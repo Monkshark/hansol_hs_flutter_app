@@ -1,7 +1,10 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/Screens/homeScreen.dart';
+import 'package:hansol_high_school/Screens/noticeScreen.dart';
 
 import '../firebase_options.dart';
+import 'mealScreen.dart';
 
 Future<void> main() async {
   runApp(HansolHighSchool());
@@ -39,18 +42,20 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
+        showSelectedLabels: false,
+        showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.restaurant),
-            label: 'Meal',
+            label: '급식',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: '홈',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications),
-            label: 'Notice',
+            label: '알림',
           ),
         ],
       ),
