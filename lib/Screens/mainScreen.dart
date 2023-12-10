@@ -34,17 +34,35 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
   final _pages = [MealScreen(), HomeScreen(), NoticeScreen()];
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _pages[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: (index) {
+      body: PageView(
+        controller: _pageController,
+        children: _pages,
+        onPageChanged: (index) {
           setState(() {
             _currentIndex = index;
           });
+        },
+        physics: const AlwaysScrollableScrollPhysics(),
+      ),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          _pageController.animateToPage(
+            index,
+            duration: const Duration(milliseconds: 0),
+            curve: Curves.easeIn,
+          );
         },
         showSelectedLabels: false,
         showUnselectedLabels: false,
