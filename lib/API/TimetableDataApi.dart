@@ -5,7 +5,7 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-import 'niesApiKeys.dart';
+import 'NiesApiKeys.dart';
 
 class timetableDataAPi {
   static Future<String?> getTimeTable(

@@ -4,17 +4,17 @@ class HansolHighSchool extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: NoticeScreen(),
+      home: PhoneAuthScreen(),
     );
   }
 }
 
-class NoticeScreen extends StatefulWidget {
+class PhoneAuthScreen extends StatefulWidget {
   @override
-  _NoticeScreenState createState() => _NoticeScreenState();
+  _PhoneAuthScreenState createState() => _PhoneAuthScreenState();
 }
 
-class _NoticeScreenState extends State<NoticeScreen> {
+class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
   @override
   void initState() {
     super.initState();
@@ -22,8 +22,6 @@ class _NoticeScreenState extends State<NoticeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(),
-    );
+    return Scaffold();
   }
 }

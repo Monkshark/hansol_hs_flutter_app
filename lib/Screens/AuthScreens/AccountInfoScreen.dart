@@ -4,17 +4,17 @@ class HansolHighSchool extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: MealScreen(),
+      home: AccointInfoScreen(),
     );
   }
 }
 
-class MealScreen extends StatefulWidget {
+class AccointInfoScreen extends StatefulWidget {
   @override
-  _MealScreenState createState() => _MealScreenState();
+  _AccointInfoScreenState createState() => _AccointInfoScreenState();
 }
 
-class _MealScreenState extends State<MealScreen> {
+class _AccointInfoScreenState extends State<AccointInfoScreen> {
   @override
   void initState() {
     super.initState();
@@ -22,8 +22,6 @@ class _MealScreenState extends State<MealScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(),
-    );
+    return Scaffold();
   }
 }
