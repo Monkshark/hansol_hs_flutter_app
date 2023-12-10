@@ -6,12 +6,12 @@ import 'package:http/http.dart' as http;
 
 import 'niesApiKeys.dart';
 
-class GetNoticeData {
+class noticeDataApi {
   static const TAG = 'getNoticeData';
 
   Future<String> getNotice(String date) async {
     final requestURL =
-        'https://open.neis.go.kr/hub/SchoolSchedule?&Type=json&ATPT_OFCDC_SC_CODE=${niesAPI.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesAPI.SD_SCHUL_CODE}&AA_YMD=$date';
+        'https://open.neis.go.kr/hub/SchoolSchedule?&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}&AA_YMD=$date';
 
     if (kDebugMode) print('$TAG: getNotice: $date');
 

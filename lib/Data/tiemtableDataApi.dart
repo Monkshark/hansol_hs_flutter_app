@@ -7,11 +7,11 @@ import 'package:intl/intl.dart';
 
 import 'niesApiKeys.dart';
 
-class GetTimetableData {
+class timetableDataAPi {
   static Future<String?> getTimeTable(
       String date, String grade, String classNum) async {
     final requestURL =
-        'https://open.neis.go.kr/hub/hisTimetable?&Type=json&ATPT_OFCDC_SC_CODE=${niesAPI.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesAPI.SD_SCHUL_CODE}&ALL_TI_YMD=$date&GRADE=$grade&CLASS_NM=$classNum';
+        'https://open.neis.go.kr/hub/hisTimetable?&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}&ALL_TI_YMD=$date&GRADE=$grade&CLASS_NM=$classNum';
 
     if (kDebugMode) print('requestURL: $requestURL');
 
