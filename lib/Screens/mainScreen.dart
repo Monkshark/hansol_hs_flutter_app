@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Screens/homeScreen.dart';
 import 'package:hansol_high_school/Screens/noticeScreen.dart';
 
-import '../firebase_options.dart';
+import '../Firebase/firebase_options.dart';
 import 'mealScreen.dart';
 
 Future<void> main() async {
