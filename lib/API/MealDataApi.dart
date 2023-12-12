@@ -6,12 +6,24 @@ import 'package:http/http.dart' as http;
 
 import 'NiesApiKeys.dart';
 
-class mealDataApi {
+class MealDataApi {
+  static const int _BREAKFAST = 1;
+  static const int _LUNCH = 2;
+  static const int _DINNER = 3;
+
+  static int get BREAKFAST => _BREAKFAST;
+  static int get LUNCH => _LUNCH;
+  static int get DINNER => _DINNER;
+
   static String result = '';
 
-  Future<String> getMeal(String date, String mealScCode, String type) async {
+  static Future<String> getMeal({
+    required String date,
+    required int mealType,
+    required String type,
+  }) async {
     String requestURL =
-        'https://open.neis.go.kr/hub/mealServiceDietInfo?&Type=json&MMEAL_SC_CODE=$mealScCode&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}&MLSV_YMD=$date';
+        'https://open.neis.go.kr/hub/mealServiceDietInfo?&Type=json&MMEAL_SC_CODE=$mealType&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}&MLSV_YMD=$date';
 
     if (kDebugMode) print('start parse $requestURL');
 

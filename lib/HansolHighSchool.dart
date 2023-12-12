@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Screens/MainScreens/HomeScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/MealScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/NoticeScreen.dart';
 
+import 'package:hansol_high_school/Notification/NotificationManager.dart';
 import 'Firebase/firebase_options.dart';
 
 Future<void> main() async {
@@ -37,6 +40,20 @@ class _MainScreenState extends State<MainScreen> {
   final PageController _pageController = PageController();
 
   @override
+  void initState() {
+    NotificationManager.init();
+    Future.delayed(
+      const Duration(seconds: 3),
+      () async => await NotificationManager.requestNotificationPermissions(),
+    );
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _pageController.jumpToPage(1);
+    });
+    super.initState();
+  }
+
+  @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
@@ -47,13 +64,13 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        children: _pages,
         onPageChanged: (index) {
           setState(() {
             _currentIndex = index;
           });
         },
         physics: const AlwaysScrollableScrollPhysics(),
+        children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,

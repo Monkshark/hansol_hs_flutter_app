@@ -7,7 +7,7 @@ import 'package:intl/intl.dart';
 
 import 'NiesApiKeys.dart';
 
-class timetableDataAPi {
+class TimetableDataAPi {
   static Future<String?> getTimeTable(
       String date, String grade, String classNum) async {
     final requestURL =

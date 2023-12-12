@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 import 'NiesApiKeys.dart';
 
-class noticeDataApi {
+class NoticeDataApi {
   static const TAG = 'getNoticeData';
 
   Future<String> getNotice(String date) async {
