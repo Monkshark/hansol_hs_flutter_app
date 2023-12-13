@@ -32,7 +32,9 @@ class NotificationManager {
 
     await flutterLocalNotificationsPlugin.initialize(initializationSettings);
 
-    scheduleDailyNotification(
+    requestNotificationPermissions();
+
+    await scheduleDailyNotification(
       scheduledNotificationDateTime: tz.TZDateTime(
         tz.local,
         DateTime.now().year,
@@ -52,7 +54,7 @@ class NotificationManager {
       hour: 6,
       minute: 0,
     );
-    scheduleDailyNotification(
+    await scheduleDailyNotification(
       scheduledNotificationDateTime: tz.TZDateTime(
         tz.local,
         DateTime.now().year,
@@ -72,14 +74,14 @@ class NotificationManager {
       hour: 12,
       minute: 0,
     );
-    scheduleDailyNotification(
+    await scheduleDailyNotification(
       scheduledNotificationDateTime: tz.TZDateTime(
         tz.local,
         DateTime.now().year,
         DateTime.now().month,
         DateTime.now().day,
-        19,
-        55,
+        17,
+        00,
       ),
       title: "석식",
       body: "아래로 당겨서 석식메뉴 확인",
@@ -89,8 +91,8 @@ class NotificationManager {
             mealType: MealDataApi.DINNER,
             type: '메뉴'),
       ).toString(),
-      hour: 19,
-      minute: 55,
+      hour: 17,
+      minute: 00,
     );
   }
 
