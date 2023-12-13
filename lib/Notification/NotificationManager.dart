@@ -12,10 +12,11 @@ class NotificationManager {
       FlutterLocalNotificationsPlugin();
 
   static init() async {
+    createNotificationChannel();
     tz.initializeTimeZones();
 
     AndroidInitializationSettings androidInitializationSettings =
-        const AndroidInitializationSettings('icon');
+        const AndroidInitializationSettings('mipmap/ic_launcher');
 
     DarwinInitializationSettings darwinInitializationSettings =
         const DarwinInitializationSettings(
@@ -38,14 +39,16 @@ class NotificationManager {
         DateTime.now().month,
         DateTime.now().day,
         6,
+        00,
       ),
       title: "조식",
       body: "아래로 당겨서 조식메뉴 확인",
-      bigText: MealDataApi.getMeal(
-              date: DateFormat('yyyyMMdd').format(DateTime.now()),
-              mealType: MealDataApi.BREAKFAST,
-              type: '메뉴')
-          .toString(),
+      bigText: (
+        await MealDataApi.getMeal(
+            date: DateFormat('yyyyMMdd').format(DateTime.now()),
+            mealType: MealDataApi.BREAKFAST,
+            type: '메뉴'),
+      ).toString(),
       hour: 6,
       minute: 0,
     );
@@ -56,14 +59,16 @@ class NotificationManager {
         DateTime.now().month,
         DateTime.now().day,
         12,
+        00,
       ),
       title: "중식",
       body: "아래로 당겨서 중식메뉴 확인",
-      bigText: MealDataApi.getMeal(
-              date: DateFormat('yyyyMMdd').format(DateTime.now()),
-              mealType: MealDataApi.LUNCH,
-              type: '메뉴')
-          .toString(),
+      bigText: (
+        await MealDataApi.getMeal(
+            date: DateFormat('yyyyMMdd').format(DateTime.now()),
+            mealType: MealDataApi.LUNCH,
+            type: '메뉴'),
+      ).toString(),
       hour: 12,
       minute: 0,
     );
@@ -73,17 +78,19 @@ class NotificationManager {
         DateTime.now().year,
         DateTime.now().month,
         DateTime.now().day,
-        17,
+        19,
+        55,
       ),
       title: "석식",
       body: "아래로 당겨서 석식메뉴 확인",
-      bigText: MealDataApi.getMeal(
-              date: DateFormat('yyyyMMdd').format(DateTime.now()),
-              mealType: MealDataApi.DINNER,
-              type: '메뉴')
-          .toString(),
-      hour: 23,
-      minute: 0,
+      bigText: (
+        await MealDataApi.getMeal(
+            date: DateFormat('yyyyMMdd').format(DateTime.now()),
+            mealType: MealDataApi.DINNER,
+            type: '메뉴'),
+      ).toString(),
+      hour: 19,
+      minute: 55,
     );
   }
 
@@ -98,32 +105,6 @@ class NotificationManager {
         );
   }
 
-  static Future<void> showNotification({
-    required String title,
-    required String body,
-    required String bigText,
-  }) async {
-    AndroidNotificationDetails androidNotificationDetails =
-        AndroidNotificationDetails('channelId', '급식 정보 알림',
-            channelDescription: '조식, 중식, 석식 메뉴를 알림으로 발송합니다.',
-            importance: Importance.max,
-            priority: Priority.max,
-            showWhen: false,
-            styleInformation: BigTextStyleInformation(bigText));
-
-    NotificationDetails notificationDetails = NotificationDetails(
-      android: androidNotificationDetails,
-      iOS: const DarwinNotificationDetails(badgeNumber: 1),
-    );
-
-    await flutterLocalNotificationsPlugin.show(
-      0,
-      title,
-      body,
-      notificationDetails,
-    );
-  }
-
   static Future<void> scheduleDailyNotification({
     required String title,
     required String body,
@@ -135,8 +116,8 @@ class NotificationManager {
     AndroidNotificationDetails androidNotificationDetails =
         AndroidNotificationDetails(
       'channelId',
-      'channelName',
-      channelDescription: 'channelDescription',
+      '급식 정보 알림',
+      channelDescription: '조식, 중식, 석식 메뉴를 알림으로 발송합니다.',
       importance: Importance.max,
       priority: Priority.max,
       showWhen: false,
@@ -161,5 +142,20 @@ class NotificationManager {
           UILocalNotificationDateInterpretation.absoluteTime,
       matchDateTimeComponents: DateTimeComponents.time,
     );
+  }
+
+  static createNotificationChannel() async {
+    AndroidNotificationChannel androidNotificationChannel =
+        const AndroidNotificationChannel(
+      'channelId',
+      '급식 정보 알림',
+      description: '조식, 중식, 석식 메뉴를 알림으로 발송합니다.',
+      importance: Importance.high,
+    );
+
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.createNotificationChannel(androidNotificationChannel);
   }
 }
