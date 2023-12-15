@@ -1,1 +1,3 @@
-class ScheduledNotification {}
+class ScheduledNotification {
+  //
+}
