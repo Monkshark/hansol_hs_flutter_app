@@ -46,6 +46,7 @@ dependencies:
   device_info_plus: ^9.1.1
   io: ^1.0.4
   android_alarm_manager_plus: ^3.0.4
+  cloud_firestore: ^4.13.6
 
 
 
