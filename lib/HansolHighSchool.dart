@@ -1,24 +1,20 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:hansol_high_school/API/MealDataApi.dart';
-import 'package:hansol_high_school/API/NoticeDataApi.dart';
-import 'package:hansol_high_school/API/TimetableDataApi.dart';
 import 'package:hansol_high_school/Screens/MainScreens/HomeScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/MealScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/NoticeScreen.dart';
 import 'package:hansol_high_school/Firebase/firebase_options.dart';
-import 'package:intl/date_symbol_data_http_request.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 import 'Notification/NotificationManager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(HansolHighSchool());
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
   await NotificationManager.requestNotificationPermissions();
 }
 
@@ -26,6 +22,7 @@ class HansolHighSchool extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       home: MainScreen(),
     );
   }
