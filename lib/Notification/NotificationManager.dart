@@ -8,9 +8,6 @@ import 'package:hansol_high_school/API/MealDataApi.dart';
 class NotificationManager {
   NotificationManager._();
 
-  static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
-
   static init() async {
     createNotificationChannel();
     tz.initializeTimeZones();
@@ -34,6 +31,9 @@ class NotificationManager {
 
     requestNotificationPermissions();
 
+    String breakfastMenu = (await MealDataApi.getMeal(
+            date: DateTime.now(), mealType: MealDataApi.BREAKFAST, type: '메뉴'))
+        .toString();
     await scheduleDailyNotification(
       scheduledNotificationDateTime: tz.TZDateTime(
         tz.local,
@@ -45,13 +45,14 @@ class NotificationManager {
       ),
       title: "조식",
       body: "아래로 당겨서 조식메뉴 확인",
-      bigText: (
-        await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: MealDataApi.BREAKFAST, type: '메뉴'),
-      ).toString(),
+      bigText: breakfastMenu,
       hour: 6,
       minute: 0,
     );
+
+    String lunchMenu = (await MealDataApi.getMeal(
+            date: DateTime.now(), mealType: MealDataApi.LUNCH, type: '메뉴'))
+        .toString();
     await scheduleDailyNotification(
       scheduledNotificationDateTime: tz.TZDateTime(
         tz.local,
@@ -63,13 +64,14 @@ class NotificationManager {
       ),
       title: "중식",
       body: "아래로 당겨서 중식메뉴 확인",
-      bigText: (
-        await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: MealDataApi.LUNCH, type: '메뉴'),
-      ).toString(),
+      bigText: lunchMenu,
       hour: 12,
       minute: 0,
     );
+
+    String dinnerMenu = (await MealDataApi.getMeal(
+            date: DateTime.now(), mealType: MealDataApi.DINNER, type: '메뉴'))
+        .toString();
     await scheduleDailyNotification(
       scheduledNotificationDateTime: tz.TZDateTime(
         tz.local,
@@ -81,14 +83,14 @@ class NotificationManager {
       ),
       title: "석식",
       body: "아래로 당겨서 석식메뉴 확인",
-      bigText: (
-        await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: MealDataApi.DINNER, type: '메뉴'),
-      ).toString(),
+      bigText: dinnerMenu,
       hour: 17,
       minute: 00,
     );
   }
+
+  static FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   static requestNotificationPermissions() {
     flutterLocalNotificationsPlugin
@@ -129,9 +131,8 @@ class NotificationManager {
       0,
       title,
       body,
-      tz.TZDateTime.now(tz.local)
-          .add(const Duration(days: 1))
-          .subtract(Duration(hours: tz.TZDateTime.now(tz.local).hour - hour)),
+      tz.TZDateTime(tz.local, DateTime.now().year, DateTime.now().month,
+          DateTime.now().day, hour, minute),
       notificationDetails,
       androidAllowWhileIdle: true,
       uiLocalNotificationDateInterpretation:

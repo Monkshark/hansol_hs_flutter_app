@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hansol_high_school/API/MealDataApi.dart';
 import 'package:hansol_high_school/API/NoticeDataApi.dart';
 import 'package:hansol_high_school/API/TimetableDataApi.dart';
@@ -8,30 +9,29 @@ import 'package:hansol_high_school/Screens/MainScreens/HomeScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/MealScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/NoticeScreen.dart';
 import 'package:hansol_high_school/Firebase/firebase_options.dart';
+import 'package:intl/date_symbol_data_http_request.dart';
 
 import 'Notification/NotificationManager.dart';
 
 Future<void> main() async {
-  runApp(const HansolHighSchool());
+  WidgetsFlutterBinding.ensureInitialized();
+  runApp(HansolHighSchool());
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationManager.requestNotificationPermissions();
 }
 
 class HansolHighSchool extends StatelessWidget {
-  const HansolHighSchool({super.key});
-
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
       home: MainScreen(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
-
   @override
   _MainScreenState createState() => _MainScreenState();
 }
