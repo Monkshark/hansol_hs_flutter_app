@@ -47,9 +47,7 @@ class NotificationManager {
       body: "아래로 당겨서 조식메뉴 확인",
       bigText: (
         await MealDataApi.getMeal(
-            date: DateFormat('yyyyMMdd').format(DateTime.now()),
-            mealType: MealDataApi.BREAKFAST,
-            type: '메뉴'),
+            date: DateTime.now(), mealType: MealDataApi.BREAKFAST, type: '메뉴'),
       ).toString(),
       hour: 6,
       minute: 0,
@@ -67,9 +65,7 @@ class NotificationManager {
       body: "아래로 당겨서 중식메뉴 확인",
       bigText: (
         await MealDataApi.getMeal(
-            date: DateFormat('yyyyMMdd').format(DateTime.now()),
-            mealType: MealDataApi.LUNCH,
-            type: '메뉴'),
+            date: DateTime.now(), mealType: MealDataApi.LUNCH, type: '메뉴'),
       ).toString(),
       hour: 12,
       minute: 0,
@@ -87,9 +83,7 @@ class NotificationManager {
       body: "아래로 당겨서 석식메뉴 확인",
       bigText: (
         await MealDataApi.getMeal(
-            date: DateFormat('yyyyMMdd').format(DateTime.now()),
-            mealType: MealDataApi.DINNER,
-            type: '메뉴'),
+            date: DateTime.now(), mealType: MealDataApi.DINNER, type: '메뉴'),
       ).toString(),
       hour: 17,
       minute: 00,

@@ -1,16 +1,18 @@
 import 'dart:async';
-
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/API/MealDataApi.dart';
+import 'package:hansol_high_school/API/NoticeDataApi.dart';
+import 'package:hansol_high_school/API/TimetableDataApi.dart';
 import 'package:hansol_high_school/Screens/MainScreens/HomeScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/MealScreen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/NoticeScreen.dart';
-import 'package:hansol_high_school/Notification/NotificationManager.dart';
 import 'package:hansol_high_school/Firebase/firebase_options.dart';
+
+import 'Notification/NotificationManager.dart';
 
 Future<void> main() async {
   runApp(const HansolHighSchool());
-
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
