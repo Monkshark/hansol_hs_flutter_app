@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/API/NoticeDataApi.dart';
 import 'package:hansol_high_school/Data/LocalDatabase.dart';
 import 'package:hansol_high_school/Data/ScheduleData.dart';
-import 'package:hansol_high_school/Widgets/DeleteAlertDialog.dart';
-import 'package:hansol_high_school/Widgets/MainCalendar.dart';
-import 'package:hansol_high_school/Widgets/ScheduleBottomSheet.dart';
-import 'package:hansol_high_school/Widgets/ScheduleCard.dart';
-import 'package:hansol_high_school/Widgets/SchoolScheduleCard.dart';
-import 'package:hansol_high_school/Widgets/TodayBanner.dart';
+import 'package:hansol_high_school/Widgets/AlertWidgets/DeleteAlertDialog.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/MainCalendar.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/ScheduleBottomSheet.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/ScheduleCard.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/SchoolScheduleCard.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/TodayBanner.dart';
 import 'package:get_it/get_it.dart';
 
 class HansolHighSchool extends StatelessWidget {
@@ -117,16 +117,28 @@ class _NoticeScreenState extends State<NoticeScreen> {
                         itemCount: itemCount,
                         itemBuilder: (context, index) {
                           if (hasSchoolSchedule && index == 0) {
-                            return Padding(
-                              padding: const EdgeInsets.only(
-                                bottom: 8.0,
-                                left: 8.0,
-                                right: 8.0,
-                              ),
-                              child: SchoolScheduleCard(
-                                startTime: 00,
-                                endTime: 24,
-                                content: schoolSchedule!,
+                            return Dismissible(
+                              key: UniqueKey(),
+                              direction: DismissDirection.endToStart,
+                              confirmDismiss: (direction) async {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('학사일정은 삭제가 불가능합니다'),
+                                  ),
+                                );
+                                return false;
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 8.0,
+                                  left: 8.0,
+                                  right: 8.0,
+                                ),
+                                child: SchoolScheduleCard(
+                                  startTime: 00,
+                                  endTime: 24,
+                                  content: schoolSchedule!,
+                                ),
                               ),
                             );
                           } else {

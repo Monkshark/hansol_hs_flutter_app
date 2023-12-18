@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/Widgets/MainCalendar.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/MainCalendar.dart';
 
 class TodayBanner extends StatelessWidget {
   final DateTime selectedDate;
