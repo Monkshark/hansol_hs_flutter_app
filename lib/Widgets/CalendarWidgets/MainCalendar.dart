@@ -62,45 +62,6 @@ class _MainCalendarState extends State<MainCalendar> {
             return null;
           }
         },
-        // todayBuilder: (context, date, _) {
-        //   return Center(
-        //     child: Container(
-        //       width: 40.0,
-        //       height: 40.0,
-        //       decoration: BoxDecoration(
-        //         border: Border.all(
-        //           color: PRIMARY_COLOR,
-        //         ),
-        //         shape: BoxShape.circle,
-        //       ),
-        //       child: Center(
-        //         child: Text(
-        //           date.day.toString(),
-        //           style: const TextStyle(color: Colors.black),
-        //         ),
-        //       ),
-        //     ),
-        //   );
-        // },
-        // selectedBuilder: (context, date, _) {
-        //   return Center(
-        //     child: AnimatedContainer(
-        //       width: 40.0,
-        //       height: 40.0,
-        //       decoration: const BoxDecoration(
-        //         color: PRIMARY_COLOR,
-        //         shape: BoxShape.circle,
-        //       ),
-        //       duration: const Duration(milliseconds: 300),
-        //       child: Center(
-        //         child: Text(
-        //           date.day.toString(),
-        //           style: const TextStyle(color: Colors.white),
-        //         ),
-        //       ),
-        //     ),
-        //   );
-        // },
       ),
     );
   }

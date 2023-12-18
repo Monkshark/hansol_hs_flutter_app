@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hansol_high_school/Network/NetworkStatus.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -10,6 +11,8 @@ class TimetableDataApi {
     required String grade,
     required String classNum,
   }) async {
+    if (await NetworkStatus.isUnconnected()) return "시간표를 확인하려면 인터넷에 연결하세요";
+
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     final requestURL =
         'https://open.neis.go.kr/hub/hisTimetable?key=${niesApiKeys.NIES_API_KEY}'

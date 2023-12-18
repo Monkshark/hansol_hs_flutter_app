@@ -58,6 +58,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
         },
         child: const Icon(
           Icons.add,
+          color: Colors.white,
         ),
       ),
       body: SafeArea(

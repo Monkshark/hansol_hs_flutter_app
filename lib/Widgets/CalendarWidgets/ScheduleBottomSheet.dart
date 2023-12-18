@@ -161,6 +161,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 16.0)
               ],
             ),
           ),

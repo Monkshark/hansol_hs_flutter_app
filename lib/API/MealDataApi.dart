@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:hansol_high_school/Network/NetworkStatus.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -30,6 +31,8 @@ class MealDataApi {
     required int mealType,
     required String type,
   }) async {
+    if (await NetworkStatus.isUnconnected()) return "식단 정보를 확인하려면 인터넷에 연결하세요";
+
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     String requestURL =
         'https://open.neis.go.kr/hub/mealServiceDietInfo?key=${niesApiKeys.NIES_API_KEY}'
