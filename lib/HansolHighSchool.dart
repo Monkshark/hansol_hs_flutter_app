@@ -68,7 +68,7 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        physics: const AlwaysScrollableScrollPhysics(),
+        physics: const PageScrollPhysics(), // 페이지 스크롤 물리 효과를 적용
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
@@ -76,7 +76,7 @@ class _MainScreenState extends State<MainScreen> {
         onTap: (index) {
           _pageController.animateToPage(
             index,
-            duration: const Duration(milliseconds: 0),
+            duration: const Duration(milliseconds: 200),
             curve: Curves.easeIn,
           );
         },
