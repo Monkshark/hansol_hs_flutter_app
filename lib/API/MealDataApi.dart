@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -16,6 +15,14 @@ class MealDataApi {
   static int get LUNCH => _LUNCH;
   static int get DINNER => _DINNER;
 
+  static const String _MENU = '메뉴';
+  static const String _CALORIE = '칼로리';
+  static const String _NUTRITION_INFO = '영양정보';
+
+  static String get MENU => _MENU;
+  static String get CALORIE => _CALORIE;
+  static String get NUTRITION_INFO => _NUTRITION_INFO;
+
   static String result = '';
 
   static Future<String> getMeal({
@@ -25,7 +32,11 @@ class MealDataApi {
   }) async {
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     String requestURL =
-        'https://open.neis.go.kr/hub/mealServiceDietInfo?&Type=json&MMEAL_SC_CODE=$mealType&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}&MLSV_YMD=$formattedDate';
+        'https://open.neis.go.kr/hub/mealServiceDietInfo?key=${niesApiKeys.NIES_API_KEY}'
+        '&Type=json&MMEAL_SC_CODE=$mealType'
+        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
+        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&MLSV_YMD=$formattedDate';
 
     print('start parse $requestURL');
 
@@ -43,20 +54,19 @@ class MealDataApi {
           final nutritionInfo = itemObject['NTR_INFO'];
 
           switch (type) {
-            case '메뉴':
+            case _MENU:
               result = menu;
               break;
-            case '칼로리':
+            case _CALORIE:
               result = calorie;
               break;
-            case '영양정보':
+            case _NUTRITION_INFO:
               result = nutritionInfo;
               break;
           }
         }
       }
     }
-    result ??= '정보 없음';
     return result.replaceAll('<br/>', '\n');
   }
 }

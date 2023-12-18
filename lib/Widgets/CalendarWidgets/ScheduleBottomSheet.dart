@@ -101,6 +101,14 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
             ),
             child: Column(
               children: [
+                const Text(
+                  '일정 만들기',
+                  style: TextStyle(
+                    fontSize: 24.0,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 16.0),
                 Row(
                   children: [
                     Expanded(
