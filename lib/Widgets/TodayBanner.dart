@@ -33,7 +33,8 @@ class TodayBanner extends StatelessWidget {
               style: textStyle,
             ),
             Text(
-              '${count}개',
+              '$count개',
+              style: textStyle,
             ),
           ],
         ),

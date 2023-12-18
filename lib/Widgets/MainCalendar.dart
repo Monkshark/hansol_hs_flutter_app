@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-const PRIMARY_COLOR = Color(0xFF0DB2B2);
+const PRIMARY_COLOR = Color(0xFF5C6BC0);
 final LIGHT_GREY_COLOR = Colors.grey[200]!;
 final DARK_GREY_COLOR = Colors.grey[600]!;
 final TEXT_FIELD_FILL_COLOR = Colors.grey[300]!;
 
-class MainCalendar extends StatelessWidget {
+class MainCalendar extends StatefulWidget {
   final OnDaySelected onDaySelected;
   final DateTime selectedDate;
 
@@ -16,18 +16,23 @@ class MainCalendar extends StatelessWidget {
   });
 
   @override
+  _MainCalendarState createState() => _MainCalendarState();
+}
+
+class _MainCalendarState extends State<MainCalendar> {
+  @override
   Widget build(BuildContext context) {
     return TableCalendar(
       locale: 'ko_KR',
-      onDaySelected: onDaySelected,
+      onDaySelected: widget.onDaySelected,
       selectedDayPredicate: (date) =>
-          date.year == selectedDate.year &&
-          date.month == selectedDate.month &&
-          date.day == selectedDate.day,
+          date.year == widget.selectedDate.year &&
+          date.month == widget.selectedDate.month &&
+          date.day == widget.selectedDate.day,
       firstDay: DateTime.utc(1800, 1, 1),
       lastDay: DateTime.utc(3000, 1, 1),
       focusedDay: DateTime.now(),
-      headerStyle: HeaderStyle(
+      headerStyle: const HeaderStyle(
         titleCentered: true,
         formatButtonVisible: false,
         titleTextStyle: TextStyle(
@@ -36,35 +41,65 @@ class MainCalendar extends StatelessWidget {
           fontWeight: FontWeight.w700,
         ),
       ),
-      calendarStyle: CalendarStyle(
-        isTodayHighlighted: false,
-        defaultDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
-          color: LIGHT_GREY_COLOR,
-        ),
-        weekendDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
-          color: LIGHT_GREY_COLOR,
-        ),
-        selectedDecoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(6.0),
-          border: Border.all(
-            color: PRIMARY_COLOR,
-            width: 1.0,
-          ),
-        ),
-        defaultTextStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: DARK_GREY_COLOR,
-        ),
-        weekendTextStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: DARK_GREY_COLOR,
-        ),
-        selectedTextStyle: TextStyle(
-          fontWeight: FontWeight.w600,
-          color: PRIMARY_COLOR,
-        ),
+      calendarBuilders: CalendarBuilders(
+        defaultBuilder: (context, day, focusedDay) {
+          if (day.weekday == DateTime.saturday) {
+            return Center(
+              child: Text(
+                day.day.toString(),
+                style: const TextStyle(color: Colors.blue),
+              ),
+            );
+          } else if (day.weekday == DateTime.sunday) {
+            return Center(
+              child: Text(
+                day.day.toString(),
+                style: const TextStyle(color: Colors.red),
+              ),
+            );
+          } else {
+            return null;
+          }
+        },
+        // todayBuilder: (context, date, _) {
+        //   return Center(
+        //     child: Container(
+        //       width: 40.0,
+        //       height: 40.0,
+        //       decoration: BoxDecoration(
+        //         border: Border.all(
+        //           color: PRIMARY_COLOR,
+        //         ),
+        //         shape: BoxShape.circle,
+        //       ),
+        //       child: Center(
+        //         child: Text(
+        //           date.day.toString(),
+        //           style: const TextStyle(color: Colors.black),
+        //         ),
+        //       ),
+        //     ),
+        //   );
+        // },
+        // selectedBuilder: (context, date, _) {
+        //   return Center(
+        //     child: AnimatedContainer(
+        //       width: 40.0,
+        //       height: 40.0,
+        //       decoration: const BoxDecoration(
+        //         color: PRIMARY_COLOR,
+        //         shape: BoxShape.circle,
+        //       ),
+        //       duration: const Duration(milliseconds: 300),
+        //       child: Center(
+        //         child: Text(
+        //           date.day.toString(),
+        //           style: const TextStyle(color: Colors.white),
+        //         ),
+        //       ),
+        //     ),
+        //   );
+        // },
       ),
     );
   }
