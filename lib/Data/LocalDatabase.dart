@@ -22,4 +22,23 @@ class LocalDataBase {
           scheduleDate.day == date.day;
     }).toList();
   }
+
+  Future<void> deleteSchedule(Schedule schedule) async {
+    final prefs = await SharedPreferences.getInstance();
+    final schedules = prefs.getStringList('schedules') ?? [];
+
+    final scheduleIndex = schedules.indexWhere((storedSchedule) {
+      final decodedSchedule =
+          jsonDecode(storedSchedule) as Map<String, dynamic>;
+      return decodedSchedule['startTime'] == schedule.startTime &&
+          decodedSchedule['endTime'] == schedule.endTime &&
+          decodedSchedule['content'] == schedule.content &&
+          decodedSchedule['date'] == schedule.date;
+    });
+
+    if (scheduleIndex != -1) {
+      schedules.removeAt(scheduleIndex);
+      await prefs.setStringList('schedules', schedules);
+    }
+  }
 }

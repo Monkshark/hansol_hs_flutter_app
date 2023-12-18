@@ -42,7 +42,7 @@ class CustomTextField extends StatelessWidget {
                 isTime ? [FilteringTextInputFormatter.digitsOnly] : [],
             decoration: InputDecoration(
               border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0), // 테두리 둥글기 설정
+                borderRadius: BorderRadius.circular(10.0),
               ),
               filled: true,
               fillColor: Colors.grey[300],

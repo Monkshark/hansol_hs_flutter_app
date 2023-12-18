@@ -1,19 +1,19 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/API/NoticeDataApi.dart';
 import 'package:hansol_high_school/Data/LocalDatabase.dart';
 import 'package:hansol_high_school/Data/ScheduleData.dart';
+import 'package:hansol_high_school/Widgets/DeleteAlertDialog.dart';
 import 'package:hansol_high_school/Widgets/MainCalendar.dart';
 import 'package:hansol_high_school/Widgets/ScheduleBottomSheet.dart';
 import 'package:hansol_high_school/Widgets/ScheduleCard.dart';
+import 'package:hansol_high_school/Widgets/SchoolScheduleCard.dart';
 import 'package:hansol_high_school/Widgets/TodayBanner.dart';
 import 'package:get_it/get_it.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class HansolHighSchool extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return const MaterialApp(
       home: NoticeScreen(),
     );
   }
@@ -73,69 +73,106 @@ class _NoticeScreenState extends State<NoticeScreen> {
               builder: (context, snapshot) {
                 if (!snapshot.hasData) return Container();
 
-                return TodayBanner(
-                  selectedDate: selectedDate,
-                  count: snapshot.data!.length ?? 0,
+                return FutureBuilder<String?>(
+                  future: NoticeDataApi().getNotice(date: selectedDate),
+                  builder: (context, snapshot2) {
+                    final schoolSchedule = snapshot2.data;
+                    final hasSchoolSchedule = schoolSchedule != null;
+
+                    final schedules = snapshot.data!;
+                    final count =
+                        schedules.length + (hasSchoolSchedule ? 1 : 0);
+
+                    return TodayBanner(
+                      selectedDate: selectedDate,
+                      count: count,
+                    );
+                  },
                 );
               },
             ),
             const SizedBox(height: 8.0),
             Expanded(
-              child: StreamBuilder<List<Schedule>>(
-                stream: GetIt.I<LocalDataBase>().watchSchedules(selectedDate),
+              child: FutureBuilder<String?>(
+                future: NoticeDataApi().getNotice(date: selectedDate),
                 builder: (context, snapshot) {
-                  if (!snapshot.hasData) return Container();
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                  return ListView.builder(
-                    itemCount: snapshot.data!.length,
-                    itemBuilder: (context, index) {
-                      final schedule = snapshot.data![index];
-                      return Dismissible(
-                        key: UniqueKey(),
-                        direction: DismissDirection.endToStart,
-                        onDismissed: (direction) async {
-                          final prefs = await SharedPreferences.getInstance();
-                          final scheduleStrings =
-                              prefs.getStringList('schedules') ?? [];
-                          final schedules = scheduleStrings.map((schedule) {
-                            return jsonDecode(schedule) as Map<String, dynamic>;
-                          }).toList();
-                          final selectedDateSchedules =
-                              schedules.where((schedule) {
-                            return DateTime.parse(schedule['date']).day ==
-                                    selectedDate.day &&
-                                DateTime.parse(schedule['date']).month ==
-                                    selectedDate.month &&
-                                DateTime.parse(schedule['date']).year ==
-                                    selectedDate.year;
-                          }).toList();
-                          final scheduleToRemove = selectedDateSchedules[index];
-                          schedules.remove(scheduleToRemove);
-                          final updatedScheduleStrings =
-                              schedules.map((schedule) {
-                            return jsonEncode(schedule);
-                          }).toList();
-                          await prefs.setStringList(
-                              'schedules', updatedScheduleStrings);
-                          setState(() {});
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('일정 삭제됨'),
-                            ),
-                          );
+                  final schoolSchedule = snapshot.data;
+                  final hasSchoolSchedule = schoolSchedule != null;
+
+                  return StreamBuilder<List<Schedule>>(
+                    stream:
+                        GetIt.I<LocalDataBase>().watchSchedules(selectedDate),
+                    builder: (context, snapshot) {
+                      if (!snapshot.hasData) return Container();
+
+                      final schedules = snapshot.data!;
+                      final itemCount =
+                          schedules.length + (hasSchoolSchedule ? 1 : 0);
+
+                      return ListView.builder(
+                        itemCount: itemCount,
+                        itemBuilder: (context, index) {
+                          if (hasSchoolSchedule && index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: 8.0,
+                                left: 8.0,
+                                right: 8.0,
+                              ),
+                              child: SchoolScheduleCard(
+                                startTime: 00,
+                                endTime: 24,
+                                content: schoolSchedule!,
+                              ),
+                            );
+                          } else {
+                            final schedule =
+                                schedules[index - (hasSchoolSchedule ? 1 : 0)];
+
+                            return Dismissible(
+                              key: UniqueKey(),
+                              direction: DismissDirection.endToStart,
+                              confirmDismiss: (direction) async {
+                                return await showDialog(
+                                  context: context,
+                                  builder: (BuildContext context) {
+                                    return const DeleteAlertDialog(
+                                      title: '일정 삭제',
+                                      content:
+                                          '정말 일정을 삭제하시겠습니까?\n삭제 후에는 복구가 불가능합니다.',
+                                    );
+                                  },
+                                );
+                              },
+                              onDismissed: (direction) async {
+                                await GetIt.I<LocalDataBase>()
+                                    .deleteSchedule(schedule);
+                                setState(() {});
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('일정 삭제됨'),
+                                  ),
+                                );
+                              },
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                  bottom: 8.0,
+                                  left: 8.0,
+                                  right: 8.0,
+                                ),
+                                child: ScheduleCard(
+                                  startTime: schedule.startTime,
+                                  endTime: schedule.endTime,
+                                  content: schedule.content,
+                                ),
+                              ),
+                            );
+                          }
                         },
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                            bottom: 8.0,
-                            left: 8.0,
-                            right: 8.0,
-                          ),
-                          child: ScheduleCard(
-                            startTime: schedule.startTime,
-                            endTime: schedule.endTime,
-                            content: schedule.content,
-                          ),
-                        ),
                       );
                     },
                   );

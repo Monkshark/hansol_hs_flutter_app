@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
@@ -10,7 +9,7 @@ import 'NiesApiKeys.dart';
 class NoticeDataApi {
   static const TAG = 'getNoticeData';
 
-  Future<String> getNotice({
+  Future<String?> getNotice({
     required DateTime date,
   }) async {
     final formattedDate = DateFormat('yyyyMMdd').format(date);
@@ -32,6 +31,7 @@ class NoticeDataApi {
             for (var j = 0; j < rowArray.length; j++) {
               final row = rowArray[j];
               if (row.containsKey('EVENT_NM')) {
+                if (row['EVENT_NM'] == '토요휴업일') return null;
                 return row['EVENT_NM'];
               }
             }
@@ -39,6 +39,6 @@ class NoticeDataApi {
         }
       }
     }
-    return '학사일정 없음';
+    return null;
   }
 }

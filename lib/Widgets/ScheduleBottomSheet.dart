@@ -65,7 +65,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
         return "숫자를 입력해주세요";
       }
 
-      if (number < 0 || number > 24) return "0시부터 24시 사이를 입력해주세요";
+      if (number < 0 || number > 24) return "올바른 시간을 입력해주세요";
 
       return null;
     }
