@@ -35,7 +35,8 @@ class MealDataApi {
 
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     String requestURL =
-        'https://open.neis.go.kr/hub/mealServiceDietInfo?key=${niesApiKeys.NIES_API_KEY}'
+        'https://open.neis.go.kr/hub/mealServiceDietInfo?'
+        // 'key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&MMEAL_SC_CODE=$mealType'
         '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
