@@ -72,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
             _currentIndex = index;
           });
         },
-        physics: const PageScrollPhysics(), // 페이지 스크롤 물리 효과를 적용
+        physics: const PageScrollPhysics(),
         children: _pages,
       ),
       bottomNavigationBar: BottomNavigationBar(
