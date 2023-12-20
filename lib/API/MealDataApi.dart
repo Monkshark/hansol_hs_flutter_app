@@ -8,6 +8,8 @@ import 'package:intl/intl.dart';
 import 'NiesApiKeys.dart';
 
 class MealDataApi {
+  static const TAG = 'MealDataApi';
+
   static const int _BREAKFAST = 1;
   static const int _LUNCH = 2;
   static const int _DINNER = 3;
@@ -42,7 +44,7 @@ class MealDataApi {
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
         '&MLSV_YMD=$formattedDate';
 
-    print('start parse $requestURL');
+    print('$TAG :getMeal: $requestURL');
 
     final response = await http.get(Uri.parse(requestURL));
     if (response.statusCode == 200) {

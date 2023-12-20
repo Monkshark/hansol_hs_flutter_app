@@ -8,7 +8,7 @@ import 'package:intl/intl.dart';
 import 'NiesApiKeys.dart';
 
 class NoticeDataApi {
-  static const TAG = 'getNoticeData';
+  static const TAG = 'NoticeDataApi';
 
   Future<String?> getNotice({
     required DateTime date,
@@ -22,7 +22,7 @@ class NoticeDataApi {
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
         '&AA_YMD=$formattedDate';
 
-    print('$TAG: getNotice: $date');
+    print('$TAG: getNotice: $requestURL');
 
     final response = await http.get(Uri.parse(requestURL));
     if (response.statusCode == 200) {

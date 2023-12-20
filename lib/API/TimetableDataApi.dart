@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:hansol_high_school/API/NiesApiKeys.dart';
 
 class TimetableDataApi {
+  static const TAG = 'TimetableDataApi';
+
   static Future<String?> getTimeTable({
     required DateTime date,
     required String grade,
@@ -21,6 +23,8 @@ class TimetableDataApi {
         '&ALL_TI_YMD=$formattedDate'
         '&GRADE=$grade'
         '&CLASS_NM=$classNum';
+
+    print('$TAG: getTimeTable: $requestURL');
 
     final response = await http.get(Uri.parse(requestURL));
     if (response.statusCode == 200) {
