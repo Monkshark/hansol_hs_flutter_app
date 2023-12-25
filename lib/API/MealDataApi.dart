@@ -36,9 +36,7 @@ class MealDataApi {
     if (await NetworkStatus.isUnconnected()) return "식단 정보를 확인하려면 인터넷에 연결하세요";
 
     final formattedDate = DateFormat('yyyyMMdd').format(date);
-    String requestURL =
-        'https://open.neis.go.kr/hub/mealServiceDietInfo?'
-        // 'key=${niesApiKeys.NIES_API_KEY}'
+    String requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
         '&Type=json&MMEAL_SC_CODE=$mealType'
         '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
@@ -46,33 +44,49 @@ class MealDataApi {
 
     print('$TAG :getMeal: $requestURL');
 
-    final response = await http.get(Uri.parse(requestURL));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data != null && data.containsKey('mealServiceDietInfo')) {
-        final timetableArray = data['mealServiceDietInfo'][1]['row'];
+    final data = await fetchData(requestURL);
+    if (data == null) return '';
 
-        for (var i = 0; i < timetableArray.length; i++) {
-          final itemObject = timetableArray[i];
+    return processMealServiceDietInfo(data['mealServiceDietInfo'], type);
+  }
 
-          final menu = itemObject['DDISH_NM'];
-          final calorie = itemObject['CAL_INFO'];
-          final nutritionInfo = itemObject['NTR_INFO'];
+  static Future<Map<String, dynamic>?> fetchData(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) return null;
 
-          switch (type) {
-            case _MENU:
-              result = menu;
-              break;
-            case _CALORIE:
-              result = calorie;
-              break;
-            case _NUTRITION_INFO:
-              result = nutritionInfo;
-              break;
-          }
-        }
+    return jsonDecode(response.body);
+  }
+
+  static String processMealServiceDietInfo(
+      List<dynamic> mealServiceDietInfoArray, String type) {
+    for (var i = 0; i < mealServiceDietInfoArray.length; i++) {
+      final mealServiceDietInfo = mealServiceDietInfoArray[i];
+      if (!mealServiceDietInfo.containsKey('row')) continue;
+
+      final rowArray = mealServiceDietInfo['row'];
+      final meal = processRow(rowArray, type);
+      if (meal != null) return meal;
+    }
+
+    return '';
+  }
+
+  static String? processRow(List<dynamic> rowArray, String type) {
+    for (var row in rowArray) {
+      final menu = row['DDISH_NM'];
+      final calorie = row['CAL_INFO'];
+      final nutritionInfo = row['NTR_INFO'];
+
+      switch (type) {
+        case _MENU:
+          return menu;
+        case _CALORIE:
+          return calorie;
+        case _NUTRITION_INFO:
+          return nutritionInfo;
       }
     }
-    return result.replaceAll('<br/>', '\n');
+
+    return null;
   }
 }

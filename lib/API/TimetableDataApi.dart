@@ -26,21 +26,31 @@ class TimetableDataApi {
 
     print('$TAG: getTimeTable: $requestURL');
 
-    final response = await http.get(Uri.parse(requestURL));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final timetableArray = data['hisTimetable'][1]['row'];
+    final data = await fetchData(requestURL);
+    if (data == null) return "정보 없음";
 
-      var resultBuilder = StringBuffer();
-      if (date.weekday == DateTime.monday) resultBuilder.writeln('자율');
+    return processTimetable(data['hisTimetable']);
+  }
 
-      for (var i = 0; i < timetableArray.length; i++) {
-        final itemObject = timetableArray[i];
-        final content = itemObject['ITRT_CNTNT'];
-        resultBuilder.writeln(content);
+  static Future<Map<String, dynamic>?> fetchData(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) return null;
+
+    return jsonDecode(response.body);
+  }
+
+  static String processTimetable(List<dynamic> timetableArray) {
+    var resultBuilder = StringBuffer();
+    for (var i = 0; i < timetableArray.length; i++) {
+      final rowArray = timetableArray[i]['row'];
+      if (rowArray != null) {
+        for (var j = 0; j < rowArray.length; j++) {
+          final itemObject = rowArray[j];
+          final content = itemObject['ITRT_CNTNT'];
+          resultBuilder.writeln(content);
+        }
       }
-      return resultBuilder.toString();
     }
-    return "정보 없음";
+    return resultBuilder.toString();
   }
 }

@@ -24,7 +24,7 @@ class _MainCalendarState extends State<MainCalendar> {
   @override
   Widget build(BuildContext context) {
     return TableCalendar(
-      locale: 'ko_KR',
+      locale: 'en_US',
       onDaySelected: widget.onDaySelected,
       selectedDayPredicate: (date) =>
           date.year == widget.selectedDate.year &&
@@ -42,6 +42,9 @@ class _MainCalendarState extends State<MainCalendar> {
           fontWeight: FontWeight.w700,
         ),
       ),
+      availableCalendarFormats: const {
+        CalendarFormat.month: 'yyyy - MM',
+      },
       calendarBuilders: CalendarBuilders(
         defaultBuilder: (context, day, focusedDay) {
           if (day.weekday == DateTime.saturday) {

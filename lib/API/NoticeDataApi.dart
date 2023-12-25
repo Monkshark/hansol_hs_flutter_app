@@ -17,34 +17,46 @@ class NoticeDataApi {
 
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?'
-        // 'key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
+        // 'key=${niesApiKeys.NIES_API_KEY}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
         '&AA_YMD=$formattedDate';
 
     print('$TAG: getNotice: $requestURL');
 
-    final response = await http.get(Uri.parse(requestURL));
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      if (data != null && data.containsKey('SchoolSchedule')) {
-        final schoolScheduleArray = data['SchoolSchedule'];
+    final data = await fetchData(requestURL);
+    if (data == null) return null;
 
-        for (var i = 0; i < schoolScheduleArray.length; i++) {
-          final schedule = schoolScheduleArray[i];
-          if (schedule.containsKey('row')) {
-            final rowArray = schedule['row'];
-            for (var j = 0; j < rowArray.length; j++) {
-              final row = rowArray[j];
-              if (row.containsKey('EVENT_NM')) {
-                if (row['EVENT_NM'] == '토요휴업일') return null;
-                return row['EVENT_NM'];
-              }
-            }
-          }
-        }
-      }
+    return processSchoolSchedule(data['SchoolSchedule']);
+  }
+
+  Future<Map<String, dynamic>?> fetchData(String url) async {
+    final response = await http.get(Uri.parse(url));
+    if (response.statusCode != 200) return null;
+
+    return jsonDecode(response.body);
+  }
+
+  String? processSchoolSchedule(List<dynamic> schoolScheduleArray) {
+    for (var i = 0; i < schoolScheduleArray.length; i++) {
+      final schedule = schoolScheduleArray[i];
+      if (!schedule.containsKey('row')) continue;
+
+      final rowArray = schedule['row'];
+      final event = processRow(rowArray);
+      if (event != null) return event;
     }
+
+    return null;
+  }
+
+  String? processRow(List<dynamic> rowArray) {
+    final filteredRows = rowArray.where((row) => row.containsKey('EVENT_NM'));
+    for (var row in filteredRows) {
+      if (row['EVENT_NM'] == '토요휴업일') return null;
+      return row['EVENT_NM'];
+    }
+
     return null;
   }
 }
