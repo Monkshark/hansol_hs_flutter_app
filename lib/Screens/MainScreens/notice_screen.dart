@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/API/NoticeDataApi.dart';
-import 'package:hansol_high_school/Data/LocalDatabase.dart';
-import 'package:hansol_high_school/Data/ScheduleData.dart';
-import 'package:hansol_high_school/Widgets/AlertWidgets/DeleteAlertDialog.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/MainCalendar.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/ScheduleBottomSheet.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/ScheduleCard.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/SchoolScheduleCard.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/TodayBanner.dart';
+import 'package:hansol_high_school/API/notice_data_api.dart';
+import 'package:hansol_high_school/Data/local_database.dart';
+import 'package:hansol_high_school/Data/schedule_data.dart';
+import 'package:hansol_high_school/Widgets/AlertWidgets/delete_alert_dialog.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/schedule_bottom_sheet.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/schedule_card.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/school_schedule_card.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/today_banner.dart';
 import 'package:get_it/get_it.dart';
 
 class HansolHighSchool extends StatelessWidget {
@@ -135,7 +135,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                   left: 8.0,
                                   right: 8.0,
                                 ),
-                                child: SchoolScheduleCard(
+                                child: school_schedule_card(
                                   startTime: 00,
                                   endTime: 24,
                                   content: schoolSchedule!,

@@ -1,9 +1,9 @@
 import 'dart:convert';
-import 'package:hansol_high_school/Network/NetworkStatus.dart';
+import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-import 'package:hansol_high_school/API/NiesApiKeys.dart';
+import 'package:hansol_high_school/API/nies_api_keys.dart';
 
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';

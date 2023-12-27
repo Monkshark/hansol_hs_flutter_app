@@ -2,14 +2,14 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hansol_high_school/Data/LocalDatabase.dart';
-import 'package:hansol_high_school/Screens/MainScreens/HomeScreen.dart';
-import 'package:hansol_high_school/Screens/MainScreens/MealScreen.dart';
-import 'package:hansol_high_school/Screens/MainScreens/NoticeScreen.dart';
+import 'package:hansol_high_school/Data/local_database.dart';
+import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
+import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
+import 'package:hansol_high_school/Screens/MainScreens/notice_screen.dart';
 import 'package:hansol_high_school/Firebase/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
-import 'Notification/NotificationManager.dart';
+import 'Notification/notification_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

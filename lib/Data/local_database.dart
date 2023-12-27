@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:hansol_high_school/Data/ScheduleData.dart';
+import 'package:hansol_high_school/Data/schedule_data.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LocalDataBase {

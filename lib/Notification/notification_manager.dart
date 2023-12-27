@@ -1,9 +1,8 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
-import 'package:hansol_high_school/API/MealDataApi.dart';
+import 'package:hansol_high_school/API/meal_data_api.dart';
 
 class NotificationManager {
   NotificationManager._();

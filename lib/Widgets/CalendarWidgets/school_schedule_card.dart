@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/MainCalendar.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
 
 class _Time extends StatelessWidget {
   final int startTime;
@@ -55,12 +55,12 @@ class _Content extends StatelessWidget {
   }
 }
 
-class SchoolScheduleCard extends StatelessWidget {
+class school_schedule_card extends StatelessWidget {
   final int startTime;
   final int endTime;
   final String content;
 
-  const SchoolScheduleCard({
+  const school_schedule_card({
     required this.startTime,
     required this.endTime,
     required this.content,

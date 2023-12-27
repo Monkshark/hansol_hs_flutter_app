@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:hansol_high_school/Network/NetworkStatus.dart';
+import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 
-import 'NiesApiKeys.dart';
+import 'nies_api_keys.dart';
 
 class NoticeDataApi {
   static const TAG = 'NoticeDataApi';

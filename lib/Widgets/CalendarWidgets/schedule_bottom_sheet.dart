@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/CustomTextField.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/MainCalendar.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/custom_text_field.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
