@@ -55,12 +55,12 @@ class _Content extends StatelessWidget {
   }
 }
 
-class school_schedule_card extends StatelessWidget {
+class SchoolScheduleCard extends StatelessWidget {
   final int startTime;
   final int endTime;
   final String content;
 
-  const school_schedule_card({
+  const SchoolScheduleCard({
     required this.startTime,
     required this.endTime,
     required this.content,

@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 
 const PRIMARY_COLOR = Color(0xFF5C6BC0);
 const SECONDARY_COLOR = Color(0xFF198A43);
+final LIGHTER_COLOR = PRIMARY_COLOR.withOpacity(0.6);
 final LIGHT_GREY_COLOR = Colors.grey[200]!;
 final DARK_GREY_COLOR = Colors.grey[600]!;
 final TEXT_FIELD_FILL_COLOR = Colors.grey[300]!;
@@ -11,28 +12,36 @@ class MainCalendar extends StatefulWidget {
   final OnDaySelected onDaySelected;
   final DateTime selectedDate;
 
-  MainCalendar({
+  const MainCalendar({
+    Key? key,
     required this.onDaySelected,
     required this.selectedDate,
-  });
+  }) : super(key: key);
 
   @override
   _MainCalendarState createState() => _MainCalendarState();
 }
 
 class _MainCalendarState extends State<MainCalendar> {
+  DateTime focusedDay = DateTime.now();
+
   @override
   Widget build(BuildContext context) {
     return TableCalendar(
       locale: 'en_US',
-      onDaySelected: widget.onDaySelected,
+      onDaySelected: (selectedDay, focusedDay) {
+        widget.onDaySelected(selectedDay, focusedDay);
+        setState(() {
+          this.focusedDay = selectedDay;
+        });
+      },
       selectedDayPredicate: (date) =>
           date.year == widget.selectedDate.year &&
           date.month == widget.selectedDate.month &&
           date.day == widget.selectedDate.day,
       firstDay: DateTime.utc(1800, 1, 1),
       lastDay: DateTime.utc(3000, 1, 1),
-      focusedDay: DateTime.now(),
+      focusedDay: focusedDay,
       headerStyle: const HeaderStyle(
         titleCentered: true,
         formatButtonVisible: false,

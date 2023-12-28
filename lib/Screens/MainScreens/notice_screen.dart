@@ -120,7 +120,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                           if (hasSchoolSchedule && index == 0) {
                             return Dismissible(
                               key: UniqueKey(),
-                              direction: DismissDirection.endToStart,
+                              direction: DismissDirection.horizontal,
                               confirmDismiss: (direction) async {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
@@ -135,7 +135,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                   left: 8.0,
                                   right: 8.0,
                                 ),
-                                child: school_schedule_card(
+                                child: SchoolScheduleCard(
                                   startTime: 00,
                                   endTime: 24,
                                   content: schoolSchedule!,
@@ -148,7 +148,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
 
                             return Dismissible(
                               key: UniqueKey(),
-                              direction: DismissDirection.endToStart,
+                              direction: DismissDirection.horizontal,
                               confirmDismiss: (direction) async {
                                 return await showDialog(
                                   context: context,
