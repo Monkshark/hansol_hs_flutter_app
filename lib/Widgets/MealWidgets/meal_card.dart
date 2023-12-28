@@ -23,8 +23,8 @@ class MealCard extends StatelessWidget {
         ),
         borderRadius: BorderRadius.circular(8.0),
       ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
+      child: const Padding(
+        padding: EdgeInsets.all(16.0),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,
