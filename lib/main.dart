@@ -39,8 +39,8 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
-  final _pages = [MealScreen(), HomeScreen(), NoticeScreen()];
-  final PageController _pageController = PageController();
+  late List<Widget> _pages;
+  late PageController _pageController;
 
   @override
   void initState() {
@@ -50,9 +50,9 @@ class _MainScreenState extends State<MainScreen> {
       () async => await NotificationManager.requestNotificationPermissions(),
     );
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _pageController.jumpToPage(1);
-    });
+    _pages = [MealScreen(), HomeScreen(), const NoticeScreen()];
+    _pageController = PageController(initialPage: 1);
+
     super.initState();
   }
 
@@ -65,16 +65,18 @@ class _MainScreenState extends State<MainScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        physics: const PageScrollPhysics(),
-        children: _pages,
-      ),
+      body: (_pages.isNotEmpty)
+          ? PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              physics: const PageScrollPhysics(),
+              children: _pages,
+            )
+          : Container(),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (index) {

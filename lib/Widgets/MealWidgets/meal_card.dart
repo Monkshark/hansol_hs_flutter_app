@@ -38,40 +38,40 @@ class MealCard extends StatelessWidget {
                 children: [
                   Text(
                     "${getYear(date)}",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
                     "${getMonth(date)}${getDay(date)}",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 6.0,
                   ),
                   Text(
                     getMealType(mealType),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 24.0,
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 6.0,
                   ),
                   Text(
                     "${kcal}",
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14.0,
                     ),
                   )
                 ],
               ),
-              SizedBox(
+              const SizedBox(
                 width: 48.0,
               ),
               Expanded(

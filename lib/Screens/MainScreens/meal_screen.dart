@@ -25,12 +25,12 @@ class _MealScreenState extends State<MealScreen> {
   void initState() {
     super.initState();
     meal = MealDataApi.getMeal(
-        date: DateTime.now(),
-        mealType: MealDataApi.BREAKFAST,
+        date: DateTime.now().add(const Duration(days: 1)),
+        mealType: MealDataApi.LUNCH,
         type: MealDataApi.MENU) as Future<Meal>;
     kcal = MealDataApi.getMeal(
-        date: DateTime.now(),
-        mealType: MealDataApi.BREAKFAST,
+        date: DateTime.now().add(const Duration(days: 1)),
+        mealType: MealDataApi.LUNCH,
         type: MealDataApi.CALORIE);
   }
 
@@ -50,8 +50,8 @@ class _MealScreenState extends State<MealScreen> {
               children: [
                 MealCard(
                   meal: data[0],
-                  date: DateTime.now(),
-                  mealType: MealDataApi.BREAKFAST,
+                  date: DateTime.now().add(const Duration(days: 1)),
+                  mealType: MealDataApi.LUNCH,
                   kcal: data[1],
                 ),
               ],
