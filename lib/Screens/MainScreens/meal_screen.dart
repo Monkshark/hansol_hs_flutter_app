@@ -18,8 +18,7 @@ class MealScreen extends StatefulWidget {
 }
 
 class _MealScreenState extends State<MealScreen> {
-  late Future<Meal> meal;
-  late Future<String> kcal;
+  late Future<Meal?> meal;
 
   @override
   void initState() {
@@ -27,35 +26,33 @@ class _MealScreenState extends State<MealScreen> {
     meal = MealDataApi.getMeal(
         date: DateTime.now().add(const Duration(days: 1)),
         mealType: MealDataApi.LUNCH,
-        type: MealDataApi.MENU) as Future<Meal>;
-    kcal = MealDataApi.getMeal(
-        date: DateTime.now().add(const Duration(days: 1)),
-        mealType: MealDataApi.LUNCH,
-        type: MealDataApi.CALORIE);
+        type: MealDataApi.MENU);
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future: Future.wait([meal, kcal]),
+      body: FutureBuilder<Meal?>(
+        future: meal,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const CircularProgressIndicator();
           } else if (snapshot.hasError) {
             return Text('Error: ${snapshot.error}');
-          } else {
-            var data = snapshot.data as List;
+          } else if (snapshot.hasData && snapshot.data != null) {
+            Meal? mealData = snapshot.data;
             return Column(
               children: [
                 MealCard(
-                  meal: data[0],
-                  date: DateTime.now().add(const Duration(days: 1)),
-                  mealType: MealDataApi.LUNCH,
-                  kcal: data[1],
+                  meal: mealData!.meal,
+                  date: mealData.date,
+                  mealType: mealData.mealType,
+                  kcal: mealData.kcal,
                 ),
               ],
             );
+          } else {
+            return const Text('No meal data available');
           }
         },
       ),

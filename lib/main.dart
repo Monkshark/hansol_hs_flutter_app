@@ -7,9 +7,8 @@ import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/notice_screen.dart';
 import 'package:hansol_high_school/Firebase/firebase_options.dart';
+import 'package:hansol_high_school/Notification/notification_manager.dart';
 import 'package:intl/date_symbol_data_local.dart';
-
-import 'Notification/notification_manager.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
 
 class MealCard extends StatelessWidget {
   final String meal;
@@ -23,7 +22,7 @@ class MealCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           width: 1.5,
-          color: SECONDARY_COLOR,
+          color: Colors.grey,
         ),
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -37,7 +36,7 @@ class MealCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${getYear(date)}",
+                    getYear(date),
                     style: const TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w500,
@@ -50,9 +49,7 @@ class MealCard extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  const SizedBox(
-                    height: 6.0,
-                  ),
+                  const SizedBox(height: 6.0),
                   Text(
                     getMealType(mealType),
                     style: const TextStyle(
@@ -60,20 +57,16 @@ class MealCard extends StatelessWidget {
                       fontWeight: FontWeight.w700,
                     ),
                   ),
-                  const SizedBox(
-                    height: 6.0,
-                  ),
+                  const SizedBox(height: 6.0),
                   Text(
-                    "${kcal}",
+                    kcal,
                     style: const TextStyle(
                       fontSize: 14.0,
                     ),
-                  )
+                  ),
                 ],
               ),
-              const SizedBox(
-                width: 48.0,
-              ),
+              const SizedBox(width: 48.0),
               Expanded(
                 child: SingleChildScrollView(
                   child: Column(
@@ -91,13 +84,13 @@ class MealCard extends StatelessWidget {
     );
   }
 
-  getYear(DateTime date) => date.year.toString();
+  String getYear(DateTime date) => date.year.toString();
 
-  getMonth(DateTime date) => date.month.toString();
+  String getMonth(DateTime date) => date.month.toString().padLeft(2, '0');
 
-  getDay(DateTime date) => date.day.toString();
+  String getDay(DateTime date) => date.day.toString().padLeft(2, '0');
 
-  getMealType(int mealType) {
+  String getMealType(int mealType) {
     switch (mealType) {
       case 1:
         return "조식";
