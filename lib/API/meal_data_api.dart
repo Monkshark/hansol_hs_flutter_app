@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../Data/meal.dart';
 import 'nies_api_keys.dart';
@@ -29,11 +30,24 @@ class MealDataApi {
 
   static String result = '';
 
+  static Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
   static Future<Meal?> getMeal({
     required DateTime date,
     required int mealType,
     required String type,
   }) async {
+    final formattedDate = DateFormat('yyyyMMdd').format(date);
+    final cacheKey = '$formattedDate-$mealType-$type';
+    final prefs = await _prefs;
+
+    if (prefs.containsKey(cacheKey)) {
+      final mealData = prefs.getString(cacheKey);
+      if (mealData != null) {
+        return Meal.fromJson(jsonDecode(mealData));
+      }
+    }
+
     if (await NetworkStatus.isUnconnected()) {
       return Meal(
         meal: "식단 정보를 확인하려면 인터넷에 연결하세요",
@@ -43,7 +57,6 @@ class MealDataApi {
       );
     }
 
-    final formattedDate = DateFormat('yyyyMMdd').format(date);
     String requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
         '&Type=json&MMEAL_SC_CODE=$mealType'
         '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
@@ -53,9 +66,21 @@ class MealDataApi {
     print('$TAG :getMeal: $requestURL');
 
     final data = await fetchData(requestURL);
-    if (data == null) return null;
+    if (data == null) {
+      final meal = Meal(meal: '학사일정이 없습니다', date: date, mealType: mealType, kcal: '');
+      prefs.setString(cacheKey, jsonEncode(meal.toJson()));
+      return meal;
+    }
 
-    return processMealServiceDietInfo(data['mealServiceDietInfo'], type, date, mealType);
+    final meal = processMealServiceDietInfo(data['mealServiceDietInfo'], type, date, mealType);
+    if (meal != null) {
+      prefs.setString(cacheKey, jsonEncode(meal.toJson()));
+    } else {
+      final meal = Meal(meal: '학사일정이 없습니다', date: date, mealType: mealType, kcal: '');
+      prefs.setString(cacheKey, jsonEncode(meal.toJson()));
+    }
+
+    return meal;
   }
 
   static Future<Map<String, dynamic>?> fetchData(String url) async {

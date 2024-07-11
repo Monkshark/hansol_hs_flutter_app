@@ -4,30 +4,46 @@ import 'dart:convert';
 import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'nies_api_keys.dart';
 
 class NoticeDataApi {
   static const TAG = 'NoticeDataApi';
 
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+
   Future<String?> getNotice({
     required DateTime date,
   }) async {
-    if (await NetworkStatus.isUnconnected()) return "학사일정을 확인하려면 인터넷에 연결하세요";
-
     final formattedDate = DateFormat('yyyyMMdd').format(date);
+    final prefs = await _prefs;
+
+    if (prefs.containsKey(formattedDate)) {
+      return prefs.getString(formattedDate);
+    }
+
+    if (await NetworkStatus.isUnconnected()) {
+      return "학사일정을 확인하려면 인터넷에 연결하세요";
+    }
+
     final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?'
         '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        // 'key=${niesApiKeys.NIES_API_KEY}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
         '&AA_YMD=$formattedDate';
 
     print('$TAG: getNotice: $requestURL');
 
     final data = await fetchData(requestURL);
-    if (data == null) return null;
+    if (data == null) {
+      prefs.setString(formattedDate, '학사일정이 없습니다');
+      return '학사일정이 없습니다';
+    }
 
-    return processSchoolSchedule(data['SchoolSchedule']);
+    final notice = processSchoolSchedule(data['SchoolSchedule']);
+    prefs.setString(formattedDate, notice ?? '학사일정이 없습니다');
+
+    return notice;
   }
 
   Future<Map<String, dynamic>?> fetchData(String url) async {
@@ -47,7 +63,7 @@ class NoticeDataApi {
       if (event != null) return event;
     }
 
-    return null;
+    return '학사일정이 없습니다';
   }
 
   String? processRow(List<dynamic> rowArray) {

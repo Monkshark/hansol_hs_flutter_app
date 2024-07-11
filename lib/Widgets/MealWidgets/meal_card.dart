@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
 
 class MealCard extends StatelessWidget {
   final String meal;
@@ -22,7 +23,7 @@ class MealCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           width: 1.5,
-          color: Colors.grey,
+          color: PRIMARY_COLOR,
         ),
         borderRadius: BorderRadius.circular(8.0),
       ),
@@ -36,14 +37,14 @@ class MealCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    getYear(date),
+                    date.year.toString(),
                     style: const TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                   Text(
-                    "${getMonth(date)}${getDay(date)}",
+                    "${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}",
                     style: const TextStyle(
                       fontSize: 20.0,
                       fontWeight: FontWeight.w500,

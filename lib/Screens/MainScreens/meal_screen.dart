@@ -24,37 +24,41 @@ class _MealScreenState extends State<MealScreen> {
   void initState() {
     super.initState();
     meal = MealDataApi.getMeal(
-        date: DateTime.now().add(const Duration(days: 1)),
-        mealType: MealDataApi.LUNCH,
-        type: MealDataApi.MENU);
+      date: DateTime.now().add(const Duration(days: 1)),
+      mealType: MealDataApi.LUNCH,
+      type: MealDataApi.MENU,
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder<Meal?>(
-        future: meal,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const CircularProgressIndicator();
-          } else if (snapshot.hasError) {
-            return Text('Error: ${snapshot.error}');
-          } else if (snapshot.hasData && snapshot.data != null) {
-            Meal? mealData = snapshot.data;
-            return Column(
-              children: [
-                MealCard(
-                  meal: mealData!.meal,
-                  date: mealData.date,
-                  mealType: mealData.mealType,
-                  kcal: mealData.kcal,
-                ),
-              ],
-            );
-          } else {
-            return const Text('No meal data available');
-          }
-        },
+      backgroundColor: Colors.white,
+      body: SafeArea(
+        child: FutureBuilder<Meal?>(
+          future: meal,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error: ${snapshot.error}'));
+            } else if (snapshot.hasData && snapshot.data != null) {
+              Meal? mealData = snapshot.data;
+              return Column(
+                children: [
+                  MealCard(
+                    meal: mealData!.meal,
+                    date: mealData.date,
+                    mealType: mealData.mealType,
+                    kcal: mealData.kcal,
+                  ),
+                ],
+              );
+            } else {
+              return const Center(child: Text('No meal data available'));
+            }
+          },
+        ),
       ),
     );
   }

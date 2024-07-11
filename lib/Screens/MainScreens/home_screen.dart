@@ -17,8 +17,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [],
+    return Scaffold(
+      backgroundColor: Colors.white,
     );
   }
 }

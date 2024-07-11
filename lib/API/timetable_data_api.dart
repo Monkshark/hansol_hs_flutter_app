@@ -2,20 +2,34 @@ import 'dart:convert';
 import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hansol_high_school/API/nies_api_keys.dart';
 
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
 
-  static Future<String?> getTimeTable({
+  static Future<List<String>> getTimeTable({
     required DateTime date,
     required String grade,
     required String classNum,
   }) async {
-    if (await NetworkStatus.isUnconnected()) return "시간표를 확인하려면 인터넷에 연결하세요";
-
     final formattedDate = DateFormat('yyyyMMdd').format(date);
+    final cacheKey = '$formattedDate-$grade-$classNum';
+
+    final prefs = await SharedPreferences.getInstance();
+
+    if (prefs.containsKey(cacheKey)) {
+      final timetableData = prefs.getStringList(cacheKey);
+      if (timetableData != null) {
+        return timetableData;
+      }
+    }
+
+    if (await NetworkStatus.isUnconnected()) {
+      return ["시간표를 확인하려면 인터넷에 연결하세요"];
+    }
+
     final requestURL = 'https://open.neis.go.kr/hub/hisTimetable?'
         'key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
@@ -27,9 +41,12 @@ class TimetableDataApi {
     print('$TAG: getTimeTable: $requestURL');
 
     final data = await fetchData(requestURL);
-    if (data == null) return "정보 없음";
+    if (data == null) return ["정보 없음"];
 
-    return processTimetable(data['hisTimetable']);
+    final timetable = processTimetable(data['hisTimetable']);
+    prefs.setStringList(cacheKey, timetable);
+
+    return timetable;
   }
 
   static Future<Map<String, dynamic>?> fetchData(String url) async {
@@ -39,18 +56,21 @@ class TimetableDataApi {
     return jsonDecode(response.body);
   }
 
-  static String processTimetable(List<dynamic> timetableArray) {
-    var resultBuilder = StringBuffer();
+  static List<String> processTimetable(List<dynamic> timetableArray) {
+    List<String> resultList = [];
+
     for (var i = 0; i < timetableArray.length; i++) {
       final rowArray = timetableArray[i]['row'];
       if (rowArray != null) {
         for (var j = 0; j < rowArray.length; j++) {
           final itemObject = rowArray[j];
           final content = itemObject['ITRT_CNTNT'];
-          resultBuilder.writeln(content);
+          resultList.add(content);
         }
       }
     }
-    return resultBuilder.toString();
+
+    return resultList;
   }
+
 }

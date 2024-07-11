@@ -91,7 +91,7 @@ class SchoolScheduleCard extends StatelessWidget {
                 width: 16.0,
               ),
               _Content(
-                content: content,
+                content: "[학사일정] $content",
               ),
             ],
           ),
