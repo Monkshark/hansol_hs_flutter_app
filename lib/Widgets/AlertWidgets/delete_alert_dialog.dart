@@ -61,12 +61,12 @@ class DeleteAlertDialog extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
                   TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text("삭제"),
-                  ),
-                  TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     child: const Text("취소"),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(true),
+                    child: const Text("삭제"),
                   ),
                 ],
               ),

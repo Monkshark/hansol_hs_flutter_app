@@ -41,11 +41,11 @@ class CustomTextField extends StatelessWidget {
             inputFormatters:
                 isTime ? [FilteringTextInputFormatter.digitsOnly] : [],
             decoration: InputDecoration(
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
+              // border: OutlineInputBorder(
+              //   borderRadius: BorderRadius.circular(10.0),
+              // ),
               filled: true,
-              fillColor: Colors.grey[300],
+              fillColor: Colors.white,
               suffixText: isTime ? '시' : null,
             ),
           ),
