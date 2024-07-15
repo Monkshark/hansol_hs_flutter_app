@@ -17,10 +17,20 @@ class NoticeDataApi {
     required DateTime date,
   }) async {
     final formattedDate = DateFormat('yyyyMMdd').format(date);
+    final cacheKey = formattedDate;
     final prefs = await _prefs;
 
-    if (prefs.containsKey(formattedDate)) {
-      return prefs.getString(formattedDate);
+    if (prefs.containsKey(cacheKey)) {
+      final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+
+      if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
+        return prefs.getString(cacheKey);
+      } else {
+        prefs.remove(cacheKey);
+        prefs.remove('$cacheKey-timestamp');
+      }
     }
 
     if (await NetworkStatus.isUnconnected()) {
@@ -36,12 +46,14 @@ class NoticeDataApi {
 
     final data = await fetchData(requestURL);
     if (data == null) {
-      prefs.setString(formattedDate, '학사일정이 없습니다');
+      prefs.setString(cacheKey, '학사일정이 없습니다');
+      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
       return '학사일정이 없습니다';
     }
 
     final notice = processSchoolSchedule(data['SchoolSchedule']);
-    prefs.setString(formattedDate, notice ?? '학사일정이 없습니다');
+    prefs.setString(cacheKey, notice ?? '학사일정이 없습니다');
+    prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
 
     return notice;
   }

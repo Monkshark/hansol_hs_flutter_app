@@ -16,13 +16,21 @@ class TimetableDataApi {
   }) async {
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     final cacheKey = '$formattedDate-$grade-$classNum';
-
     final prefs = await SharedPreferences.getInstance();
 
     if (prefs.containsKey(cacheKey)) {
-      final timetableData = prefs.getStringList(cacheKey);
-      if (timetableData != null) {
-        return timetableData;
+      final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+
+      if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
+        final timetableData = prefs.getStringList(cacheKey);
+        if (timetableData != null) {
+          return timetableData;
+        }
+      } else {
+        prefs.remove(cacheKey);
+        prefs.remove('$cacheKey-timestamp');
       }
     }
 
@@ -45,6 +53,7 @@ class TimetableDataApi {
 
     final timetable = processTimetable(data['hisTimetable']);
     prefs.setStringList(cacheKey, timetable);
+    prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
 
     return timetable;
   }
@@ -52,7 +61,6 @@ class TimetableDataApi {
   static Future<Map<String, dynamic>?> fetchData(String url) async {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) return null;
-
     return jsonDecode(response.body);
   }
 
@@ -73,4 +81,5 @@ class TimetableDataApi {
     return resultList;
   }
 
+  //static List<String> getDynamicTimeTable() {  }
 }

@@ -19,6 +19,22 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Positioned(
+            top: 20,
+            right: 20,
+            child: IconButton(
+              onPressed: () {
+
+              },
+              icon: const Icon(Icons.settings),
+            ),
+          ),
+
+          //
+        ],
+      ),
     );
   }
 }

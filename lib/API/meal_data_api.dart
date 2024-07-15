@@ -30,7 +30,7 @@ class MealDataApi {
 
   static String result = '';
 
-  static Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  static final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
   static Future<Meal?> getMeal({
     required DateTime date,
@@ -42,9 +42,18 @@ class MealDataApi {
     final prefs = await _prefs;
 
     if (prefs.containsKey(cacheKey)) {
-      final mealData = prefs.getString(cacheKey);
-      if (mealData != null) {
-        return Meal.fromJson(jsonDecode(mealData));
+      final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+
+      if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
+        final mealData = prefs.getString(cacheKey);
+        if (mealData != null) {
+          return Meal.fromJson(jsonDecode(mealData));
+        }
+      } else {
+        prefs.remove(cacheKey);
+        prefs.remove('$cacheKey-timestamp');
       }
     }
 
@@ -67,17 +76,21 @@ class MealDataApi {
 
     final data = await fetchData(requestURL);
     if (data == null) {
-      final meal = Meal(meal: '학사일정이 없습니다', date: date, mealType: mealType, kcal: '');
+      final meal = Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
       prefs.setString(cacheKey, jsonEncode(meal.toJson()));
+      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
       return meal;
     }
 
     final meal = processMealServiceDietInfo(data['mealServiceDietInfo'], type, date, mealType);
+
     if (meal != null) {
       prefs.setString(cacheKey, jsonEncode(meal.toJson()));
+      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
     } else {
-      final meal = Meal(meal: '학사일정이 없습니다', date: date, mealType: mealType, kcal: '');
+      final meal = Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
       prefs.setString(cacheKey, jsonEncode(meal.toJson()));
+      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
     }
 
     return meal;
@@ -87,7 +100,12 @@ class MealDataApi {
     final response = await http.get(Uri.parse(url));
     if (response.statusCode != 200) return null;
 
-    return jsonDecode(response.body);
+    final data = jsonDecode(response.body);
+    if (data is Map<String, dynamic> && data['RESULT'] != null && data['RESULT']['CODE'] == 'INFO-200') {
+      return null;
+    }
+
+    return data;
   }
 
   static Meal? processMealServiceDietInfo(
@@ -116,5 +134,30 @@ class MealDataApi {
 
     return null;
   }
-}
 
+
+  Future<bool> isAllMealEmpty(DateTime date) async {
+    final formattedDate = DateFormat('yyyyMMdd').format(date);
+    String requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
+        '&Type=json'
+        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
+        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&MLSV_YMD=$formattedDate';
+
+    final response = await http.get(Uri.parse(requestURL));
+
+    final data = jsonDecode(response.body);
+
+    if (data.containsKey('RESULT') && data['RESULT']['CODE'] == 'INFO-200') {
+      return true;
+    }
+
+    if (data.containsKey('mealServiceDietInfo') && data['mealServiceDietInfo'].length > 1 &&
+        data['mealServiceDietInfo'][1].containsKey('row')) {
+      return data['mealServiceDietInfo'][1]['row'].isEmpty;
+    }
+
+    return false;
+  }
+
+}

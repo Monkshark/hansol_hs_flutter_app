@@ -214,4 +214,5 @@ String getMealType(int mealType) {
     default:
       return "중식";
   }
+
 }
