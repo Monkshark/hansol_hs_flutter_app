@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -46,7 +47,7 @@ class TimetableDataApi {
         '&GRADE=$grade'
         '&CLASS_NM=$classNum';
 
-    print('$TAG: getTimeTable: $requestURL');
+    log('$TAG: getTimeTable: $requestURL');
 
     final data = await fetchData(requestURL);
     if (data == null) return ["정보 없음"];
@@ -81,5 +82,10 @@ class TimetableDataApi {
     return resultList;
   }
 
-  //static List<String> getDynamicTimeTable() {  }
+
+  static List<String>? getCustomTimeTable() {
+    // 1. 날짜에 해당하는 학사일정을 받아옴(하루)
+    // 2.
+    return null;
+  }
 }

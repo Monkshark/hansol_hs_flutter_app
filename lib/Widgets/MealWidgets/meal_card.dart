@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
@@ -80,7 +81,7 @@ class _MealCardState extends State<MealCard> with SingleTickerProviderStateMixin
       final xFile = XFile(imgFile.path);
       await Share.shareXFiles([xFile]);
     } catch (e) {
-      print(e.toString());
+      log(e.toString());
     }
   }
 

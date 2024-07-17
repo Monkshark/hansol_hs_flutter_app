@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
@@ -42,7 +43,7 @@ class NoticeDataApi {
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
         '&AA_YMD=$formattedDate';
 
-    print('$TAG: getNotice: $requestURL');
+    log('$TAG: getNotice: $requestURL');
 
     final data = await fetchData(requestURL);
     if (data == null) {

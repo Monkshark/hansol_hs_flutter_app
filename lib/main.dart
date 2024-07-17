@@ -10,15 +10,17 @@ import 'package:hansol_high_school/Firebase/firebase_options.dart';
 import 'package:hansol_high_school/Notification/notification_manager.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:timezone/data/latest.dart' as tz;
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await NotificationManager.requestNotificationPermissions();
+  await NotificationManager.init();
   final database = LocalDataBase();
   GetIt.I.registerSingleton<LocalDataBase>(database);
+  tz.initializeTimeZones();
   initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
 }
 
@@ -44,16 +46,9 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   void initState() {
-    NotificationManager.init();
-    Future.delayed(
-      const Duration(seconds: 3),
-      () async => await NotificationManager.requestNotificationPermissions(),
-    );
-
+    super.initState();
     _pages = [MealScreen(), HomeScreen(), const NoticeScreen()];
     _pageController = PageController(initialPage: 1);
-
-    super.initState();
   }
 
   @override
@@ -67,15 +62,15 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: (_pages.isNotEmpty)
           ? PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              physics: const PageScrollPhysics(),
-              children: _pages,
-            )
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        physics: const PageScrollPhysics(),
+        children: _pages,
+      )
           : Container(),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: PRIMARY_COLOR,

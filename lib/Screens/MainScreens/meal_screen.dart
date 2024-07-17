@@ -32,9 +32,9 @@ class _MealScreenState extends State<MealScreen> {
   void initState() {
     super.initState();
     setState(() {
-      do {
+      while (selectedDate.weekday == DateTime.saturday || selectedDate.weekday == DateTime.sunday) {
         selectedDate = selectedDate.add(const Duration(days: 1));
-      } while (selectedDate.weekday == DateTime.saturday || selectedDate.weekday == DateTime.sunday);
+      }
       dateController.text = selectedDate.toLocal().toString().split(' ')[0];
       fetchMeals();
     });
