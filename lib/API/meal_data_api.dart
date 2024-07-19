@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../Data/meal.dart';
+import 'package:hansol_high_school/Data/meal.dart';
 import 'nies_api_keys.dart';
 
 class MealDataApi {
@@ -31,7 +31,8 @@ class MealDataApi {
 
   static String result = '';
 
-  static final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  static final Future<SharedPreferences> _prefs =
+      SharedPreferences.getInstance();
 
   static Future<Meal?> getMeal({
     required DateTime date,
@@ -77,21 +78,27 @@ class MealDataApi {
 
     final data = await fetchData(requestURL);
     if (data == null) {
-      final meal = Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
+      final meal =
+          Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
       prefs.setString(cacheKey, jsonEncode(meal.toJson()));
-      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+      prefs.setInt(
+          '$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
       return meal;
     }
 
-    final meal = processMealServiceDietInfo(data['mealServiceDietInfo'], type, date, mealType);
+    final meal = processMealServiceDietInfo(
+        data['mealServiceDietInfo'], type, date, mealType);
 
     if (meal != null) {
       prefs.setString(cacheKey, jsonEncode(meal.toJson()));
-      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+      prefs.setInt(
+          '$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
     } else {
-      final meal = Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
+      final meal =
+          Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
       prefs.setString(cacheKey, jsonEncode(meal.toJson()));
-      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+      prefs.setInt(
+          '$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
     }
 
     return meal;
@@ -102,7 +109,9 @@ class MealDataApi {
     if (response.statusCode != 200) return null;
 
     final data = jsonDecode(response.body);
-    if (data is Map<String, dynamic> && data['RESULT'] != null && data['RESULT']['CODE'] == 'INFO-200') {
+    if (data is Map<String, dynamic> &&
+        data['RESULT'] != null &&
+        data['RESULT']['CODE'] == 'INFO-200') {
       return null;
     }
 
@@ -113,8 +122,7 @@ class MealDataApi {
       List<dynamic> mealServiceDietInfoArray,
       String type,
       DateTime date,
-      int mealType
-      ) {
+      int mealType) {
     for (var i = 0; i < mealServiceDietInfoArray.length; i++) {
       final mealServiceDietInfo = mealServiceDietInfoArray[i];
       if (!mealServiceDietInfo.containsKey('row')) continue;
@@ -136,7 +144,6 @@ class MealDataApi {
     return null;
   }
 
-
   Future<bool> isAllMealEmpty(DateTime date) async {
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     String requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
@@ -153,12 +160,12 @@ class MealDataApi {
       return true;
     }
 
-    if (data.containsKey('mealServiceDietInfo') && data['mealServiceDietInfo'].length > 1 &&
+    if (data.containsKey('mealServiceDietInfo') &&
+        data['mealServiceDietInfo'].length > 1 &&
         data['mealServiceDietInfo'][1].containsKey('row')) {
       return data['mealServiceDietInfo'][1]['row'].isEmpty;
     }
 
     return false;
   }
-
 }

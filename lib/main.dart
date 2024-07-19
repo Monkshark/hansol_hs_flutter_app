@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hansol_high_school/API/timetable_data_api.dart';
 import 'package:hansol_high_school/Data/local_database.dart';
 import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
@@ -62,15 +63,15 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: (_pages.isNotEmpty)
           ? PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        physics: const PageScrollPhysics(),
-        children: _pages,
-      )
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              physics: const PageScrollPhysics(),
+              children: _pages,
+            )
           : Container(),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: PRIMARY_COLOR,

@@ -32,7 +32,8 @@ class _MealScreenState extends State<MealScreen> {
   void initState() {
     super.initState();
     setState(() {
-      while (selectedDate.weekday == DateTime.saturday || selectedDate.weekday == DateTime.sunday) {
+      while (selectedDate.weekday == DateTime.saturday ||
+          selectedDate.weekday == DateTime.sunday) {
         selectedDate = selectedDate.add(const Duration(days: 1));
       }
       dateController.text = selectedDate.toLocal().toString().split(' ')[0];
@@ -66,7 +67,8 @@ class _MealScreenState extends State<MealScreen> {
     setState(() {
       do {
         selectedDate = selectedDate.add(const Duration(days: 1));
-      } while (selectedDate.weekday == DateTime.saturday || selectedDate.weekday == DateTime.sunday);
+      } while (selectedDate.weekday == DateTime.saturday ||
+          selectedDate.weekday == DateTime.sunday);
       dateController.text = selectedDate.toLocal().toString().split(' ')[0];
       fetchMeals();
     });
@@ -76,12 +78,12 @@ class _MealScreenState extends State<MealScreen> {
     setState(() {
       do {
         selectedDate = selectedDate.subtract(const Duration(days: 1));
-      } while (selectedDate.weekday == DateTime.saturday || selectedDate.weekday == DateTime.sunday);
+      } while (selectedDate.weekday == DateTime.saturday ||
+          selectedDate.weekday == DateTime.sunday);
       dateController.text = selectedDate.toLocal().toString().split(' ')[0];
       fetchMeals();
     });
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -124,21 +126,22 @@ class _MealScreenState extends State<MealScreen> {
 
                     for (Meal? meal in meals) {
                       meal!;
-
-                      if (meal.meal != '급식 정보가 없습니다.' && isNullMealCardVisible) {
-                        mealCards.add(
-                          MealCard(
-                            meal: meal.meal,
-                            date: meal.date,
-                            mealType: meal.mealType,
-                            kcal: meal.kcal,
-                          ),
-                        );
-                      }
+                      // if (meal.meal != '급식 정보가 없습니다.' &&
+                      //     isNullMealCardVisible) {
+                      mealCards.add(
+                        MealCard(
+                          meal: meal.meal,
+                          date: meal.date,
+                          mealType: meal.mealType,
+                          kcal: meal.kcal,
+                        ),
+                      );
+                      // }
                     }
 
                     if (mealCards.isEmpty) {
-                      return const Center(child: Text('No meal data available'));
+                      return const Center(
+                          child: Text('No meal data available'));
                     }
 
                     return Column(

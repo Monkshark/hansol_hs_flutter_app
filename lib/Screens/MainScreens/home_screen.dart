@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../API/timetable_data_api.dart';
+
 class HansolHighSchool extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -26,13 +28,11 @@ class _HomeScreenState extends State<HomeScreen> {
             right: 20,
             child: IconButton(
               onPressed: () {
-
+                TimetableDataApi.getSubjects(grade: 3);
               },
               icon: const Icon(Icons.settings),
             ),
           ),
-
-          //
         ],
       ),
     );

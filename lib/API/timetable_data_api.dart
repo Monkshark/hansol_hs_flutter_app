@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:hansol_high_school/Data/subject.dart';
 import 'package:hansol_high_school/Network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -82,10 +83,72 @@ class TimetableDataApi {
     return resultList;
   }
 
+  static Future<List<String>?> getSubjects({required int grade}) async {
+    List<String> subjects = [];
+    DateTime now = DateTime.now();
+    int year = now.year;
 
-  static List<String>? getCustomTimeTable() {
-    // 1. 날짜에 해당하는 학사일정을 받아옴(하루)
-    // 2.
-    return null;
+    DateTime startDate = DateTime(year, 3, 1);
+    DateTime endDate = DateTime(year, 3, 7);
+
+    for (DateTime date = startDate;
+        date.isBefore(endDate.add(const Duration(days: 1)));
+        date = date.add(const Duration(days: 1))) {
+      if (date.weekday == DateTime.saturday ||
+          date.weekday == DateTime.sunday) {
+        continue;
+      }
+
+      for (var i = 1; i < 9; i++) {
+        List<String> timetable = await getTimeTable(
+            date: date, grade: grade.toString(), classNum: i.toString());
+
+        subjects.addAll(timetable);
+      }
+    }
+
+    subjects = subjects.toSet().toList()..sort();
+
+    log(subjects.toString());
+    return subjects;
+  }
+
+  static Future<List<List<String?>>> getCustomTimeTable({
+    required List<Subject> userSubjects,
+    required String grade,
+  }) async {
+    List<List<String?>> customTimeTable = [
+      [null, '', '', '', '', '', '', ''],
+      [null, '', '', '', '', '', '', ''],
+      [null, '', '', '', '', '', '', ''],
+      [null, '', '', '', '', '', '', ''],
+      [null, '', '', '', '', '', '', '']
+    ];
+
+    DateTime now = DateTime.now();
+    int year = now.year;
+
+    DateTime startDate = DateTime(year, 3, 1);
+    DateTime endDate = DateTime(year, 3, 7);
+
+    for (DateTime date = startDate;
+        date.isBefore(endDate.add(const Duration(days: 1)));
+        date = date.add(const Duration(days: 1))) {
+      int count = 0;
+
+      if (date.weekday == DateTime.saturday ||
+          date.weekday == DateTime.sunday) {
+        continue;
+      }
+
+      for (var subject in userSubjects) {
+        List<String> timetable = getTimeTable(
+            date: date,
+            grade: grade,
+            classNum: subject.subjectClass.toString()) as List<String>;
+      }
+    }
+
+    return customTimeTable;
   }
 }
