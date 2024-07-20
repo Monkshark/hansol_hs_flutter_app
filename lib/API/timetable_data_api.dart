@@ -132,8 +132,8 @@ class TimetableDataApi {
     DateTime endDate = DateTime(year, 3, 15);
 
     for (DateTime date = startDate;
-        date.isBefore(endDate.add(const Duration(days: 1)));
-        date = date.add(const Duration(days: 1))) {
+    date.isBefore(endDate.add(const Duration(days: 1)));
+    date = date.add(const Duration(days: 1))) {
       if (date.weekday == DateTime.saturday ||
           date.weekday == DateTime.sunday) {
         continue;
@@ -145,14 +145,15 @@ class TimetableDataApi {
             grade: grade,
             classNum: subject.subjectClass.toString());
 
-        if (customTimeTable[date.weekday].contains(subject.subjectName)) {
-          customTimeTable[date.weekday]
-                  [timetable.indexOf(subject.subjectName) + 1] =
-              subject.subjectName;
+        for (var period = 0; period < timetable.length; period++) {
+          if (timetable[period] == subject.subjectName) {
+            customTimeTable[date.weekday - 1][period + 1] = subject.subjectName;
+          }
         }
       }
     }
 
     return customTimeTable;
   }
+
 }
