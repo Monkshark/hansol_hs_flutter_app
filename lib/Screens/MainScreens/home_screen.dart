@@ -1,4 +1,7 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/Data/subject.dart';
 
 import '../../API/timetable_data_api.dart';
 
@@ -29,6 +32,10 @@ class _HomeScreenState extends State<HomeScreen> {
             child: IconButton(
               onPressed: () {
                 TimetableDataApi.getSubjects(grade: 3);
+                log(TimetableDataApi.getCustomTimeTable(userSubjects: [
+                  new Subject(subjectName: '문학', subjectClass: 1)
+                ], grade: 2.toString())
+                    .toString());
               },
               icon: const Icon(Icons.settings),
             ),

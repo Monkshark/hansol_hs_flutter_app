@@ -128,24 +128,28 @@ class TimetableDataApi {
     DateTime now = DateTime.now();
     int year = now.year;
 
-    DateTime startDate = DateTime(year, 3, 1);
-    DateTime endDate = DateTime(year, 3, 7);
+    DateTime startDate = DateTime(year, 3, 8);
+    DateTime endDate = DateTime(year, 3, 15);
 
     for (DateTime date = startDate;
         date.isBefore(endDate.add(const Duration(days: 1)));
         date = date.add(const Duration(days: 1))) {
-      int count = 0;
-
       if (date.weekday == DateTime.saturday ||
           date.weekday == DateTime.sunday) {
         continue;
       }
 
       for (var subject in userSubjects) {
-        List<String> timetable = getTimeTable(
+        List<String> timetable = await getTimeTable(
             date: date,
             grade: grade,
-            classNum: subject.subjectClass.toString()) as List<String>;
+            classNum: subject.subjectClass.toString());
+
+        if (customTimeTable[date.weekday].contains(subject.subjectName)) {
+          customTimeTable[date.weekday]
+                  [timetable.indexOf(subject.subjectName) + 1] =
+              subject.subjectName;
+        }
       }
     }
 
