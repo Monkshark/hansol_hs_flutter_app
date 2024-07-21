@@ -46,15 +46,13 @@ class _HomeScreenState extends State<HomeScreen> {
                       Subject(subjectName: '기하', subjectClass: 1),
                       Subject(subjectName: '영어Ⅰ', subjectClass: 1),
                       Subject(subjectName: '지구과학Ⅰ', subjectClass: 6),
-                      Subject(subjectName: '진로활동', subjectClass: 1)
-
+                      Subject(subjectName: '진로활동', subjectClass: 1),
                     ],
-                    grade: 2.toString()
+                    grade: 2.toString(),
                 );
 
                 log(customTimeTable.toString());
               },
-
 
               icon: const Icon(Icons.settings),
             ),
