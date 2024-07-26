@@ -6,7 +6,7 @@ import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
+import 'package:hansol_high_school/styles.dart';
 
 class MealCard extends StatefulWidget {
   final String meal;
@@ -26,7 +26,8 @@ class MealCard extends StatefulWidget {
   _MealCardState createState() => _MealCardState();
 }
 
-class _MealCardState extends State<MealCard> with SingleTickerProviderStateMixin {
+class _MealCardState extends State<MealCard>
+    with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   late Animation<double> _opacity;
   late Animation<double> _buttonOpacity;
@@ -67,11 +68,13 @@ class _MealCardState extends State<MealCard> with SingleTickerProviderStateMixin
 
   Future<void> _shareMealCard() async {
     try {
-      RenderRepaintBoundary boundary = _globalKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      RenderRepaintBoundary boundary = _globalKey.currentContext!
+          .findRenderObject() as RenderRepaintBoundary;
 
       ui.Image image = await boundary.toImage(pixelRatio: 5.0);
 
-      ByteData? byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      ByteData? byteData =
+          await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
 
       final directory = (await getTemporaryDirectory()).path;
@@ -84,7 +87,6 @@ class _MealCardState extends State<MealCard> with SingleTickerProviderStateMixin
       log(e.toString());
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -129,7 +131,7 @@ class _MealCardState extends State<MealCard> with SingleTickerProviderStateMixin
                                 ),
                                 Text(
                                   "${widget.date.month.toString().padLeft(2, '0')}"
-                                      "${widget.date.day.toString().padLeft(2, '0')}",
+                                  "${widget.date.day.toString().padLeft(2, '0')}",
                                   style: const TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w500,
@@ -178,7 +180,8 @@ class _MealCardState extends State<MealCard> with SingleTickerProviderStateMixin
                     opacity: _buttonOpacity,
                     child: ElevatedButton(
                       onPressed: _shareMealCard,
-                      child: Icon(Platform.isIOS ? Icons.ios_share : Icons.share),
+                      child:
+                          Icon(Platform.isIOS ? Icons.ios_share : Icons.share),
                     ),
                   ),
                 ),
@@ -215,5 +218,4 @@ String getMealType(int mealType) {
     default:
       return "중식";
   }
-
 }

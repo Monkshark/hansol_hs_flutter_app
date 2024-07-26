@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
+import 'package:hansol_high_school/styles.dart';
 
 class _Time extends StatelessWidget {
   final int startTime;

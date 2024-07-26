@@ -1,27 +1,26 @@
 import 'package:flutter/material.dart';
 
-class HansolHighSchool extends StatelessWidget {
+class SettingScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: SettingScreen(),
+    return Scaffold(
+      body: GestureDetector(
+        onHorizontalDragEnd: (details) {
+          if (details.primaryVelocity! > 0) {
+            Navigator.of(context).pop();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: Colors.white,
+          appBar: AppBar(
+            backgroundColor: Colors.white,
+            title: Text(''),
+          ),
+          body: Center(
+            child: Text('Settings Screen'),
+          ),
+        ),
+      ),
     );
-  }
-}
-
-class SettingScreen extends StatefulWidget {
-  @override
-  _SettingScreenState createState() => _SettingScreenState();
-}
-
-class _SettingScreenState extends State<SettingScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold();
   }
 }

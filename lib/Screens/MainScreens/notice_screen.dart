@@ -9,7 +9,7 @@ import 'package:hansol_high_school/Widgets/CalendarWidgets/schedule_card.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/school_schedule_card.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/today_banner.dart';
 import 'package:get_it/get_it.dart';
-
+import 'package:hansol_high_school/styles.dart';
 
 class HansolHighSchool extends StatelessWidget {
   @override
@@ -105,12 +105,12 @@ class _NoticeScreenState extends State<NoticeScreen> {
                   }
 
                   final schoolSchedule = snapshot.data;
-                  final hasSchoolSchedule = schoolSchedule != null &&
-                      schoolSchedule != '학사일정이 없습니다';
+                  final hasSchoolSchedule =
+                      schoolSchedule != null && schoolSchedule != '학사일정이 없습니다';
 
                   return StreamBuilder<List<Schedule>>(
                     stream:
-                    GetIt.I<LocalDataBase>().watchSchedules(selectedDate),
+                        GetIt.I<LocalDataBase>().watchSchedules(selectedDate),
                     builder: (context, snapshot) {
                       if (!snapshot.hasData) return Container();
 
@@ -148,7 +148,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                             );
                           } else {
                             final schedule =
-                            schedules[index - (hasSchoolSchedule ? 1 : 0)];
+                                schedules[index - (hasSchoolSchedule ? 1 : 0)];
 
                             return Dismissible(
                               key: UniqueKey(),
@@ -160,7 +160,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                     return const DeleteAlertDialog(
                                       title: '일정 삭제',
                                       content:
-                                      '정말 일정을 삭제하시겠습니까?\n삭제 후에는 복구가 불가능합니다.',
+                                          '정말 일정을 삭제하시겠습니까?\n삭제 후에는 복구가 불가능합니다.',
                                     );
                                   },
                                 );

@@ -1,9 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/custom_text_field.dart';
-import 'package:hansol_high_school/Widgets/CalendarWidgets/main_calendar.dart';
-
+import 'package:hansol_high_school/styles.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleBottomSheet extends StatefulWidget {
@@ -22,7 +23,6 @@ class ScheduleBottomSheet extends StatefulWidget {
 
 class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
   final GlobalKey<FormState> formKey = GlobalKey();
-
   int? startTime;
   int? endTime;
   String? content;
@@ -54,26 +54,66 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
       }
     }
 
-    String? timeValidator(String? val) {
-      if (val == null) return "값을 입력해주세요";
+    Future<void> pickTime(BuildContext context, bool isStart) async {
+      final now = TimeOfDay.now();
+      final initialTime = TimeOfDay(hour: now.hour, minute: 0);
 
-      int? number;
+      if (Platform.isIOS) {
+        showCupertinoModalPopup(
+          context: context,
+          builder: (context) {
+            return Container(
+              height: 250,
+              color: Colors.white,
+              child: CupertinoDatePicker(
+                mode: CupertinoDatePickerMode.time,
+                initialDateTime: DateTime(
+                  widget.selectedDate.year,
+                  widget.selectedDate.month,
+                  widget.selectedDate.day,
+                  initialTime.hour,
+                  initialTime.minute,
+                ),
+                use24hFormat: false,
+                onDateTimeChanged: (DateTime newDateTime) {
+                  setState(() {
+                    if (isStart) {
+                      startTime = newDateTime.hour;
+                    } else {
+                      endTime = newDateTime.hour;
+                    }
+                  });
+                },
+              ),
+            );
+          },
+        );
+      } else {
+        final pickedTime = await showTimePicker(
+          context: context,
+          initialTime: initialTime,
+          builder: (context, child) {
+            return MediaQuery(
+              data:
+                  MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+              child: child!,
+            );
+          },
+        );
 
-      try {
-        number = int.parse(val);
-      } catch (e) {
-        return "숫자를 입력해주세요";
+        if (pickedTime != null) {
+          int hour24Format;
+          hour24Format = pickedTime.hour == 12 ? 12 : pickedTime.hour + 0;
+
+          setState(() {
+            if (isStart) {
+              startTime = hour24Format;
+            } else {
+              endTime = hour24Format;
+            }
+          });
+        }
       }
-
-      if (number < 0 || number > 24) return "올바른 시간을 입력해주세요";
-
-      return null;
-    }
-
-    String? contextValidator(String? val) {
-      if (val == null || val.isEmpty) return "값을 입력해주세요";
-
-      return null;
     }
 
     return Form(
@@ -112,24 +152,44 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                 Row(
                   children: [
                     Expanded(
-                      child: CustomTextField(
-                        label: '시작 시간',
-                        isTime: true,
-                        onSaved: (String? val) {
-                          startTime = int.parse(val!);
-                        },
-                        validator: timeValidator,
+                      child: GestureDetector(
+                        onTap: () => pickTime(context, true),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              startTime == null
+                                  ? '시작 시간'
+                                  : '${startTime! < 10 ? '0$startTime' : startTime}:00',
+                              style: const TextStyle(fontSize: 16.0),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                     const SizedBox(width: 16.0),
                     Expanded(
-                      child: CustomTextField(
-                        label: '종료 시간',
-                        isTime: true,
-                        onSaved: (String? val) {
-                          endTime = int.parse(val!);
-                        },
-                        validator: timeValidator,
+                      child: GestureDetector(
+                        onTap: () => pickTime(context, false),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12.0),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey),
+                            borderRadius: BorderRadius.circular(8.0),
+                          ),
+                          child: Center(
+                            child: Text(
+                              endTime == null
+                                  ? '종료 시간'
+                                  : '${endTime! < 10 ? '0$endTime' : endTime}:00',
+                              style: const TextStyle(fontSize: 16.0),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],
@@ -142,7 +202,10 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                     onSaved: (String? val) {
                       content = val;
                     },
-                    validator: contextValidator,
+                    validator: (String? val) {
+                      if (val == null || val.isEmpty) return "값을 입력해주세요";
+                      return null;
+                    },
                   ),
                 ),
                 const SizedBox(height: 16.0),
