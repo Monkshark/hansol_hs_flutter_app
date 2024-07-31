@@ -15,11 +15,11 @@ class SettingData {
   }
 
   set grade(int value) => _sharedPreferences.setInt('Grade', value);
-  int get grade => _sharedPreferences.getInt('Grade') ?? 0;
+  int get grade => _sharedPreferences.getInt('Grade') ?? 1;
 
   set classNum(int value) => _sharedPreferences.setInt('Class', value);
-  int get classNum => _sharedPreferences.getInt('Class') ?? 0;
+  int get classNum => _sharedPreferences.getInt('Class') ?? 1;
 
   set mealType(int value) => _sharedPreferences.setInt('MealType', value);
-  int get mealType => _sharedPreferences.getInt('MealType') ?? 0;
+  int get mealType => _sharedPreferences.getInt('MealType') ?? 1;
 }

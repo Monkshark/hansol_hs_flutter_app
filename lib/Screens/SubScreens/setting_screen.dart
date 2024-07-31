@@ -14,10 +14,25 @@ class SettingScreen extends StatelessWidget {
           backgroundColor: Colors.white,
           appBar: AppBar(
             backgroundColor: Colors.white,
-            title: Text(''),
+            title: const Text(''),
           ),
-          body: Center(
-            child: Text('Settings Screen'),
+          body: SingleChildScrollView(
+            child: Column(
+              children: List.generate(
+                10,
+                (index) => Container(
+                  margin: const EdgeInsets.all(10),
+                  color: Colors.blueAccent,
+                  height: 150,
+                  child: Center(
+                    child: Text(
+                      'Item ${index + 1}',
+                      style: const TextStyle(color: Colors.white, fontSize: 24),
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
         ),
       ),
