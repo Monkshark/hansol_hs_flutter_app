@@ -67,4 +67,5 @@ flutter {
 
 dependencies {
     implementation 'com.android.support:multidex:1.0.3'
+    implementation "androidx.work:work-runtime-ktx:2.7.1"
 }

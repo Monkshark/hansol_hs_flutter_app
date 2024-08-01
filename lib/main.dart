@@ -11,17 +11,28 @@ import 'package:hansol_high_school/Notification/notification_manager.dart';
 import 'package:hansol_high_school/styles.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await _requestNotificationPermission();
   await NotificationManager.init();
   final database = LocalDataBase();
   GetIt.I.registerSingleton<LocalDataBase>(database);
   tz.initializeTimeZones();
   initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
+}
+
+Future<void> _requestNotificationPermission() async {
+  final status = await Permission.notification.request();
+  if (status.isGranted) {
+    print("Notification permission granted.");
+  } else {
+    print("Notification permission denied.");
+  }
 }
 
 class HansolHighSchool extends StatelessWidget {
@@ -62,15 +73,15 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: (_pages.isNotEmpty)
           ? PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              physics: const PageScrollPhysics(),
-              children: _pages,
-            )
+        controller: _pageController,
+        onPageChanged: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        physics: const PageScrollPhysics(),
+        children: _pages,
+      )
           : Container(),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: PRIMARY_COLOR,

@@ -11,6 +11,11 @@ class Meal {
     required this.kcal,
   });
 
+  @override
+  String toString() {
+    return meal;
+  }
+
   Map<String, dynamic> toJson() => {
         'meal': meal,
         'date': date.toIso8601String(),
