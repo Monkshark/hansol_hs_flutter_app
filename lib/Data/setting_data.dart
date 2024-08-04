@@ -19,7 +19,4 @@ class SettingData {
 
   set classNum(int value) => _sharedPreferences.setInt('Class', value);
   int get classNum => _sharedPreferences.getInt('Class') ?? 1;
-
-  set mealType(int value) => _sharedPreferences.setInt('MealType', value);
-  int get mealType => _sharedPreferences.getInt('MealType') ?? 1;
 }

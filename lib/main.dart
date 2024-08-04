@@ -73,15 +73,15 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: (_pages.isNotEmpty)
           ? PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
-        physics: const PageScrollPhysics(),
-        children: _pages,
-      )
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              physics: const PageScrollPhysics(),
+              children: _pages,
+            )
           : Container(),
       bottomNavigationBar: BottomNavigationBar(
         selectedItemColor: PRIMARY_COLOR,

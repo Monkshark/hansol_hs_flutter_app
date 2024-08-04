@@ -24,7 +24,7 @@ class NoticeDataApi {
     if (prefs.containsKey(cacheKey)) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
-      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+      const oneDayInMilliseconds = 12 * 60 * 60 * 1000;
 
       if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
         return prefs.getString(cacheKey);
@@ -48,7 +48,8 @@ class NoticeDataApi {
     final data = await fetchData(requestURL);
     if (data == null) {
       prefs.setString(cacheKey, '학사일정이 없습니다');
-      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+      prefs.setInt(
+          '$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
       return '학사일정이 없습니다';
     }
 

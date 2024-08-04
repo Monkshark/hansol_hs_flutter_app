@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:intl/intl.dart';
+
 import 'package:hansol_high_school/Data/subject.dart';
 import 'package:hansol_high_school/Network/network_status.dart';
-import 'package:http/http.dart' as http;
-import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:hansol_high_school/API/nies_api_keys.dart';
 
 class TimetableDataApi {
@@ -38,7 +38,7 @@ class TimetableDataApi {
     if (prefs.containsKey(cacheKey)) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
-      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
+      const oneDayInMilliseconds = 12 * 60 * 60 * 1000;
 
       if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
         final timetableData = prefs.getStringList(cacheKey);
@@ -169,5 +169,46 @@ class TimetableDataApi {
     }
 
     return customTimeTable;
+  }
+
+  static Future<int> getClassCount(int grade) async {
+    final cacheKey = 'classCount-$grade';
+    final prefs = await SharedPreferences.getInstance();
+
+    if (prefs.containsKey(cacheKey)) {
+      final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
+      final currentTime = DateTime.now().millisecondsSinceEpoch;
+      const twelveHoursInMilliseconds = 12 * 60 * 60 * 1000;
+
+      if (currentTime - cachedTimestamp < twelveHoursInMilliseconds) {
+        final cachedClassCount = prefs.getInt(cacheKey);
+        if (cachedClassCount != null) {
+          return cachedClassCount;
+        }
+      } else {
+        prefs.remove(cacheKey);
+        prefs.remove('$cacheKey-timestamp');
+      }
+    }
+
+    final requestURL = 'https://open.neis.go.kr/hub/hisTimetable?'
+        'key=${niesApiKeys.NIES_API_KEY}'
+        '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
+        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&AY=${DateTime.now().year}'
+        '&GRADE=$grade';
+
+    log('$TAG: getClassCount: $requestURL');
+
+    final data = await fetchData(requestURL);
+    if (data == null) return 0;
+
+    final classInfo = data['classInfo'][0]['head'][0];
+    final classCount = classInfo['list_total_count'];
+
+    prefs.setInt(cacheKey, classCount);
+    prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+
+    return classCount;
   }
 }

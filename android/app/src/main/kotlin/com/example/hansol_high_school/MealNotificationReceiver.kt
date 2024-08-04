@@ -18,7 +18,7 @@ class MealNotificationReceiver : BroadcastReceiver() {
     private val channelName = "Meal Notifications"
 
     override fun onReceive(context: Context, intent: Intent) {
-        val mealType = intent.getStringExtra("mealType")
+        val notificationTitle = intent.getStringExtra("notificationTitle")
         val mealMenu = intent.getStringExtra("mealMenu")
         val hour = intent.getIntExtra("hour", 0)
         val minute = intent.getIntExtra("minute", 0)
@@ -37,7 +37,7 @@ class MealNotificationReceiver : BroadcastReceiver() {
         val vibrationPattern = longArrayOf(0, 500, 500, 500)
 
         val notification = NotificationCompat.Builder(context, channelId)
-                .setContentTitle(mealType)
+                .setContentTitle(notificationTitle)
                 .setContentText("아래로 당겨서 메뉴 확인")
                 .setStyle(NotificationCompat.BigTextStyle().bigText(mealMenu))
                 .setSmallIcon(R.mipmap.ic_launcher)
@@ -49,8 +49,8 @@ class MealNotificationReceiver : BroadcastReceiver() {
                 .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
                 .build()
 
-        notificationManager.notify(mealType.hashCode(), notification)
-        Log.d("MealNotificationReceiver", "Notification sent for $mealType")
+        notificationManager.notify(notificationTitle.hashCode(), notification)
+        Log.d("MealNotificationReceiver", "Notification sent for $notificationTitle")
     }
 
     private fun createNotificationChannel(context: Context) {

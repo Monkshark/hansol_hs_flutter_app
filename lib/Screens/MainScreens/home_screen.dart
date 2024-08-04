@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Screens/SubScreens/setting_screen.dart';
+import 'package:hansol_high_school/Widgets/SettingWidgets/setting_toggle_switch.dart';
 
 void main() {
   runApp(HansolHighSchool());
@@ -20,6 +21,7 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  bool isSwitched = false;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,6 +38,20 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: const Icon(Icons.settings),
             ),
           ),
+          Center(
+            child: SettingToggleSwitch(
+              value: isSwitched,
+              // trackActiveColor: PRIMARY_COLOR,
+              // toggleActiveColor: Colors.green,
+              // trackHeight: 25,
+              toggleInActiveColor: Colors.white,
+              onChanged: (value) {
+                setState(() {
+                  isSwitched = value;
+                });
+              },
+            ),
+          )
         ],
       ),
     );

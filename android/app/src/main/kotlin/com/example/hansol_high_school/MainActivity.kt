@@ -1,10 +1,5 @@
 package com.example.hansol_high_school
 
-import android.app.AlarmManager
-import android.app.PendingIntent
-import android.content.Context
-import android.content.Intent
-import android.util.Log
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -23,10 +18,10 @@ class MainActivity : FlutterActivity() {
             if (call.method == "scheduleMealNotification") {
                 val hour = call.argument<Int>("hour") ?: return@setMethodCallHandler
                 val minute = call.argument<Int>("minute") ?: return@setMethodCallHandler
-                val mealType = call.argument<String>("mealType") ?: return@setMethodCallHandler
+                val notificationTitle = call.argument<String>("notificationTitle") ?: return@setMethodCallHandler
                 val mealMenu = call.argument<String>("mealMenu") ?: return@setMethodCallHandler
 
-                scheduleMealNotification(hour, minute, mealType, mealMenu)
+                scheduleMealNotification(hour, minute, notificationTitle, mealMenu)
                 result.success(null)
             } else {
                 result.notImplemented()
@@ -34,9 +29,9 @@ class MainActivity : FlutterActivity() {
         }
     }
 
-    private fun scheduleMealNotification(hour: Int, minute: Int, mealType: String, mealMenu: String) {
+    private fun scheduleMealNotification(hour: Int, minute: Int, notificationTitle: String, mealMenu: String) {
         val inputData = Data.Builder()
-                .putString("mealType", mealType)
+                .putString("notificationTitle", notificationTitle)
                 .putString("mealMenu", mealMenu)
                 .putInt("hour", hour)
                 .putInt("minute", minute)
