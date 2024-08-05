@@ -140,8 +140,8 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                   right: 8.0,
                                 ),
                                 child: SchoolScheduleCard(
-                                  startTime: 00,
-                                  endTime: 24,
+                                  startTime: 8,
+                                  endTime: 4,
                                   content: schoolSchedule!,
                                 ),
                               ),
@@ -182,8 +182,8 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                   right: 8.0,
                                 ),
                                 child: ScheduleCard(
-                                  startTime: schedule.startTime,
-                                  endTime: schedule.endTime,
+                                  startTimeInMinutes: schedule.startTime,
+                                  endTimeInMinutes: schedule.endTime,
                                   content: schedule.content,
                                 ),
                               ),

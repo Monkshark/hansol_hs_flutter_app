@@ -23,11 +23,11 @@ class _Time extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${startTime.toString().padLeft(2, '0')}:00',
+          '${startTime.toString()}:40 AM',
           style: textStyle,
         ),
         Text(
-          '${endTime.toString().padLeft(2, '0')}:00',
+          '${endTime.toString()}:20 PM',
           style: textStyle.copyWith(
             fontSize: 16.0,
           ),

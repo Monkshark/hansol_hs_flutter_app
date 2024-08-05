@@ -191,7 +191,7 @@ class TimetableDataApi {
       }
     }
 
-    final requestURL = 'https://open.neis.go.kr/hub/hisTimetable?'
+    final requestURL = 'https://open.neis.go.kr/hub/classInfo?'
         'key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'

@@ -7,12 +7,16 @@ class CustomTextField extends StatelessWidget {
   final bool isTime;
   final FormFieldSetter<String> onSaved;
   final FormFieldValidator<String> validator;
+  final TextEditingController controller;
+  final VoidCallback? onTap;
 
   const CustomTextField({
     required this.label,
     required this.isTime,
     required this.onSaved,
     required this.validator,
+    required this.controller,
+    this.onTap,
     Key? key,
   }) : super(key: key);
 
@@ -28,26 +32,23 @@ class CustomTextField extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        Expanded(
-          flex: isTime ? 0 : 1,
-          child: TextFormField(
-            onSaved: onSaved,
-            validator: validator,
-            cursorColor: Colors.grey,
-            maxLines: isTime ? 1 : null,
-            expands: !isTime,
-            keyboardType:
-                isTime ? TextInputType.number : TextInputType.multiline,
-            inputFormatters:
-                isTime ? [FilteringTextInputFormatter.digitsOnly] : [],
-            decoration: InputDecoration(
-              // border: OutlineInputBorder(
-              //   borderRadius: BorderRadius.circular(10.0),
-              // ),
-              filled: true,
-              fillColor: Colors.white,
-              suffixText: isTime ? '시' : null,
-            ),
+        const SizedBox(height: 8.0),
+        TextFormField(
+          controller: controller,
+          onSaved: onSaved,
+          validator: validator,
+          cursorColor: Colors.grey,
+          maxLines: isTime ? 1 : null,
+          readOnly: isTime,
+          onTap: onTap,
+          keyboardType: isTime ? TextInputType.none : TextInputType.multiline,
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.white,
+            // border: OutlineInputBorder(
+            //   borderRadius: BorderRadius.circular(8.0),
+            // ),
+            suffixText: isTime ? '' : null,
           ),
         ),
       ],

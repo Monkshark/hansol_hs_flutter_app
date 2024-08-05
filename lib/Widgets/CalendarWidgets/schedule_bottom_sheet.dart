@@ -23,9 +23,12 @@ class ScheduleBottomSheet extends StatefulWidget {
 
 class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
   final GlobalKey<FormState> formKey = GlobalKey();
-  int? startTime;
-  int? endTime;
+  TimeOfDay? startTime;
+  TimeOfDay? endTime;
   String? content;
+  final TextEditingController startTimeController = TextEditingController();
+  final TextEditingController endTimeController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +42,8 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
         final schedules = prefs.getStringList('schedules') ?? [];
 
         final newSchedule = {
-          'startTime': startTime,
-          'endTime': endTime,
+          'startTime': startTime!.hour * 60 + startTime!.minute,
+          'endTime': endTime!.hour * 60 + endTime!.minute,
           'content': content,
           'date': widget.selectedDate.toIso8601String(),
         };
@@ -56,7 +59,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
 
     Future<void> pickTime(BuildContext context, bool isStart) async {
       final now = TimeOfDay.now();
-      final initialTime = TimeOfDay(hour: now.hour, minute: 0);
+      final initialTime = isStart ? (startTime ?? now) : (endTime ?? now);
 
       if (Platform.isIOS) {
         showCupertinoModalPopup(
@@ -78,9 +81,17 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                 onDateTimeChanged: (DateTime newDateTime) {
                   setState(() {
                     if (isStart) {
-                      startTime = newDateTime.hour;
+                      startTime = TimeOfDay(
+                        hour: newDateTime.hour,
+                        minute: newDateTime.minute,
+                      );
+                      startTimeController.text = startTime!.format(context);
                     } else {
-                      endTime = newDateTime.hour;
+                      endTime = TimeOfDay(
+                        hour: newDateTime.hour,
+                        minute: newDateTime.minute,
+                      );
+                      endTimeController.text = endTime!.format(context);
                     }
                   });
                 },
@@ -102,14 +113,13 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
         );
 
         if (pickedTime != null) {
-          int hour24Format;
-          hour24Format = pickedTime.hour == 12 ? 12 : pickedTime.hour + 0;
-
           setState(() {
             if (isStart) {
-              startTime = hour24Format;
+              startTime = pickedTime;
+              startTimeController.text = startTime!.format(context);
             } else {
-              endTime = hour24Format;
+              endTime = pickedTime;
+              endTimeController.text = endTime!.format(context);
             }
           });
         }
@@ -152,44 +162,34 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                 Row(
                   children: [
                     Expanded(
-                      child: GestureDetector(
+                      child: CustomTextField(
+                        label: '시작 시간',
+                        isTime: true,
+                        controller: startTimeController,
                         onTap: () => pickTime(context, true),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              startTime == null
-                                  ? '시작 시간'
-                                  : '${startTime! < 10 ? '0$startTime' : startTime}:00',
-                              style: const TextStyle(fontSize: 16.0),
-                            ),
-                          ),
-                        ),
+                        onSaved: (value) {},
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '시작 시간을 선택해주세요';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                     const SizedBox(width: 16.0),
                     Expanded(
-                      child: GestureDetector(
+                      child: CustomTextField(
+                        label: '종료 시간',
+                        isTime: true,
+                        controller: endTimeController,
                         onTap: () => pickTime(context, false),
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12.0),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: Colors.grey),
-                            borderRadius: BorderRadius.circular(8.0),
-                          ),
-                          child: Center(
-                            child: Text(
-                              endTime == null
-                                  ? '종료 시간'
-                                  : '${endTime! < 10 ? '0$endTime' : endTime}:00',
-                              style: const TextStyle(fontSize: 16.0),
-                            ),
-                          ),
-                        ),
+                        onSaved: (value) {},
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return '종료 시간을 선택해주세요';
+                          }
+                          return null;
+                        },
                       ),
                     ),
                   ],
@@ -199,11 +199,14 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                   child: CustomTextField(
                     label: '내용',
                     isTime: false,
-                    onSaved: (String? val) {
+                    controller: contentController,
+                    onSaved: (val) {
                       content = val;
                     },
-                    validator: (String? val) {
-                      if (val == null || val.isEmpty) return "값을 입력해주세요";
+                    validator: (val) {
+                      if (val == null || val.isEmpty) {
+                        return "값을 입력해주세요";
+                      }
                       return null;
                     },
                   ),

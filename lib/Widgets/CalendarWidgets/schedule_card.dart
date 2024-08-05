@@ -2,14 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles.dart';
 
 class _Time extends StatelessWidget {
-  final int startTime;
-  final int endTime;
+  final int startTimeInMinutes;
+  final int endTimeInMinutes;
 
   const _Time({
-    required this.startTime,
-    required this.endTime,
+    required this.startTimeInMinutes,
+    required this.endTimeInMinutes,
     Key? key,
   }) : super(key: key);
+
+  TimeOfDay _getTimeOfDay(int minutes) {
+    final hours = minutes ~/ 60;
+    final minutesPart = minutes % 60;
+    return TimeOfDay(hour: hours, minute: minutesPart);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -19,15 +25,18 @@ class _Time extends StatelessWidget {
       color: PRIMARY_COLOR,
     );
 
+    final startTime = _getTimeOfDay(startTimeInMinutes);
+    final endTime = _getTimeOfDay(endTimeInMinutes);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          '${startTime.toString().padLeft(2, '0')}:00',
+          startTime.format(context),
           style: textStyle,
         ),
         Text(
-          '${endTime.toString().padLeft(2, '0')}:00',
+          endTime.format(context),
           style: textStyle.copyWith(
             fontSize: 16.0,
           ),
@@ -56,13 +65,13 @@ class _Content extends StatelessWidget {
 }
 
 class ScheduleCard extends StatelessWidget {
-  final int startTime;
-  final int endTime;
+  final int startTimeInMinutes;
+  final int endTimeInMinutes;
   final String content;
 
   const ScheduleCard({
-    required this.startTime,
-    required this.endTime,
+    required this.startTimeInMinutes,
+    required this.endTimeInMinutes,
     required this.content,
     Key? key,
   }) : super(key: key);
@@ -84,8 +93,8 @@ class ScheduleCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               _Time(
-                startTime: startTime,
-                endTime: endTime,
+                startTimeInMinutes: startTimeInMinutes,
+                endTimeInMinutes: endTimeInMinutes,
               ),
               const SizedBox(
                 width: 16.0,
