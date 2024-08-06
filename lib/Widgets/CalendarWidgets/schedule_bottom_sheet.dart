@@ -134,7 +134,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
           decoration: BoxDecoration(
             color: Colors.white,
             border: Border.all(
-              color: Colors.grey,
+              color: Colors.white,
               width: 2.0,
             ),
             borderRadius: const BorderRadius.only(

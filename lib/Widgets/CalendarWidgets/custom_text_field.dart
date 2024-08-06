@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hansol_high_school/styles.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -45,9 +44,6 @@ class CustomTextField extends StatelessWidget {
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.white,
-            // border: OutlineInputBorder(
-            //   borderRadius: BorderRadius.circular(8.0),
-            // ),
             suffixText: isTime ? '' : null,
           ),
         ),

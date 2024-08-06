@@ -1,8 +1,10 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/Data/local_database.dart';
+import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/notice_screen.dart';
@@ -19,7 +21,8 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   await _requestNotificationPermission();
-  await NotificationManager.init();
+  await SettingData().init();
+  await NotificationManager().init();
   final database = LocalDataBase();
   GetIt.I.registerSingleton<LocalDataBase>(database);
   tz.initializeTimeZones();
@@ -29,9 +32,9 @@ Future<void> main() async {
 Future<void> _requestNotificationPermission() async {
   final status = await Permission.notification.request();
   if (status.isGranted) {
-    print("Notification permission granted.");
+    log("Notification permission granted.");
   } else {
-    print("Notification permission denied.");
+    log("Notification permission denied.");
   }
 }
 

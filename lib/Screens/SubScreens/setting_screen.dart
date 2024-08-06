@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/API/timetable_data_api.dart';
+import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:hansol_high_school/Screens/SubScreens/timetable_select_screen.dart';
 import 'package:hansol_high_school/Widgets/SettingWidgets/setting_card.dart';
@@ -23,6 +24,75 @@ class _SettingScreenState extends State<SettingScreen> {
   TimeOfDay lunchTime = TimeOfDay.now();
   TimeOfDay dinnerTime = TimeOfDay.now();
 
+  late Future<void> _settingsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _settingsFuture = _loadSettings();
+  }
+
+  Future<void> _loadSettings() async {
+    await SettingData().init();
+    setState(() {
+      grade = SettingData().grade;
+      classNum = SettingData().classNum;
+      isDarkMode = SettingData().isDarkMode;
+      isBreakfastNotificationOn = SettingData().isBreakfastNotificationOn;
+      breakfastTime = _parseTimeOfDay(SettingData().breakfastTime);
+      isLunchNotificationOn = SettingData().isLunchNotificationOn;
+      lunchTime = _parseTimeOfDay(SettingData().lunchTime);
+      isDinnerNotificationOn = SettingData().isDinnerNotificationOn;
+      dinnerTime = _parseTimeOfDay(SettingData().dinnerTime);
+      isNullNotificationOn = SettingData().isNullNotificationOn;
+    });
+  }
+
+  TimeOfDay _parseTimeOfDay(String time) {
+    try {
+      final parts = time.split(':');
+      final hourPart = parts[0];
+      final minutePart = parts[1];
+      if (minutePart.contains(' ')) {
+        final minuteParts = minutePart.split(' ');
+        final minute = int.parse(minuteParts[0]);
+        final period = minuteParts[1];
+        int hour = int.parse(hourPart);
+        if (period == 'PM' && hour != 12) {
+          hour += 12;
+        } else if (period == 'AM' && hour == 12) {
+          hour = 0;
+        }
+        return TimeOfDay(hour: hour, minute: minute);
+      } else {
+        final hour = int.parse(hourPart);
+        final minute = int.parse(minutePart);
+        return TimeOfDay(hour: hour, minute: minute);
+      }
+    } catch (e) {
+      return const TimeOfDay(hour: 6, minute: 0);
+    }
+  }
+
+  String _formatTimeOfDay(TimeOfDay time) {
+    final hour = time.hour.toString().padLeft(2, '0');
+    final minute = time.minute.toString().padLeft(2, '0');
+    return '$hour:$minute';
+  }
+
+  Future<void> _saveSettings() async {
+    SettingData().grade = grade;
+    SettingData().classNum = classNum;
+    SettingData().isDarkMode = isDarkMode;
+    SettingData().isBreakfastNotificationOn = isBreakfastNotificationOn;
+    SettingData().breakfastTime = _formatTimeOfDay(breakfastTime);
+    SettingData().isLunchNotificationOn = isLunchNotificationOn;
+    SettingData().lunchTime = _formatTimeOfDay(lunchTime);
+    SettingData().isDinnerNotificationOn = isDinnerNotificationOn;
+    SettingData().dinnerTime = _formatTimeOfDay(dinnerTime);
+    SettingData().isNullNotificationOn = isNullNotificationOn;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,116 +103,133 @@ class _SettingScreenState extends State<SettingScreen> {
             Navigator.of(context).pop();
           }
         },
-        child: Scaffold(
-          backgroundColor: Colors.white,
-          appBar: AppBar(
-            backgroundColor: Colors.white,
-            title: const Text('설정'),
-          ),
-          body: Column(
-            children: [
-              SizedBox(
-                child: Column(
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    SettingCard(
-                      name: '학년 반 설정',
-                      child: GestureDetector(
-                        onTap: () => _selectGradeAndClass(),
-                        child: Text(
-                          '$grade학년 $classNum반',
-                          style: const TextStyle(fontSize: 22),
-                        ),
-                      ),
-                    ),
-                  ],
+        child: FutureBuilder<void>(
+          future: _settingsFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return Center(child: CircularProgressIndicator());
+            } else if (snapshot.hasError) {
+              return Center(child: Text('Error loading settings'));
+            } else {
+              return buildSettingsBody();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget buildSettingsBody() {
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        title: const Text('설정'),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const SizedBox(height: 10),
+            SettingCard(
+              name: '학년 반 설정',
+              child: GestureDetector(
+                onTap: () => _selectGradeAndClass(),
+                child: Text(
+                  '$grade학년 $classNum반',
+                  style: const TextStyle(fontSize: 22),
                 ),
               ),
-              SettingCard(
-                name: '선택과목 시간표 설정',
-                child: IconButton(
-                  onPressed: grade == 1
-                      ? null
-                      : () {
-                          Navigator.of(context).push(_createRoute());
-                        },
-                  icon: Icon(
-                    Icons.arrow_forward_ios,
-                    color: grade == 1 ? Colors.grey : Colors.black,
-                  ),
+            ),
+            SettingCard(
+              name: '선택과목 시간표 설정',
+              child: IconButton(
+                onPressed: grade == 1
+                    ? null
+                    : () {
+                        Navigator.of(context).push(_createRoute());
+                      },
+                icon: Icon(
+                  Icons.arrow_forward_ios,
+                  color: grade == 1 ? Colors.grey : Colors.black,
                 ),
               ),
-              SettingCard(
-                name: '다크 모드',
-                child: SettingToggleSwitch(
-                  value: isDarkMode,
-                  onChanged: (value) {
-                    setState(() {
-                      isDarkMode = value;
-                    });
-                  },
-                ),
-              ),
-              buildNotificationCard(
-                '조식 알림',
-                breakfastTime,
-                isBreakfastNotificationOn,
-                (newTime) {
+            ),
+            SettingCard(
+              name: '다크 모드',
+              child: SettingToggleSwitch(
+                value: isDarkMode,
+                onChanged: (value) {
                   setState(() {
-                    breakfastTime = newTime;
-                  });
-                },
-                (newValue) {
-                  setState(() {
-                    isBreakfastNotificationOn = newValue;
+                    isDarkMode = value;
+                    _saveSettings();
                   });
                 },
               ),
-              buildNotificationCard(
-                '중식 알림',
-                lunchTime,
-                isLunchNotificationOn,
-                (newTime) {
+            ),
+            buildNotificationCard(
+              '조식 알림',
+              breakfastTime,
+              isBreakfastNotificationOn,
+              (newTime) {
+                setState(() {
+                  breakfastTime = newTime;
+                  _saveSettings();
+                });
+              },
+              (newValue) {
+                setState(() {
+                  isBreakfastNotificationOn = newValue;
+                  _saveSettings();
+                });
+              },
+            ),
+            buildNotificationCard(
+              '중식 알림',
+              lunchTime,
+              isLunchNotificationOn,
+              (newTime) {
+                setState(() {
+                  lunchTime = newTime;
+                  _saveSettings();
+                });
+              },
+              (newValue) {
+                setState(() {
+                  isLunchNotificationOn = newValue;
+                  _saveSettings();
+                });
+              },
+            ),
+            buildNotificationCard(
+              '석식 알림',
+              dinnerTime,
+              isDinnerNotificationOn,
+              (newTime) {
+                setState(() {
+                  dinnerTime = newTime;
+                  _saveSettings();
+                });
+              },
+              (newValue) {
+                setState(() {
+                  isDinnerNotificationOn = newValue;
+                  _saveSettings();
+                });
+              },
+            ),
+            SettingCard(
+              name: '정보 없는 알림',
+              child: SettingToggleSwitch(
+                value: isNullNotificationOn,
+                onChanged: (value) {
                   setState(() {
-                    lunchTime = newTime;
-                  });
-                },
-                (newValue) {
-                  setState(() {
-                    isLunchNotificationOn = newValue;
+                    isNullNotificationOn = value;
+                    _saveSettings();
                   });
                 },
               ),
-              buildNotificationCard(
-                '석식 알림',
-                dinnerTime,
-                isDinnerNotificationOn,
-                (newTime) {
-                  setState(() {
-                    dinnerTime = newTime;
-                  });
-                },
-                (newValue) {
-                  setState(() {
-                    isDinnerNotificationOn = newValue;
-                  });
-                },
-              ),
-              SettingCard(
-                name: '정보 없는 알림',
-                child: SettingToggleSwitch(
-                  value: isNullNotificationOn,
-                  onChanged: (value) {
-                    setState(() {
-                      isNullNotificationOn = value;
-                    });
-                  },
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -204,7 +291,11 @@ class _SettingScreenState extends State<SettingScreen> {
           const SizedBox(width: 15),
           SettingToggleSwitch(
             value: isSwitched,
-            onChanged: onSwitchChanged,
+            onChanged: (newValue) {
+              onSwitchChanged(newValue);
+              setState(() {});
+              _saveSettings();
+            },
           ),
         ],
       ),
@@ -228,6 +319,7 @@ class _SettingScreenState extends State<SettingScreen> {
       setState(() {
         grade = selectedValues[0];
         classNum = selectedValues[1];
+        _saveSettings();
       });
     }
   }
