@@ -18,14 +18,24 @@ import UserNotifications
         channel.setMethodCallHandler { [weak self] (call, result) in
             if call.method == "scheduleMealNotification" {
                 guard let args = call.arguments as? [String: Any],
-                      let hour = args["hour"] as? Int,
-                      let minute = args["minute"] as? Int,
-                      let mealType = args["mealType"] as? String,
-                      let mealMenu = args["mealMenu"] as? String else {
+                      let hour = args["hour"] as? String,
+                      let minute = args["minute"] as? String,
+                      let notificationTitle = args["notificationTitle"] as? String,
+                      let mealMenu = args["mealMenu"] as? String,
+                      let hourInt = Int(hour),
+                      let minuteInt = Int(minute) else {
                     result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil))
                     return
                 }
-                self?.scheduleMealNotification(hour: hour, minute: minute, mealType: mealType, mealMenu: mealMenu)
+                self?.scheduleMealNotification(hour: hourInt, minute: minuteInt, notificationTitle: notificationTitle, mealMenu: mealMenu)
+                result(nil)
+            } else if call.method == "cancelMealNotification" {
+                guard let args = call.arguments as? [String: Any],
+                      let notificationTitle = args["notificationTitle"] as? String else {
+                    result(FlutterError(code: "INVALID_ARGUMENT", message: "Invalid argument", details: nil))
+                    return
+                }
+                self?.cancelMealNotification(notificationTitle: notificationTitle)
                 result(nil)
             } else {
                 result(FlutterMethodNotImplemented)
@@ -46,9 +56,9 @@ import UserNotifications
         }
     }
 
-    private func scheduleMealNotification(hour: Int, minute: Int, mealType: String, mealMenu: String) {
+    private func scheduleMealNotification(hour: Int, minute: Int, notificationTitle: String, mealMenu: String) {
         let content = UNMutableNotificationContent()
-        content.title = mealType
+        content.title = notificationTitle
         content.body = "아래로 당겨서 메뉴 확인"
         content.sound = UNNotificationSound.default
         content.userInfo = ["mealMenu": mealMenu]
@@ -59,7 +69,7 @@ import UserNotifications
 
         let trigger = UNCalendarNotificationTrigger(dateMatching: dateComponents, repeats: true)
 
-        let identifier = UUID().uuidString
+        let identifier = notificationTitle
         let request = UNNotificationRequest(identifier: identifier, content: content, trigger: trigger)
 
         let center = UNUserNotificationCenter.current()
@@ -67,8 +77,14 @@ import UserNotifications
             if let error = error {
                 print("Error adding notification: \(error)")
             } else {
-                print("Scheduled \(mealType) notification for \(hour):\(minute) with menu: \(mealMenu)")
+                print("Scheduled \(notificationTitle) notification for \(hour):\(minute) with menu: \(mealMenu)")
             }
         }
+    }
+
+    private func cancelMealNotification(notificationTitle: String) {
+        let center = UNUserNotificationCenter.current()
+        center.removePendingNotificationRequests(withIdentifiers: [notificationTitle])
+        print("Cancelled notification: \(notificationTitle)")
     }
 }
