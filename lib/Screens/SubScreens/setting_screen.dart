@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/API/timetable_data_api.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
+import 'package:hansol_high_school/Notification/notification_manager.dart';
 import 'package:numberpicker/numberpicker.dart';
 import 'package:hansol_high_school/Screens/SubScreens/timetable_select_screen.dart';
 import 'package:hansol_high_school/Widgets/SettingWidgets/setting_card.dart';
@@ -174,12 +177,16 @@ class _SettingScreenState extends State<SettingScreen> {
                 setState(() {
                   breakfastTime = newTime;
                   _saveSettings();
+                  NotificationManager().updateNotifications();
+                  log('notification setting changed');
                 });
               },
               (newValue) {
                 setState(() {
                   isBreakfastNotificationOn = newValue;
                   _saveSettings();
+                  NotificationManager().updateNotifications();
+                  log('notification setting changed');
                 });
               },
             ),
@@ -191,12 +198,16 @@ class _SettingScreenState extends State<SettingScreen> {
                 setState(() {
                   lunchTime = newTime;
                   _saveSettings();
+                  NotificationManager().updateNotifications();
+                  log('notification setting changed');
                 });
               },
               (newValue) {
                 setState(() {
                   isLunchNotificationOn = newValue;
                   _saveSettings();
+                  NotificationManager().updateNotifications();
+                  log('notification setting changed');
                 });
               },
             ),
@@ -208,12 +219,16 @@ class _SettingScreenState extends State<SettingScreen> {
                 setState(() {
                   dinnerTime = newTime;
                   _saveSettings();
+                  NotificationManager().updateNotifications();
+                  log('notification setting changed');
                 });
               },
               (newValue) {
                 setState(() {
                   isDinnerNotificationOn = newValue;
                   _saveSettings();
+                  NotificationManager().updateNotifications();
+                  log('notification setting changed');
                 });
               },
             ),
@@ -225,6 +240,9 @@ class _SettingScreenState extends State<SettingScreen> {
                   setState(() {
                     isNullNotificationOn = value;
                     _saveSettings();
+                    NotificationManager().updateNotifications();
+                    log('notification setting changed');
+
                   });
                 },
               ),

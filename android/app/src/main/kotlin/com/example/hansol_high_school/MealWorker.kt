@@ -1,4 +1,3 @@
-// MealWorker.kt
 package com.example.hansol_high_school
 
 import android.app.AlarmManager
@@ -16,6 +15,8 @@ class MealWorker(context: Context, workerParams: WorkerParameters) : Worker(cont
         val mealMenu = inputData.getString("mealMenu") ?: return Result.failure()
         val hour = inputData.getInt("hour", 0)
         val minute = inputData.getInt("minute", 0)
+
+        Log.d("MealWorker", "Received work request for notification: $notificationTitle at $hour:$minute with menu: $mealMenu")
 
         val intent = Intent(applicationContext, MealNotificationReceiver::class.java).apply {
             action = "com.example.hansol_high_school.NOTIFY_MEAL"

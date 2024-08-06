@@ -11,7 +11,6 @@ import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import java.util.Calendar
 
 class MealNotificationReceiver : BroadcastReceiver() {
     private val channelId = "meal_notification_channel"
@@ -23,31 +22,33 @@ class MealNotificationReceiver : BroadcastReceiver() {
         val hour = intent.getIntExtra("hour", 0)
         val minute = intent.getIntExtra("minute", 0)
 
+        Log.d("MealNotificationReceiver", "Received notification intent: $notificationTitle at $hour:$minute with menu: $mealMenu")
+
         createNotificationChannel(context)
 
         val notificationManager = NotificationManagerCompat.from(context)
 
         val notificationIntent = Intent(context, MainActivity::class.java)
         val pendingIntent = PendingIntent.getActivity(
-                context, 0, notificationIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            context, 0, notificationIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
         val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
         val vibrationPattern = longArrayOf(0, 500, 500, 500)
 
         val notification = NotificationCompat.Builder(context, channelId)
-                .setContentTitle(notificationTitle)
-                .setContentText("아래로 당겨서 메뉴 확인")
-                .setStyle(NotificationCompat.BigTextStyle().bigText(mealMenu))
-                .setSmallIcon(R.mipmap.ic_launcher)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true)
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setSound(alarmSound)
-                .setVibrate(vibrationPattern)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .build()
+            .setContentTitle(notificationTitle)
+            .setContentText("아래로 당겨서 메뉴 확인")
+            .setStyle(NotificationCompat.BigTextStyle().bigText(mealMenu))
+            .setSmallIcon(R.mipmap.ic_launcher)
+            .setContentIntent(pendingIntent)
+            .setAutoCancel(true)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setSound(alarmSound)
+            .setVibrate(vibrationPattern)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .build()
 
         notificationManager.notify(notificationTitle.hashCode(), notification)
         Log.d("MealNotificationReceiver", "Notification sent for $notificationTitle")
@@ -63,16 +64,7 @@ class MealNotificationReceiver : BroadcastReceiver() {
             }
             val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
+            Log.d("MealNotificationReceiver", "Notification channel created")
         }
-    }
-
-    private fun getTriggerTime(hour: Int, minute: Int): Long {
-        val calendar = Calendar.getInstance().apply {
-            set(Calendar.HOUR_OF_DAY, hour)
-            set(Calendar.MINUTE, minute)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
-        }
-        return calendar.timeInMillis
     }
 }

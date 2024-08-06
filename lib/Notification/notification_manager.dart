@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
@@ -23,12 +24,17 @@ class NotificationManager {
   late bool isNullNotificationOn;
 
   static const MethodChannel platform =
-      MethodChannel('com.example.hansol_high_school/alarm');
+  MethodChannel('com.example.hansol_high_school/alarm');
 
   Future<void> init() async {
     await SettingData().init();
     tz.initializeTimeZones();
 
+    await _loadSettings();
+    await _scheduleAllMealNotifications();
+  }
+
+  Future<void> _loadSettings() async {
     isBreakfastNotificationOn = SettingData().isBreakfastNotificationOn;
     breakfastTime = _parseTimeOfDay(SettingData().breakfastTime);
     isLunchNotificationOn = SettingData().isLunchNotificationOn;
@@ -36,68 +42,75 @@ class NotificationManager {
     isDinnerNotificationOn = SettingData().isDinnerNotificationOn;
     dinnerTime = _parseTimeOfDay(SettingData().dinnerTime);
     isNullNotificationOn = SettingData().isNullNotificationOn;
-
-    final String breakfastMenu = (await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: MealDataApi.BREAKFAST, type: '메뉴'))
-        .toString();
-    if (isBreakfastNotificationOn) {
-      await scheduleMealNotification(
-        hour: breakfastTime.hour,
-        minute: breakfastTime.minute,
-        notificationTitle:
-            "${DateTime.now().month}/${DateTime.now().day} 조식 정보",
-        mealMenu: breakfastMenu,
-      );
-    }
-
-    final String lunchMenu = (await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: MealDataApi.LUNCH, type: '메뉴'))
-        .toString();
-    if (isLunchNotificationOn) {
-      await scheduleMealNotification(
-        hour: lunchTime.hour,
-        minute: lunchTime.minute,
-        notificationTitle:
-            "${DateTime.now().month}/${DateTime.now().day} 중식 정보",
-        mealMenu: lunchMenu,
-      );
-    }
-
-    final String dinnerMenu = (await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: MealDataApi.DINNER, type: '메뉴'))
-        .toString();
-    if (isDinnerNotificationOn) {
-      await scheduleMealNotification(
-        hour: dinnerTime.hour,
-        minute: dinnerTime.minute,
-        notificationTitle:
-            "${DateTime.now().month}/${DateTime.now().day} 석식 정보",
-        mealMenu: dinnerMenu,
-      );
-    }
   }
 
-  Future<void> scheduleMealNotification({
-    required int hour,
-    required int minute,
+  Future<void> _scheduleAllMealNotifications() async {
+    await _scheduleMealNotification(
+      isNotificationOn: isBreakfastNotificationOn,
+      time: breakfastTime,
+      mealType: MealDataApi.BREAKFAST,
+      notificationTitle: "${DateTime.now().month}/${DateTime.now().day} 조식 정보",
+    );
+    await _scheduleMealNotification(
+      isNotificationOn: isLunchNotificationOn,
+      time: lunchTime,
+      mealType: MealDataApi.LUNCH,
+      notificationTitle: "${DateTime.now().month}/${DateTime.now().day} 중식 정보",
+    );
+    await _scheduleMealNotification(
+      isNotificationOn: isDinnerNotificationOn,
+      time: dinnerTime,
+      mealType: MealDataApi.DINNER,
+      notificationTitle: "${DateTime.now().month}/${DateTime.now().day} 석식 정보",
+    );
+  }
+
+  Future<void> _scheduleMealNotification({
+    required bool isNotificationOn,
+    required TimeOfDay time,
+    required int mealType,
     required String notificationTitle,
-    required String mealMenu,
   }) async {
-    try {
-      if (mealMenu != '급식 정보가 없습니다.' && !isNullNotificationOn) {
+    if (!isNotificationOn) {
+      await _cancelNotification(notificationTitle);
+      return;
+    }
+
+    final String mealMenu = (await MealDataApi.getMeal(
+        date: DateTime.now(), mealType: mealType, type: '메뉴'))
+        .toString();
+
+    if (mealMenu == '급식 정보가 없습니다.' && !isNullNotificationOn) {
+      try {
         await platform.invokeMethod('scheduleMealNotification', {
-          'hour': hour,
-          'minute': minute,
+          'hour': time.hour.toString(),
+          'minute': time.minute.toString(),
           'notificationTitle': notificationTitle,
           'mealMenu': mealMenu,
         });
-        log("Scheduled $notificationTitle notification for $hour:$minute with menu: $mealMenu");
-      } else {
-        log('meal is null');
+        log("Scheduled $notificationTitle notification for ${time.hour}:${time.minute} with menu: $mealMenu");
+      } catch (e) {
+        log("Failed to schedule notification: $e");
       }
-    } on PlatformException catch (e) {
-      log("Failed to schedule notification: '${e.message}'.");
+    } else {
+      log('Meal is null or null notifications are disabled');
     }
+  }
+
+  Future<void> _cancelNotification(String notificationTitle) async {
+    try {
+      await platform.invokeMethod('cancelMealNotification', {
+        'notificationTitle': notificationTitle,
+      });
+      log("Cancelled $notificationTitle notification");
+    } on PlatformException catch (e) {
+      log("Failed to cancel notification: '${e.message}'.");
+    }
+  }
+
+  Future<void> updateNotifications() async {
+    await _loadSettings();
+    await _scheduleAllMealNotifications();
   }
 
   static TimeOfDay _parseTimeOfDay(String time) {
