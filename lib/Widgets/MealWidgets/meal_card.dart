@@ -146,8 +146,19 @@ class _MealCardState extends State<MealCard>
                                   ),
                                 ),
                                 const SizedBox(height: 6.0),
-                                Text(
-                                  widget.kcal,
+                                Text.rich(
+                                  TextSpan(
+                                    text: widget.kcal,
+                                    children: [
+                                      if (widget.kcal.length == 10)
+                                        const TextSpan(
+                                          text: '0',
+                                          style: TextStyle(
+                                            color: Colors.transparent,
+                                          ),
+                                        ),
+                                    ],
+                                  ),
                                   style: const TextStyle(
                                     fontSize: 14.0,
                                   ),

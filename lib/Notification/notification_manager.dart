@@ -24,7 +24,7 @@ class NotificationManager {
   late bool isNullNotificationOn;
 
   static const MethodChannel platform =
-  MethodChannel('com.example.hansol_high_school/alarm');
+      MethodChannel('com.example.hansol_high_school/alarm');
 
   Future<void> init() async {
     await SettingData().init();
@@ -77,10 +77,11 @@ class NotificationManager {
     }
 
     final String mealMenu = (await MealDataApi.getMeal(
-        date: DateTime.now(), mealType: mealType, type: '메뉴'))
+            date: DateTime.now(), mealType: mealType, type: '메뉴'))
         .toString();
 
-    if (mealMenu == '급식 정보가 없습니다.' && !isNullNotificationOn) {
+    if (mealMenu != '급식 정보가 없습니다.' ||
+        (isNullNotificationOn && mealMenu == '급식 정보가 없습니다.')) {
       try {
         await platform.invokeMethod('scheduleMealNotification', {
           'hour': time.hour.toString(),

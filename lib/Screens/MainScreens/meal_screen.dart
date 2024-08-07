@@ -125,8 +125,6 @@ class _MealScreenState extends State<MealScreen> {
                     List<Widget> mealCards = [];
 
                     for (Meal? meal in meals) {
-                      // if (meal.meal != '급식 정보가 없습니다.' &&
-                      //     isNullMealCardVisible) {
                       if (meal != null) {
                         mealCards.add(
                           MealCard(
