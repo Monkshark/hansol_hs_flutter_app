@@ -74,7 +74,7 @@ class _MealCardState extends State<MealCard>
       ui.Image image = await boundary.toImage(pixelRatio: 5.0);
 
       ByteData? byteData =
-      await image.toByteData(format: ui.ImageByteFormat.png);
+          await image.toByteData(format: ui.ImageByteFormat.png);
       Uint8List pngBytes = byteData!.buffer.asUint8List();
 
       final directory = (await getTemporaryDirectory()).path;
@@ -90,15 +90,6 @@ class _MealCardState extends State<MealCard>
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    final cardWidth = screenWidth * 0.9;
-    final cardHeight = screenHeight * 0.2;
-    final baseFontSizeHorizontal = screenWidth * 0.025;
-    final baseFontSizeVertical = screenHeight * 0.022;
-
-    final combinedFontSize = (baseFontSizeHorizontal + baseFontSizeVertical) / 2;
-
     return GestureDetector(
       onTap: _handleTap,
       child: AnimatedBuilder(
@@ -112,8 +103,8 @@ class _MealCardState extends State<MealCard>
                 child: RepaintBoundary(
                   key: _globalKey,
                   child: Container(
-                    width: cardWidth,
-                    height: cardHeight,
+                    width: 350.0,
+                    height: 160.0,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       border: Border.all(
@@ -129,33 +120,32 @@ class _MealCardState extends State<MealCard>
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
                                   widget.date.year.toString(),
-                                  style: TextStyle(
-                                    fontSize: combinedFontSize,
+                                  style: const TextStyle(
+                                    fontSize: 20.0,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 Text(
                                   "${widget.date.month.toString().padLeft(2, '0')}"
-                                      "${widget.date.day.toString().padLeft(2, '0')}",
-                                  style: TextStyle(
-                                    fontSize: combinedFontSize,
+                                  "${widget.date.day.toString().padLeft(2, '0')}",
+                                  style: const TextStyle(
+                                    fontSize: 20.0,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 const SizedBox(height: 6.0),
                                 Text(
                                   getMealType(widget.mealType),
-                                  style: TextStyle(
-                                    fontSize: combinedFontSize * 1.2,
+                                  style: const TextStyle(
+                                    fontSize: 24.0,
                                     fontWeight: FontWeight.w700,
                                   ),
                                 ),
-                                const SizedBox(height: 14.0),
+                                const SizedBox(height: 6.0),
                                 Text.rich(
                                   TextSpan(
                                     text: widget.kcal,
@@ -169,8 +159,8 @@ class _MealCardState extends State<MealCard>
                                         ),
                                     ],
                                   ),
-                                  style: TextStyle(
-                                    fontSize: combinedFontSize * 0.7,
+                                  style: const TextStyle(
+                                    fontSize: 14.0,
                                   ),
                                 ),
                               ],
@@ -181,12 +171,7 @@ class _MealCardState extends State<MealCard>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(
-                                      widget.meal,
-                                      style: TextStyle(
-                                        fontSize: combinedFontSize,
-                                      ),
-                                    ),
+                                    Text(widget.meal),
                                   ],
                                 ),
                               ),
@@ -206,8 +191,8 @@ class _MealCardState extends State<MealCard>
                     opacity: _buttonOpacity,
                     child: ElevatedButton(
                       onPressed: _shareMealCard,
-                      child: Icon(
-                          Platform.isIOS ? Icons.ios_share : Icons.share),
+                      child:
+                          Icon(Platform.isIOS ? Icons.ios_share : Icons.share),
                     ),
                   ),
                 ),

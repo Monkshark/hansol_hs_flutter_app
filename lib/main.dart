@@ -13,9 +13,14 @@ import 'package:hansol_high_school/firebase_options.dart';
 import 'package:hansol_high_school/styles.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 Future<void> main() async {
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitDown,
+    DeviceOrientation.portraitUp,
+  ]);
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,

@@ -23,6 +23,11 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
             backgroundColor: Colors.white,
             title: const Text('선택과목 시간표 설정'),
           ),
+          body: Column(
+            children: [
+              Row(),
+            ],
+          ),
         ),
       ),
     );
