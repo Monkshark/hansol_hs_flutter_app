@@ -11,7 +11,7 @@ import 'package:hansol_high_school/API/nies_api_keys.dart';
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
 
-  var myTimetable = {
+  var myTimetable = [
     Subject(subjectName: '문학', subjectClass: 1),
     Subject(subjectName: '수학Ⅰ', subjectClass: 1),
     Subject(subjectName: '물리학Ⅰ', subjectClass: 5),
@@ -24,7 +24,7 @@ class TimetableDataApi {
     Subject(subjectName: '영어Ⅰ', subjectClass: 1),
     Subject(subjectName: '지구과학Ⅰ', subjectClass: 6),
     Subject(subjectName: '진로활동', subjectClass: 1),
-  };
+  ];
 
   static Future<List<String>> getTimeTable({
     required DateTime date,
@@ -131,6 +131,7 @@ class TimetableDataApi {
   static Future<List<List<String?>>> getCustomTimeTable({
     required List<Subject> userSubjects,
     required String grade,
+    bool writeLog = false,
   }) async {
     List<List<String?>> customTimeTable = [
       [null, '', '', '', '', '', '', ''],
@@ -142,9 +143,11 @@ class TimetableDataApi {
 
     DateTime now = DateTime.now();
     int year = now.year;
+    int month = now.month;
+    int day = now.day;
 
-    DateTime startDate = DateTime(year, 3, 8);
-    DateTime endDate = DateTime(year, 3, 15);
+    DateTime startDate = DateTime(year, month, day + 6);
+    DateTime endDate = DateTime(year, month, day + 13);
 
     for (DateTime date = startDate;
         date.isBefore(endDate.add(const Duration(days: 1)));
@@ -160,11 +163,19 @@ class TimetableDataApi {
             grade: grade,
             classNum: subject.subjectClass.toString());
 
+        log(timetable.toString());
+
         for (var i = 0; i < timetable.length; i++) {
           if (timetable[i] == subject.subjectName) {
             customTimeTable[date.weekday - 1][i + 1] = subject.subjectName;
           }
         }
+      }
+    }
+
+    if (writeLog) {
+      for(var weekday in customTimeTable) {
+        log('day${customTimeTable.indexOf(weekday) + 1}: ${weekday.toString()}');
       }
     }
 

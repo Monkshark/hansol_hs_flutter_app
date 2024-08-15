@@ -22,6 +22,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   bool isSwitched = false;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
