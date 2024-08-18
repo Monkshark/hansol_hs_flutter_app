@@ -2,9 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hansol_high_school/API/meal_data_api.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:timezone/data/latest.dart' as tz;
-import 'package:hansol_high_school/API/meal_data_api.dart';
 
 class NotificationManager {
   static final NotificationManager _instance = NotificationManager._internal();
@@ -81,7 +81,9 @@ class NotificationManager {
         .toString();
 
     if (mealMenu != '급식 정보가 없습니다.' ||
-        (isNullNotificationOn && mealMenu == '급식 정보가 없습니다.')) {
+        (isNullNotificationOn && mealMenu == '급식 정보가 없습니다.') &&
+            DateTime.now().weekday != DateTime.saturday &&
+            DateTime.now().weekday != DateTime.sunday) {
       try {
         await platform.invokeMethod('scheduleMealNotification', {
           'hour': time.hour.toString(),
@@ -94,7 +96,7 @@ class NotificationManager {
         log("Failed to schedule notification: $e");
       }
     } else {
-      log('Meal is null or null notifications are disabled');
+      log('Meal is null or null notifications are disabled or today is weekend');
     }
   }
 

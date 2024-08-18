@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
 
+import 'package:hansol_high_school/API/nies_api_keys.dart';
 import 'package:hansol_high_school/Data/subject.dart';
 import 'package:hansol_high_school/Network/network_status.dart';
-import 'package:hansol_high_school/API/nies_api_keys.dart';
+import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
@@ -174,7 +174,7 @@ class TimetableDataApi {
     }
 
     if (writeLog) {
-      for(var weekday in customTimeTable) {
+      for (var weekday in customTimeTable) {
         log('day${customTimeTable.indexOf(weekday) + 1}: ${weekday.toString()}');
       }
     }
