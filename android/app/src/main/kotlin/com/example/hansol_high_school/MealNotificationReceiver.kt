@@ -34,9 +34,6 @@ class MealNotificationReceiver : BroadcastReceiver() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
-        val vibrationPattern = longArrayOf(0, 500, 500, 500)
-
         val notification = NotificationCompat.Builder(context, channelId)
             .setContentTitle(notificationTitle)
             .setContentText("아래로 당겨서 메뉴 확인")
@@ -45,8 +42,6 @@ class MealNotificationReceiver : BroadcastReceiver() {
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setSound(alarmSound)
-            .setVibrate(vibrationPattern)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build()
 

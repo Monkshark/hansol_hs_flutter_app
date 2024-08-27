@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/API/meal_data_api.dart';
 import 'package:hansol_high_school/Data/meal.dart';
 import 'package:hansol_high_school/Widgets/MealWidgets/meal_card.dart';
+import 'package:hansol_high_school/Widgets/MealWidgets/weekly_calendar.dart';
+import 'package:hansol_high_school/styles.dart';
 
 class HansolHighSchool extends StatelessWidget {
   @override
@@ -92,6 +94,17 @@ class _MealScreenState extends State<MealScreen> {
       body: SafeArea(
         child: Column(
           children: [
+            WeeklyCalendar(
+              backgroundColor: PRIMARY_COLOR,
+              onDaySelected: (DateTime) {},
+            ),
+            SizedBox(
+              height: 100,
+              width: double.infinity,
+              child: ColoredBox(
+                color: PRIMARY_COLOR,
+              ),
+            ),
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(

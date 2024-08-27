@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Screens/SubScreens/setting_screen.dart';
-import 'package:hansol_high_school/Widgets/SettingWidgets/setting_toggle_switch.dart';
-
-void main() {
-  runApp(HansolHighSchool());
-}
+import 'package:hansol_high_school/Widgets/HomeWidgets/current_subject_card.dart';
+import 'package:hansol_high_school/styles.dart';
 
 class HansolHighSchool extends StatelessWidget {
   @override
@@ -27,33 +24,38 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(
-        children: [
-          Positioned(
-            top: 20,
-            right: 20,
-            child: IconButton(
-              onPressed: () {
-                Navigator.of(context).push(_createRoute());
-              },
-              icon: const Icon(Icons.settings),
+      body: Scaffold(
+        backgroundColor: Colors.white,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(200),
+          child: AppBar(
+            backgroundColor: PRIMARY_COLOR,
+            actions: [
+              SizedBox(
+                child: IconButton(
+                  color: Colors.white,
+                  onPressed: () {
+                    Navigator.of(context).push(_createRoute());
+                  },
+                  icon: const Icon(Icons.settings_outlined),
+                  iconSize: 27,
+                ),
+              ),
+            ],
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(
+                bottom: Radius.circular(20),
+              ),
             ),
           ),
-          Center(
-            child: SettingToggleSwitch(
-              value: isSwitched,
-              // trackActiveColor: PRIMARY_COLOR,
-              // toggleActiveColor: Colors.green,
-              // trackHeight: 25,
-              toggleInActiveColor: Colors.white,
-              onChanged: (value) {
-                setState(() {
-                  isSwitched = value;
-                });
-              },
+        ),
+        body: Column(
+          children: [
+            Center(
+              child: CurrentSubjectCard(),
             ),
-          )
-        ],
+          ],
+        ),
       ),
     );
   }

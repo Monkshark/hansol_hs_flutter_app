@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/Data/local_database.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
+import 'package:hansol_high_school/Notification/meal_notification_worker.dart';
 import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/notice_screen.dart';
@@ -25,9 +26,11 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await NotificationManager().init();
+  MealNotificationWorker.initialize();
+  MealNotificationWorker.registerDailyMealNotificationTask();
   await _requestNotificationPermission();
   await SettingData().init();
-  await NotificationManager().init();
   final database = LocalDataBase();
   GetIt.I.registerSingleton<LocalDataBase>(database);
   tz.initializeTimeZones();
@@ -92,7 +95,7 @@ class _MainScreenState extends State<MainScreen> {
             )
           : Container(),
       bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: PRIMARY_COLOR,
+        selectedItemColor: Color(0xFF3B8EF2),
         backgroundColor: Colors.white,
         currentIndex: _currentIndex,
         onTap: (index) {
@@ -106,16 +109,19 @@ class _MainScreenState extends State<MainScreen> {
         showUnselectedLabels: false,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.restaurant),
+            icon: Icon(Icons.fastfood_outlined),
             label: '급식',
+            // activeIcon: Icon(Icons.fastfood),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
             label: '홈',
+            // activeIcon: Icon(Icons.home),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
+            icon: Icon(Icons.notifications_outlined),
             label: '알림',
+            // activeIcon: Icon(Icons.notifications),
           ),
         ],
       ),

@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Schedule {
@@ -12,7 +11,7 @@ class Schedule {
     required this.startTime,
     required this.endTime,
     required this.content,
-    required this.date, // And this line
+    required this.date,
   });
 }
 

@@ -105,7 +105,8 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
           initialTime: initialTime,
           builder: (context, child) {
             return MediaQuery(
-              data: MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
+              data:
+                  MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
               child: child!,
             );
           },

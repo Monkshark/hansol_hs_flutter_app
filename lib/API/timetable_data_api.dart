@@ -146,8 +146,8 @@ class TimetableDataApi {
     int month = now.month;
     int day = now.day;
 
-    DateTime startDate = DateTime(year, month, day + 6);
-    DateTime endDate = DateTime(year, month, day + 13);
+    DateTime startDate = DateTime(year, month, day);
+    DateTime endDate = DateTime(year, month, day + 6);
 
     for (DateTime date = startDate;
         date.isBefore(endDate.add(const Duration(days: 1)));
@@ -165,10 +165,21 @@ class TimetableDataApi {
 
         log(timetable.toString());
 
-        for (var i = 0; i < timetable.length; i++) {
-          if (timetable[i] == subject.subjectName) {
-            customTimeTable[date.weekday - 1][i + 1] = subject.subjectName;
+        try {
+          for (var i = 0; i < timetable.length; i++) {
+            if (timetable[i] == subject.subjectName) {
+              customTimeTable[date.weekday - 1][i + 1] = subject.subjectName;
+            }
           }
+        } catch (e) {
+          log(e.toString());
+          return [
+            [null, '', '', '', '', '', '', ''],
+            [null, '', '', '', '', '', '', ''],
+            [null, '', '', '', '', '', '', ''],
+            [null, '', '', '', '', '', '', ''],
+            [null, '', '', '', '', '', '', '']
+          ];
         }
       }
     }

@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hansol_high_school/Data/meal.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -34,8 +35,17 @@ class _MealCardState extends State<MealCard>
   bool _buttonsVisible = false;
   final GlobalKey _globalKey = GlobalKey();
 
+  late Meal mealData;
+
   @override
   void initState() {
+    mealData = Meal(
+      meal: widget.meal,
+      date: widget.date,
+      mealType: widget.mealType,
+      kcal: widget.kcal,
+    );
+
     super.initState();
     _controller = AnimationController(
       vsync: this,
@@ -123,15 +133,15 @@ class _MealCardState extends State<MealCard>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  widget.date.year.toString(),
+                                  mealData.date.year.toString(),
                                   style: const TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w500,
                                   ),
                                 ),
                                 Text(
-                                  "${widget.date.month.toString().padLeft(2, '0')}"
-                                  "${widget.date.day.toString().padLeft(2, '0')}",
+                                  "${mealData.date.month.toString().padLeft(2, '0')}"
+                                  "${mealData.date.day.toString().padLeft(2, '0')}",
                                   style: const TextStyle(
                                     fontSize: 20.0,
                                     fontWeight: FontWeight.w500,
@@ -139,7 +149,7 @@ class _MealCardState extends State<MealCard>
                                 ),
                                 const SizedBox(height: 6.0),
                                 Text(
-                                  getMealType(widget.mealType),
+                                  mealData.getMealType(),
                                   style: const TextStyle(
                                     fontSize: 24.0,
                                     fontWeight: FontWeight.w700,
@@ -148,9 +158,9 @@ class _MealCardState extends State<MealCard>
                                 const SizedBox(height: 6.0),
                                 Text.rich(
                                   TextSpan(
-                                    text: widget.kcal,
+                                    text: mealData.kcal,
                                     children: [
-                                      if (widget.kcal.length == 10)
+                                      if (mealData.kcal.length == 10)
                                         const TextSpan(
                                           text: '0',
                                           style: TextStyle(
@@ -171,7 +181,7 @@ class _MealCardState extends State<MealCard>
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text(widget.meal),
+                                    Text(mealData.meal),
                                   ],
                                 ),
                               ),
@@ -215,18 +225,5 @@ class _MealCardState extends State<MealCard>
         },
       ),
     );
-  }
-}
-
-String getMealType(int mealType) {
-  switch (mealType) {
-    case 1:
-      return "조식";
-    case 2:
-      return "중식";
-    case 3:
-      return "석식";
-    default:
-      return "중식";
   }
 }

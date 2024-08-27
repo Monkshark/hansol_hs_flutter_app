@@ -29,4 +29,17 @@ class Meal {
         mealType: json['mealType'],
         kcal: json['kcal'],
       );
+
+  String getMealType() {
+    switch (mealType) {
+      case 1:
+        return "조식";
+      case 2:
+        return "중식";
+      case 3:
+        return "석식";
+      default:
+        return "중식";
+    }
+  }
 }
