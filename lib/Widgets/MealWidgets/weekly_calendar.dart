@@ -1,6 +1,6 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Data/device.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class WeeklyCalendar extends StatefulWidget {
@@ -14,7 +14,7 @@ class WeeklyCalendar extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _WeeklyCalendarState createState() => _WeeklyCalendarState();
+  State<WeeklyCalendar> createState() => _WeeklyCalendarState();
 }
 
 class _WeeklyCalendarState extends State<WeeklyCalendar> {
@@ -28,61 +28,60 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 10),
-            child: TableCalendar(
-              // locale: 'ko_KR',
-              firstDay: DateTime.utc(2020, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                widget.onDaySelected(selectedDay);
-              },
-              calendarFormat: CalendarFormat.week,
-              startingDayOfWeek: StartingDayOfWeek.monday,
-              calendarStyle: CalendarStyle(
-                todayDecoration: BoxDecoration(
-                  color: LIGHTER_COLOR,
-                  shape: BoxShape.circle,
-                ),
-                selectedDecoration: const BoxDecoration(
-                  color: PRIMARY_COLOR,
-                  shape: BoxShape.circle,
-                ),
-                weekendTextStyle: const TextStyle(color: Colors.white),
-                defaultTextStyle: const TextStyle(color: Colors.white),
-                outsideDaysVisible: false,
-              ),
-              daysOfWeekStyle: DaysOfWeekStyle(
-                weekendStyle: const TextStyle(color: Colors.white),
-                weekdayStyle: const TextStyle(color: Colors.white),
-              ),
-              headerStyle: const HeaderStyle(
-                formatButtonVisible: false,
-                titleCentered: true,
-                titleTextStyle: TextStyle(color: Colors.white),
-                leftChevronIcon: Icon(Icons.chevron_left, color: Colors.white),
-                rightChevronIcon:
-                    Icon(Icons.chevron_right, color: Colors.white),
-              ),
-              onPageChanged: (focusedDay) {
-                setState(() {
-                  _focusedDay = focusedDay;
-                });
-              },
+            padding: EdgeInsets.symmetric(
+              horizontal: Device.getWidth(1.5),
             ),
+            child: _buildCustomHeader(context),
+          ),
+          TableCalendar(
+            locale: 'ko_KR',
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) {
+              return isSameDay(_selectedDay, day);
+            },
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+              widget.onDaySelected(selectedDay);
+            },
+            calendarFormat: CalendarFormat.week,
+            startingDayOfWeek: StartingDayOfWeek.monday,
+            calendarStyle: CalendarStyle(
+              todayDecoration: BoxDecoration(
+                color: AppColors.color.lighterColor,
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: AppColors.color.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              weekendTextStyle: const TextStyle(color: Colors.white),
+              defaultTextStyle: const TextStyle(color: Colors.white),
+              outsideDaysVisible: false,
+            ),
+            daysOfWeekStyle: const DaysOfWeekStyle(
+              weekendStyle: TextStyle(color: Colors.white),
+              weekdayStyle: TextStyle(color: Colors.white),
+            ),
+            headerVisible: false,
+            onPageChanged: (focusedDay) {
+              setState(() {
+                _focusedDay = focusedDay;
+              });
+            },
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 0.0),
+            padding: EdgeInsets.symmetric(
+              horizontal:
+                  Device.isTablet ? Device.width * 0.053 : Device.width * 0.03,
+            ),
             child: Row(
               key: ValueKey<DateTime>(_focusedDay),
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: List.generate(7, (index) {
                 final day = _focusedDay
                     .add(Duration(days: index - _focusedDay.weekday + 1));
@@ -92,15 +91,15 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
-                      width: 36,
-                      height: 36,
+                      width: isSelected ? 34 : 36,
+                      height: isSelected ? 34 : 36,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         border: Border.all(
                           color: isSelected
                               ? const Color(0xFFD0DBFF)
                               : Colors.transparent,
-                          width: 2.0,
+                          width: 2,
                         ),
                       ),
                       child: Padding(
@@ -108,7 +107,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                         child: Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: _getCircleColor(day),
+                            gradient: _getCircleColor(day),
                           ),
                           width: 30,
                           height: 30,
@@ -125,29 +124,103 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
     );
   }
 
-  Color _getCircleColor(DateTime day) {
+  Widget _buildCustomHeader(BuildContext context) {
+    final year = _focusedDay.year.toString();
+    final month = _focusedDay.month.toString();
+
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: EdgeInsets.only(
+          top: Device.getHeight(3),
+          left: Device.getWidth(3),
+          bottom: Device.getHeight(3),
+        ),
+        child: RichText(
+          text: TextSpan(
+            children: [
+              TextSpan(
+                text: year,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize:
+                      Device.isTablet ? Device.getWidth(3) : Device.getWidth(5),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: '년 ',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize:
+                      Device.isTablet ? Device.getWidth(3) : Device.getWidth(5),
+                ),
+              ),
+              TextSpan(
+                text: month,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize:
+                      Device.isTablet ? Device.getWidth(3) : Device.getWidth(5),
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              TextSpan(
+                text: '월',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize:
+                      Device.isTablet ? Device.getWidth(3) : Device.getWidth(5),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  LinearGradient _getCircleColor(DateTime day) {
     final int dayHash = day.year * 10000 + day.month * 100 + day.day;
     final int colorCode = dayHash % 3;
 
     switch (colorCode) {
       case 0:
-        return Colors.green;
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xffB6E9FF),
+            Color(0xff4FCAFF),
+          ],
+        );
       case 1:
-        return Colors.yellow;
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xffCEFBD5),
+            Color(0xff60D32A),
+          ],
+        );
       case 2:
-        return Colors.red;
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xffFFD0D0),
+            Color(0xffFF4A4A),
+          ],
+        );
       default:
-        return Colors.grey;
+        return const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            Color(0xffF8F8F8),
+            Color(0xffA9A9A9),
+          ],
+        );
     }
   }
-
-// Color _getCircleColor(int score) {
-  //   if (score >= 66) {
-  //     return Colors.green;
-  //   } else if (score >= 33) {
-  //     return Colors.yellow;
-  //   } else {
-  //     return Colors.red;
-  //   }
-  // }
 }

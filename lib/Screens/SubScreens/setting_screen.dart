@@ -2,16 +2,21 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/API/timetable_data_api.dart';
+import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:hansol_high_school/Notification/notification_manager.dart';
-import 'package:numberpicker/numberpicker.dart';
+import 'package:hansol_high_school/Widgets/SettingWidgets/grade_and_class_picker.dart';
+import 'package:hansol_high_school/Widgets/SettingWidgets/single_setting_card.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 import 'package:hansol_high_school/Screens/SubScreens/timetable_select_screen.dart';
 import 'package:hansol_high_school/Widgets/SettingWidgets/setting_card.dart';
 import 'package:hansol_high_school/Widgets/SettingWidgets/setting_toggle_switch.dart';
 
 class SettingScreen extends StatefulWidget {
+  const SettingScreen({Key? key}) : super(key: key);
+
   @override
-  _SettingScreenState createState() => _SettingScreenState();
+  State<SettingScreen> createState() => _SettingScreenState();
 }
 
 class _SettingScreenState extends State<SettingScreen> {
@@ -110,9 +115,9 @@ class _SettingScreenState extends State<SettingScreen> {
           future: _settingsFuture,
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(child: CircularProgressIndicator());
+              return const Center(child: CircularProgressIndicator());
             } else if (snapshot.hasError) {
-              return Center(child: Text('Error loading settings'));
+              return const Center(child: Text('Error loading settings'));
             } else {
               return buildSettingsBody();
             }
@@ -124,10 +129,17 @@ class _SettingScreenState extends State<SettingScreen> {
 
   Widget buildSettingsBody() {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.color.settingScreenBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
-        title: const Text('설정'),
+        centerTitle: true,
+        backgroundColor: AppColors.color.settingScreenBackgroundColor,
+        title: const Text(
+          '설정',
+        ),
+        titleTextStyle: TextStyle(
+          fontSize: Device.getWidth(5),
+          fontWeight: FontWeight.w600,
+        ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -242,10 +254,13 @@ class _SettingScreenState extends State<SettingScreen> {
                     _saveSettings();
                     NotificationManager().updateNotifications();
                     log('notification setting changed');
-
                   });
                 },
               ),
+            ),
+            const SingleSettingCard(
+              text: '알림 설정',
+              child: Text("a"),
             ),
           ],
         ),
@@ -256,7 +271,7 @@ class _SettingScreenState extends State<SettingScreen> {
   Route _createRoute() {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) =>
-          TimetableSelectScreen(),
+          const TimetableSelectScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
@@ -299,7 +314,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   }
                 : null,
             child: Text(
-              '${selectedTime.format(context)}',
+              selectedTime.format(context),
               style: TextStyle(
                 fontSize: 18,
                 color: isSwitched ? Colors.black : Colors.grey,
@@ -322,6 +337,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
   void _selectGradeAndClass() async {
     int classCount = await TimetableDataApi.getClassCount(grade);
+    if (!mounted) return;
     List<int>? selectedValues = await showDialog<List<int>>(
       context: context,
       builder: (context) {
@@ -340,84 +356,5 @@ class _SettingScreenState extends State<SettingScreen> {
         _saveSettings();
       });
     }
-  }
-}
-
-class GradeAndClassPickerDialog extends StatefulWidget {
-  final int initialGrade;
-  final int initialClass;
-  final int classCount;
-
-  GradeAndClassPickerDialog({
-    required this.initialGrade,
-    required this.initialClass,
-    required this.classCount,
-  });
-
-  @override
-  _GradeAndClassPickerDialogState createState() =>
-      _GradeAndClassPickerDialogState();
-}
-
-class _GradeAndClassPickerDialogState extends State<GradeAndClassPickerDialog> {
-  late int selectedGrade;
-  late int selectedClass;
-
-  @override
-  void initState() {
-    super.initState();
-    selectedGrade = widget.initialGrade;
-    selectedClass = widget.initialClass;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return AlertDialog(
-      content: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('학년'),
-              NumberPicker(
-                minValue: 1,
-                maxValue: 3,
-                value: selectedGrade,
-                onChanged: (value) {
-                  setState(() {
-                    selectedGrade = value;
-                  });
-                },
-              ),
-            ],
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('반'),
-              NumberPicker(
-                minValue: 1,
-                maxValue: widget.classCount,
-                value: selectedClass,
-                onChanged: (value) {
-                  setState(() {
-                    selectedClass = value;
-                  });
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.of(context).pop([selectedGrade, selectedClass]);
-          },
-          child: Text('확인'),
-        ),
-      ],
-    );
   }
 }

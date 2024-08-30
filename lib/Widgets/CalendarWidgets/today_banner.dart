@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class TodayBanner extends StatelessWidget {
   final DateTime selectedDate;
@@ -24,7 +24,7 @@ class TodayBanner extends StatelessWidget {
         topRight: Radius.circular(10.0),
       ),
       child: Container(
-        color: LIGHTER_COLOR,
+        color: AppColors.color.lighterColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 16.0,

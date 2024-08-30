@@ -1,17 +1,10 @@
 import 'package:flutter/material.dart';
 
-class HansolHighSchool extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MealInfoScreen(),
-    );
-  }
-}
-
 class MealInfoScreen extends StatefulWidget {
+  const MealInfoScreen({Key? key}) : super(key: key);
+
   @override
-  _MealInfoScreenState createState() => _MealInfoScreenState();
+  State<MealInfoScreen> createState() => _MealInfoScreenState();
 }
 
 class _MealInfoScreenState extends State<MealInfoScreen> {
@@ -22,6 +15,6 @@ class _MealInfoScreenState extends State<MealInfoScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return const Scaffold();
   }
 }

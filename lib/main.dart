@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/local_database.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:hansol_high_school/Notification/meal_notification_worker.dart';
@@ -10,8 +10,6 @@ import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/notice_screen.dart';
 import 'package:hansol_high_school/Notification/notification_manager.dart';
-import 'package:hansol_high_school/firebase_options.dart';
-import 'package:hansol_high_school/styles.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:flutter/services.dart';
@@ -23,9 +21,9 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  // await Firebase.initializeApp(
+  //   options: DefaultFirebaseOptions.currentPlatform,
+  // );
   await NotificationManager().init();
   MealNotificationWorker.initialize();
   MealNotificationWorker.registerDailyMealNotificationTask();
@@ -49,6 +47,7 @@ Future<void> _requestNotificationPermission() async {
 class HansolHighSchool extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    Device.init(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       home: MainScreen(),

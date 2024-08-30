@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/Data/device.dart';
 
 class CurrentSubjectCard extends StatefulWidget {
   const CurrentSubjectCard({Key? key}) : super(key: key);
@@ -10,8 +11,7 @@ class CurrentSubjectCard extends StatefulWidget {
 class _CurrentSubjectCardState extends State<CurrentSubjectCard> {
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final cardWidth = screenWidth * 0.95;
+    final cardWidth = Device.getWidth(95);
     final cardHeight = cardWidth * 0.38;
 
     return Container(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class _Time extends StatelessWidget {
   final int startTimeInMinutes;
@@ -19,10 +19,10 @@ class _Time extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(
+    TextStyle textStyle = TextStyle(
       fontSize: 16.0,
       fontWeight: FontWeight.w600,
-      color: PRIMARY_COLOR,
+      color: AppColors.color.primaryColor,
     );
 
     final startTime = _getTimeOfDay(startTimeInMinutes);
@@ -82,7 +82,7 @@ class ScheduleCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           width: 1.0,
-          color: PRIMARY_COLOR,
+          color: AppColors.color.primaryColor,
         ),
         borderRadius: BorderRadius.circular(8.0),
       ),

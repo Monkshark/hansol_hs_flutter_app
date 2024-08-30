@@ -1,27 +1,15 @@
 import 'package:flutter/material.dart';
 
-class HansolHighSchool extends StatelessWidget {
+class AccountInfoScreen extends StatefulWidget {
+  const AccountInfoScreen({Key? key}) : super(key: key);
+
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: AccointInfoScreen(),
-    );
-  }
+  State<AccountInfoScreen> createState() => _AccountInfoScreenState();
 }
 
-class AccointInfoScreen extends StatefulWidget {
-  @override
-  _AccointInfoScreenState createState() => _AccointInfoScreenState();
-}
-
-class _AccointInfoScreenState extends State<AccointInfoScreen> {
-  @override
-  void initState() {
-    super.initState();
-  }
-
+class _AccountInfoScreenState extends State<AccountInfoScreen> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold();
+    return const Scaffold();
   }
 }

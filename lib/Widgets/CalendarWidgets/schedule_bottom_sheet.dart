@@ -3,8 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/custom_text_field.dart';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleBottomSheet extends StatefulWidget {
@@ -133,7 +134,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
           builder: (context, constraints) {
             return Container(
               width: constraints.maxWidth,
-              height: MediaQuery.of(context).size.height / 2 + bottomInset,
+              height: Device.getHeight(50) + bottomInset,
               decoration: BoxDecoration(
                 color: Colors.white,
                 border: Border.all(
@@ -220,7 +221,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                       child: ElevatedButton(
                         onPressed: onSavePressed,
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: PRIMARY_COLOR,
+                          backgroundColor: AppColors.color.primaryColor,
                         ),
                         child: const Text(
                           '저장',

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class CustomTextField extends StatelessWidget {
   final String label;
@@ -26,8 +26,8 @@ class CustomTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            color: PRIMARY_COLOR,
+          style: TextStyle(
+            color: AppColors.color.primaryColor,
             fontWeight: FontWeight.w600,
           ),
         ),

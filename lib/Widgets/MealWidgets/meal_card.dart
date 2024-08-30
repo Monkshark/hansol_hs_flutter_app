@@ -7,7 +7,7 @@ import 'package:hansol_high_school/Data/meal.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class MealCard extends StatefulWidget {
   final String meal;
@@ -119,7 +119,7 @@ class _MealCardState extends State<MealCard>
                       color: Colors.white,
                       border: Border.all(
                         width: 1.5,
-                        color: PRIMARY_COLOR,
+                        color: AppColors.color.primaryColor,
                       ),
                       borderRadius: BorderRadius.circular(8.0),
                     ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/styles.dart';
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class SettingToggleSwitch extends StatefulWidget {
   final Function(bool value) onChanged;
@@ -13,21 +13,23 @@ class SettingToggleSwitch extends StatefulWidget {
   final Color trackInActiveColor;
   final Color trackActiveColor;
 
-  const SettingToggleSwitch({
+  SettingToggleSwitch({
+    Key? key,
     required this.onChanged,
     required this.value,
-    this.trackHeight = 10,
-    this.trackWidth = 40,
-    this.toggleWidth = 20,
-    this.toggleHeight = 20,
+    this.trackHeight = 10.0,
+    this.trackWidth = 40.0,
+    this.toggleWidth = 20.0,
+    this.toggleHeight = 20.0,
     this.trackActiveColor = const Color(0xffcccccc),
     this.trackInActiveColor = const Color(0xffcccccc),
-    this.toggleActiveColor = PRIMARY_COLOR,
+    Color? toggleActiveColor,
     this.toggleInActiveColor = const Color(0xffcccccc),
-  });
+  })  : toggleActiveColor = toggleActiveColor ?? AppColors.color.primaryColor,
+        super(key: key);
 
   @override
-  _SettingToggleSwitchState createState() => _SettingToggleSwitchState();
+  State<SettingToggleSwitch> createState() => _SettingToggleSwitchState();
 }
 
 class _SettingToggleSwitchState extends State<SettingToggleSwitch> {
@@ -69,7 +71,7 @@ class _SettingToggleSwitchState extends State<SettingToggleSwitch> {
               ),
             ),
             AnimatedPositioned(
-              duration: Duration(milliseconds: 200),
+              duration: const Duration(milliseconds: 200),
               curve: Curves.ease,
               left: _isSwitched ? widget.trackWidth - widget.toggleWidth : 0.0,
               child: GestureDetector(

@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Screens/SubScreens/setting_screen.dart';
 import 'package:hansol_high_school/Widgets/HomeWidgets/current_subject_card.dart';
-import 'package:hansol_high_school/styles.dart';
-
-class HansolHighSchool extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: HomeScreen(),
-    );
-  }
-}
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
-  _HomeScreenState createState() => _HomeScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -29,7 +22,7 @@ class _HomeScreenState extends State<HomeScreen> {
         appBar: PreferredSize(
           preferredSize: const Size.fromHeight(200),
           child: AppBar(
-            backgroundColor: PRIMARY_COLOR,
+            backgroundColor: AppColors.color.primaryColor,
             actions: [
               SizedBox(
                 child: IconButton(
@@ -49,7 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ),
-        body: Column(
+        body: const Column(
           children: [
             Center(
               child: CurrentSubjectCard(),

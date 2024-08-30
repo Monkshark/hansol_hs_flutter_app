@@ -1,22 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/API/meal_data_api.dart';
+import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/meal.dart';
 import 'package:hansol_high_school/Widgets/MealWidgets/meal_card.dart';
 import 'package:hansol_high_school/Widgets/MealWidgets/weekly_calendar.dart';
-import 'package:hansol_high_school/styles.dart';
-
-class HansolHighSchool extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      home: MealScreen(),
-    );
-  }
-}
+import 'package:hansol_high_school/Styles/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class MealScreen extends StatefulWidget {
+  const MealScreen({Key? key}) : super(key: key);
+
   @override
-  _MealScreenState createState() => _MealScreenState();
+  State<MealScreen> createState() => _MealScreenState();
 }
 
 class _MealScreenState extends State<MealScreen> {
@@ -65,104 +60,87 @@ class _MealScreenState extends State<MealScreen> {
     });
   }
 
-  void _incrementDate() {
-    setState(() {
-      do {
-        selectedDate = selectedDate.add(const Duration(days: 1));
-      } while (selectedDate.weekday == DateTime.saturday ||
-          selectedDate.weekday == DateTime.sunday);
-      dateController.text = selectedDate.toLocal().toString().split(' ')[0];
-      fetchMeals();
-    });
-  }
-
-  void _decrementDate() {
-    setState(() {
-      do {
-        selectedDate = selectedDate.subtract(const Duration(days: 1));
-      } while (selectedDate.weekday == DateTime.saturday ||
-          selectedDate.weekday == DateTime.sunday);
-      dateController.text = selectedDate.toLocal().toString().split(' ')[0];
-      fetchMeals();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    DateTime selectedDate;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.color.primaryColor,
       body: SafeArea(
         child: Column(
           children: [
             WeeklyCalendar(
-              backgroundColor: PRIMARY_COLOR,
-              onDaySelected: (DateTime) {},
+              backgroundColor: AppColors.color.primaryColor,
+              onDaySelected: (dateTime) {
+                selectedDate = dateTime;
+                print(DateFormat("M월 d일 E요일", 'ko_KR').format(selectedDate));
+              },
             ),
             SizedBox(
-              height: 100,
+              height: Device.getHeight(5),
               width: double.infinity,
               child: ColoredBox(
-                color: PRIMARY_COLOR,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.arrow_left),
-                    onPressed: _decrementDate,
-                  ),
-                  Text(
-                    dateController.text,
-                    style: const TextStyle(fontSize: 20),
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.arrow_right),
-                    onPressed: _incrementDate,
-                  ),
-                ],
+                color: AppColors.color.primaryColor,
               ),
             ),
             Expanded(
-              child: FutureBuilder<List<Meal?>>(
-                future: Future.wait([breakfast, lunch, dinner]),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  } else if (snapshot.hasData) {
-                    List<Meal?> meals = snapshot.data!;
-                    List<Widget> mealCards = [];
+              child: Container(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20),
+                  ),
+                ),
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: FutureBuilder<List<Meal?>>(
+                      future: Future.wait([breakfast, lunch, dinner]),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Center(
+                            child: Text('Error: ${snapshot.error}'),
+                          );
+                        } else if (snapshot.hasData) {
+                          List<Meal?> meals = snapshot.data!;
+                          List<Widget> mealCards = [];
 
-                    for (Meal? meal in meals) {
-                      if (meal != null) {
-                        mealCards.add(
-                          MealCard(
-                            meal: meal.meal,
-                            date: meal.date,
-                            mealType: meal.mealType,
-                            kcal: meal.kcal,
-                          ),
-                        );
-                      }
-                      // }
-                    }
+                          for (Meal? meal in meals) {
+                            if (meal != null) {
+                              mealCards.add(
+                                MealCard(
+                                  meal: meal.meal,
+                                  date: meal.date,
+                                  mealType: meal.mealType,
+                                  kcal: meal.kcal,
+                                ),
+                              );
+                            }
+                          }
 
-                    if (mealCards.isEmpty) {
-                      return const Center(
-                          child: Text('No meal data available'));
-                    }
+                          if (mealCards.isEmpty) {
+                            return const Center(
+                              child: Text('No meal data available'),
+                            );
+                          }
 
-                    return Column(
-                      children: mealCards,
-                    );
-                  } else {
-                    return const Center(child: Text('No meal data available'));
-                  }
-                },
+                          return Column(
+                            children: mealCards,
+                          );
+                        } else {
+                          return const Center(
+                            child: Text('No meal data available'),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                ),
               ),
             ),
           ],

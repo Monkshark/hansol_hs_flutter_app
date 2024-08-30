@@ -9,22 +9,13 @@ import 'package:hansol_high_school/Widgets/CalendarWidgets/schedule_card.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/school_schedule_card.dart';
 import 'package:hansol_high_school/Widgets/CalendarWidgets/today_banner.dart';
 import 'package:get_it/get_it.dart';
-import 'package:hansol_high_school/styles.dart';
-
-class HansolHighSchool extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: NoticeScreen(),
-    );
-  }
-}
+import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class NoticeScreen extends StatefulWidget {
   const NoticeScreen({Key? key}) : super(key: key);
 
   @override
-  _NoticeScreenState createState() => _NoticeScreenState();
+  State<NoticeScreen> createState() => _NoticeScreenState();
 }
 
 class _NoticeScreenState extends State<NoticeScreen> {
@@ -44,7 +35,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: PRIMARY_COLOR,
+        backgroundColor: AppColors.color.primaryColor,
         onPressed: () {
           showModalBottomSheet(
             context: context,
