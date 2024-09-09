@@ -9,6 +9,12 @@ class LightAppColors extends AppColors {
   LightAppColors._internal();
 
   @override
+  Color get black => Colors.black;
+
+  @override
+  Color get white => Colors.white;
+
+  @override
   Color get transparent => Colors.transparent;
 
   @override
@@ -31,4 +37,13 @@ class LightAppColors extends AppColors {
 
   @override
   Color get settingScreenBackgroundColor => const Color(0xFFF8F6F6);
+
+  @override
+  Color get mealCardBackgroundColor => const Color(0xffDBE2EF);
+
+  @override
+  Color get mealTypeTextColor => const Color(0xff848484);
+
+  @override
+  Color get mealHeaderIconColor => const Color(0xffDBE2EF);
 }

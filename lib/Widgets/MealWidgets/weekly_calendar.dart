@@ -87,34 +87,73 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                     .add(Duration(days: index - _focusedDay.weekday + 1));
                 final isSelected = isSameDay(day, _selectedDay);
 
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: isSelected ? 34 : 36,
-                      height: isSelected ? 34 : 36,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected
-                              ? const Color(0xFFD0DBFF)
-                              : Colors.transparent,
-                          width: 2,
-                        ),
+                return GestureDetector(
+                  onTap: () {
+                    setState(() {
+                      _selectedDay = day;
+                      _focusedDay = day;
+                    });
+                    widget.onDaySelected(day);
+                  },
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      FutureBuilder<LinearGradient>(
+                        future: _getCircleColor(day),
+                        builder: (context, snapshot) {
+                          LinearGradient gradient;
+
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            gradient = const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xffF8F8F8),
+                                Color(0xffA9A9A9),
+                              ],
+                            );
+                          } else if (snapshot.hasError) {
+                            gradient = const LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [
+                                Color(0xffF8F8F8),
+                                Color(0xffA9A9A9),
+                              ],
+                            );
+                          } else {
+                            gradient = snapshot.data!;
+                          }
+
+                          return Container(
+                            width: isSelected ? 32 : 36,
+                            height: isSelected ? 32 : 36,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: isSelected
+                                    ? const Color(0xFFD0DBFF)
+                                    : Colors.transparent,
+                                width: 2,
+                              ),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(2.0),
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  gradient: gradient,
+                                ),
+                                width: 30,
+                                height: 30,
+                              ),
+                            ),
+                          );
+                        },
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(2.0),
-                        child: Container(
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: _getCircleColor(day),
-                          ),
-                          width: 30,
-                          height: 30,
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               }),
             ),
@@ -180,7 +219,8 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
     );
   }
 
-  LinearGradient _getCircleColor(DateTime day) {
+  Future<LinearGradient> _getCircleColor(DateTime day) async {
+    await Future.delayed(Duration(milliseconds: 100));
     final int dayHash = day.year * 10000 + day.month * 100 + day.day;
     final int colorCode = dayHash % 3;
 

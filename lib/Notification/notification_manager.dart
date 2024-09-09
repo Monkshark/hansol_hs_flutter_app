@@ -76,14 +76,22 @@ class NotificationManager {
       return;
     }
 
+    final now = DateTime.now();
+    final notificationDate =
+        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+
+    if (notificationDate.isBefore(now)) {
+      notificationDate.add(Duration(days: 1));
+    }
+
     final String mealMenu = (await MealDataApi.getMeal(
-            date: DateTime.now(), mealType: mealType, type: '메뉴'))
+      date: DateTime.now(),
+      mealType: mealType,
+      type: '메뉴',
+    ))
         .toString();
 
-    if (mealMenu != '급식 정보가 없습니다.' ||
-        (isNullNotificationOn && mealMenu == '급식 정보가 없습니다.') &&
-            DateTime.now().weekday != DateTime.saturday &&
-            DateTime.now().weekday != DateTime.sunday) {
+    if (getMealSetting(mealMenu, isNullNotificationOn) && !isWeekend()) {
       try {
         await platform.invokeMethod('scheduleMealNotification', {
           'hour': time.hour.toString(),
@@ -140,5 +148,15 @@ class NotificationManager {
     } catch (e) {
       return const TimeOfDay(hour: 6, minute: 0);
     }
+  }
+
+  static bool isWeekend() {
+    return (DateTime.now().weekday != DateTime.saturday &&
+        DateTime.now().weekday != DateTime.sunday);
+  }
+
+  static bool getMealSetting(var mealMenu, var isNullNotificationOn) {
+    return mealMenu != '급식 정보가 없습니다.' ||
+        (isNullNotificationOn && mealMenu == '급식 정보가 없습니다.');
   }
 }

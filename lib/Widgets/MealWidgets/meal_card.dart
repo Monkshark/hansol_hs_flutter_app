@@ -1,8 +1,11 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:flutter/widgets.dart';
+import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/meal.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -113,81 +116,25 @@ class _MealCardState extends State<MealCard>
                 child: RepaintBoundary(
                   key: _globalKey,
                   child: Container(
-                    width: 350.0,
-                    height: 160.0,
+                    width: Device.getWidth(85),
                     decoration: BoxDecoration(
-                      color: Colors.white,
-                      border: Border.all(
-                        width: 1.5,
-                        color: AppColors.color.primaryColor,
-                      ),
-                      borderRadius: BorderRadius.circular(8.0),
+                      color: AppColors.color.mealCardBackgroundColor,
+                      borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
-                      child: IntrinsicHeight(
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  mealData.date.year.toString(),
-                                  style: const TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  "${mealData.date.month.toString().padLeft(2, '0')}"
-                                  "${mealData.date.day.toString().padLeft(2, '0')}",
-                                  style: const TextStyle(
-                                    fontSize: 20.0,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(height: 6.0),
-                                Text(
-                                  mealData.getMealType(),
-                                  style: const TextStyle(
-                                    fontSize: 24.0,
-                                    fontWeight: FontWeight.w700,
-                                  ),
-                                ),
-                                const SizedBox(height: 6.0),
-                                Text.rich(
-                                  TextSpan(
-                                    text: mealData.kcal,
-                                    children: [
-                                      if (mealData.kcal.length == 10)
-                                        const TextSpan(
-                                          text: '0',
-                                          style: TextStyle(
-                                            color: Colors.transparent,
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                  style: const TextStyle(
-                                    fontSize: 14.0,
-                                  ),
-                                ),
-                              ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            mealData.meal,
+                            style: TextStyle(
+                              fontSize: Device.getWidth(3.5),
+                              fontFamily: 'Inter',
+                              fontWeight: FontWeight.w500,
                             ),
-                            const SizedBox(width: 48.0),
-                            Expanded(
-                              child: SingleChildScrollView(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(mealData.meal),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
+                          )
+                        ],
                       ),
                     ),
                   ),

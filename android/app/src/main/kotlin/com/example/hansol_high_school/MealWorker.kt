@@ -9,6 +9,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 import java.util.Calendar
 
+@Suppress("UNREACHABLE_CODE")
 class MealWorker(context: Context, workerParams: WorkerParameters) : Worker(context, workerParams) {
     override fun doWork(): Result {
         val notificationTitle = inputData.getString("notificationTitle") ?: return Result.failure()

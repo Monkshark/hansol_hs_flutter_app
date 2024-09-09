@@ -3,6 +3,7 @@ import 'package:hansol_high_school/API/meal_data_api.dart';
 import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/meal.dart';
 import 'package:hansol_high_school/Widgets/MealWidgets/meal_card.dart';
+import 'package:hansol_high_school/Widgets/MealWidgets/meal_header.dart';
 import 'package:hansol_high_school/Widgets/MealWidgets/weekly_calendar.dart';
 import 'package:hansol_high_school/Styles/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -29,11 +30,7 @@ class _MealScreenState extends State<MealScreen> {
   void initState() {
     super.initState();
     setState(() {
-      while (selectedDate.weekday == DateTime.saturday ||
-          selectedDate.weekday == DateTime.sunday) {
-        selectedDate = selectedDate.add(const Duration(days: 1));
-      }
-      dateController.text = selectedDate.toLocal().toString().split(' ')[0];
+      dateController.text = selectedDate.toLocal().toString().split(' ').first;
       fetchMeals();
     });
   }
@@ -62,8 +59,6 @@ class _MealScreenState extends State<MealScreen> {
 
   @override
   Widget build(BuildContext context) {
-    DateTime selectedDate;
-
     return Scaffold(
       backgroundColor: AppColors.color.primaryColor,
       body: SafeArea(
@@ -72,7 +67,10 @@ class _MealScreenState extends State<MealScreen> {
             WeeklyCalendar(
               backgroundColor: AppColors.color.primaryColor,
               onDaySelected: (dateTime) {
-                selectedDate = dateTime;
+                setState(() {
+                  selectedDate = dateTime;
+                  fetchMeals();
+                });
                 print(DateFormat("M월 d일 E요일", 'ko_KR').format(selectedDate));
               },
             ),
@@ -92,54 +90,95 @@ class _MealScreenState extends State<MealScreen> {
                     topRight: Radius.circular(20),
                   ),
                 ),
-                child: SingleChildScrollView(
-                  child: Center(
-                    child: FutureBuilder<List<Meal?>>(
-                      future: Future.wait([breakfast, lunch, dinner]),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Center(
-                            child: Text('Error: ${snapshot.error}'),
-                          );
-                        } else if (snapshot.hasData) {
-                          List<Meal?> meals = snapshot.data!;
-                          List<Widget> mealCards = [];
-
-                          for (Meal? meal in meals) {
-                            if (meal != null) {
-                              mealCards.add(
-                                MealCard(
-                                  meal: meal.meal,
-                                  date: meal.date,
-                                  mealType: meal.mealType,
-                                  kcal: meal.kcal,
-                                ),
-                              );
-                            }
-                          }
-
-                          if (mealCards.isEmpty) {
-                            return const Center(
-                              child: Text('No meal data available'),
-                            );
-                          }
-
-                          return Column(
-                            children: mealCards,
-                          );
-                        } else {
-                          return const Center(
-                            child: Text('No meal data available'),
-                          );
-                        }
-                      },
+                child: Column(
+                  children: [
+                    MealHeader(
+                      selectedDate: selectedDate,
                     ),
-                  ),
+                    Expanded(
+                      child: SingleChildScrollView(
+                        child: Center(
+                          child: FutureBuilder<List<Meal?>>(
+                            future: Future.wait([breakfast, lunch, dinner]),
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const Center(
+                                  child: CircularProgressIndicator(),
+                                );
+                              } else if (snapshot.hasError) {
+                                return Center(
+                                  child: Text('Error: ${snapshot.error}'),
+                                );
+                              } else if (snapshot.hasData) {
+                                List<Meal?> meals = snapshot.data!;
+                                List<Widget> mealCards = [];
+
+                                for (Meal? meal in meals) {
+                                  if (meal != null) {
+                                    mealCards.add(
+                                      SizedBox(
+                                        height: Device.getHeight(3),
+                                      ),
+                                    );
+                                    mealCards.add(
+                                      Align(
+                                        alignment: Alignment.centerLeft,
+                                        child: Padding(
+                                          padding: EdgeInsets.only(
+                                            left: Device.getWidth(7.5),
+                                          ),
+                                          child: Text(
+                                            meal.getMealType(),
+                                            style: TextStyle(
+                                              color: AppColors
+                                                  .color.mealTypeTextColor,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                    mealCards.add(
+                                      SizedBox(
+                                        height: Device.getHeight(1),
+                                      ),
+                                    );
+                                    mealCards.add(
+                                      MealCard(
+                                        meal: meal.meal,
+                                        date: meal.date,
+                                        mealType: meal.mealType,
+                                        kcal: meal.kcal,
+                                      ),
+                                    );
+                                    mealCards.add(
+                                      SizedBox(
+                                        height: Device.getHeight(1),
+                                      ),
+                                    );
+                                  }
+                                }
+
+                                if (mealCards.isEmpty) {
+                                  return const Center(
+                                    child: Text('No meal data available'),
+                                  );
+                                }
+
+                                return Column(
+                                  children: mealCards,
+                                );
+                              } else {
+                                return const Center(
+                                  child: Text('No meal data available'),
+                                );
+                              }
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
