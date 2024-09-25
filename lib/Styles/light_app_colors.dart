@@ -24,6 +24,9 @@ class LightAppColors extends AppColors {
   Color get secondaryColor => const Color(0xFF198A43);
 
   @override
+  Color get tertiaryColor => const Color(0xFF4D99F4);
+
+  @override
   Color get lighterColor => const Color.fromRGBO(63, 114, 175, 0.6);
 
   @override

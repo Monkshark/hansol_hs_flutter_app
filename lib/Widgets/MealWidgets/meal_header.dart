@@ -50,7 +50,7 @@ class _MealHeaderState extends State<MealHeader> {
                       width: Device.getWidth(7),
                       height: Device.getWidth(7),
                       decoration: BoxDecoration(
-                        color: AppColors.color.mealHeaderIconColor,
+                        color: AppColors.theme.mealHeaderIconColor,
                         shape: BoxShape.circle,
                       ),
                       child: Center(
@@ -58,7 +58,7 @@ class _MealHeaderState extends State<MealHeader> {
                           onPressed: () => {},
                           icon: Icon(
                             Icons.keyboard_arrow_right_rounded,
-                            color: AppColors.color.black,
+                            color: AppColors.theme.black,
                             size: Device.getWidth(7),
                           ),
                           constraints: BoxConstraints(

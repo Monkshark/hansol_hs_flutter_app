@@ -25,7 +25,7 @@ class SettingToggleSwitch extends StatefulWidget {
     this.trackInActiveColor = const Color(0xffcccccc),
     Color? toggleActiveColor,
     this.toggleInActiveColor = const Color(0xffcccccc),
-  })  : toggleActiveColor = toggleActiveColor ?? AppColors.color.primaryColor,
+  })  : toggleActiveColor = toggleActiveColor ?? AppColors.theme.primaryColor,
         super(key: key);
 
   @override

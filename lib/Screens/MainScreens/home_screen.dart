@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Screens/SubScreens/setting_screen.dart';
 import 'package:hansol_high_school/Widgets/HomeWidgets/current_subject_card.dart';
 import 'package:hansol_high_school/Styles/app_colors.dart';
+import 'package:hansol_high_school/Widgets/HomeWidgets/news_card.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -20,9 +22,9 @@ class _HomeScreenState extends State<HomeScreen> {
       body: Scaffold(
         backgroundColor: Colors.white,
         appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(200),
+          preferredSize: Size.fromHeight(Device.getHeight(23)),
           child: AppBar(
-            backgroundColor: AppColors.color.primaryColor,
+            backgroundColor: AppColors.theme.primaryColor,
             actions: [
               SizedBox(
                 child: IconButton(
@@ -45,7 +47,14 @@ class _HomeScreenState extends State<HomeScreen> {
         body: const Column(
           children: [
             Center(
-              child: CurrentSubjectCard(),
+              child: Column(
+                children: [
+                  CurrentSubjectCard(),
+                  NewsCard(
+                    title: "{news_title_1}",
+                  ),
+                ],
+              ),
             ),
           ],
         ),

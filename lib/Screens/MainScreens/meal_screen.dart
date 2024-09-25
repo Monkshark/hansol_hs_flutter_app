@@ -60,12 +60,12 @@ class _MealScreenState extends State<MealScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.color.primaryColor,
+      backgroundColor: AppColors.theme.primaryColor,
       body: SafeArea(
         child: Column(
           children: [
             WeeklyCalendar(
-              backgroundColor: AppColors.color.primaryColor,
+              backgroundColor: AppColors.theme.primaryColor,
               onDaySelected: (dateTime) {
                 setState(() {
                   selectedDate = dateTime;
@@ -78,7 +78,7 @@ class _MealScreenState extends State<MealScreen> {
               height: Device.getHeight(5),
               width: double.infinity,
               child: ColoredBox(
-                color: AppColors.color.primaryColor,
+                color: AppColors.theme.primaryColor,
               ),
             ),
             Expanded(
@@ -132,7 +132,7 @@ class _MealScreenState extends State<MealScreen> {
                                             meal.getMealType(),
                                             style: TextStyle(
                                               color: AppColors
-                                                  .color.mealTypeTextColor,
+                                                  .theme.mealTypeTextColor,
                                             ),
                                           ),
                                         ),

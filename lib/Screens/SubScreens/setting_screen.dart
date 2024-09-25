@@ -129,10 +129,10 @@ class _SettingScreenState extends State<SettingScreen> {
 
   Widget buildSettingsBody() {
     return Scaffold(
-      backgroundColor: AppColors.color.settingScreenBackgroundColor,
+      backgroundColor: AppColors.theme.settingScreenBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
-        backgroundColor: AppColors.color.settingScreenBackgroundColor,
+        backgroundColor: AppColors.theme.settingScreenBackgroundColor,
         title: const Text(
           '설정',
         ),

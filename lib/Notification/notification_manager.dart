@@ -1,10 +1,12 @@
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hansol_high_school/API/meal_data_api.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 
 class NotificationManager {
   static final NotificationManager _instance = NotificationManager._internal();
@@ -23,15 +25,46 @@ class NotificationManager {
   late TimeOfDay dinnerTime;
   late bool isNullNotificationOn;
 
-  static const MethodChannel platform =
-      MethodChannel('com.example.hansol_high_school/alarm');
+  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   Future<void> init() async {
     await SettingData().init();
     tz.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
     await _loadSettings();
+    await _initializeNotifications();
     await _scheduleAllMealNotifications();
+    await scheduleMidnightAlarm();
+  }
+
+  Future<void> _initializeNotifications() async {
+    const DarwinInitializationSettings initializationSettingsIOS =
+        DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+    );
+
+    const InitializationSettings initializationSettings =
+        InitializationSettings(
+      iOS: initializationSettingsIOS,
+    );
+
+    await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+    await _requestIOSPermissions();
+  }
+
+  Future<void> _requestIOSPermissions() async {
+    await flutterLocalNotificationsPlugin
+        .resolvePlatformSpecificImplementation<
+            IOSFlutterLocalNotificationsPlugin>()
+        ?.requestPermissions(
+          alert: true,
+          badge: true,
+          sound: true,
+        );
   }
 
   Future<void> _loadSettings() async {
@@ -45,77 +78,113 @@ class NotificationManager {
   }
 
   Future<void> _scheduleAllMealNotifications() async {
-    await _scheduleMealNotification(
-      isNotificationOn: isBreakfastNotificationOn,
-      time: breakfastTime,
-      mealType: MealDataApi.BREAKFAST,
-      notificationTitle: "${DateTime.now().month}/${DateTime.now().day} 조식 정보",
-    );
-    await _scheduleMealNotification(
-      isNotificationOn: isLunchNotificationOn,
-      time: lunchTime,
-      mealType: MealDataApi.LUNCH,
-      notificationTitle: "${DateTime.now().month}/${DateTime.now().day} 중식 정보",
-    );
-    await _scheduleMealNotification(
-      isNotificationOn: isDinnerNotificationOn,
-      time: dinnerTime,
-      mealType: MealDataApi.DINNER,
-      notificationTitle: "${DateTime.now().month}/${DateTime.now().day} 석식 정보",
-    );
+    DateTime now = DateTime.now();
+    for (int i = 0; i < 7; i++) {
+      DateTime date = now.add(Duration(days: i));
+      await _scheduleMealNotificationsForDate(date);
+    }
+  }
+
+  Future<void> _scheduleMealNotificationsForDate(DateTime date) async {
+    if (isBreakfastNotificationOn) {
+      await _scheduleMealNotification(
+        date: date,
+        time: breakfastTime,
+        mealType: MealDataApi.BREAKFAST,
+        notificationId: _getNotificationId(date, MealDataApi.BREAKFAST),
+      );
+    }
+
+    if (isLunchNotificationOn) {
+      await _scheduleMealNotification(
+        date: date,
+        time: lunchTime,
+        mealType: MealDataApi.LUNCH,
+        notificationId: _getNotificationId(date, MealDataApi.LUNCH),
+      );
+    }
+
+    if (isDinnerNotificationOn) {
+      await _scheduleMealNotification(
+        date: date,
+        time: dinnerTime,
+        mealType: MealDataApi.DINNER,
+        notificationId: _getNotificationId(date, MealDataApi.DINNER),
+      );
+    }
+  }
+
+  int _getNotificationId(DateTime date, int mealType) {
+    String idString =
+        '${date.year}${date.month.toString().padLeft(2, '0')}${date.day.toString().padLeft(2, '0')}$mealType';
+    return int.parse(idString);
   }
 
   Future<void> _scheduleMealNotification({
-    required bool isNotificationOn,
+    required DateTime date,
     required TimeOfDay time,
     required int mealType,
-    required String notificationTitle,
+    required int notificationId,
   }) async {
-    if (!isNotificationOn) {
-      await _cancelNotification(notificationTitle);
-      return;
-    }
+    final DateTime scheduledDateTime = DateTime(
+      date.year,
+      date.month,
+      date.day,
+      time.hour,
+      time.minute,
+    );
 
-    final now = DateTime.now();
-    final notificationDate =
-        DateTime(now.year, now.month, now.day, time.hour, time.minute);
+    final tz.TZDateTime scheduledDate = tz.TZDateTime.from(
+      scheduledDateTime,
+      tz.local,
+    );
 
-    if (notificationDate.isBefore(now)) {
-      notificationDate.add(Duration(days: 1));
-    }
-
-    final String mealMenu = (await MealDataApi.getMeal(
-      date: DateTime.now(),
+    String mealMenu = (await MealDataApi.getMeal(
+      date: date,
       mealType: mealType,
       type: '메뉴',
     ))
         .toString();
 
-    if (getMealSetting(mealMenu, isNullNotificationOn) && !isWeekend()) {
-      try {
-        await platform.invokeMethod('scheduleMealNotification', {
-          'hour': time.hour.toString(),
-          'minute': time.minute.toString(),
-          'notificationTitle': notificationTitle,
-          'mealMenu': mealMenu,
-        });
-        log("Scheduled $notificationTitle notification for ${time.hour}:${time.minute} with menu: $mealMenu");
-      } catch (e) {
-        log("Failed to schedule notification: $e");
-      }
+    String notificationTitle =
+        "${date.month}/${date.day} ${_getMealName(mealType)} 정보";
+
+    if (_shouldScheduleNotification(mealMenu, isNullNotificationOn) &&
+        !_isWeekend(date)) {
+      const DarwinNotificationDetails iOSPlatformChannelSpecifics =
+          DarwinNotificationDetails();
+
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(iOS: iOSPlatformChannelSpecifics);
+
+      await flutterLocalNotificationsPlugin.zonedSchedule(
+        notificationId,
+        notificationTitle,
+        mealMenu,
+        scheduledDate,
+        platformChannelSpecifics,
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.absoluteTime,
+        matchDateTimeComponents: DateTimeComponents.dateAndTime,
+      );
+
+      log("Scheduled $notificationTitle notification for ${time.hour}:${time.minute} with menu: $mealMenu");
     } else {
-      log('Meal is null or null notifications are disabled or today is weekend');
+      log('식단 정보가 없거나 알림 설정이 꺼져 있거나 주말입니다.');
     }
   }
 
-  Future<void> _cancelNotification(String notificationTitle) async {
-    try {
-      await platform.invokeMethod('cancelMealNotification', {
-        'notificationTitle': notificationTitle,
-      });
-      log("Cancelled $notificationTitle notification");
-    } on PlatformException catch (e) {
-      log("Failed to cancel notification: '${e.message}'.");
+  String _getMealName(int mealType) {
+    switch (mealType) {
+      case 1:
+        return '조식';
+      case 2:
+        return '중식';
+      case 3:
+        return '석식';
+      default:
+        return '';
     }
   }
 
@@ -150,13 +219,35 @@ class NotificationManager {
     }
   }
 
-  static bool isWeekend() {
-    return (DateTime.now().weekday != DateTime.saturday &&
-        DateTime.now().weekday != DateTime.sunday);
+  bool _isWeekend(DateTime date) {
+    return (date.weekday == DateTime.saturday ||
+        date.weekday == DateTime.sunday);
   }
 
-  static bool getMealSetting(var mealMenu, var isNullNotificationOn) {
+  bool _shouldScheduleNotification(String mealMenu, bool isNullNotificationOn) {
     return mealMenu != '급식 정보가 없습니다.' ||
         (isNullNotificationOn && mealMenu == '급식 정보가 없습니다.');
   }
+
+  Future<void> scheduleMidnightAlarm() async {
+    final now = DateTime.now();
+    final midnight = DateTime(now.year, now.month, now.day + 1);
+
+    await AndroidAlarmManager.cancel(0);
+
+    await AndroidAlarmManager.oneShotAt(
+      midnight,
+      0,
+      midnightCallback,
+      exact: true,
+      wakeup: true,
+      rescheduleOnReboot: true,
+    );
+  }
+}
+
+void midnightCallback() {
+  WidgetsFlutterBinding.ensureInitialized();
+  final notificationManager = NotificationManager();
+  notificationManager.updateNotifications();
 }

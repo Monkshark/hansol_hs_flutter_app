@@ -52,11 +52,11 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
             startingDayOfWeek: StartingDayOfWeek.monday,
             calendarStyle: CalendarStyle(
               todayDecoration: BoxDecoration(
-                color: AppColors.color.lighterColor,
+                color: AppColors.theme.lighterColor,
                 shape: BoxShape.circle,
               ),
               selectedDecoration: BoxDecoration(
-                color: AppColors.color.primaryColor,
+                color: AppColors.theme.primaryColor,
                 shape: BoxShape.circle,
               ),
               weekendTextStyle: const TextStyle(color: Colors.white),

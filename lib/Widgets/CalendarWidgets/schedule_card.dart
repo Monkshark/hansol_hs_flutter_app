@@ -22,7 +22,7 @@ class _Time extends StatelessWidget {
     TextStyle textStyle = TextStyle(
       fontSize: 16.0,
       fontWeight: FontWeight.w600,
-      color: AppColors.color.primaryColor,
+      color: AppColors.theme.primaryColor,
     );
 
     final startTime = _getTimeOfDay(startTimeInMinutes);
@@ -82,7 +82,7 @@ class ScheduleCard extends StatelessWidget {
       decoration: BoxDecoration(
         border: Border.all(
           width: 1.0,
-          color: AppColors.color.primaryColor,
+          color: AppColors.theme.primaryColor,
         ),
         borderRadius: BorderRadius.circular(8.0),
       ),

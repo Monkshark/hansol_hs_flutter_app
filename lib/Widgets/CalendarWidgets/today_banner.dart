@@ -24,7 +24,7 @@ class TodayBanner extends StatelessWidget {
         topRight: Radius.circular(10.0),
       ),
       child: Container(
-        color: AppColors.color.lighterColor,
+        color: AppColors.theme.lighterColor,
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: 16.0,

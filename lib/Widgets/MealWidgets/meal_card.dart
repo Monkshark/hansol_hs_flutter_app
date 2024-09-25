@@ -118,7 +118,7 @@ class _MealCardState extends State<MealCard>
                   child: Container(
                     width: Device.getWidth(85),
                     decoration: BoxDecoration(
-                      color: AppColors.color.mealCardBackgroundColor,
+                      color: AppColors.theme.mealCardBackgroundColor,
                       borderRadius: BorderRadius.circular(12.0),
                     ),
                     child: Padding(

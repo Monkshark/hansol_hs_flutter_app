@@ -13,6 +13,7 @@ abstract class AppColors {
 
   Color get primaryColor => const Color(0xff3F72AF);
   Color get secondaryColor => const Color(0xff198A43);
+  Color get tertiaryColor => const Color(0xFF4D99F4);
   Color get lighterColor => const Color.fromRGBO(63, 114, 175, 0.6);
   Color get lightGreyColor => Colors.grey[200]!;
   Color get darkGreyColor => Colors.grey[600]!;
@@ -22,7 +23,7 @@ abstract class AppColors {
   Color get mealTypeTextColor => const Color(0xff848484);
   Color get mealHeaderIconColor => const Color(0xffDBE2EF);
 
-  static AppColors get color {
+  static AppColors get theme {
     return SettingData().isDarkMode ? DarkAppColors() : LightAppColors();
   }
 }

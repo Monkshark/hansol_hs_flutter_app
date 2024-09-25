@@ -2,17 +2,15 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Permissions -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT"/>
-    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <!-- 아래 권한은 Android 13 이상에서만 필요합니다 -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
-        android:maxSdkVersion="32"/>
-    <uses-permission android:name="android.permission.USE_EXACT_ALARM"
-        tools:ignore="ExactAlarm"/>
+    <!-- 정확한 알람을 위한 권한 -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
     <application
         android:label="hansol_high_school"
@@ -30,55 +28,40 @@
             android:turnScreenOn="true">
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
-                android:resource="@style/NormalTheme"/>
+                android:resource="@style/NormalTheme" />
             <meta-data
                 android:name="com.google.firebase.messaging.default_notification_channel_id"
-                android:value="high_importance_channel"/>
+                android:value="high_importance_channel" />
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
             <intent-filter>
-                <action android:name="FLUTTER_NOTIFICATION_CLICK"/>
-                <category android:name="android.intent.category.DEFAULT"/>
+                <action android:name="FLUTTER_NOTIFICATION_CLICK" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
 
-        <!-- Boot Receiver -->
-        <receiver
-            android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
-            android:exported="true">
+        <!-- 플러그인에서 필요한 리시버들 -->
+        <receiver android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
+            android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED"/>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-
-        <receiver
-            android:name=".MealNotificationReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="com.example.hansol_high_school.NOTIFY_MEAL" />
-            </intent-filter>
-        </receiver>
-
-        <!-- Notification Receiver for Scheduling -->
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.ActionBroadcastReceiver"
-            android:exported="true"/>
+            android:exported="true" />
 
-        <!-- Notification Receiver for Dismissing -->
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.DismissedReceiver"
-            android:exported="true"/>
+            android:exported="true" />
 
-        <!-- Notification Service for Scheduling -->
-        <service
-            android:name="com.dexterous.flutterlocalnotifications.scheduler.NotificationService"
+        <service android:name="com.dexterous.flutterlocalnotifications.scheduler.NotificationService"
             android:permission="android.permission.BIND_JOB_SERVICE"
-            android:exported="true"/>
+            android:exported="false" />
 
-        <!-- Flutter Plugin Registrant -->
         <meta-data
             android:name="flutterEmbedding"
-            android:value="2"/>
+            android:value="2" />
     </application>
 </manifest>

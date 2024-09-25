@@ -35,7 +35,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.color.primaryColor,
+        backgroundColor: AppColors.theme.primaryColor,
         onPressed: () {
           showModalBottomSheet(
             context: context,

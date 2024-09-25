@@ -20,7 +20,7 @@ class _SingleSettingCardState extends State<SingleSettingCard> {
   Widget build(BuildContext context) {
     return Container(
       width: Device.getWidth(94),
-      height: Device.getHeight(5.7),
+      height: Device.getHeight(6.5),
       decoration: ShapeDecoration(
         color: Colors.white,
         shape: RoundedRectangleBorder(
