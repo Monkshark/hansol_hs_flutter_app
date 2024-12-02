@@ -46,7 +46,7 @@ class MealDataApi {
     if (prefs.containsKey(cacheKey)) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
-      const oneDayInMilliseconds = 12 * 60 * 60 * 1000;
+      const oneDayInMilliseconds = 24 * 60 * 60 * 1000;
 
       if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
         final mealData = prefs.getString(cacheKey);
@@ -100,6 +100,7 @@ class MealDataApi {
       prefs.setInt(
           '$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
     }
+    log(meal.toString());
 
     return meal;
   }

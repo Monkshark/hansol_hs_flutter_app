@@ -2,19 +2,21 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/local_database.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
+import 'package:hansol_high_school/Notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/Screens/MainScreens/home_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/meal_screen.dart';
 import 'package:hansol_high_school/Screens/MainScreens/notice_screen.dart';
-import 'package:hansol_high_school/Notification/notification_manager.dart';
 import 'package:hansol_high_school/firebase_options.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:timezone/data/latest.dart' as tz;
+import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,13 +27,16 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  await NotificationManager().init();
 
+  tz.initializeTimeZones();
+  tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
   await _requestNotificationPermission();
   await SettingData().init();
+
   final database = LocalDataBase();
   GetIt.I.registerSingleton<LocalDataBase>(database);
-  tz.initializeTimeZones();
+  DailyMealNotification().initializeNotifications();
+  DailyMealNotification().scheduleDailyNotifications();
   initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
 }
 
@@ -65,27 +70,31 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
   late List<Widget> _pages;
   late PageController _pageController;
 
-  final NotificationManager _notificationManager = NotificationManager();
-
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    _notificationManager.init();
     _pages = [MealScreen(), HomeScreen(), const NoticeScreen()];
     _pageController = PageController(initialPage: 1);
+
+    notificationStream.stream.listen((payload) {
+      if (payload == 'meal_screen') {
+        _navigateToMealScreen();
+      }
+    });
+  }
+
+  void _navigateToMealScreen() {
+    setState(() {
+      _currentIndex = 0;
+    });
+    _pageController.jumpToPage(0);
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      _notificationManager.updateNotifications();
-    }
-  }
+  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
     _pageController.dispose();
     super.dispose();
   }
@@ -122,20 +131,24 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
           BottomNavigationBarItem(
             icon: Icon(Icons.fastfood_outlined),
             label: '급식',
-            // activeIcon: Icon(Icons.fastfood),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.home_outlined),
             label: '홈',
-            // activeIcon: Icon(Icons.home),
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications_outlined),
             label: '알림',
-            // activeIcon: Icon(Icons.notifications),
           ),
         ],
       ),
     );
   }
+}
+
+final StreamController<String?> notificationStream =
+    StreamController<String?>.broadcast();
+
+void onNotificationTap(NotificationResponse notificationResponse) {
+  notificationStream.add(notificationResponse.payload);
 }

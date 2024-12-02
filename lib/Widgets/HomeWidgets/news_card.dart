@@ -20,10 +20,10 @@ class _NewsCardState extends State<NewsCard> {
     return Container(
       width: Device.getWidth(95),
       height: Device.getHeight(5),
-      color: AppColors.theme.tertiaryColor,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(10),
+        color: AppColors.theme.tertiaryColor,
       ),
       child: Text(
         widget.title,

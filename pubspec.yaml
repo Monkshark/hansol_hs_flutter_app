@@ -43,7 +43,7 @@ dependencies:
   firebase_core: ^3.3.0
   android_intent: ^2.0.2
   package_info: ^2.0.2
-  device_info_plus: ^10.1.0
+  device_info_plus: ^10.1.2
   io: ^1.0.4
   android_alarm_manager_plus: ^4.0.3
   cloud_firestore: ^5.1.0
@@ -61,6 +61,7 @@ dependencies:
   permission_handler: ^11.3.1
   numberpicker: ^2.1.2
   workmanager: ^0.5.2
+  flutter_timezone: ^3.0.1
 
 
 dev_dependencies:

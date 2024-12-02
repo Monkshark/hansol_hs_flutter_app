@@ -1,10 +1,8 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter/widgets.dart';
 import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/meal.dart';
 import 'package:share_plus/share_plus.dart';
@@ -13,7 +11,7 @@ import 'dart:io';
 import 'package:hansol_high_school/Styles/app_colors.dart';
 
 class MealCard extends StatefulWidget {
-  final String meal;
+  final String? meal;
   final DateTime date;
   final int mealType;
   final String kcal;
@@ -65,6 +63,9 @@ class _MealCardState extends State<MealCard>
   }
 
   void _handleTap() {
+    if (mealData.meal == null || mealData.meal == "급식 정보가 없습니다") {
+      return;
+    }
     setState(() {
       _buttonsVisible = true;
     });
@@ -127,7 +128,9 @@ class _MealCardState extends State<MealCard>
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            mealData.meal,
+                            mealData.meal != null
+                                ? mealData.meal!
+                                : "급식 정보가 없습니다",
                             style: TextStyle(
                               fontSize: Device.getWidth(3.5),
                               fontFamily: 'Inter',

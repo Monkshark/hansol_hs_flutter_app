@@ -1,5 +1,5 @@
 class Meal {
-  final String meal;
+  final String? meal;
   final DateTime date;
   final int mealType;
   final String kcal;
@@ -13,7 +13,7 @@ class Meal {
 
   @override
   String toString() {
-    return meal;
+    return meal ?? '';
   }
 
   Map<String, dynamic> toJson() => {

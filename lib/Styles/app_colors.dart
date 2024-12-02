@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:hansol_high_school/Styles/dark_app_colors.dart';

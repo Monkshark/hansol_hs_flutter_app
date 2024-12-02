@@ -30,6 +30,23 @@ class _NoticeScreenState extends State<NoticeScreen> {
     super.initState();
   }
 
+  Future<bool> hasSchoolSchedule(DateTime date) async {
+    final schoolSchedule = await NoticeDataApi().getNotice(date: date);
+    return schoolSchedule != null && schoolSchedule != '학사일정이 없습니다';
+  }
+
+  Future<bool> hasPersonalSchedules(DateTime date) async {
+    final schedulesStream = GetIt.I<LocalDataBase>().watchSchedules(date);
+    final schedules = await schedulesStream.first;
+    return schedules.isNotEmpty;
+  }
+
+  Future<bool> hasAnySchedule(DateTime date) async {
+    final schoolScheduleExists = await hasSchoolSchedule(date);
+    final personalSchedulesExist = await hasPersonalSchedules(date);
+    return schoolScheduleExists || personalSchedulesExist;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

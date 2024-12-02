@@ -51,9 +51,4 @@ class SettingData {
       _sharedPreferences.setString('dinnerTime', value);
   String get dinnerTime =>
       _sharedPreferences.getString('dinnerTime') ?? '17:00';
-
-  set isNullNotificationOn(bool value) =>
-      _sharedPreferences.setBool('isNullNotificationOn', value);
-  bool get isNullNotificationOn =>
-      _sharedPreferences.getBool('isNullNotificationOn') ?? true;
 }
