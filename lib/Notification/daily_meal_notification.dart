@@ -92,7 +92,6 @@ class DailyMealNotification {
     TimeOfDay lunchTime = _parseTimeOfDay(SettingData().lunchTime);
     bool isDinnerNotificationOn = SettingData().isDinnerNotificationOn;
     TimeOfDay dinnerTime = _parseTimeOfDay(SettingData().dinnerTime);
-
     await cancelAllNotifications();
 
     List<int> weekdays = [

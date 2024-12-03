@@ -5,6 +5,7 @@ import 'package:hansol_high_school/Data/device.dart';
 import 'package:hansol_high_school/Data/setting_data.dart';
 import 'package:hansol_high_school/Notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/Widgets/SettingWidgets/grade_and_class_picker.dart';
+import 'package:hansol_high_school/Widgets/SettingWidgets/light_mode_switch.dart';
 import 'package:hansol_high_school/Widgets/SettingWidgets/single_setting_card.dart';
 import 'package:hansol_high_school/Styles/app_colors.dart';
 import 'package:hansol_high_school/Screens/SubScreens/timetable_select_screen.dart';
@@ -244,6 +245,7 @@ class _SettingScreenState extends State<SettingScreen> {
               text: '알림 설정',
               child: Text("a"),
             ),
+            LightModeSwitch(currentMode: ThemeMode.dark, isSelected: true)
           ],
         ),
       ),
