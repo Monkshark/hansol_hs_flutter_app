@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 
 class MultiSettingCard extends StatefulWidget {
-  const MultiSettingCard({Key? key}) : super(key: key);
+  final int settingsCount;
+  final List<SettingInfo> settingInfo;
+  const MultiSettingCard({
+    Key? key,
+    required this.settingsCount,
+    required this.settingInfo,
+  }) : super(key: key);
 
   @override
   State<MultiSettingCard> createState() => _MultiSettingCardState();
@@ -12,4 +18,9 @@ class _MultiSettingCardState extends State<MultiSettingCard> {
   Widget build(BuildContext context) {
     return Container();
   }
+}
+
+enum SettingInfo {
+  text,
+  child,
 }
