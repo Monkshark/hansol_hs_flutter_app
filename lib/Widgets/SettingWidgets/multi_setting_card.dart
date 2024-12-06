@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class MultiSettingCard extends StatefulWidget {
   final int settingsCount;
   final List<SettingInfo> settingInfo;
+
   const MultiSettingCard({
     Key? key,
     required this.settingsCount,
