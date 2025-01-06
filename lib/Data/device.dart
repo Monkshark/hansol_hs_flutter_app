@@ -21,3 +21,4 @@ class Device {
     return height / 100 * percent;
   }
 }
+
