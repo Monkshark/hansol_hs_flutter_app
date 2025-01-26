@@ -1,4 +1,4 @@
-# Miscellaneous 
+# Miscellaneous
 *.class
 *.log
 *.pyc
@@ -47,4 +47,5 @@ app.*.map.json
 /android/app/release
 
 /lib/API/nies_api_keys.dart
+
 
