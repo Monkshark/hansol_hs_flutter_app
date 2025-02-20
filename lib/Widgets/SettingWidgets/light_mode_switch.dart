@@ -18,19 +18,27 @@ class LightModeSwitch extends StatefulWidget {
 class _LightModeSwitchState extends State<LightModeSwitch> {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.blue,
-      body: SizedBox(
-        width: Device.getWidth(30),
-        height: Device.getHeight(30),
-        child: Center(
-          child: SizedBox(
-            width: Device.getWidth(10),
-            height: Device.getHeight(10),
-            child: Icon(
-              Icons.light_mode,
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(13),
+        color: Colors.blue,
+      ),
+      width: Device.getWidth(27),
+      height: Device.getWidth(27),
+      child: Center(
+        child: Column(
+          children: [
+            SizedBox(
+              width: Device.getWidth(8),
+              height: Device.getWidth(8),
+              child: FittedBox(
+                fit: BoxFit.fill,
+                child: Icon(
+                  Icons.light_mode,
+                ),
+              ),
             ),
-          ),
+          ],
         ),
       ),
     );
