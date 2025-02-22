@@ -21,21 +21,40 @@ class _LightModeSwitchState extends State<LightModeSwitch> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(13),
-        color: Colors.blue,
+        color: Colors.white,
       ),
-      width: Device.getWidth(27),
-      height: Device.getWidth(27),
+      width: Device.getWidth(30),
+      height: Device.getWidth(30),
       child: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            SizedBox(
-              width: Device.getWidth(8),
-              height: Device.getWidth(8),
+            Container(
+              width: Device.getWidth(10),
+              height: Device.getWidth(10),
+              padding: EdgeInsets.all(Device.getWidth(2)),
+              decoration: BoxDecoration(
+                color: Color(0xFFFF9500),
+                borderRadius: BorderRadius.circular(
+                  Device.getWidth(5),
+                ),
+              ),
               child: FittedBox(
                 fit: BoxFit.fill,
                 child: Icon(
                   Icons.light_mode,
+                  color: Colors.white,
                 ),
+              ),
+            ),
+            SizedBox(
+              height: Device.getWidth(1),
+            ),
+            Text(
+              "라이트 모드",
+              style: TextStyle(
+                fontSize: Device.getWidth(3),
               ),
             ),
           ],
