@@ -35,19 +35,19 @@ class _ThemeModeButtonsState extends State<ThemeModeButtons> {
           type: ThemeType.light,
           icon: Icons.light_mode,
           label: "라이트 모드",
-          iconColor: Color(0xFFFF9500),
-        ),
-        _buildModeButton(
-          type: ThemeType.system,
-          icon: Icons.phonelink_setup,
-          label: "시스템 모드",
-          iconColor: Color(0xFF007AFF),
+          selectedIconColor: Color(0xFFFF9500),
         ),
         _buildModeButton(
           type: ThemeType.dark,
           icon: Icons.dark_mode,
           label: "다크 모드",
-          iconColor: Color(0xFF8E8E93),
+          selectedIconColor: Color(0xFF21005D),
+        ),
+        _buildModeButton(
+          type: ThemeType.system,
+          icon: Icons.brightness_medium_sharp,
+          label: "시스템 모드",
+          selectedIconColor: Color(0xFF34C759),
         ),
       ],
     );
@@ -57,7 +57,7 @@ class _ThemeModeButtonsState extends State<ThemeModeButtons> {
     required ThemeType type,
     required IconData icon,
     required String label,
-    required Color iconColor,
+    required Color selectedIconColor,
   }) {
     final isSelected = selectedMode == type;
 
@@ -85,7 +85,7 @@ class _ThemeModeButtonsState extends State<ThemeModeButtons> {
                 height: Device.getWidth(10),
                 padding: EdgeInsets.all(Device.getWidth(2)),
                 decoration: BoxDecoration(
-                  color: iconColor,
+                  color: isSelected ? selectedIconColor : Color(0xFF8E8E93),
                   borderRadius: BorderRadius.circular(Device.getWidth(5)),
                 ),
                 child: FittedBox(
