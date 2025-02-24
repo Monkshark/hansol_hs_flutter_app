@@ -59,7 +59,7 @@ class _ThemeModeButtonsState extends State<ThemeModeButtons> {
     required String label,
     required Color selectedIconColor,
   }) {
-    final isSelected = selectedMode == type;
+    var isSelected = selectedMode == type;
 
     return GestureDetector(
       onTap: () {
