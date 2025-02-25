@@ -73,8 +73,8 @@ class _ThemeModeButtonsState extends State<ThemeModeButtons> {
           borderRadius: BorderRadius.circular(13),
           color: isSelected ? Color(0xFFE5E5EA) : Colors.white,
         ),
-        width: Device.getWidth(30),
-        height: Device.getWidth(30),
+        width: Device.getWidth(29),
+        height: Device.getWidth(29),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
