@@ -234,7 +234,7 @@ class DailyMealNotification {
         scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
       scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
-    print('Next instance of weekday $weekday at $scheduledDate');
+    print('next instance of weekday $weekday at $scheduledDate');
     return scheduledDate;
   }
 
@@ -256,4 +256,3 @@ class DailyMealNotification {
     return scheduledDate;
   }
 }
- 
