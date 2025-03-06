@@ -9,17 +9,17 @@ abstract class AppColors {
   Color get black => Colors.black;
   Color get white => Colors.white;
 
-  Color get primaryColor => const Color(0xff3F72AF);
-  Color get secondaryColor => const Color(0xff198A43);
-  Color get tertiaryColor => const Color(0xFF4D99F4);
-  Color get lighterColor => const Color.fromRGBO(63, 114, 175, 0.6);
-  Color get lightGreyColor => Colors.grey[200]!;
-  Color get darkGreyColor => Colors.grey[600]!;
-  Color get textFiledFillColor => Colors.grey[300]!;
-  Color get settingScreenBackgroundColor => const Color(0xffF8F6F6);
-  Color get mealCardBackgroundColor => const Color(0xffDBE2EF);
-  Color get mealTypeTextColor => const Color(0xff848484);
-  Color get mealHeaderIconColor => const Color(0xffDBE2EF);
+  Color get primaryColor;
+  Color get secondaryColor;
+  Color get tertiaryColor;
+  Color get lighterColor;
+  Color get lightGreyColor;
+  Color get darkGreyColor;
+  Color get textFiledFillColor;
+  Color get settingScreenBackgroundColor;
+  Color get mealCardBackgroundColor;
+  Color get mealTypeTextColor;
+  Color get mealHeaderIconColor;
 
   static AppColors get theme {
     return SettingData().isDarkMode ? DarkAppColors() : LightAppColors();
