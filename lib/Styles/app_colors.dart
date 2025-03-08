@@ -6,8 +6,8 @@ import 'package:hansol_high_school/Styles/light_app_colors.dart';
 abstract class AppColors {
   Color get transparent => Colors.transparent;
 
-  Color get black => Colors.black;
-  Color get white => Colors.white;
+  Color get black;
+  Color get white;
 
   Color get primaryColor;
   Color get secondaryColor;
