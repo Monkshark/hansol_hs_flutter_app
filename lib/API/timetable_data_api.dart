@@ -117,7 +117,6 @@ class TimetableDataApi {
       for (var i = 1; i < await getClassCount(grade) + 1; i++) {
         List<String> timetable = await getTimeTable(
             date: date, grade: grade.toString(), classNum: i.toString());
-
         subjects.addAll(timetable);
       }
     }

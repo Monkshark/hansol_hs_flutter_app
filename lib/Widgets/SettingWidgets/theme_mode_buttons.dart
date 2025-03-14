@@ -45,7 +45,7 @@ class _ThemeModeButtonsState extends State<ThemeModeButtons> {
         ),
         _buildModeButton(
           type: ThemeType.system,
-          icon: Icons.brightness_medium_sharp,
+          icon: Icons.settings_suggest,
           label: "시스템 모드",
           selectedIconColor: Color(0xFF34C759),
         ),
