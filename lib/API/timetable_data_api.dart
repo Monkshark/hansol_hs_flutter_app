@@ -11,20 +11,20 @@ import 'package:shared_preferences/shared_preferences.dart';
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
 
-  var myTimetable = [
-    Subject(subjectName: '문학', subjectClass: 1),
-    Subject(subjectName: '수학Ⅰ', subjectClass: 1),
-    Subject(subjectName: '물리학Ⅰ', subjectClass: 5),
-    Subject(subjectName: '세계 문제와 미래 사회', subjectClass: 6),
-    Subject(subjectName: '운동과 건강', subjectClass: 1),
-    Subject(subjectName: '정보과학', subjectClass: 1),
-    Subject(subjectName: '자율활동', subjectClass: 1),
-    Subject(subjectName: '화학Ⅰ', subjectClass: 7),
-    Subject(subjectName: '기하', subjectClass: 1),
-    Subject(subjectName: '영어Ⅰ', subjectClass: 1),
-    Subject(subjectName: '지구과학Ⅰ', subjectClass: 6),
-    Subject(subjectName: '진로활동', subjectClass: 1),
-  ];
+  // var myTimetable = [
+  //   Subject(subjectName: '문학', subjectClass: 1),
+  //   Subject(subjectName: '수학Ⅰ', subjectClass: 1),
+  //   Subject(subjectName: '물리학Ⅰ', subjectClass: 5),
+  //   Subject(subjectName: '세계 문제와 미래 사회', subjectClass: 6),
+  //   Subject(subjectName: '운동과 건강', subjectClass: 1),
+  //   Subject(subjectName: '정보과학', subjectClass: 1),
+  //   Subject(subjectName: '자율활동', subjectClass: 1),
+  //   Subject(subjectName: '화학Ⅰ', subjectClass: 7),
+  //   Subject(subjectName: '기하', subjectClass: 1),
+  //   Subject(subjectName: '영어Ⅰ', subjectClass: 1),
+  //   Subject(subjectName: '지구과학Ⅰ', subjectClass: 6),
+  //   Subject(subjectName: '진로활동', subjectClass: 1),
+  // ];
 
   static Future<List<String>> getTimeTable({
     required DateTime date,
@@ -133,6 +133,7 @@ class TimetableDataApi {
     bool writeLog = false,
   }) async {
     List<List<String?>> customTimeTable = [
+      [],
       [null, '', '', '', '', '', '', ''],
       [null, '', '', '', '', '', '', ''],
       [null, '', '', '', '', '', '', ''],
@@ -167,12 +168,13 @@ class TimetableDataApi {
         try {
           for (var i = 0; i < timetable.length; i++) {
             if (timetable[i] == subject.subjectName) {
-              customTimeTable[date.weekday - 1][i + 1] = subject.subjectName;
+              customTimeTable[date.weekday][i + 1] = subject.subjectName;
             }
           }
         } catch (e) {
           log(e.toString());
           return [
+            [],
             [null, '', '', '', '', '', '', ''],
             [null, '', '', '', '', '', '', ''],
             [null, '', '', '', '', '', '', ''],
@@ -184,8 +186,8 @@ class TimetableDataApi {
     }
 
     if (writeLog) {
-      for (var weekday in customTimeTable) {
-        log('day${customTimeTable.indexOf(weekday) + 1}: ${weekday.toString()}');
+      for (var weekday in customTimeTable.sublist(1)) {
+        log('day\${customTimeTable.indexOf(weekday)}: ${weekday.toString()}');
       }
     }
 
