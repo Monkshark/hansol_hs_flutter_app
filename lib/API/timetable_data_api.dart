@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:hansol_high_school/API/nies_api_keys.dart';
 import 'package:hansol_high_school/Data/subject.dart';
 import 'package:hansol_high_school/Network/network_status.dart';
@@ -10,21 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
-
-  // var myTimetable = [
-  //   Subject(subjectName: '문학', subjectClass: 1),
-  //   Subject(subjectName: '수학Ⅰ', subjectClass: 1),
-  //   Subject(subjectName: '물리학Ⅰ', subjectClass: 5),
-  //   Subject(subjectName: '세계 문제와 미래 사회', subjectClass: 6),
-  //   Subject(subjectName: '운동과 건강', subjectClass: 1),
-  //   Subject(subjectName: '정보과학', subjectClass: 1),
-  //   Subject(subjectName: '자율활동', subjectClass: 1),
-  //   Subject(subjectName: '화학Ⅰ', subjectClass: 7),
-  //   Subject(subjectName: '기하', subjectClass: 1),
-  //   Subject(subjectName: '영어Ⅰ', subjectClass: 1),
-  //   Subject(subjectName: '지구과학Ⅰ', subjectClass: 6),
-  //   Subject(subjectName: '진로활동', subjectClass: 1),
-  // ];
+  static const _subjectCacheKey = 'selectedSubjects';
 
   static Future<List<String>> getTimeTable({
     required DateTime date,
@@ -38,13 +23,11 @@ class TimetableDataApi {
     if (prefs.containsKey(cacheKey)) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
-      const oneDayInMilliseconds = 12 * 60 * 60 * 1000;
+      const oneDay = 12 * 60 * 60 * 1000;
 
-      if (currentTime - cachedTimestamp < oneDayInMilliseconds) {
+      if (currentTime - cachedTimestamp < oneDay) {
         final timetableData = prefs.getStringList(cacheKey);
-        if (timetableData != null) {
-          return timetableData;
-        }
+        if (timetableData != null) return timetableData;
       } else {
         prefs.remove(cacheKey);
         prefs.remove('$cacheKey-timestamp');
@@ -83,18 +66,14 @@ class TimetableDataApi {
 
   static List<String> processTimetable(List<dynamic> timetableArray) {
     List<String> resultList = [];
-
-    for (var i = 0; i < timetableArray.length; i++) {
-      final rowArray = timetableArray[i]['row'];
+    for (var data in timetableArray) {
+      final rowArray = data['row'];
       if (rowArray != null) {
-        for (var j = 0; j < rowArray.length; j++) {
-          final itemObject = rowArray[j];
-          final content = itemObject['ITRT_CNTNT'];
-          resultList.add(content);
+        for (var item in rowArray) {
+          resultList.add(item['ITRT_CNTNT']);
         }
       }
     }
-
     return resultList;
   }
 
@@ -102,28 +81,25 @@ class TimetableDataApi {
     List<String> subjects = [];
     DateTime now = DateTime.now();
     int year = now.year;
-
     DateTime startDate = DateTime(year, 3, 1);
     DateTime endDate = DateTime(year, 3, 7);
 
     for (DateTime date = startDate;
         date.isBefore(endDate.add(const Duration(days: 1)));
         date = date.add(const Duration(days: 1))) {
-      if (date.weekday == DateTime.saturday ||
-          date.weekday == DateTime.sunday) {
-        continue;
-      }
+      if (date.weekday >= 6) continue;
 
       for (var i = 1; i < await getClassCount(grade) + 1; i++) {
         List<String> timetable = await getTimeTable(
-            date: date, grade: grade.toString(), classNum: i.toString());
+          date: date,
+          grade: grade.toString(),
+          classNum: i.toString(),
+        );
         subjects.addAll(timetable);
       }
     }
 
     subjects = subjects.toSet().toList()..sort();
-
-    log(subjects.toString());
     return subjects;
   }
 
@@ -138,32 +114,24 @@ class TimetableDataApi {
       [null, '', '', '', '', '', '', ''],
       [null, '', '', '', '', '', '', ''],
       [null, '', '', '', '', '', '', ''],
-      [null, '', '', '', '', '', '', '']
+      [null, '', '', '', '', '', '', ''],
     ];
 
     DateTime now = DateTime.now();
-    int year = now.year;
-    int month = now.month;
-    int day = now.day;
-
-    DateTime startDate = DateTime(year, month, day);
-    DateTime endDate = DateTime(year, month, day + 6);
+    DateTime startDate = now;
+    DateTime endDate = now.add(const Duration(days: 6));
 
     for (DateTime date = startDate;
         date.isBefore(endDate.add(const Duration(days: 1)));
         date = date.add(const Duration(days: 1))) {
-      if (date.weekday == DateTime.saturday ||
-          date.weekday == DateTime.sunday) {
-        continue;
-      }
+      if (date.weekday >= 6) continue;
 
       for (var subject in userSubjects) {
         List<String> timetable = await getTimeTable(
-            date: date,
-            grade: grade,
-            classNum: subject.subjectClass.toString());
-
-        log(timetable.toString());
+          date: date,
+          grade: grade,
+          classNum: subject.subjectClass.toString(),
+        );
 
         try {
           for (var i = 0; i < timetable.length; i++) {
@@ -179,7 +147,7 @@ class TimetableDataApi {
             [null, '', '', '', '', '', '', ''],
             [null, '', '', '', '', '', '', ''],
             [null, '', '', '', '', '', '', ''],
-            [null, '', '', '', '', '', '', '']
+            [null, '', '', '', '', '', '', ''],
           ];
         }
       }
@@ -187,11 +155,48 @@ class TimetableDataApi {
 
     if (writeLog) {
       for (var weekday in customTimeTable.sublist(1)) {
-        log('day\${customTimeTable.indexOf(weekday)}: ${weekday.toString()}');
+        log('day${customTimeTable.indexOf(weekday)}: ${weekday.toString()}');
       }
     }
 
     return customTimeTable;
+  }
+
+  static Future<List<Subject>> loadCachedSubjects() async {
+    final prefs = await SharedPreferences.getInstance();
+    DateTime now = DateTime.now();
+    if (now.month < 3 || (now.month == 3 && now.day < 1)) {
+      await prefs.remove(_subjectCacheKey);
+      return [];
+    }
+
+    final jsonString = prefs.getString(_subjectCacheKey);
+    if (jsonString == null) return [];
+
+    try {
+      final List<dynamic> jsonList = json.decode(jsonString);
+      return jsonList
+          .map((item) => Subject(
+                subjectName: item['subjectName'],
+                subjectClass: item['subjectClass'],
+              ))
+          .toList();
+    } catch (e) {
+      log('loadCachedSubjects error: $e');
+      return [];
+    }
+  }
+
+  static Future<void> saveSubjectsToCache(List<Subject> subjects) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonList = subjects
+        .map((s) => {
+              'subjectName': s.subjectName,
+              'subjectClass': s.subjectClass,
+            })
+        .toList();
+    final jsonString = json.encode(jsonList);
+    await prefs.setString(_subjectCacheKey, jsonString);
   }
 
   static Future<int> getClassCount(int grade) async {
@@ -201,13 +206,11 @@ class TimetableDataApi {
     if (prefs.containsKey(cacheKey)) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
-      const twelveHoursInMilliseconds = 12 * 60 * 60 * 1000;
+      const twelveHours = 12 * 60 * 60 * 1000;
 
-      if (currentTime - cachedTimestamp < twelveHoursInMilliseconds) {
+      if (currentTime - cachedTimestamp < twelveHours) {
         final cachedClassCount = prefs.getInt(cacheKey);
-        if (cachedClassCount != null) {
-          return cachedClassCount;
-        }
+        if (cachedClassCount != null) return cachedClassCount;
       } else {
         prefs.remove(cacheKey);
         prefs.remove('$cacheKey-timestamp');
