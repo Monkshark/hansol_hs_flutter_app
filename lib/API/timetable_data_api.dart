@@ -59,20 +59,33 @@ class TimetableDataApi {
   }
 
   static Future<Map<String, dynamic>?> fetchData(String url) async {
-    final response = await http.get(Uri.parse(url));
-    if (response.statusCode != 200) return null;
-    return jsonDecode(response.body);
+    try {
+      final response = await http.get(Uri.parse(url));
+      if (response.statusCode != 200) return null;
+      return jsonDecode(response.body);
+    } catch (e) {
+      log('fetchData error: $e');
+      return null;
+    }
   }
 
   static List<String> processTimetable(List<dynamic> timetableArray) {
     List<String> resultList = [];
-    for (var data in timetableArray) {
-      final rowArray = data['row'];
-      if (rowArray != null) {
-        for (var item in rowArray) {
-          resultList.add(item['ITRT_CNTNT']);
+    try {
+      for (var data in timetableArray) {
+        final rowArray = data['row'];
+        if (rowArray != null) {
+          for (var item in rowArray) {
+            final content = item['ITRT_CNTNT'];
+            if (content is String) {
+              resultList.add(content);
+            }
+          }
         }
       }
+    } catch (e) {
+      log('processTimetable error: $e');
+      return [];
     }
     return resultList;
   }
@@ -140,7 +153,7 @@ class TimetableDataApi {
             }
           }
         } catch (e) {
-          log(e.toString());
+          log('getCustomTimeTable error: $e');
           return [
             [],
             [null, '', '', '', '', '', '', ''],
