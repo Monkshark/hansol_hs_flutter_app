@@ -17,6 +17,8 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hansol_high_school/API/timetable_data_api.dart';
+import 'package:hansol_high_school/Data/subject.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,6 +40,15 @@ Future<void> main() async {
   DailyMealNotification().initializeNotifications();
   DailyMealNotification().scheduleDailyNotifications();
   initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
+
+  List<Subject> subjects =
+      await TimetableDataApi.getAllSubjectCombinations(grade: 3);
+  for (var subject in subjects) {
+    log('${subject.subjectName} - ${subject.subjectClass}반');
+  }
+
+  List<String>? subjectss = await TimetableDataApi.getSubjects(grade: 3);
+  log('[main] getSubjects 결과: $subjectss');
 }
 
 Future<void> _requestNotificationPermission() async {

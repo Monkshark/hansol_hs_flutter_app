@@ -93,9 +93,9 @@ class TimetableDataApi {
   static Future<List<String>?> getSubjects({required int grade}) async {
     List<String> subjects = [];
     DateTime now = DateTime.now();
-    int year = now.year;
-    DateTime startDate = DateTime(year, 3, 1);
-    DateTime endDate = DateTime(year, 3, 7);
+
+    DateTime startDate = DateTime(now.year, 3, 8);
+    DateTime endDate = DateTime(now.year, 3, 14);
 
     for (DateTime date = startDate;
         date.isBefore(endDate.add(const Duration(days: 1)));
@@ -108,7 +108,8 @@ class TimetableDataApi {
           grade: grade.toString(),
           classNum: i.toString(),
         );
-        subjects.addAll(timetable);
+
+        subjects.addAll(timetable.where((name) => !name.contains('[보강]')));
       }
     }
 
@@ -249,5 +250,43 @@ class TimetableDataApi {
     prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
 
     return classCount;
+  }
+
+  static Future<List<Subject>> getAllSubjectCombinations(
+      {required int grade}) async {
+    Set<Subject> subjectSet = {};
+    DateTime now = DateTime.now();
+    DateTime startDate = DateTime(now.year, 3, 8);
+    DateTime endDate = DateTime(now.year, 3, 14);
+
+    for (DateTime date = startDate;
+        date.isBefore(endDate.add(const Duration(days: 1)));
+        date = date.add(const Duration(days: 1))) {
+      if (date.weekday >= 6) continue;
+
+      int classCount = await getClassCount(grade);
+
+      for (int classNum = 1; classNum <= classCount; classNum++) {
+        List<String> timetable = await getTimeTable(
+          date: date,
+          grade: grade.toString(),
+          classNum: classNum.toString(),
+        );
+
+        subjectSet.addAll(timetable
+            .where((name) => !name.contains('[보강]'))
+            .map((name) => Subject(subjectName: name, subjectClass: classNum)));
+      }
+    }
+
+    List<Subject> subjectList = subjectSet.toList();
+
+    subjectList.sort((a, b) {
+      int nameCompare = a.subjectName.compareTo(b.subjectName);
+      if (nameCompare != 0) return nameCompare;
+      return a.subjectClass.compareTo(b.subjectClass);
+    });
+
+    return subjectList;
   }
 }
