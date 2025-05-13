@@ -2,30 +2,25 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 
 class NetworkStatus {
   static Future<bool> isConnected() async {
-    ConnectivityResult connectivityResult =
-        await Connectivity().checkConnectivity();
-
-    return connectivityResult != ConnectivityResult.none;
+    final results = await Connectivity().checkConnectivity();
+    return results.contains(ConnectivityResult.wifi) ||
+        results.contains(ConnectivityResult.mobile);
   }
 
   static Future<bool> isUnconnected() async {
-    ConnectivityResult connectivityResult =
-        await Connectivity().checkConnectivity();
-
-    return connectivityResult == ConnectivityResult.none;
+    final results = await Connectivity().checkConnectivity();
+    return results.isEmpty || results.contains(ConnectivityResult.none);
   }
 
   static Future<String> getConnectionType() async {
-    ConnectivityResult connectivityResult =
-        await Connectivity().checkConnectivity();
+    final results = await Connectivity().checkConnectivity();
 
-    switch (connectivityResult) {
-      case ConnectivityResult.wifi:
-        return 'Wi-Fi';
-      case ConnectivityResult.mobile:
-        return 'Mobile';
-      default:
-        return 'None';
+    if (results.contains(ConnectivityResult.wifi)) {
+      return 'Wi-Fi';
+    } else if (results.contains(ConnectivityResult.mobile)) {
+      return 'Mobile';
+    } else {
+      return 'None';
     }
   }
 }
