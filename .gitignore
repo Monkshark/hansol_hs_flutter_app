@@ -46,7 +46,7 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-/lib/API/nies_api_keys.dart
+/lib/api/nies_api_keys.dart
  
 
 
