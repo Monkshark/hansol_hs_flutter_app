@@ -1,13 +1,11 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'package:flutter/foundation.dart';
-import 'package:hansol_high_school/API/nies_api_keys.dart';
-import 'package:hansol_high_school/Data/subject.dart';
-import 'package:hansol_high_school/Network/network_status.dart';
+import 'package:hansol_high_school/api/nies_api_keys.dart';
+import 'package:hansol_high_school/data/subject.dart';
+import 'package:hansol_high_school/network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
