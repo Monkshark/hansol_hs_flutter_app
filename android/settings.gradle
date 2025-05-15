@@ -26,4 +26,10 @@ plugins {
     id "com.android.application" version '8.2.2' apply false
 }
 
+dependencyResolutionManagement{
+    repositories{
+        maven { url "https://jitpack.io" }
+    }
+}
+
 include ":app"
