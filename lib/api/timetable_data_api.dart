@@ -294,25 +294,23 @@ class TimetableDataApi {
   static Future<List<Subject>> getSubjectsFromAdminFirestore(int grade) async {
     List<Subject> result = [];
 
-    final subjectDoc =
-        FirebaseFirestore.instance.collection("subjects").doc(grade.toString());
+    final query = await FirebaseFirestore.instance
+        .collection('grade')
+        .doc(grade.toString())
+        .collection('subject')
+        .get();
 
-    final collections = await subjectDoc.collection("과목").get();
-
-    for (final subjectCol in collections.docs) {
-      final metaDoc =
-          await subjectCol.reference.collection('meta').doc('meta').get();
-      if (metaDoc.exists) {
-        final data = metaDoc.data()!;
-        result.add(Subject(
-          subjectName: subjectCol.id,
+    for (var doc in query.docs) {
+      final data = doc.data();
+      result.add(
+        Subject(
+          subjectName: doc.id,
           subjectClass: -1,
-          category: data["category"],
-          isOriginal: data["isOriginal"] ?? false,
-        ));
-      }
+          category: data['category'],
+          isOriginal: data['isOriginal'] ?? false,
+        ),
+      );
     }
-
     return result;
   }
 }
