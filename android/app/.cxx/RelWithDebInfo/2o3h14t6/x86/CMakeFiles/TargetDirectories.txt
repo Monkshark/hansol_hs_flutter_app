@@ -1,2 +1,0 @@
-C:/Users/manne/Desktop/hansol_high_school/android/app/.cxx/RelWithDebInfo/2o3h14t6/x86/CMakeFiles/edit_cache.dir
-C:/Users/manne/Desktop/hansol_high_school/android/app/.cxx/RelWithDebInfo/2o3h14t6/x86/CMakeFiles/rebuild_cache.dir

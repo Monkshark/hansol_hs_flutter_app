@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hansol_high_school/api/nies_api_keys.dart';
 import 'package:hansol_high_school/data/subject.dart';
 import 'package:hansol_high_school/network/network_status.dart';
@@ -290,32 +291,28 @@ class TimetableDataApi {
     return subjectList;
   }
 
-  // static Future<List<Subject>> getSubjectsFromAdminFirestore(int grade) async {
-  //   if (kIsWeb) {
-  //     debugPrint("Web에서는 Firestore listCollections() 미지원");
-  //     return []; // 또는 throw UnsupportedError("Web not supported");
-  //   }
-  //
-  //   List<Subject> result = [];
-  //
-  //   final subjectDoc =
-  //       FirebaseFirestore.instance.collection("subjects").doc(grade.toString());
-  //
-  //   final collections = await subjectDoc.listCollections();
-  //
-  //   for (final subjectCol in collections) {
-  //     final metaDoc = await subjectCol.doc("meta").get();
-  //     if (metaDoc.exists) {
-  //       final data = metaDoc.data()!;
-  //       result.add(Subject(
-  //         subjectName: subjectCol.id,
-  //         subjectClass: -1,
-  //         category: data["category"],
-  //         isOriginal: data["isOriginal"] ?? false,
-  //       ));
-  //     }
-  //   }
-  //
-  //   return result;
-  // }
+  static Future<List<Subject>> getSubjectsFromAdminFirestore(int grade) async {
+    List<Subject> result = [];
+
+    final subjectDoc =
+        FirebaseFirestore.instance.collection("subjects").doc(grade.toString());
+
+    final collections = await subjectDoc.collection("과목").get();
+
+    for (final subjectCol in collections.docs) {
+      final metaDoc =
+          await subjectCol.reference.collection('meta').doc('meta').get();
+      if (metaDoc.exists) {
+        final data = metaDoc.data()!;
+        result.add(Subject(
+          subjectName: subjectCol.id,
+          subjectClass: -1,
+          category: data["category"],
+          isOriginal: data["isOriginal"] ?? false,
+        ));
+      }
+    }
+
+    return result;
+  }
 }
