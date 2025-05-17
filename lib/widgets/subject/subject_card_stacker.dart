@@ -18,14 +18,17 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
   double dragDx = 0.0;
   int swipeDirection = 1; // 1: next, -1: prev
 
+  static const double maxDrag = 55.0; // 카드가 움직일 수 있는 최대 거리
+
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
-      duration: const Duration(milliseconds: 220),
+      duration: const Duration(milliseconds: 210),
       vsync: this,
     );
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.easeInOut);
+    _animation =
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
   }
 
   @override
@@ -69,16 +72,16 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
     if (_isSwiping) return;
     setState(() {
       dragDx += details.primaryDelta!;
-      dragDx = dragDx.clamp(-100.0, 100.0);
+      dragDx = dragDx.clamp(-maxDrag, maxDrag); // 최대 이동 거리 제한
       swipeDirection = dragDx < 0 ? 1 : -1;
     });
   }
 
   void _handleDragEnd(DragEndDetails details) {
     if (_isSwiping) return;
-    if (dragDx.abs() > 50 ||
+    if (dragDx.abs() > maxDrag / 2 ||
         (details.primaryVelocity != null &&
-            details.primaryVelocity!.abs() > 500)) {
+            details.primaryVelocity!.abs() > 350)) {
       if (dragDx < 0) {
         _animateToNext();
       } else if (dragDx > 0) {
@@ -96,31 +99,29 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
     final int len = widget.cards.length;
     int backIndex = (currentIndex + 1) % len;
     int prevIndex = (currentIndex - 1 + len) % len;
-
     int nextCardIndex = swipeDirection == 1 ? backIndex : prevIndex;
 
     return Center(
       child: SizedBox(
         width: 340,
-        height: 160,
+        height: 120,
         child: GestureDetector(
           onHorizontalDragUpdate: _handleDragUpdate,
           onHorizontalDragEnd: _handleDragEnd,
           child: Stack(
             alignment: Alignment.center,
             children: [
-              // "넘어갈 카드"
               AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
                   double progress = _isSwiping
                       ? _animation.value
-                      : (dragDx.abs() / 100.0).clamp(0.0, 1.0);
-                  double dx = 8.0 * (1 - progress);
-                  double scale = 0.98 + 0.02 * progress;
-                  double opacity = 0.8 + 0.18 * progress;
+                      : (dragDx.abs() / maxDrag).clamp(0.0, 1.0);
+                  double dx = 7.0 * (1 - progress);
+                  double scale = 0.984 + 0.016 * progress;
+                  double opacity = 0.80 + 0.18 * progress;
                   return Transform.translate(
-                    offset: Offset(dx, 4),
+                    offset: Offset(dx, 3.5),
                     child: Transform.scale(
                       scale: scale,
                       child: Opacity(
@@ -131,13 +132,12 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
                   );
                 },
               ),
-              // 현재 카드
               AnimatedBuilder(
                 animation: _animation,
                 builder: (context, child) {
                   double progress = _isSwiping
                       ? _animation.value
-                      : (dragDx.abs() / 100.0).clamp(0.0, 1.0);
+                      : (dragDx.abs() / maxDrag).clamp(0.0, 1.0);
                   double direction = _isSwiping
                       ? swipeDirection.toDouble()
                       : (dragDx < 0
@@ -145,9 +145,9 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
                           : dragDx > 0
                               ? -1
                               : 0);
-                  double dx = -direction * 7.0 * progress + dragDx;
-                  double scale = 1 - 0.02 * progress;
-                  double opacity = 1 - 0.32 * progress;
+                  double dx = -direction * 7.5 * progress + dragDx;
+                  double scale = 1 - 0.016 * progress;
+                  double opacity = 1 - 0.28 * progress;
                   return Transform.translate(
                     offset: Offset(dx, 0),
                     child: Transform.scale(
