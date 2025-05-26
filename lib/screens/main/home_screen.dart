@@ -4,8 +4,6 @@ import 'package:hansol_high_school/screens/sub/setting_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/home/news_card.dart';
-import 'package:hansol_high_school/widgets/subject/subject_card.dart';
-import 'package:hansol_high_school/widgets/subject/subject_card_stacker.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -54,15 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
                   const CurrentSubjectCard(),
                   const NewsCard(
                     title: "{news_title_1}",
-                  ),
-                  Center(
-                    child: SubjectCardStacker(
-                      cards: [
-                        SubjectCard(subjectName: '생명과학 I', classNumber: 1),
-                        SubjectCard(subjectName: '생명과학 I', classNumber: 2),
-                        SubjectCard(subjectName: '생명과학 I', classNumber: 3),
-                      ],
-                    ),
                   ),
                 ],
               ),

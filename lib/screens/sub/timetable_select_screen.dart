@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/widgets/subject/subject_card.dart';
+import 'package:hansol_high_school/widgets/subject/subject_card_stacker.dart';
 
 class TimetableSelectScreen extends StatefulWidget {
   const TimetableSelectScreen({Key? key}) : super(key: key);
@@ -18,14 +20,22 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
           }
         },
         child: Scaffold(
-          backgroundColor: Colors.white,
+          backgroundColor: Color(0xffE0E0E0),
           appBar: AppBar(
-            backgroundColor: Colors.white,
+            backgroundColor: Color(0xffE0E0E0),
             title: const Text('선택과목 시간표 설정'),
           ),
           body: Column(
             children: [
-              Row(),
+              Center(
+                child: SubjectCardStacker(
+                  cards: [
+                    SubjectCard(subjectName: '생명과학 I', classNumber: 1),
+                    SubjectCard(subjectName: '생명과학 I', classNumber: 2),
+                    SubjectCard(subjectName: '생명과학 I', classNumber: 3),
+                  ],
+                ),
+              ),
             ],
           ),
         ),

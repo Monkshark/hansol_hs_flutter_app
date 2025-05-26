@@ -17,7 +17,7 @@ class SubjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      elevation: 10,
+      // elevation: 10,
       borderRadius: BorderRadius.circular(22),
       color: Colors.white,
       child: Container(
