@@ -274,9 +274,12 @@ class TimetableDataApi {
           classNum: classNum.toString(),
         );
 
-        subjectSet.addAll(timetable
-            .where((name) => !name.contains('[보강]'))
-            .map((name) => Subject(subjectName: name, subjectClass: classNum)));
+        for (var subjectName in timetable) {
+          if (!subjectName.contains('[보강]')) {
+            subjectSet
+                .add(Subject(subjectName: subjectName, subjectClass: classNum));
+          }
+        }
       }
     }
 

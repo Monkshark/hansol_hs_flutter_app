@@ -24,4 +24,15 @@ class Subject {
         category: json['category'],
         isOriginal: json['isOriginal'] ?? false,
       );
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Subject &&
+          runtimeType == other.runtimeType &&
+          subjectName == other.subjectName &&
+          subjectClass == other.subjectClass;
+
+  @override
+  int get hashCode => subjectName.hashCode ^ subjectClass.hashCode;
 }

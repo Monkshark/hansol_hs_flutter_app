@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/device.dart';
 
 class SubjectCard extends StatelessWidget {
   final String subjectName;
   final int classNumber;
   final bool checked;
-  final VoidCallback? onCheck;
+  final ValueChanged<bool?>? onCheck;
 
   const SubjectCard({
     Key? key,
@@ -17,12 +18,11 @@ class SubjectCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      // elevation: 10,
       borderRadius: BorderRadius.circular(22),
       color: Colors.white,
       child: Container(
-        width: 340,
-        height: 140,
+        width: Device.getWidth(80),
+        height: Device.getHeight(15),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
@@ -33,13 +33,15 @@ class SubjectCard extends StatelessWidget {
             Expanded(
               child: Text(
                 '$subjectName\n${classNumber}반',
-                style:
-                    const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: Device.getWidth(3.5),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Checkbox(
               value: checked,
-              onChanged: (_) => onCheck?.call(),
+              onChanged: onCheck,
             ),
           ],
         ),

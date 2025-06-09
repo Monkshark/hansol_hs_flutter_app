@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/device.dart';
 import 'subject_card.dart';
 
 class SubjectCardStacker extends StatefulWidget {
@@ -6,10 +7,10 @@ class SubjectCardStacker extends StatefulWidget {
   const SubjectCardStacker({Key? key, required this.cards}) : super(key: key);
 
   @override
-  State<SubjectCardStacker> createState() => _SubjectCardStackerState();
+  State<SubjectCardStacker> createState() => SubjectCardStackerState();
 }
 
-class _SubjectCardStackerState extends State<SubjectCardStacker>
+class SubjectCardStackerState extends State<SubjectCardStacker>
     with TickerProviderStateMixin {
   int currentIndex = 0;
   late AnimationController _controller;
@@ -18,9 +19,12 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
   int swipeDirection = 1;
   bool _isAnimating = false;
 
-  static const double cardWidth = 340.0;
-  static const double cardHeight = 120.0;
-  static const double threshold = cardWidth / 3;
+  static double cardWidth = Device.getWidth(80);
+  static double cardHeight = Device.getHeight(15);
+  static double threshold = cardWidth / 3;
+
+  List<bool> checkedList = [];
+  List<SubjectCard> effectiveCards = [];
 
   @override
   void initState() {
@@ -31,6 +35,30 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
     );
     _animation =
         CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic);
+
+    _updateCardList();
+  }
+
+  @override
+  void didUpdateWidget(SubjectCardStacker oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.cards != widget.cards) {
+      _updateCardList();
+    }
+  }
+
+  void _updateCardList() {
+    setState(() {
+      if (widget.cards.length == 2) {
+        effectiveCards = [...widget.cards, ...widget.cards];
+      } else {
+        effectiveCards = widget.cards;
+      }
+      checkedList = List.filled(effectiveCards.length, false);
+      if (currentIndex >= effectiveCards.length) {
+        currentIndex = 0;
+      }
+    });
   }
 
   @override
@@ -40,7 +68,11 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
   }
 
   void _animateToNext({double start = 0}) {
-    if (_isAnimating || widget.cards.length <= 1) return;
+    if (_isAnimating ||
+        effectiveCards.length <= 1 ||
+        checkedList[currentIndex]) {
+      return;
+    }
     _isAnimating = true;
     swipeDirection = 1;
     final anim =
@@ -49,7 +81,7 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
     anim.addListener(() => setState(() => dragDx = anim.value));
     _controller.forward().then((_) {
       setState(() {
-        currentIndex = (currentIndex + 1) % widget.cards.length;
+        currentIndex = (currentIndex + 1) % effectiveCards.length;
         dragDx = 0;
         _isAnimating = false;
       });
@@ -57,7 +89,11 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
   }
 
   void _animateToPrev({double start = 0}) {
-    if (_isAnimating || widget.cards.length <= 1) return;
+    if (_isAnimating ||
+        effectiveCards.length <= 1 ||
+        checkedList[currentIndex]) {
+      return;
+    }
     _isAnimating = true;
     swipeDirection = -1;
     final anim =
@@ -67,7 +103,7 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
     _controller.forward().then((_) {
       setState(() {
         currentIndex =
-            (currentIndex - 1 + widget.cards.length) % widget.cards.length;
+            (currentIndex - 1 + effectiveCards.length) % effectiveCards.length;
         dragDx = 0;
         _isAnimating = false;
       });
@@ -89,19 +125,25 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
   }
 
   void _handleDragUpdate(DragUpdateDetails details) {
-    if (_isAnimating) return;
+    if (_isAnimating ||
+        checkedList[currentIndex] ||
+        effectiveCards.length <= 1) {
+      return;
+    }
     setState(() {
-      final newDx = (dragDx + details.primaryDelta!)
-          .clamp(-cardWidth * 1.2, cardWidth * 1.2);
-      final newDirection = newDx < 0 ? 1 : -1;
-      if (newDirection != swipeDirection) {}
-      dragDx = newDx;
+      dragDx += details.primaryDelta!;
+      dragDx = dragDx.clamp(-cardWidth * 1.2, cardWidth * 1.2);
+      int newDirection = dragDx < 0 ? 1 : -1;
       swipeDirection = newDirection;
     });
   }
 
   void _handleDragEnd(DragEndDetails details) {
-    if (_isAnimating) return;
+    if (_isAnimating ||
+        checkedList[currentIndex] ||
+        effectiveCards.length <= 1) {
+      return;
+    }
     if (dragDx.abs() > threshold) {
       if (dragDx < 0) {
         _animateToNext(start: dragDx);
@@ -114,26 +156,38 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
   }
 
   Widget _buildAnimatedCard({
-    required Widget child,
+    required int cardKey,
     required double dx,
     required double dy,
     required double scale,
     required double opacity,
-    required int cardKey,
-    Key? key,
   }) {
     return Transform.translate(
-      key: key,
       offset: Offset(dx, dy),
       child: Transform.scale(
         scale: scale,
         child: Opacity(
           opacity: opacity,
           child: Container(
+            key: ValueKey('${cardKey}_${effectiveCards[cardKey].subjectName}'),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
             ),
-            child: child,
+            child: SubjectCard(
+              subjectName: effectiveCards[cardKey].subjectName,
+              classNumber: effectiveCards[cardKey].classNumber,
+              checked: checkedList[cardKey],
+              onCheck: (value) {
+                setState(() {
+                  checkedList[cardKey] = value ?? false;
+                  if (effectiveCards.length == 4) {
+                    int duplicateIndex =
+                        (cardKey < 2) ? cardKey + 2 : cardKey - 2;
+                    checkedList[duplicateIndex] = value ?? false;
+                  }
+                });
+              },
+            ),
           ),
         ),
       ),
@@ -142,16 +196,28 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
 
   @override
   Widget build(BuildContext context) {
-    final int len = widget.cards.length;
+    final int len = effectiveCards.length;
     if (len == 0) return const SizedBox.shrink();
 
+    if (len == 1) {
+      return Center(
+        child: _buildAnimatedCard(
+          cardKey: 0,
+          dx: 0,
+          dy: 0,
+          scale: 1,
+          opacity: 1,
+        ),
+      );
+    }
+
     final backIndex = (currentIndex + 1) % len;
-    final back2Index = (currentIndex + 2) % len;
     final prevIndex = (currentIndex - 1 + len) % len;
-    final prev2Index = (currentIndex - 2 + len) % len;
+    final back2Index = (currentIndex + 2) % len;
 
     double progress = (dragDx.abs() / cardWidth).clamp(0.0, 1.0);
-    double lerp(double a, double b) => a + (b - a) * progress;
+    double lerp(double a, double b) =>
+        a + (b - a) * Curves.easeInOut.transform(progress);
 
     final frontDx = lerp(0, swipeDirection == 1 ? -cardWidth : cardWidth);
     final frontOpacity = lerp(1, 0);
@@ -161,48 +227,42 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
     final backOpacity = lerp(0.73, 1);
     final backDy = lerp(4, 0);
 
-    final fadeStart =
-        (progress < 0.5) ? 0.0 : ((progress - 0.5) * 2).clamp(0.0, 1.0);
-    final back2Dx =
-        lerp(swipeDirection == 1 ? 35 : -35, swipeDirection == 1 ? 18 : -18);
-    final back2Scale = lerp(0.94, 0.97);
-    final back2Opacity = fadeStart * 0.4;
-    final back2Dy = lerp(7, 4);
-
     final backCard = swipeDirection == 1 ? backIndex : prevIndex;
-    final back2Card = swipeDirection == 1 ? back2Index : prev2Index;
+    final back2Card = swipeDirection == 1 ? back2Index : prevIndex;
 
     Widget secondBack = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 320),
+      duration: const Duration(milliseconds: 600), // 더 부드러운 전환
       switchInCurve: Curves.easeInOut,
       switchOutCurve: Curves.easeInOut,
-      transitionBuilder: (child, anim) =>
-          FadeTransition(opacity: anim, child: child),
+      transitionBuilder: (child, anim) => FadeTransition(
+        opacity: anim,
+        child: ScaleTransition(
+          scale: anim,
+          child: child,
+        ),
+      ),
       child: _buildAnimatedCard(
-        key: ValueKey('second-$back2Card'),
-        child: widget.cards[back2Card],
-        dx: back2Dx,
-        dy: back2Dy,
-        scale: back2Scale,
-        opacity: back2Opacity,
         cardKey: back2Card,
+        dx: lerp(
+            swipeDirection == 1 ? 35 : -35, swipeDirection == 1 ? 18 : -18),
+        dy: lerp(7, 4),
+        scale: lerp(0.94, 0.97),
+        opacity: Curves.easeInOut.transform(progress) * 0.8, // 서서히 나타나고 사라짐
       ),
     );
 
     Widget firstBack = AnimatedSwitcher(
       duration: const Duration(milliseconds: 320),
       switchInCurve: Curves.easeInOut,
-      switchOutCurve: Curves.easeInOut,
+      switchOutCurve: Curves.easeOut,
       transitionBuilder: (child, anim) =>
           FadeTransition(opacity: anim, child: child),
       child: _buildAnimatedCard(
-        key: ValueKey('first-$backCard'),
-        child: widget.cards[backCard],
+        cardKey: backCard,
         dx: backDx,
         dy: backDy,
         scale: backScale,
         opacity: backOpacity,
-        cardKey: backCard,
       ),
     );
 
@@ -217,15 +277,13 @@ class _SubjectCardStackerState extends State<SubjectCardStacker>
             alignment: Alignment.center,
             children: [
               if (len > 2) secondBack,
-              if (len > 1) firstBack,
+              firstBack,
               _buildAnimatedCard(
-                key: ValueKey('front-$currentIndex'),
-                child: widget.cards[currentIndex],
+                cardKey: currentIndex,
                 dx: frontDx,
                 dy: 0,
                 scale: 1,
                 opacity: frontOpacity,
-                cardKey: currentIndex,
               ),
             ],
           ),
