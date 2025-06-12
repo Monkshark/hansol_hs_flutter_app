@@ -17,6 +17,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hansol_high_school/api/timetable_data_api.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -24,20 +25,33 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
-
+  await Future.wait([
+    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
+    SettingData().init(),
+    _requestNotificationPermission(),
+  ]);
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
-  await _requestNotificationPermission();
-  await SettingData().init();
+
+  Future<void> loadSubjects(int grade) async {
+    try {
+      final subjects =
+          await TimetableDataApi.getAllSubjectCombinations(grade: grade);
+      if (subjects.isEmpty) {
+        log('Empty subject list for grade $grade, using cache or retrying later');
+      }
+    } catch (e) {
+      log('Preload subjects error for grade $grade: $e');
+    }
+  }
+
+  unawaited(loadSubjects(2));
+  unawaited(loadSubjects(3));
 
   final database = LocalDataBase();
   GetIt.I.registerSingleton<LocalDataBase>(database);
   await DailyMealNotification().initializeNotifications();
   await DailyMealNotification().scheduleDailyNotifications();
-
   initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
 }
 
@@ -76,7 +90,6 @@ class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
     super.initState();
     _pages = [MealScreen(), HomeScreen(), const NoticeScreen()];
     _pageController = PageController(initialPage: 1);
-
     notificationStream.stream.listen((payload) {
       if (payload == 'meal_screen') {
         _navigateToMealScreen();
