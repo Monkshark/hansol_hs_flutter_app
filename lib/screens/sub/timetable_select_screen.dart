@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/subject.dart';
-import 'package:hansol_high_school/widgets/subject/subject_card.dart';
 import 'package:hansol_high_school/widgets/subject/subject_card_stacker.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/data/subject_data_manager.dart';
 
 class TimetableSelectScreen extends StatefulWidget {
   const TimetableSelectScreen({Key? key}) : super(key: key);
@@ -14,6 +14,7 @@ class TimetableSelectScreen extends StatefulWidget {
 
 class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
   late Future<Map<String, List<Subject>>> _subjectGroupsFuture;
+  List<Subject> selectedSubjects = [];
 
   @override
   void initState() {
@@ -21,6 +22,16 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
     final settingData = SettingData();
     final grade = settingData.grade;
     _subjectGroupsFuture = _getSubjectGroups(grade);
+    _loadSelectedSubjects(grade);
+  }
+
+  Future<void> _loadSelectedSubjects(int grade) async {
+    selectedSubjects = await SubjectDataManager.loadSelectedSubjects(grade);
+    setState(() {});
+  }
+
+  Future<void> _saveSelectedSubjects(int grade) async {
+    await SubjectDataManager.saveSelectedSubjects(grade, selectedSubjects);
   }
 
   Future<Map<String, List<Subject>>> _getSubjectGroups(int grade) async {
@@ -51,24 +62,38 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
           } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return const Center(child: Text('과목을 불러올 수 없습니다.'));
           } else {
+            final settingData = SettingData();
             final subjectGroups = snapshot.data!;
             return ListView.builder(
               itemCount: subjectGroups.length,
               itemBuilder: (context, index) {
                 final subjectName = subjectGroups.keys.elementAt(index);
                 final subjects = subjectGroups[subjectName]!;
-                final cards = subjects
-                    .map((s) => SubjectCard(
-                          subjectName: s.subjectName,
-                          classNumber: s.subjectClass,
-                        ))
-                    .toList();
+                final selectedSubject = selectedSubjects.firstWhere(
+                  (s) => s.subjectName == subjectName,
+                  orElse: () => Subject(subjectName: '', subjectClass: -1),
+                );
                 return Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      SubjectCardStacker(cards: cards),
+                      SubjectCardStacker(
+                        subjects: subjects,
+                        selectedSubject: selectedSubject.subjectName.isNotEmpty
+                            ? selectedSubject
+                            : null,
+                        onSubjectSelected: (subject) {
+                          setState(() {
+                            selectedSubjects.removeWhere(
+                                (s) => s.subjectName == subjectName);
+                            if (subject != null) {
+                              selectedSubjects.add(subject);
+                            }
+                          });
+                          _saveSelectedSubjects(settingData.grade);
+                        },
+                      ),
                     ],
                   ),
                 );

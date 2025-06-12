@@ -1,10 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/device.dart';
-import 'subject_card.dart';
+import 'package:hansol_high_school/data/subject.dart';
+import 'package:hansol_high_school/widgets/subject/subject_card.dart';
 
 class SubjectCardStacker extends StatefulWidget {
-  final List<SubjectCard> cards;
-  const SubjectCardStacker({Key? key, required this.cards}) : super(key: key);
+  final List<Subject> subjects;
+  final Subject? selectedSubject;
+  final void Function(Subject?) onSubjectSelected;
+
+  const SubjectCardStacker({
+    Key? key,
+    required this.subjects,
+    required this.selectedSubject,
+    required this.onSubjectSelected,
+  }) : super(key: key);
 
   @override
   State<SubjectCardStacker> createState() => SubjectCardStackerState();
@@ -23,8 +32,7 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
   static double cardHeight = Device.getHeight(15);
   static double threshold = cardWidth / 3;
 
-  List<bool> checkedList = [];
-  List<SubjectCard> effectiveCards = [];
+  List<Subject> effectiveSubjects = [];
 
   @override
   void initState() {
@@ -36,29 +44,39 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
     _animation =
         CurvedAnimation(parent: _controller, curve: Curves.easeInOutCubic);
 
-    _updateCardList();
+    _updateSubjectList();
+    _setInitialIndex();
   }
 
   @override
   void didUpdateWidget(SubjectCardStacker oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.cards != widget.cards) {
-      _updateCardList();
+    if (oldWidget.subjects != widget.subjects ||
+        oldWidget.selectedSubject != widget.selectedSubject) {
+      _updateSubjectList();
+      _setInitialIndex();
     }
   }
 
-  void _updateCardList() {
+  void _updateSubjectList() {
     setState(() {
-      if (widget.cards.length == 2) {
-        effectiveCards = [...widget.cards, ...widget.cards];
+      if (widget.subjects.length == 2) {
+        effectiveSubjects = [...widget.subjects, ...widget.subjects];
       } else {
-        effectiveCards = widget.cards;
-      }
-      checkedList = List.filled(effectiveCards.length, false);
-      if (currentIndex >= effectiveCards.length) {
-        currentIndex = 0;
+        effectiveSubjects = widget.subjects;
       }
     });
+  }
+
+  void _setInitialIndex() {
+    if (widget.selectedSubject != null) {
+      final index = effectiveSubjects.indexOf(widget.selectedSubject!);
+      if (index != -1) {
+        setState(() {
+          currentIndex = index;
+        });
+      }
+    }
   }
 
   @override
@@ -69,10 +87,8 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
 
   void _animateToNext({double start = 0}) {
     if (_isAnimating ||
-        effectiveCards.length <= 1 ||
-        checkedList[currentIndex]) {
-      return;
-    }
+        effectiveSubjects.length <= 1 ||
+        widget.selectedSubject != null) return;
     _isAnimating = true;
     swipeDirection = 1;
     final anim =
@@ -81,7 +97,7 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
     anim.addListener(() => setState(() => dragDx = anim.value));
     _controller.forward().then((_) {
       setState(() {
-        currentIndex = (currentIndex + 1) % effectiveCards.length;
+        currentIndex = (currentIndex + 1) % effectiveSubjects.length;
         dragDx = 0;
         _isAnimating = false;
       });
@@ -90,10 +106,8 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
 
   void _animateToPrev({double start = 0}) {
     if (_isAnimating ||
-        effectiveCards.length <= 1 ||
-        checkedList[currentIndex]) {
-      return;
-    }
+        effectiveSubjects.length <= 1 ||
+        widget.selectedSubject != null) return;
     _isAnimating = true;
     swipeDirection = -1;
     final anim =
@@ -102,8 +116,8 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
     anim.addListener(() => setState(() => dragDx = anim.value));
     _controller.forward().then((_) {
       setState(() {
-        currentIndex =
-            (currentIndex - 1 + effectiveCards.length) % effectiveCards.length;
+        currentIndex = (currentIndex - 1 + effectiveSubjects.length) %
+            effectiveSubjects.length;
         dragDx = 0;
         _isAnimating = false;
       });
@@ -126,10 +140,8 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
 
   void _handleDragUpdate(DragUpdateDetails details) {
     if (_isAnimating ||
-        checkedList[currentIndex] ||
-        effectiveCards.length <= 1) {
-      return;
-    }
+        effectiveSubjects.length <= 1 ||
+        widget.selectedSubject != null) return;
     setState(() {
       dragDx += details.primaryDelta!;
       dragDx = dragDx.clamp(-cardWidth * 1.2, cardWidth * 1.2);
@@ -140,10 +152,8 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
 
   void _handleDragEnd(DragEndDetails details) {
     if (_isAnimating ||
-        checkedList[currentIndex] ||
-        effectiveCards.length <= 1) {
-      return;
-    }
+        effectiveSubjects.length <= 1 ||
+        widget.selectedSubject != null) return;
     if (dragDx.abs() > threshold) {
       if (dragDx < 0) {
         _animateToNext(start: dragDx);
@@ -162,6 +172,7 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
     required double scale,
     required double opacity,
   }) {
+    final subject = effectiveSubjects[cardKey];
     return Transform.translate(
       offset: Offset(dx, dy),
       child: Transform.scale(
@@ -169,23 +180,20 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
         child: Opacity(
           opacity: opacity,
           child: Container(
-            key: ValueKey('${cardKey}_${effectiveCards[cardKey].subjectName}'),
+            key: ValueKey('${cardKey}_${subject.subjectName}'),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(18),
             ),
             child: SubjectCard(
-              subjectName: effectiveCards[cardKey].subjectName,
-              classNumber: effectiveCards[cardKey].classNumber,
-              checked: checkedList[cardKey],
-              onCheck: (value) {
-                setState(() {
-                  checkedList[cardKey] = value;
-                  if (effectiveCards.length == 4) {
-                    int duplicateIndex =
-                        (cardKey < 2) ? cardKey + 2 : cardKey - 2;
-                    checkedList[duplicateIndex] = value;
-                  }
-                });
+              subjectName: subject.subjectName,
+              classNumber: subject.subjectClass,
+              checked: widget.selectedSubject == subject,
+              onCheck: (checked) {
+                if (checked) {
+                  widget.onSubjectSelected(subject);
+                } else {
+                  widget.onSubjectSelected(null);
+                }
               },
             ),
           ),
@@ -196,7 +204,7 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
 
   @override
   Widget build(BuildContext context) {
-    final int len = effectiveCards.length;
+    final int len = effectiveSubjects.length;
     if (len == 0) return const SizedBox.shrink();
 
     if (len == 1) {

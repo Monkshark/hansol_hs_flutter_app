@@ -10,7 +10,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetableDataApi {
   static const TAG = 'TimetableDataApi';
-  static const _subjectCacheKey = 'selectedSubjects';
   static const _subjectCacheKeyPrefix = 'subjects_grade_';
 
   static Future<Map<String, Map<String, List<String>>>> getTimeTable({
@@ -257,51 +256,6 @@ class TimetableDataApi {
     }
     log('$TAG: getCustomTimeTable: Completed with timetable: $customTimeTable');
     return customTimeTable;
-  }
-
-  static Future<List<Subject>> loadCachedSubjects() async {
-    final prefs = await SharedPreferences.getInstance();
-    DateTime now = DateTime.now();
-    log('$TAG: loadCachedSubjects: Checking cache for $_subjectCacheKey');
-    if (now.month < 3 || (now.month == 3 && now.day < 1)) {
-      log('$TAG: loadCachedSubjects: Clearing cache due to new academic year');
-      await prefs.remove(_subjectCacheKey);
-      return [];
-    }
-
-    final jsonString = prefs.getString(_subjectCacheKey);
-    if (jsonString == null) {
-      log('$TAG: loadCachedSubjects: No cached subjects found');
-      return [];
-    }
-
-    try {
-      final List<dynamic> jsonList = json.decode(jsonString);
-      final subjects = jsonList
-          .map((item) => Subject(
-                subjectName: item['subjectName'],
-                subjectClass: item['subjectClass'],
-              ))
-          .toList();
-      log('$TAG: loadCachedSubjects: Loaded ${subjects.length} subjects from cache');
-      return subjects;
-    } catch (e) {
-      log('$TAG: loadCachedSubjects error: $e');
-      return [];
-    }
-  }
-
-  static Future<void> saveSubjectsToCache(List<Subject> subjects) async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonList = subjects
-        .map((s) => {
-              'subjectName': s.subjectName,
-              'subjectClass': s.subjectClass,
-            })
-        .toList();
-    final jsonString = json.encode(jsonList);
-    await prefs.setString(_subjectCacheKey, jsonString);
-    log('$TAG: saveSubjectsToCache: Saved ${subjects.length} subjects to cache');
   }
 
   static Future<int> getClassCount(int grade) async {
