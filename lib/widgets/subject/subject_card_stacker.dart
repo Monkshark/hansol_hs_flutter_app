@@ -179,11 +179,11 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
               checked: checkedList[cardKey],
               onCheck: (value) {
                 setState(() {
-                  checkedList[cardKey] = value ?? false;
+                  checkedList[cardKey] = value;
                   if (effectiveCards.length == 4) {
                     int duplicateIndex =
                         (cardKey < 2) ? cardKey + 2 : cardKey - 2;
-                    checkedList[duplicateIndex] = value ?? false;
+                    checkedList[duplicateIndex] = value;
                   }
                 });
               },
@@ -231,7 +231,7 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
     final back2Card = swipeDirection == 1 ? back2Index : prevIndex;
 
     Widget secondBack = AnimatedSwitcher(
-      duration: const Duration(milliseconds: 600), // 더 부드러운 전환
+      duration: const Duration(milliseconds: 600),
       switchInCurve: Curves.easeInOut,
       switchOutCurve: Curves.easeInOut,
       transitionBuilder: (child, anim) => FadeTransition(
@@ -247,7 +247,7 @@ class SubjectCardStackerState extends State<SubjectCardStacker>
             swipeDirection == 1 ? 35 : -35, swipeDirection == 1 ? 18 : -18),
         dy: lerp(7, 4),
         scale: lerp(0.94, 0.97),
-        opacity: Curves.easeInOut.transform(progress) * 0.8, // 서서히 나타나고 사라짐
+        opacity: Curves.easeInOut.transform(progress) * 0.8,
       ),
     );
 

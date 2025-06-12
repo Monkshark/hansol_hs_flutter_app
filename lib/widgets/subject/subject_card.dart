@@ -111,8 +111,10 @@ class CheckBoxPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
+    final borderColor = Color.lerp(Colors.grey, Colors.blue, animation.value)!;
+
     final paint = Paint()
-      ..color = Colors.grey
+      ..color = borderColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
