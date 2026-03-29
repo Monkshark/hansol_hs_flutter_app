@@ -175,3 +175,19 @@ app.*.map.json
 /lib/api/nies_api_keys.dart
 firebase.json
 /lib/firebase_options.dart
+
+# Figma designs
+/figma/
+
+# Secret files
+lib/api/nies_api_keys.dart
+lib/firebase_options.dart
+android/app/google-services.json
+ios/Runner/GoogleService-Info.plist
+macos/Runner/GoogleService-Info.plist
+
+# Admin web - Firebase config (API keys)
+admin-web/js/firebase-init.js
+
+# Cloud Functions
+functions/node_modules/

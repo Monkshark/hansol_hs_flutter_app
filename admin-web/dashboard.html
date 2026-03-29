@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>대시보드 - 한솔고 관리자</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" style="display:flex;flex-direction:column;">
+      <h2>HS Admin</h2>
+      <a href="dashboard.html" class="active"><span>대시보드</span></a>
+      <a href="posts.html"><span>게시글 관리</span></a>
+      <a href="reports.html"><span>신고 관리</span></a>
+      <a href="users.html"><span>사용자 관리</span></a>
+      <a href="config.html"><span>앱 설정</span></a>
+      <a href="#" class="logout" id="logoutBtn"><span>로그아웃</span></a>
+    </nav>
+
+    <div class="main">
+      <h1>대시보드</h1>
+
+      <div class="card-grid">
+        <div class="stat-card">
+          <div class="number" id="userCount">-</div>
+          <div class="label">전체 사용자</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="postCount">-</div>
+          <div class="label">전체 게시글</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="reportCount">-</div>
+          <div class="label">미처리 신고</div>
+        </div>
+        <div class="stat-card">
+          <div class="number" id="todayPostCount">-</div>
+          <div class="label">오늘 게시글</div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px;">최근 신고</h3>
+        <table>
+          <thead><tr><th>신고 사유</th><th>신고자</th><th>시간</th><th>액션</th></tr></thead>
+          <tbody id="recentReports"><tr><td colspan="4" class="loading">로딩중...</td></tr></tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px;">최근 게시글</h3>
+        <table>
+          <thead><tr><th>카테고리</th><th>제목</th><th>작성자</th><th>시간</th></tr></thead>
+          <tbody id="recentPosts"><tr><td colspan="4" class="loading">로딩중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut, collection, getDocs, query, orderBy, limit, where, Timestamp } from './js/firebase-init.js';
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'index.html';
+      else loadDashboard();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    async function loadDashboard() {
+      // 사용자 수
+      const users = await getDocs(collection(db, 'users'));
+      document.getElementById('userCount').textContent = users.size;
+
+      // 게시글 수
+      const posts = await getDocs(collection(db, 'posts'));
+      document.getElementById('postCount').textContent = posts.size;
+
+      // 신고 수
+      const reports = await getDocs(collection(db, 'reports'));
+      document.getElementById('reportCount').textContent = reports.size;
+
+      // 오늘 게시글
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayTs = Timestamp.fromDate(today);
+      const todayPosts = await getDocs(query(collection(db, 'posts'), where('createdAt', '>=', todayTs)));
+      document.getElementById('todayPostCount').textContent = todayPosts.size;
+
+      // 최근 신고 5개
+      const recentReportsQ = query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(5));
+      const recentReports = await getDocs(recentReportsQ);
+      const reportsTbody = document.getElementById('recentReports');
+      reportsTbody.innerHTML = '';
+      if (recentReports.empty) {
+        reportsTbody.innerHTML = '<tr><td colspan="4" style="color:#888;">신고가 없습니다</td></tr>';
+      } else {
+        recentReports.forEach(doc => {
+          const d = doc.data();
+          const time = d.createdAt?.toDate().toLocaleString('ko-KR') || '';
+          reportsTbody.innerHTML += `<tr>
+            <td><span class="badge badge-red">${d.reason || ''}</span></td>
+            <td>${d.reporterUid?.substring(0, 8) || ''}...</td>
+            <td>${time}</td>
+            <td><a href="posts.html?id=${d.postId}" class="btn btn-sm btn-primary">글 보기</a></td>
+          </tr>`;
+        });
+      }
+
+      // 최근 게시글 10개
+      const recentPostsQ = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(10));
+      const recentPosts = await getDocs(recentPostsQ);
+      const postsTbody = document.getElementById('recentPosts');
+      postsTbody.innerHTML = '';
+      recentPosts.forEach(doc => {
+        const d = doc.data();
+        const time = d.createdAt?.toDate().toLocaleString('ko-KR') || '';
+        const catClass = { '자유': 'badge-blue', '질문': 'badge-green', '정보공유': 'badge-orange' }[d.category] || 'badge-blue';
+        postsTbody.innerHTML += `<tr>
+          <td><span class="badge ${catClass}">${d.category || ''}</span></td>
+          <td>${d.title || ''}</td>
+          <td>${d.authorName || ''}</td>
+          <td>${time}</td>
+        </tr>`;
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,16 +1,16 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
-import 'package:hansol_high_school/data/device.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
+import 'package:hansol_high_school/notification/fcm_service.dart';
+import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
-import 'package:hansol_high_school/widgets/setting/theme_mode_buttons.dart';
-import 'package:hansol_high_school/widgets/setting/single_setting_card.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
-import 'package:hansol_high_school/widgets/setting/setting_card.dart';
-import 'package:hansol_high_school/widgets/setting/setting_toggle_switch.dart';
+import 'package:hansol_high_school/main.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
@@ -22,7 +22,7 @@ class SettingScreen extends StatefulWidget {
 class _SettingScreenState extends State<SettingScreen> {
   late int grade;
   late int classNum;
-  late bool isDarkMode;
+  late int themeModeIndex;
   late bool isBreakfastNotificationOn;
   late bool isLunchNotificationOn;
   late bool isDinnerNotificationOn;
@@ -32,11 +32,31 @@ class _SettingScreenState extends State<SettingScreen> {
   late TimeOfDay dinnerTime;
 
   late Future<void> _settingsFuture;
+  String _cacheSize = '';
 
   @override
   void initState() {
     super.initState();
     _settingsFuture = _loadSettings();
+    _calcCacheSize();
+  }
+
+  Future<void> _calcCacheSize() async {
+    final prefs = await SharedPreferences.getInstance();
+    final keys = prefs.getKeys();
+    int bytes = 0;
+    for (var key in keys) {
+      final val = prefs.get(key);
+      if (val is String) bytes += val.length * 2;
+      else if (val is List<String>) {
+        for (var s in val) bytes += s.length * 2;
+      }
+      bytes += key.length * 2;
+    }
+    final mb = bytes / (1024 * 1024);
+    setState(() {
+      _cacheSize = mb < 0.01 ? '${(bytes / 1024).toStringAsFixed(1)} KB' : '${mb.toStringAsFixed(2)} MB';
+    });
   }
 
   Future<void> _loadSettings() async {
@@ -44,7 +64,7 @@ class _SettingScreenState extends State<SettingScreen> {
     setState(() {
       grade = SettingData().grade;
       classNum = SettingData().classNum;
-      isDarkMode = SettingData().isDarkMode;
+      themeModeIndex = SettingData().themeModeIndex;
       isBreakfastNotificationOn = SettingData().isBreakfastNotificationOn;
       breakfastTime = _parseTimeOfDay(SettingData().breakfastTime);
       isLunchNotificationOn = SettingData().isLunchNotificationOn;
@@ -89,7 +109,7 @@ class _SettingScreenState extends State<SettingScreen> {
   Future<void> _saveSettings() async {
     SettingData().grade = grade;
     SettingData().classNum = classNum;
-    SettingData().isDarkMode = isDarkMode;
+    SettingData().themeModeIndex = themeModeIndex;
     SettingData().isBreakfastNotificationOn = isBreakfastNotificationOn;
     SettingData().breakfastTime = _formatTimeOfDay(breakfastTime);
     SettingData().isLunchNotificationOn = isLunchNotificationOn;
@@ -98,10 +118,33 @@ class _SettingScreenState extends State<SettingScreen> {
     SettingData().dinnerTime = _formatTimeOfDay(dinnerTime);
   }
 
+  void _applyThemeMode(int index) {
+    themeModeIndex = index;
+    SettingData().themeModeIndex = index;
+
+    switch (index) {
+      case 0:
+        SettingData().isDarkMode = false;
+        themeNotifier.value = ThemeMode.light;
+        break;
+      case 1:
+        SettingData().isDarkMode = true;
+        themeNotifier.value = ThemeMode.dark;
+        break;
+      case 2:
+        final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
+        SettingData().isDarkMode = isDark;
+        themeNotifier.value = ThemeMode.system;
+        break;
+    }
+
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       body: GestureDetector(
         onHorizontalDragEnd: (details) {
           if (details.primaryVelocity! > 0) {
@@ -116,7 +159,7 @@ class _SettingScreenState extends State<SettingScreen> {
             } else if (snapshot.hasError) {
               return const Center(child: Text('Error loading settings'));
             } else {
-              return buildSettingsBody();
+              return _buildSettingsBody();
             }
           },
         ),
@@ -124,200 +167,413 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-  Widget buildSettingsBody() {
+  Widget _buildSettingsBody() {
     return Scaffold(
       backgroundColor: AppColors.theme.settingScreenBackgroundColor,
       appBar: AppBar(
         centerTitle: true,
         backgroundColor: AppColors.theme.settingScreenBackgroundColor,
-        title: const Text(
-          '설정',
-        ),
+        foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
+        title: const Text('설정'),
         titleTextStyle: TextStyle(
-          fontSize: Device.getWidth(5),
+          fontSize: 20,
           fontWeight: FontWeight.w600,
+          color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
+        elevation: 0,
       ),
       body: SingleChildScrollView(
-        child: Column(
-          children: [
-            const SizedBox(height: 10),
-            SettingCard(
-              name: '학년 반 설정',
-              child: GestureDetector(
-                onTap: () => _selectGradeAndClass(),
-                child: Text(
-                  '$grade학년 $classNum반',
-                  style: const TextStyle(fontSize: 22),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 16),
+              _buildAuthCard(),
+              const SizedBox(height: 24),
+              _buildSectionTitle('학교 정보'),
+              _buildGroupedCard([
+                _buildSettingRow(
+                  '학년 반 설정',
+                  trailing: GestureDetector(
+                    onTap: () => _selectGradeAndClass(),
+                    child: Text(
+                      '$grade학년 $classNum반',
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: AppColors.theme.primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            SettingCard(
-              name: '선택과목 시간표 설정',
-              child: IconButton(
-                onPressed: grade == 1
-                    ? null
-                    : () {
-                        Navigator.of(context).push(_createRoute());
-                      },
-                icon: Icon(
-                  Icons.arrow_forward_ios,
-                  color: grade == 1 ? Colors.grey : Colors.black,
+                _buildDivider(),
+                _buildSettingRow(
+                  '선택과목 시간표',
+                  trailing: IconButton(
+                    onPressed: grade == 1
+                        ? null
+                        : () {
+                            if (!SettingData().isGradeSet) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(content: Text('학년/반을 먼저 설정해주세요')),
+                              );
+                              return;
+                            }
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => const TimetableSelectScreen(),
+                              ),
+                            );
+                          },
+                    icon: Icon(
+                      Icons.arrow_forward_ios,
+                      size: 16,
+                      color: grade == 1
+                          ? AppColors.theme.darkGreyColor
+                          : AppColors.theme.primaryColor,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-            SettingCard(
-              name: '다크 모드',
-              child: SettingToggleSwitch(
-                value: isDarkMode,
-                onChanged: (value) {
-                  setState(() {
-                    isDarkMode = value;
-                    _saveSettings();
-                  });
-                },
-              ),
-            ),
-            buildNotificationCard(
-              '조식 알림',
-              breakfastTime,
-              isBreakfastNotificationOn,
-              (newTime) {
-                setState(() {
-                  breakfastTime = newTime;
-                  _saveSettings();
-                  DailyMealNotification().updateNotifications();
-                  log('notification setting changed');
-                });
-              },
-              (newValue) {
-                setState(() {
-                  isBreakfastNotificationOn = newValue;
-                  _saveSettings();
-                  DailyMealNotification().updateNotifications();
-                  log('notification setting changed');
-                });
-              },
-            ),
-            buildNotificationCard(
-              '중식 알림',
-              lunchTime,
-              isLunchNotificationOn,
-              (newTime) {
-                setState(() {
-                  lunchTime = newTime;
-                  _saveSettings();
-                  DailyMealNotification().updateNotifications();
-                  log('notification setting changed');
-                });
-              },
-              (newValue) {
-                setState(() {
-                  isLunchNotificationOn = newValue;
-                  _saveSettings();
-                  DailyMealNotification().updateNotifications();
-                  log('notification setting changed');
-                });
-              },
-            ),
-            buildNotificationCard(
-              '석식 알림',
-              dinnerTime,
-              isDinnerNotificationOn,
-              (newTime) {
-                setState(() {
-                  dinnerTime = newTime;
-                  _saveSettings();
-                  DailyMealNotification().updateNotifications();
-                  log('notification setting changed');
-                });
-              },
-              (newValue) {
-                setState(() {
-                  isDinnerNotificationOn = newValue;
-                  _saveSettings();
-                  DailyMealNotification().updateNotifications();
-                  log('notification setting changed');
-                });
-              },
-            ),
-            const SingleSettingCard(
-              text: '알림 설정',
-              child: Text("a"),
-            ),
-            ThemeModeButtons(
-              initialMode: ThemeType.light,
-              onModeChanged: (ThemeType newMode) {
-                print('Selected mode: $newMode');
-              },
-            ),
-          ],
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionTitle('테마'),
+              _buildGroupedCard([
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                  child: Row(
+                    children: [
+                      _buildThemeButton(0, '라이트', Icons.light_mode),
+                      const SizedBox(width: 8),
+                      _buildThemeButton(1, '다크', Icons.dark_mode),
+                      const SizedBox(width: 8),
+                      _buildThemeButton(2, '시스템', Icons.settings_brightness),
+                    ],
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionTitle('알림'),
+              _buildGroupedCard([
+                _buildNotificationRow('조식 알림', breakfastTime, isBreakfastNotificationOn,
+                  (t) {
+                    setState(() { breakfastTime = t; _saveSettings(); DailyMealNotification().updateNotifications(); });
+                  },
+                  (v) {
+                    setState(() { isBreakfastNotificationOn = v; _saveSettings(); DailyMealNotification().updateNotifications(); });
+                  },
+                ),
+                _buildDivider(),
+                _buildNotificationRow('중식 알림', lunchTime, isLunchNotificationOn,
+                  (t) {
+                    setState(() { lunchTime = t; _saveSettings(); DailyMealNotification().updateNotifications(); });
+                  },
+                  (v) {
+                    setState(() { isLunchNotificationOn = v; _saveSettings(); DailyMealNotification().updateNotifications(); });
+                  },
+                ),
+                _buildDivider(),
+                _buildNotificationRow('석식 알림', dinnerTime, isDinnerNotificationOn,
+                  (t) {
+                    setState(() { dinnerTime = t; _saveSettings(); DailyMealNotification().updateNotifications(); });
+                  },
+                  (v) {
+                    setState(() { isDinnerNotificationOn = v; _saveSettings(); DailyMealNotification().updateNotifications(); });
+                  },
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionTitle('게시판 알림'),
+              _buildGroupedCard([
+                _buildSettingRow(
+                  '새 글 알림',
+                  trailing: Switch(
+                    value: SettingData().isBoardNotificationOn,
+                    activeColor: AppColors.theme.primaryColor,
+                    onChanged: (v) {
+                      setState(() {
+                        FcmService.toggleBoardNotification(v);
+                      });
+                    },
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 24),
+              _buildSectionTitle('기타'),
+              _buildGroupedCard([
+                _buildSettingRow(
+                  '알림 테스트',
+                  trailing: TextButton(
+                    onPressed: () async {
+                      await DailyMealNotification().sendTestNotification();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('5초 후 테스트 알림이 발송됩니다')),
+                        );
+                      }
+                    },
+                    child: Text('보내기', style: TextStyle(color: AppColors.theme.primaryColor)),
+                  ),
+                ),
+                _buildDivider(),
+                _buildSettingRow(
+                  '캐시 삭제${_cacheSize.isNotEmpty ? ' ($_cacheSize)' : ''}',
+                  trailing: TextButton(
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      // 사용자 설정 키 보존
+                      const preserveKeys = {
+                        'Grade', 'Class', 'isDarkMode', 'themeModeIndex',
+                        'isBreakfastNotificationOn', 'breakfastTime',
+                        'isLunchNotificationOn', 'lunchTime',
+                        'isDinnerNotificationOn', 'dinnerTime',
+                      };
+                      final allKeys = prefs.getKeys().toList();
+                      int removed = 0;
+                      for (var key in allKeys) {
+                        if (!preserveKeys.contains(key) && !key.startsWith('selected_subjects_')) {
+                          await prefs.remove(key);
+                          removed++;
+                        }
+                      }
+                      log('Cache clear: removed $removed / ${allKeys.length} keys');
+                      _calcCacheSize();
+                      if (mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('캐시가 삭제되었습니다')),
+                        );
+                      }
+                    },
+                    child: Text('삭제', style: TextStyle(color: Colors.red[400])),
+                  ),
+                ),
+                _buildDivider(),
+                _buildSettingRow(
+                  '앱 버전',
+                  trailing: Text(
+                    'v1.0.0',
+                    style: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
+                  ),
+                ),
+              ]),
+              SizedBox(height: MediaQuery.of(context).padding.bottom + 32),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Route _createRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) =>
-          const TimetableSelectScreen(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.ease;
-
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
-
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
-        );
-      },
+  Widget _buildSectionTitle(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4, bottom: 8),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: AppColors.theme.darkGreyColor,
+        ),
+      ),
     );
   }
 
-  Widget buildNotificationCard(
+  Widget _buildGroupedCard(List<Widget> children) {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.theme.mealCardBackgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(children: children),
+    );
+  }
+
+  Widget _buildSettingRow(String title, {Widget? trailing}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            title,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
+          ),
+          if (trailing != null) trailing,
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDivider() {
+    return Divider(
+      height: 1,
+      indent: 16,
+      endIndent: 16,
+      color: AppColors.theme.lightGreyColor,
+    );
+  }
+
+  Widget _buildAuthCard() {
+    final isLoggedIn = AuthService.isLoggedIn;
+
+    if (isLoggedIn) {
+      return FutureBuilder<UserProfile?>(
+        future: AuthService.getUserProfile(),
+        builder: (context, snapshot) {
+          final profile = snapshot.data;
+          final name = profile?.name ?? AuthService.currentUser?.displayName ?? '';
+          final email = AuthService.currentUser?.email ?? '';
+
+          return _buildGroupedCard([
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: AppColors.theme.primaryColor,
+                child: Text(
+                  name.isNotEmpty ? name[0] : '?',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                ),
+              ),
+              title: Text(name.isNotEmpty ? name : '이름 없음',
+                style: TextStyle(fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color)),
+              subtitle: Text(email,
+                style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+              trailing: TextButton(
+                onPressed: () async {
+                  await AuthService.signOut();
+                  if (mounted) setState(() {});
+                },
+                child: Text('로그아웃', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+              ),
+            ),
+          ]);
+        },
+      );
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        final result = await Navigator.of(context).push<bool>(
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+        if (result == true && mounted) setState(() {});
+      },
+      child: _buildGroupedCard([
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          child: Row(
+            children: [
+              CircleAvatar(
+                backgroundColor: AppColors.theme.lightGreyColor,
+                child: Icon(Icons.person, color: AppColors.theme.darkGreyColor),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('로그인', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodyLarge?.color)),
+                    Text('Google 계정으로 로그인하세요', style: TextStyle(
+                        fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+            ],
+          ),
+        ),
+      ]),
+    );
+  }
+
+  Widget _buildThemeButton(int index, String label, IconData icon) {
+    final isSelected = themeModeIndex == index;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () => _applyThemeMode(index),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected
+                ? AppColors.theme.primaryColor
+                : AppColors.theme.lightGreyColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: isSelected ? Colors.white : AppColors.theme.darkGreyColor),
+              const SizedBox(height: 4),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: isSelected ? Colors.white : AppColors.theme.darkGreyColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNotificationRow(
     String name,
     TimeOfDay selectedTime,
     bool isSwitched,
     ValueChanged<TimeOfDay> onTimeChanged,
     ValueChanged<bool> onSwitchChanged,
   ) {
-    return SettingCard(
-      name: name,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          GestureDetector(
-            onTap: isSwitched
-                ? () async {
-                    TimeOfDay? pickedTime = await showTimePicker(
-                      context: context,
-                      initialTime: selectedTime,
-                    );
-
-                    if (pickedTime != null && pickedTime != selectedTime) {
-                      onTimeChanged(pickedTime);
-                    }
-                  }
-                : null,
-            child: Text(
-              selectedTime.format(context),
-              style: TextStyle(
-                fontSize: 18,
-                color: isSwitched ? Colors.black : Colors.grey,
-              ),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 16,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
-          const SizedBox(width: 15),
-          SettingToggleSwitch(
-            value: isSwitched,
-            onChanged: (newValue) {
-              onSwitchChanged(newValue);
-              setState(() {});
-              _saveSettings();
-            },
+          Row(
+            children: [
+              GestureDetector(
+                onTap: isSwitched
+                    ? () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: selectedTime,
+                        );
+                        if (pickedTime != null && pickedTime != selectedTime) {
+                          onTimeChanged(pickedTime);
+                        }
+                      }
+                    : null,
+                child: Text(
+                  selectedTime.format(context),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isSwitched
+                        ? AppColors.theme.primaryColor
+                        : AppColors.theme.darkGreyColor,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Switch.adaptive(
+                value: isSwitched,
+                activeColor: AppColors.theme.primaryColor,
+                onChanged: (newValue) {
+                  onSwitchChanged(newValue);
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -325,14 +581,17 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   void _selectGradeAndClass() async {
-    int classCount = await TimetableDataApi.getClassCount(grade);
+    final pickerGrade = grade > 0 ? grade : 1;
+    final pickerClass = classNum > 0 ? classNum : 1;
+    int classCount = await TimetableDataApi.getClassCount(pickerGrade);
+    if (classCount <= 0) classCount = 10;
     if (!mounted) return;
     List<int>? selectedValues = await showDialog<List<int>>(
       context: context,
       builder: (context) {
         return GradeAndClassPickerDialog(
-          initialGrade: grade,
-          initialClass: classNum,
+          initialGrade: pickerGrade,
+          initialClass: pickerClass,
           classCount: classCount,
         );
       },

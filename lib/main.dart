@@ -8,16 +8,32 @@ import 'package:hansol_high_school/data/device.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
+import 'package:hansol_high_school/notification/fcm_service.dart';
+import 'package:hansol_high_school/notification/update_checker.dart';
+import 'package:hansol_high_school/screens/sub/onboarding_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:hansol_high_school/screens/main/home_screen.dart';
 import 'package:hansol_high_school/screens/main/meal_screen.dart';
 import 'package:hansol_high_school/screens/main/notice_screen.dart';
 import 'package:hansol_high_school/firebase_options.dart';
+import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
+
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+
+final StreamController<String?> notificationStream =
+    StreamController<String?>.broadcast();
+
+void onNotificationTap(NotificationResponse notificationResponse) {
+  notificationStream.add(notificationResponse.payload);
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,136 +49,233 @@ Future<void> main() async {
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
-  Future<void> loadSubjects(int grade) async {
-    try {
-      final subjects =
-          await TimetableDataApi.getAllSubjectCombinations(grade: grade);
-      if (subjects.isEmpty) {
-        log('Empty subject list for grade $grade, using cache or retrying later');
-      }
-    } catch (e) {
-      log('Preload subjects error for grade $grade: $e');
-    }
-  }
+  final modeIndex = SettingData().themeModeIndex;
+  themeNotifier.value = _indexToThemeMode(modeIndex);
 
-  unawaited(loadSubjects(2));
-  unawaited(loadSubjects(3));
+  unawaited(_preloadSubjects(2));
+  unawaited(_preloadSubjects(3));
 
-  final database = LocalDataBase();
-  GetIt.I.registerSingleton<LocalDataBase>(database);
+  final localDb = LocalDataBase();
+  GetIt.I.registerSingleton<LocalDataBase>(localDb);
+  await localDb.migrateFromPrefs();
   await DailyMealNotification().initializeNotifications();
   await DailyMealNotification().scheduleDailyNotifications();
-  initializeDateFormatting().then((_) => runApp(HansolHighSchool()));
+
+  // FCM 초기화
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+  unawaited(FcmService.initialize());
+
+  initializeDateFormatting().then((_) => runApp(const HansolHighSchool()));
+}
+
+ThemeMode _indexToThemeMode(int index) {
+  switch (index) {
+    case 1: return ThemeMode.dark;
+    case 2: return ThemeMode.system;
+    default: return ThemeMode.light;
+  }
+}
+
+Future<void> _preloadSubjects(int grade) async {
+  try {
+    await TimetableDataApi.getAllSubjectCombinations(grade: grade);
+  } catch (e) {
+    log('Preload subjects error for grade $grade: $e');
+  }
 }
 
 Future<void> _requestNotificationPermission() async {
-  final status = await Permission.notification.request();
-  if (status.isGranted) {
-    log("Notification permission granted.");
-  } else {
-    log("Notification permission denied.");
-  }
+  await Permission.notification.request();
 }
 
-class HansolHighSchool extends StatelessWidget {
+final _lightTheme = ThemeData(
+  brightness: Brightness.light,
+  primaryColor: const Color(0xFF3F72AF),
+  scaffoldBackgroundColor: Colors.white,
+  cardColor: Colors.white,
+  dividerColor: const Color(0xFFE5E5EA),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF3F72AF),
+    foregroundColor: Colors.white,
+    elevation: 0,
+    surfaceTintColor: Colors.transparent,
+  ),
+  navigationBarTheme: NavigationBarThemeData(
+    backgroundColor: Colors.white,
+    indicatorColor: const Color(0xFF3F72AF).withAlpha(30),
+    surfaceTintColor: Colors.transparent,
+  ),
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF3F72AF),
+    brightness: Brightness.light,
+  ),
+);
+
+final _darkTheme = ThemeData(
+  brightness: Brightness.dark,
+  primaryColor: const Color(0xFF3D5A80),
+  scaffoldBackgroundColor: const Color(0xFF17191E),
+  cardColor: const Color(0xFF1E2028),
+  dividerColor: const Color(0xFF2A2D35),
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF1E2028),
+    foregroundColor: Color(0xFFEEEEEE),
+    elevation: 0,
+    surfaceTintColor: Colors.transparent,
+  ),
+  navigationBarTheme: NavigationBarThemeData(
+    backgroundColor: const Color(0xFF1E2028),
+    surfaceTintColor: Colors.transparent,
+    indicatorColor: const Color(0xFF3D5A80).withAlpha(50),
+    iconTheme: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
+        return const IconThemeData(color: Color(0xFF7EB8DA));
+      }
+      return const IconThemeData(color: Color(0xFF8B8F99));
+    }),
+    labelTextStyle: WidgetStateProperty.resolveWith((states) {
+      if (states.contains(WidgetState.selected)) {
+        return const TextStyle(color: Color(0xFF7EB8DA), fontSize: 12);
+      }
+      return const TextStyle(color: Color(0xFF8B8F99), fontSize: 12);
+    }),
+  ),
+  colorScheme: ColorScheme.fromSeed(
+    seedColor: const Color(0xFF3D5A80),
+    brightness: Brightness.dark,
+    surface: const Color(0xFF1E2028),
+  ),
+);
+
+class HansolHighSchool extends StatefulWidget {
+  const HansolHighSchool({Key? key}) : super(key: key);
+
+  @override
+  State<HansolHighSchool> createState() => _HansolHighSchoolState();
+}
+
+class _HansolHighSchoolState extends State<HansolHighSchool> {
+  ThemeMode _mode = themeNotifier.value;
+
+  @override
+  void initState() {
+    super.initState();
+    final isDark = _resolveIsDark(_mode);
+    AnimatedAppColors.instance.setDark(isDark, animate: false);
+    AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
+    themeNotifier.addListener(_onThemeChanged);
+  }
+
+  bool _resolveIsDark(ThemeMode mode) {
+    if (mode == ThemeMode.system) {
+      return WidgetsBinding.instance.platformDispatcher.platformBrightness ==
+          Brightness.dark;
+    }
+    return mode == ThemeMode.dark;
+  }
+
+  void _onThemeChanged() {
+    final newMode = themeNotifier.value;
+    final isDark = _resolveIsDark(newMode);
+    AnimatedAppColors.instance.setDark(isDark, animate: false);
+    AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
+    setState(() => _mode = newMode);
+  }
+
+  @override
+  void dispose() {
+    themeNotifier.removeListener(_onThemeChanged);
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    Device.init(context);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: MainScreen(),
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
+      themeMode: _mode,
+      locale: const Locale('ko', 'KR'),
+      supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: const MainScreen(),
     );
   }
 }
 
 class MainScreen extends StatefulWidget {
+  const MainScreen({Key? key}) : super(key: key);
+
   @override
-  _MainScreenState createState() => _MainScreenState();
+  State<MainScreen> createState() => _MainScreenState();
 }
 
-class _MainScreenState extends State<MainScreen> with WidgetsBindingObserver {
+class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
-  late List<Widget> _pages;
-  late PageController _pageController;
+  final List<Widget> _pages = const [MealScreen(), HomeScreen(), NoticeScreen()];
+  final PageController _pageController = PageController(initialPage: 1);
+  StreamSubscription<String?>? _notificationSubscription;
 
   @override
   void initState() {
     super.initState();
-    _pages = [MealScreen(), HomeScreen(), const NoticeScreen()];
-    _pageController = PageController(initialPage: 1);
-    notificationStream.stream.listen((payload) {
+    _notificationSubscription = notificationStream.stream.listen((payload) {
       if (payload == 'meal_screen') {
-        _navigateToMealScreen();
+        setState(() => _currentIndex = 0);
+        _pageController.jumpToPage(0);
       }
     });
-  }
-
-  void _navigateToMealScreen() {
-    setState(() {
-      _currentIndex = 0;
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // 온보딩
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('onboarding_done') != true && mounted) {
+        await Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+      }
+      // 업데이트 체크
+      if (mounted) UpdateChecker.check(context);
     });
-    _pageController.jumpToPage(0);
   }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {}
 
   @override
   void dispose() {
+    _notificationSubscription?.cancel();
     _pageController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    Device.init(context);
     return Scaffold(
-      body: (_pages.isNotEmpty)
-          ? PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentIndex = index;
-                });
-              },
-              physics: const PageScrollPhysics(),
-              children: _pages,
-            )
-          : Container(),
-      bottomNavigationBar: BottomNavigationBar(
-        selectedItemColor: Color(0xFF3B8EF2),
-        backgroundColor: Colors.white,
-        currentIndex: _currentIndex,
-        onTap: (index) {
-          _pageController.animateToPage(
-            index,
-            duration: const Duration(milliseconds: 200),
-            curve: Curves.easeIn,
-          );
-        },
-        showSelectedLabels: false,
-        showUnselectedLabels: false,
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.fastfood_outlined),
-            label: '급식',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            label: '홈',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications_outlined),
-            label: '알림',
-          ),
-        ],
+      body: PageView(
+        controller: _pageController,
+        onPageChanged: (index) => setState(() => _currentIndex = index),
+        physics: const PageScrollPhysics(),
+        children: _pages,
+      ),
+      bottomNavigationBar: SizedBox(
+        height: 56 + MediaQuery.of(context).padding.bottom,
+        child: NavigationBar(
+          selectedIndex: _currentIndex,
+          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+          onDestinationSelected: (index) {
+            _pageController.animateToPage(
+              index,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeIn,
+            );
+          },
+          destinations: const [
+            NavigationDestination(icon: Icon(Icons.restaurant_outlined), selectedIcon: Icon(Icons.restaurant), label: ''),
+            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: ''),
+            NavigationDestination(icon: Icon(Icons.calendar_month_outlined), selectedIcon: Icon(Icons.calendar_month), label: ''),
+          ],
+        ),
       ),
     );
   }
-}
-
-final StreamController<String?> notificationStream =
-    StreamController<String?>.broadcast();
-
-void onNotificationTap(NotificationResponse notificationResponse) {
-  notificationStream.add(notificationResponse.payload);
 }

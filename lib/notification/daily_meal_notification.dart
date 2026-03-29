@@ -1,8 +1,9 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:hansol_high_school/api/meal_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/main.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -13,88 +14,51 @@ class DailyMealNotification {
   bool _isInitialized = false;
 
   Future<void> initializeNotifications() async {
-    await _initializeNotifications();
-    _isInitialized = true;
-    print('Notifications initialized');
-  }
-
-  Future<void> _initializeNotifications() async {
-    const AndroidInitializationSettings initializationSettingsAndroid =
+    const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    final DarwinInitializationSettings initializationSettingsIOS =
-        DarwinInitializationSettings(
+    final iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
 
-    final InitializationSettings initializationSettings =
-        InitializationSettings(
-      android: initializationSettingsAndroid,
-      iOS: initializationSettingsIOS,
-    );
-
     await _localNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: _onSelectNotification,
+      InitializationSettings(android: androidSettings, iOS: iosSettings),
+      onDidReceiveNotificationResponse: _onNotificationTap,
       onDidReceiveBackgroundNotificationResponse: _onBackgroundNotification,
     );
 
     await _requestPermissions();
-    print('Initialization complete');
+    _isInitialized = true;
   }
 
-  void _onSelectNotification(NotificationResponse response) {
-    print('Notification clicked: ${response.payload}');
+  void _onNotificationTap(NotificationResponse response) {
+    log('Notification tapped: ${response.payload}');
+    notificationStream.add(response.payload);
   }
 
   @pragma('vm:entry-point')
   static void _onBackgroundNotification(NotificationResponse response) {
-    print('Background notification clicked: ${response.payload}');
+    log('Background notification: ${response.payload}');
   }
 
   Future<void> _requestPermissions() async {
     if (Platform.isIOS) {
-      final IOSFlutterLocalNotificationsPlugin? iosPlugin =
-          _localNotificationsPlugin.resolvePlatformSpecificImplementation<
+      final iosPlugin = _localNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
               IOSFlutterLocalNotificationsPlugin>();
-
-      bool? granted = await iosPlugin?.requestPermissions(
-        alert: true,
-        badge: true,
-        sound: true,
-      );
-
-      print('Permissions requested: $granted');
-
-      if (granted == false) {
-        print('알림 권한이 허용되지 않았습니다.');
-      }
+      await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
     } else if (Platform.isAndroid) {
-      final status = await Permission.notification.request();
-      if (status.isGranted) {
-        print('Notification permission granted.');
-      } else {
-        print('Notification permission denied.');
-      }
+      await Permission.notification.request();
     }
   }
 
   Future<void> scheduleDailyNotifications() async {
-    if (!_isInitialized) {
-      await initializeNotifications();
-    }
-    print('Scheduling daily notifications');
-
-    bool isBreakfastNotificationOn = SettingData().isBreakfastNotificationOn;
-    TimeOfDay breakfastTime = _parseTimeOfDay(SettingData().breakfastTime);
-    bool isLunchNotificationOn = SettingData().isLunchNotificationOn;
-    TimeOfDay lunchTime = _parseTimeOfDay(SettingData().lunchTime);
-    bool isDinnerNotificationOn = SettingData().isDinnerNotificationOn;
-    TimeOfDay dinnerTime = _parseTimeOfDay(SettingData().dinnerTime);
+    if (!_isInitialized) await initializeNotifications();
     await cancelAllNotifications();
 
-    List<int> weekdays = [
+    final settings = SettingData();
+    const weekdays = [
       DateTime.monday,
       DateTime.tuesday,
       DateTime.wednesday,
@@ -102,147 +66,141 @@ class DailyMealNotification {
       DateTime.friday,
     ];
 
-    if (isBreakfastNotificationOn) {
-      await _scheduleNotification(
+    if (settings.isBreakfastNotificationOn) {
+      await _scheduleWeeklyNotification(
         id: 1,
-        mealType: MealDataApi.BREAKFAST,
-        time: breakfastTime,
+        mealLabel: '조식',
+        time: _parseTimeOfDay(settings.breakfastTime),
         weekdays: weekdays,
       );
     }
 
-    if (isLunchNotificationOn) {
-      await _scheduleNotification(
+    if (settings.isLunchNotificationOn) {
+      await _scheduleWeeklyNotification(
         id: 2,
-        mealType: MealDataApi.LUNCH,
-        time: lunchTime,
+        mealLabel: '중식',
+        time: _parseTimeOfDay(settings.lunchTime),
         weekdays: weekdays,
       );
     }
 
-    if (isDinnerNotificationOn) {
-      await _scheduleNotification(
+    if (settings.isDinnerNotificationOn) {
+      await _scheduleWeeklyNotification(
         id: 3,
-        mealType: MealDataApi.DINNER,
-        time: dinnerTime,
+        mealLabel: '석식',
+        time: _parseTimeOfDay(settings.dinnerTime),
         weekdays: weekdays,
       );
     }
 
-    print('Daily notifications scheduled');
+    log('DailyMealNotification: scheduled ${settings.isBreakfastNotificationOn ? "조식" : ""} ${settings.isLunchNotificationOn ? "중식" : ""} ${settings.isDinnerNotificationOn ? "석식" : ""}');
+  }
+
+  Future<void> _scheduleWeeklyNotification({
+    required int id,
+    required String mealLabel,
+    required TimeOfDay time,
+    required List<int> weekdays,
+  }) async {
+    for (int weekday in weekdays) {
+      final scheduledDate = _nextInstanceOfWeekday(time, weekday);
+      final notificationId = id * 10 + weekday;
+
+      final androidDetails = AndroidNotificationDetails(
+        'daily_meal_channel_id',
+        '급식 알림',
+        channelDescription: '급식 정보 알림을 제공합니다.',
+        importance: Importance.high,
+        priority: Priority.high,
+        styleInformation: BigTextStyleInformation(
+          '오늘의 $mealLabel 메뉴가 준비되었습니다.\n앱을 열어서 확인하세요!',
+          contentTitle: '🍽️ $mealLabel 알림',
+          summaryText: '한솔고등학교',
+        ),
+        showWhen: true,
+      );
+
+      final iosDetails = DarwinNotificationDetails(
+        subtitle: '오늘의 $mealLabel을 확인하세요',
+      );
+
+      await _localNotificationsPlugin.zonedSchedule(
+        notificationId,
+        '🍽️ $mealLabel 알림',
+        '오늘의 $mealLabel 메뉴를 확인하세요',
+        scheduledDate,
+        NotificationDetails(android: androidDetails, iOS: iosDetails),
+        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+        uiLocalNotificationDateInterpretation:
+            UILocalNotificationDateInterpretation.wallClockTime,
+        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
+        payload: 'meal_screen',
+      );
+    }
+  }
+
+  /// 테스트용: 5초 후 즉시 알림 발송
+  Future<void> sendTestNotification() async {
+    if (!_isInitialized) await initializeNotifications();
+
+    final scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
+
+    final androidDetails = AndroidNotificationDetails(
+      'daily_meal_channel_id',
+      '급식 알림',
+      channelDescription: '급식 정보 알림을 제공합니다.',
+      importance: Importance.max,
+      priority: Priority.high,
+      styleInformation: const BigTextStyleInformation(
+        '테스트 알림입니다.\n오늘의 중식 메뉴를 확인하세요!',
+        contentTitle: '🍽️ 중식 알림 (테스트)',
+        summaryText: '한솔고등학교',
+      ),
+      showWhen: true,
+    );
+
+    await _localNotificationsPlugin.zonedSchedule(
+      999,
+      '🍽️ 중식 알림 (테스트)',
+      '5초 후 알림 테스트',
+      scheduledDate,
+      NotificationDetails(android: androidDetails),
+      androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+      uiLocalNotificationDateInterpretation:
+          UILocalNotificationDateInterpretation.wallClockTime,
+      payload: 'meal_screen',
+    );
+
+    log('DailyMealNotification: test notification scheduled at $scheduledDate');
   }
 
   Future<void> updateNotifications() async {
-    print('Updating notifications');
     await cancelAllNotifications();
     await scheduleDailyNotifications();
-    print('Notifications updated');
   }
 
   Future<void> cancelAllNotifications() async {
     await _localNotificationsPlugin.cancelAll();
-    print('All notifications cancelled');
   }
 
   TimeOfDay _parseTimeOfDay(String timeString) {
     final format = DateFormat.Hm();
     DateTime dateTime = format.parse(timeString);
-    print('Parsed time: $timeString to ${dateTime.hour}:${dateTime.minute}');
     return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
   }
 
-  Future<void> _scheduleNotification({
-    required int id,
-    required int mealType,
-    required TimeOfDay time,
-    required List<int> weekdays,
-  }) async {
-    for (int weekday in weekdays) {
-      tz.TZDateTime scheduledDate = _nextInstanceOfWeekday(time, weekday);
-      print(
-          'Scheduling notification [$id] for weekday $weekday at $scheduledDate');
-
-      String formattedDate =
-          '${scheduledDate.year}/${scheduledDate.month}/${scheduledDate.day}';
-      String mealTypeString;
-      switch (mealType) {
-        case 1:
-          mealTypeString = '조식 정보';
-          break;
-        case 2:
-          mealTypeString = '중식 정보';
-          break;
-        case 3:
-          mealTypeString = '석식 정보';
-          break;
-        default:
-          mealTypeString = '급식 정보';
-      }
-
-      String title = '$formattedDate $mealTypeString';
-      String body = '아래로 내려서 $mealTypeString 확인';
-      String bigText = (await MealDataApi.getMeal(
-            date: DateTime(
-                scheduledDate.year, scheduledDate.month, scheduledDate.day),
-            mealType: mealType,
-            type: MealDataApi.MENU,
-          ))
-              ?.meal ??
-          '급식 정보가 없습니다';
-
-      AndroidNotificationDetails androidDetails = AndroidNotificationDetails(
-        'daily_meal_channel_id',
-        'Daily Meal Notifications',
-        channelDescription: '급식 정보 알림을 제공합니다.',
-        importance: Importance.max,
-        priority: Priority.high,
-        styleInformation: BigTextStyleInformation(
-          bigText,
-          contentTitle: title,
-          summaryText: '',
-        ),
-        showWhen: true,
-        ticker: '',
-      );
-
-      DarwinNotificationDetails iosDetails = DarwinNotificationDetails(
-        subtitle: body,
-      );
-
-      NotificationDetails notificationDetails = NotificationDetails(
-        android: androidDetails,
-        iOS: iosDetails,
-      );
-
-      await _localNotificationsPlugin.zonedSchedule(
-        id * 10 + weekday,
-        title,
-        body,
-        scheduledDate,
-        notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.wallClockTime,
-        matchDateTimeComponents: DateTimeComponents.dayOfWeekAndTime,
-      );
-    }
-  }
-
   tz.TZDateTime _nextInstanceOfWeekday(TimeOfDay time, int weekday) {
-    tz.TZDateTime scheduledDate = _nextInstanceOfTime(time);
+    var scheduledDate = _nextInstanceOfTime(time);
     while (scheduledDate.weekday != weekday ||
         scheduledDate.isBefore(tz.TZDateTime.now(tz.local))) {
-      scheduledDate = scheduledDate.add(
-        const Duration(days: 1),
-      );
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
-    print('Next instance of weekday $weekday at $scheduledDate');
     return scheduledDate;
   }
 
   tz.TZDateTime _nextInstanceOfTime(TimeOfDay timeOfDay) {
-    final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-    tz.TZDateTime scheduledDate = tz.TZDateTime(
+    final now = tz.TZDateTime.now(tz.local);
+    var scheduledDate = tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
@@ -251,12 +209,8 @@ class DailyMealNotification {
       timeOfDay.minute,
     );
     if (scheduledDate.isBefore(now)) {
-      scheduledDate = scheduledDate.add(
-        const Duration(days: 1),
-      );
+      scheduledDate = scheduledDate.add(const Duration(days: 1));
     }
-    print(
-        'Next instance of time ${timeOfDay.hour}:${timeOfDay.minute} at $scheduledDate');
     return scheduledDate;
   }
 }

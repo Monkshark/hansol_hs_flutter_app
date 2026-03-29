@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
-import 'package:hansol_high_school/widgets/alert/delete_alert_dialog.dart';
-import 'package:hansol_high_school/Widgets/calendar/main_calendar.dart';
-import 'package:hansol_high_school/Widgets/calendar/schedule_bottom_sheet.dart';
-import 'package:hansol_high_school/Widgets/calendar/schedule_card.dart';
-import 'package:hansol_high_school/Widgets/calendar/school_schedule_card.dart';
-import 'package:hansol_high_school/Widgets/calendar/today_banner.dart';
+import 'package:hansol_high_school/widgets/calendar/main_calendar.dart';
+import 'package:hansol_high_school/widgets/calendar/schedule_bottom_sheet.dart';
+import 'package:hansol_high_school/widgets/calendar/schedule_card.dart';
+import 'package:hansol_high_school/widgets/calendar/school_schedule_card.dart';
+import 'package:hansol_high_school/widgets/calendar/today_banner.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
@@ -25,51 +24,58 @@ class _NoticeScreenState extends State<NoticeScreen> {
     DateTime.now().day,
   );
 
+  final NoticeDataApi _noticeApi = NoticeDataApi();
+  String? _schoolSchedule;
+  List<Schedule> _schedules = [];
+  bool _loading = true;
+
   @override
   void initState() {
     super.initState();
+    _loadData();
   }
 
-  Future<bool> hasSchoolSchedule(DateTime date) async {
-    final schoolSchedule = await NoticeDataApi().getNotice(date: date);
-    return schoolSchedule != null && schoolSchedule != '학사일정이 없습니다';
+  Future<void> _loadData() async {
+    setState(() => _loading = true);
+
+    final results = await Future.wait([
+      _noticeApi.getNotice(date: selectedDate),
+      GetIt.I<LocalDataBase>().watchSchedules(selectedDate).first,
+    ]);
+
+    if (mounted) {
+      setState(() {
+        _schoolSchedule = results[0] as String?;
+        _schedules = results[1] as List<Schedule>;
+        _loading = false;
+      });
+    }
   }
 
-  Future<bool> hasPersonalSchedules(DateTime date) async {
-    final schedulesStream = GetIt.I<LocalDataBase>().watchSchedules(date);
-    final schedules = await schedulesStream.first;
-    return schedules.isNotEmpty;
-  }
-
-  Future<bool> hasAnySchedule(DateTime date) async {
-    final schoolScheduleExists = await hasSchoolSchedule(date);
-    final personalSchedulesExist = await hasPersonalSchedules(date);
-    return schoolScheduleExists || personalSchedulesExist;
-  }
+  bool get _hasSchool =>
+      _schoolSchedule != null && _schoolSchedule != '학사일정이 없습니다';
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? const Color(0xFF17191E) : const Color(0xFFF5F6F8);
+    final itemCount = _schedules.length + (_hasSchool ? 1 : 0);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.theme.primaryColor,
+        elevation: 2,
         onPressed: () {
-          showModalBottomSheet(
+          showDialog(
             context: context,
             builder: (_) => ScheduleBottomSheet(
               selectedDate: selectedDate,
-              onScheduleCreated: () {
-                setState(() {});
-              },
+              onScheduleCreated: _loadData,
             ),
-            isScrollControlled: true,
-            isDismissible: true,
           );
         },
-        child: const Icon(
-          Icons.add,
-          color: Colors.white,
-        ),
+        child: const Icon(Icons.add, color: Colors.white),
       ),
       body: SafeArea(
         child: Column(
@@ -78,130 +84,56 @@ class _NoticeScreenState extends State<NoticeScreen> {
               selectedDate: selectedDate,
               onDaySelected: onDaySelected,
             ),
-            const SizedBox(height: 8.0),
-            StreamBuilder<List<Schedule>>(
-              stream: GetIt.I<LocalDataBase>().watchSchedules(selectedDate),
-              builder: (context, snapshot) {
-                if (!snapshot.hasData) return Container();
-
-                return FutureBuilder<String?>(
-                  future: NoticeDataApi().getNotice(date: selectedDate),
-                  builder: (context, snapshot2) {
-                    final schoolSchedule = snapshot2.data;
-                    final hasSchoolSchedule = schoolSchedule != null &&
-                        schoolSchedule != '학사일정이 없습니다';
-
-                    final schedules = snapshot.data!;
-                    final count =
-                        schedules.length + (hasSchoolSchedule ? 1 : 0);
-
-                    return TodayBanner(
-                      selectedDate: selectedDate,
-                      count: count,
-                    );
-                  },
-                );
-              },
-            ),
-            const SizedBox(height: 8.0),
+            const SizedBox(height: 4),
             Expanded(
-              child: FutureBuilder<String?>(
-                future: NoticeDataApi().getNotice(date: selectedDate),
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  final schoolSchedule = snapshot.data;
-                  final hasSchoolSchedule =
-                      schoolSchedule != null && schoolSchedule != '학사일정이 없습니다';
-
-                  return StreamBuilder<List<Schedule>>(
-                    stream:
-                        GetIt.I<LocalDataBase>().watchSchedules(selectedDate),
-                    builder: (context, snapshot) {
-                      if (!snapshot.hasData) return Container();
-
-                      final schedules = snapshot.data!;
-                      final itemCount =
-                          schedules.length + (hasSchoolSchedule ? 1 : 0);
-
-                      return ListView.builder(
-                        itemCount: itemCount,
-                        itemBuilder: (context, index) {
-                          if (hasSchoolSchedule && index == 0) {
-                            return Dismissible(
-                              key: UniqueKey(),
-                              direction: DismissDirection.horizontal,
-                              confirmDismiss: (direction) async {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('학사일정은 삭제가 불가능합니다'),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: bgColor,
+                  borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  children: [
+                    const SizedBox(height: 12),
+                    TodayBanner(
+                      selectedDate: selectedDate,
+                      count: itemCount,
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: _loading
+                          ? const Center(child: CircularProgressIndicator())
+                          : itemCount == 0
+                              ? Center(
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Icon(Icons.event_note, size: 40, color: AppColors.theme.darkGreyColor),
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        '일정이 없습니다',
+                                        style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor),
+                                      ),
+                                    ],
                                   ),
-                                );
-                                return false;
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: 8.0,
-                                  left: 8.0,
-                                  right: 8.0,
-                                ),
-                                child: SchoolScheduleCard(
-                                  startTime: 8,
-                                  endTime: 4,
-                                  content: schoolSchedule!,
-                                ),
-                              ),
-                            );
-                          } else {
-                            final schedule =
-                                schedules[index - (hasSchoolSchedule ? 1 : 0)];
-
-                            return Dismissible(
-                              key: UniqueKey(),
-                              direction: DismissDirection.horizontal,
-                              confirmDismiss: (direction) async {
-                                return await showDialog(
-                                  context: context,
-                                  builder: (BuildContext context) {
-                                    return const DeleteAlertDialog(
-                                      title: '일정 삭제',
-                                      content:
-                                          '정말 일정을 삭제하시겠습니까?\n삭제 후에는 복구가 불가능합니다.',
-                                    );
+                                )
+                              : ListView.separated(
+                                  padding: EdgeInsets.fromLTRB(
+                                    16, 0, 16,
+                                    MediaQuery.of(context).padding.bottom + 80,
+                                  ),
+                                  itemCount: itemCount,
+                                  separatorBuilder: (_, __) => const SizedBox(height: 8),
+                                  itemBuilder: (context, index) {
+                                    if (_hasSchool && index == 0) {
+                                      return _buildSchoolItem();
+                                    }
+                                    final scheduleIndex = index - (_hasSchool ? 1 : 0);
+                                    return _buildPersonalItem(scheduleIndex);
                                   },
-                                );
-                              },
-                              onDismissed: (direction) async {
-                                await GetIt.I<LocalDataBase>()
-                                    .deleteSchedule(schedule);
-                                setState(() {});
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                    content: Text('일정 삭제됨'),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: const EdgeInsets.only(
-                                  bottom: 8.0,
-                                  left: 8.0,
-                                  right: 8.0,
                                 ),
-                                child: ScheduleCard(
-                                  startTimeInMinutes: schedule.startTime,
-                                  endTimeInMinutes: schedule.endTime,
-                                  content: schedule.content,
-                                ),
-                              ),
-                            );
-                          }
-                        },
-                      );
-                    },
-                  );
-                },
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
@@ -210,9 +142,43 @@ class _NoticeScreenState extends State<NoticeScreen> {
     );
   }
 
+  Widget _buildSchoolItem() {
+    return SchoolScheduleCard(
+      startTime: 8,
+      endTime: 4,
+      content: _schoolSchedule ?? '',
+    );
+  }
+
+  Widget _buildPersonalItem(int index) {
+    final schedule = _schedules[index];
+
+    return Dismissible(
+      key: ValueKey(schedule.id ?? '${schedule.content}_${schedule.date}_$index'),
+      direction: DismissDirection.endToStart,
+      onDismissed: (_) {
+        setState(() => _schedules.removeAt(index));
+        GetIt.I<LocalDataBase>().deleteSchedule(schedule);
+      },
+      background: Container(
+        alignment: Alignment.centerRight,
+        padding: const EdgeInsets.only(right: 20),
+        decoration: BoxDecoration(
+          color: Colors.red,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const Icon(Icons.delete, color: Colors.white),
+      ),
+      child: ScheduleCard(
+        startTimeInMinutes: schedule.startTime,
+        endTimeInMinutes: schedule.endTime,
+        content: schedule.content,
+      ),
+    );
+  }
+
   void onDaySelected(DateTime selectedDate, DateTime focusedDay) {
-    setState(() {
-      this.selectedDate = selectedDate;
-    });
+    this.selectedDate = selectedDate;
+    _loadData();
   }
 }

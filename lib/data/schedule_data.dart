@@ -1,36 +1,31 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-
 class Schedule {
+  final int? id;
   final int startTime;
   final int endTime;
   final String content;
   final String date;
 
   Schedule({
+    this.id,
     required this.startTime,
     required this.endTime,
     required this.content,
     required this.date,
   });
-}
 
-Stream<List<Schedule>> watchSchedules(DateTime date) async* {
-  final prefs = await SharedPreferences.getInstance();
-  final schedules = prefs.getStringList('schedules') ?? [];
+  Map<String, dynamic> toMap() => {
+    if (id != null) 'id': id,
+    'startTime': startTime,
+    'endTime': endTime,
+    'content': content,
+    'date': date,
+  };
 
-  yield schedules.map((schedule) {
-    final decodedSchedule = jsonDecode(schedule) as Map<String, dynamic>;
-    return Schedule(
-      startTime: decodedSchedule['startTime'],
-      endTime: decodedSchedule['endTime'],
-      content: decodedSchedule['content'],
-      date: decodedSchedule['date'],
-    );
-  }).where((schedule) {
-    final scheduleDate = DateTime.parse(schedule.date);
-    return scheduleDate.year == date.year &&
-        scheduleDate.month == date.month &&
-        scheduleDate.day == date.day;
-  }).toList();
+  factory Schedule.fromMap(Map<String, dynamic> map) => Schedule(
+    id: map['id'] as int?,
+    startTime: map['startTime'] as int,
+    endTime: map['endTime'] as int,
+    content: map['content'] as String,
+    date: map['date'] as String,
+  );
 }

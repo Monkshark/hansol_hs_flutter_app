@@ -1,0 +1,994 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
+import 'package:get_it/get_it.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/local_database.dart';
+import 'package:hansol_high_school/data/schedule_data.dart';
+import 'package:hansol_high_school/screens/auth/login_screen.dart';
+import 'package:hansol_high_school/screens/board/write_post_screen.dart';
+import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:intl/intl.dart';
+
+class PostDetailScreen extends StatefulWidget {
+  final String postId;
+
+  const PostDetailScreen({required this.postId, Key? key}) : super(key: key);
+
+  @override
+  State<PostDetailScreen> createState() => _PostDetailScreenState();
+}
+
+class _PostDetailScreenState extends State<PostDetailScreen> {
+  final _commentController = TextEditingController();
+  bool _sending = false;
+  bool _commentAnonymous = false;
+
+  DocumentReference<Map<String, dynamic>> get _postRef =>
+      FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        foregroundColor: textColor,
+        elevation: 0,
+        actions: [
+          StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+            stream: _postRef.snapshots(),
+            builder: (context, snapshot) {
+              final data = snapshot.data?.data();
+              if (data == null) return const SizedBox.shrink();
+              final isAuthor = AuthService.currentUser?.uid == data['authorUid'];
+
+              return PopupMenuButton<String>(
+                onSelected: (value) {
+                  if (value == 'edit') _editPost(data);
+                  if (value == 'delete') _deletePost();
+                  if (value == 'report') _reportPost();
+                },
+                itemBuilder: (_) => [
+                  if (isAuthor) ...[
+                    const PopupMenuItem(value: 'edit', child: Text('수정')),
+                    const PopupMenuItem(value: 'delete', child: Text('삭제')),
+                  ],
+                  if (!isAuthor)
+                    const PopupMenuItem(value: 'report', child: Text('신고')),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+      body: Column(
+        children: [
+          Expanded(
+            child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
+              stream: _postRef.snapshots(),
+              builder: (context, postSnapshot) {
+                if (!postSnapshot.hasData || !postSnapshot.data!.exists) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                final post = postSnapshot.data!.data()!;
+                final title = post['title'] ?? '';
+                final content = post['content'] ?? '';
+                final authorName = post['authorName'] ?? '익명';
+                final category = post['category'] ?? '';
+                final createdAt = post['createdAt'] as Timestamp?;
+                final timeStr = createdAt != null
+                    ? DateFormat('M월 d일 (E) HH:mm', 'ko_KR').format(createdAt.toDate())
+                    : '';
+
+                // 일정 첨부 데이터
+                final hasEvent = post['eventDate'] != null;
+                final eventDate = hasEvent ? DateTime.parse(post['eventDate']) : null;
+                final eventContent = post['eventContent'] as String? ?? '';
+                final eventStartTime = post['eventStartTime'] as int? ?? -1;
+                final eventEndTime = post['eventEndTime'] as int? ?? -1;
+
+                // 추천/비추천 데이터
+                final likes = (post['likes'] as Map<String, dynamic>?) ?? {};
+                final dislikes = (post['dislikes'] as Map<String, dynamic>?) ?? {};
+                final myUid = AuthService.currentUser?.uid;
+                final hasLiked = myUid != null && likes.containsKey(myUid);
+                final hasDisliked = myUid != null && dislikes.containsKey(myUid);
+
+                // 투표 데이터
+                final pollOptions = (post['pollOptions'] as List<dynamic>?)?.cast<String>();
+                final hasPoll = pollOptions != null && pollOptions.isNotEmpty;
+                final pollVoters = (post['pollVoters'] as Map<String, dynamic>?) ?? {};
+                final myVote = AuthService.currentUser != null
+                    ? pollVoters[AuthService.currentUser!.uid]
+                    : null;
+
+                return ListView(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+                  children: [
+                    // 카테고리
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
+                        decoration: BoxDecoration(
+                          color: _categoryColor(category).withAlpha(20),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(category,
+                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _categoryColor(category))),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: textColor)),
+                    const SizedBox(height: 8),
+                    Text('$authorName · $timeStr',
+                      style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                    const SizedBox(height: 16),
+                    Divider(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA)),
+                    const SizedBox(height: 16),
+                    Text(content, style: TextStyle(fontSize: 15, height: 1.7, color: textColor)),
+
+                    // 이미지
+                    if (post['imageUrls'] != null && (post['imageUrls'] as List).isNotEmpty) ...[
+                      const SizedBox(height: 16),
+                      ...(post['imageUrls'] as List).map((url) => Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: GestureDetector(
+                          onTap: () => _showFullImage(context, url as String),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Image.network(
+                              url as String,
+                              width: double.infinity,
+                              fit: BoxFit.fitWidth,
+                              loadingBuilder: (context, child, progress) {
+                                if (progress == null) return child;
+                                return Container(
+                                  height: 200,
+                                  alignment: Alignment.center,
+                                  child: CircularProgressIndicator(
+                                    value: progress.expectedTotalBytes != null
+                                        ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
+                                        : null,
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      )),
+                    ],
+
+                    // 투표 카드
+                    if (hasPoll) ...[
+                      const SizedBox(height: 20),
+                      _PollCard(
+                        options: pollOptions,
+                        voters: pollVoters,
+                        myVote: myVote as int?,
+                        onVote: (index) => _vote(index),
+                      ),
+                    ],
+
+                    // 일정 첨부 카드
+                    if (hasEvent) ...[
+                      const SizedBox(height: 20),
+                      _EventAttachCard(
+                        eventDate: eventDate!,
+                        eventContent: eventContent,
+                        startTime: eventStartTime,
+                        endTime: eventEndTime,
+                        onAdd: () => _addEventToCalendar(eventDate, eventContent, eventStartTime, eventEndTime),
+                      ),
+                    ],
+
+                    // 추천/비추천
+                    const SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        _VoteButton(
+                          icon: Icons.thumb_up_outlined,
+                          activeIcon: Icons.thumb_up,
+                          count: likes.length,
+                          isActive: hasLiked,
+                          activeColor: AppColors.theme.primaryColor,
+                          onTap: () => _toggleLike(hasLiked, hasDisliked),
+                        ),
+                        const SizedBox(width: 20),
+                        _VoteButton(
+                          icon: Icons.thumb_down_outlined,
+                          activeIcon: Icons.thumb_down,
+                          count: dislikes.length,
+                          isActive: hasDisliked,
+                          activeColor: Colors.redAccent,
+                          onTap: () => _toggleDislike(hasLiked, hasDisliked),
+                        ),
+                        if (AuthService.currentUser?.uid != post['authorUid']) ...[
+                          const SizedBox(width: 20),
+                          GestureDetector(
+                            onTap: _reportPost,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: AppColors.theme.darkGreyColor.withAlpha(80)),
+                              ),
+                              child: Icon(Icons.flag_outlined, size: 20, color: AppColors.theme.darkGreyColor),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+                    Divider(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA)),
+                    const SizedBox(height: 12),
+                    // 댓글
+                    StreamBuilder<QuerySnapshot>(
+                      stream: _postRef.collection('comments').orderBy('createdAt').snapshots(),
+                      builder: (context, commentSnapshot) {
+                        final comments = commentSnapshot.data?.docs ?? [];
+
+                        return Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('댓글 ${comments.length}',
+                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textColor)),
+                            const SizedBox(height: 12),
+                            if (comments.isEmpty)
+                              Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 20),
+                                child: Center(
+                                  child: Text('첫 댓글을 남겨보세요',
+                                    style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                                ),
+                              )
+                            else
+                              ...comments.map((doc) {
+                                final c = doc.data() as Map<String, dynamic>;
+                                return _CommentItem(
+                                  data: c,
+                                  isAuthor: AuthService.currentUser?.uid == c['authorUid'],
+                                  onDelete: () => _confirmDeleteComment(doc.id),
+                                );
+                              }),
+                          ],
+                        );
+                      },
+                    ),
+                  ],
+                );
+              },
+            ),
+          ),
+          // 댓글 입력
+          Container(
+            padding: EdgeInsets.fromLTRB(16, 8, 8, MediaQuery.of(context).padding.bottom + 8),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2028) : Colors.white,
+              border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA))),
+            ),
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => setState(() => _commentAnonymous = !_commentAnonymous),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: _commentAnonymous
+                          ? AppColors.theme.primaryColor.withAlpha(20)
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: _commentAnonymous
+                            ? AppColors.theme.primaryColor
+                            : AppColors.theme.darkGreyColor,
+                      ),
+                    ),
+                    child: Text('익명',
+                      style: TextStyle(
+                        fontSize: 12, fontWeight: FontWeight.w600,
+                        color: _commentAnonymous
+                            ? AppColors.theme.primaryColor
+                            : AppColors.theme.darkGreyColor,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: TextField(
+                    controller: _commentController,
+                    style: TextStyle(fontSize: 14, color: textColor),
+                    decoration: InputDecoration(
+                      hintText: '댓글을 입력하세요',
+                      hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 4),
+                IconButton(
+                  onPressed: _sending ? null : _submitComment,
+                  icon: Icon(Icons.send, color: AppColors.theme.primaryColor),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFullImage(BuildContext context, String url) {
+    Navigator.push(context, MaterialPageRoute(
+      builder: (_) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Center(
+          child: InteractiveViewer(
+            child: Image.network(url, fit: BoxFit.contain),
+          ),
+        ),
+      ),
+    ));
+  }
+
+  Future<void> _reportPost() async {
+    if (!AuthService.isLoggedIn) return;
+
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        String? selected;
+        return StatefulBuilder(
+          builder: (ctx, setDialogState) => Dialog(
+            backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('신고 사유 선택', style: TextStyle(
+                    fontSize: 18, fontWeight: FontWeight.w700,
+                    color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                  const SizedBox(height: 16),
+                  ...['욕설/비방', '음란물', '광고/스팸', '개인정보 노출', '기타'].map((r) =>
+                    RadioListTile<String>(
+                      value: r,
+                      groupValue: selected,
+                      title: Text(r, style: TextStyle(fontSize: 14,
+                        color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                      activeColor: AppColors.theme.primaryColor,
+                      onChanged: (v) => setDialogState(() => selected = v),
+                      dense: true,
+                      contentPadding: EdgeInsets.zero,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(child: TextButton(
+                        onPressed: () => Navigator.pop(ctx),
+                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      )),
+                      const SizedBox(width: 10),
+                      Expanded(child: ElevatedButton(
+                        onPressed: selected != null ? () => Navigator.pop(ctx, selected) : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: const Text('신고'),
+                      )),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+
+    if (reason == null) return;
+
+    await FirebaseFirestore.instance.collection('reports').add({
+      'postId': widget.postId,
+      'reporterUid': AuthService.currentUser!.uid,
+      'reason': reason,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('신고가 접수되었습니다')),
+      );
+    }
+  }
+
+  Future<void> _toggleLike(bool hasLiked, bool hasDisliked) async {
+    if (!AuthService.isLoggedIn) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+    final uid = AuthService.currentUser!.uid;
+    if (hasLiked) {
+      await _postRef.update({'likes.$uid': FieldValue.delete()});
+    } else {
+      final updates = <String, dynamic>{'likes.$uid': true};
+      if (hasDisliked) updates['dislikes.$uid'] = FieldValue.delete();
+      await _postRef.update(updates);
+    }
+  }
+
+  Future<void> _toggleDislike(bool hasLiked, bool hasDisliked) async {
+    if (!AuthService.isLoggedIn) {
+      await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      return;
+    }
+    final uid = AuthService.currentUser!.uid;
+    if (hasDisliked) {
+      await _postRef.update({'dislikes.$uid': FieldValue.delete()});
+    } else {
+      final updates = <String, dynamic>{'dislikes.$uid': true};
+      if (hasLiked) updates['likes.$uid'] = FieldValue.delete();
+      await _postRef.update(updates);
+    }
+  }
+
+  Future<void> _vote(int optionIndex) async {
+    if (!AuthService.isLoggedIn) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (result != true) return;
+    }
+
+    final uid = AuthService.currentUser!.uid;
+    await _postRef.update({'pollVoters.$uid': optionIndex});
+  }
+
+  Future<void> _addEventToCalendar(DateTime date, String content, int startTime, int endTime) async {
+    await GetIt.I<LocalDataBase>().insertSchedule(Schedule(
+      startTime: startTime,
+      endTime: endTime,
+      content: content,
+      date: date.toIso8601String(),
+    ));
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${DateFormat('M/d').format(date)} 일정에 추가되었습니다')),
+      );
+    }
+  }
+
+  Future<void> _submitComment() async {
+    final text = _commentController.text.trim();
+    if (text.isEmpty) return;
+
+    if (!AuthService.isLoggedIn) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginScreen()),
+      );
+      if (result != true) return;
+    }
+
+    final profile = await AuthService.getUserProfile();
+    if (profile == null) return;
+
+    setState(() => _sending = true);
+    final anonymous = _commentAnonymous;
+    _commentController.clear();
+
+    final displayName = anonymous
+        ? '익명'
+        : (profile.studentId.isNotEmpty ? '${profile.studentId} ${profile.name}' : profile.name);
+
+    await _postRef.collection('comments').add({
+      'content': text,
+      'authorUid': AuthService.currentUser!.uid,
+      'authorName': displayName,
+      'isAnonymous': anonymous,
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+
+    await _postRef.update({'commentCount': FieldValue.increment(1)});
+    if (mounted) setState(() => _sending = false);
+  }
+
+  Future<void> _confirmDeleteComment(String commentId) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('댓글 삭제', style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.w700,
+                  color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                const SizedBox(height: 12),
+                Text('댓글을 삭제하시겠습니까?', style: TextStyle(
+                  fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: const Text('삭제'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirm == true) {
+      await _postRef.collection('comments').doc(commentId).delete();
+      await _postRef.update({'commentCount': FieldValue.increment(-1)});
+    }
+  }
+
+  void _editPost(Map<String, dynamic> data) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => WritePostScreen(
+          postId: widget.postId,
+          initialTitle: data['title'],
+          initialContent: data['content'],
+          initialCategory: data['category'],
+        ),
+      ),
+    );
+  }
+
+  Future<void> _deletePost() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        return Dialog(
+          backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text('게시글 삭제', style: TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.w700,
+                  color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                const SizedBox(height: 12),
+                Text('정말 삭제하시겠습니까?', style: TextStyle(
+                  fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
+                const SizedBox(height: 20),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: const Text('삭제'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+
+    if (confirm == true) {
+      final comments = await _postRef.collection('comments').get();
+      for (var doc in comments.docs) {
+        await doc.reference.delete();
+      }
+      await _postRef.delete();
+      if (mounted) Navigator.pop(context);
+    }
+  }
+
+  Color _categoryColor(String category) {
+    switch (category) {
+      case '자유': return AppColors.theme.primaryColor;
+      case '질문': return AppColors.theme.secondaryColor;
+      case '정보공유': return AppColors.theme.tertiaryColor;
+      default: return AppColors.theme.darkGreyColor;
+    }
+  }
+}
+
+// 일정 첨부 카드
+class _EventAttachCard extends StatelessWidget {
+  final DateTime eventDate;
+  final String eventContent;
+  final int startTime;
+  final int endTime;
+  final VoidCallback onAdd;
+
+  const _EventAttachCard({
+    required this.eventDate,
+    required this.eventContent,
+    required this.startTime,
+    required this.endTime,
+    required this.onAdd,
+  });
+
+  String _formatTime(int minutes) {
+    if (minutes < 0) return '';
+    final h = minutes ~/ 60;
+    final m = minutes % 60;
+    final period = h < 12 ? '오전' : '오후';
+    final hour = h == 0 ? 12 : (h > 12 ? h - 12 : h);
+    return '$period $hour:${m.toString().padLeft(2, '0')}';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final hasTime = startTime >= 0 && endTime >= 0;
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F6F8),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.theme.tertiaryColor.withAlpha(60)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.event, size: 18, color: AppColors.theme.tertiaryColor),
+              const SizedBox(width: 6),
+              Text('일정 공유', style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.theme.tertiaryColor)),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(eventContent, style: TextStyle(
+            fontSize: 15, fontWeight: FontWeight.w600,
+            color: Theme.of(context).textTheme.bodyLarge?.color)),
+          const SizedBox(height: 4),
+          Text(
+            DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(eventDate) +
+                (hasTime ? '  ${_formatTime(startTime)} - ${_formatTime(endTime)}' : ''),
+            style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: onAdd,
+              icon: const Icon(Icons.add, size: 18),
+              label: const Text('내 일정에 추가'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.theme.tertiaryColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                elevation: 0,
+                padding: const EdgeInsets.symmetric(vertical: 10),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _VoteButton extends StatelessWidget {
+  final IconData icon;
+  final IconData activeIcon;
+  final int count;
+  final bool isActive;
+  final Color activeColor;
+  final VoidCallback onTap;
+
+  const _VoteButton({
+    required this.icon,
+    required this.activeIcon,
+    required this.count,
+    required this.isActive,
+    required this.activeColor,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? activeColor.withAlpha(20) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isActive ? activeColor : AppColors.theme.darkGreyColor.withAlpha(80),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              isActive ? activeIcon : icon,
+              size: 20,
+              color: isActive ? activeColor : AppColors.theme.darkGreyColor,
+            ),
+            const SizedBox(width: 6),
+            Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: isActive ? activeColor : AppColors.theme.darkGreyColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _PollCard extends StatelessWidget {
+  final List<String> options;
+  final Map<String, dynamic> voters;
+  final int? myVote;
+  final Function(int) onVote;
+
+  const _PollCard({
+    required this.options,
+    required this.voters,
+    required this.myVote,
+    required this.onVote,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final totalVotes = voters.length;
+    final hasVoted = myVote != null;
+
+    // 각 옵션별 투표 수
+    final voteCounts = List.filled(options.length, 0);
+    for (var v in voters.values) {
+      final idx = v as int;
+      if (idx >= 0 && idx < options.length) voteCounts[idx]++;
+    }
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F6F8),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.theme.secondaryColor.withAlpha(60)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.poll, size: 18, color: AppColors.theme.secondaryColor),
+              const SizedBox(width: 6),
+              Text('투표', style: TextStyle(
+                fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.theme.secondaryColor)),
+              const Spacer(),
+              Text('$totalVotes명 참여', style: TextStyle(
+                fontSize: 12, color: AppColors.theme.darkGreyColor)),
+            ],
+          ),
+          const SizedBox(height: 12),
+          ...List.generate(options.length, (i) {
+            final count = voteCounts[i];
+            final ratio = totalVotes > 0 ? count / totalVotes : 0.0;
+            final isMyChoice = myVote == i;
+
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: GestureDetector(
+                onTap: hasVoted ? null : () => onVote(i),
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: isMyChoice
+                          ? AppColors.theme.secondaryColor
+                          : (isDark ? const Color(0xFF3A3D45) : const Color(0xFFE0E0E0)),
+                      width: isMyChoice ? 1.5 : 1,
+                    ),
+                  ),
+                  child: Stack(
+                    children: [
+                      // 결과 바
+                      if (hasVoted)
+                        FractionallySizedBox(
+                          widthFactor: ratio,
+                          child: Container(
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: isMyChoice
+                                  ? AppColors.theme.secondaryColor.withAlpha(30)
+                                  : AppColors.theme.darkGreyColor.withAlpha(15),
+                              borderRadius: BorderRadius.circular(9),
+                            ),
+                          ),
+                        ),
+                      Container(
+                        height: 44,
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        child: Row(
+                          children: [
+                            if (!hasVoted)
+                              Container(
+                                width: 18, height: 18,
+                                margin: const EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(color: AppColors.theme.darkGreyColor),
+                                ),
+                              )
+                            else if (isMyChoice)
+                              Container(
+                                width: 18, height: 18,
+                                margin: const EdgeInsets.only(right: 10),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: AppColors.theme.secondaryColor,
+                                ),
+                                child: const Icon(Icons.check, size: 12, color: Colors.white),
+                              ),
+                            Expanded(
+                              child: Text(options[i], style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: isMyChoice ? FontWeight.w600 : FontWeight.w400,
+                                color: textColor,
+                              )),
+                            ),
+                            if (hasVoted)
+                              Text('${(ratio * 100).round()}%', style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: isMyChoice ? AppColors.theme.secondaryColor : AppColors.theme.darkGreyColor,
+                              )),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+}
+
+class _CommentItem extends StatelessWidget {
+  final Map<String, dynamic> data;
+  final bool isAuthor;
+  final VoidCallback onDelete;
+
+  const _CommentItem({required this.data, required this.isAuthor, required this.onDelete});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final name = data['authorName'] ?? '익명';
+    final content = data['content'] ?? '';
+    final createdAt = data['createdAt'] as Timestamp?;
+    final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text(name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+                const SizedBox(width: 8),
+                Text(timeStr, style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor)),
+                const Spacer(),
+                if (isAuthor)
+                  GestureDetector(
+                    onTap: onDelete,
+                    child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 6),
+            Text(content, style: TextStyle(fontSize: 14, color: textColor, height: 1.4)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatTime(DateTime dt) {
+    final diff = DateTime.now().difference(dt);
+    if (diff.inMinutes < 1) return '방금';
+    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+    if (diff.inHours < 24) return '${diff.inHours}시간 전';
+    if (diff.inDays < 7) return '${diff.inDays}일 전';
+    return DateFormat('M/d').format(dt);
+  }
+}

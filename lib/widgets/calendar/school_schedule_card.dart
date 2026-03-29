@@ -1,60 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-class _Time extends StatelessWidget {
-  final int startTime;
-  final int endTime;
-
-  const _Time({
-    required this.startTime,
-    required this.endTime,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    TextStyle textStyle = TextStyle(
-      fontSize: 16.0,
-      fontWeight: FontWeight.w600,
-      color: AppColors.theme.secondaryColor,
-    );
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '${startTime.toString()}:40 AM',
-          style: textStyle,
-        ),
-        Text(
-          '${endTime.toString()}:20 PM',
-          style: textStyle.copyWith(
-            fontSize: 16.0,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _Content extends StatelessWidget {
-  final String content;
-
-  const _Content({
-    required this.content,
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Text(
-        content,
-      ),
-    );
-  }
-}
-
 class SchoolScheduleCard extends StatelessWidget {
   final int startTime;
   final int endTime;
@@ -69,33 +15,49 @@ class SchoolScheduleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        border: Border.all(
-          width: 1.0,
-          color: AppColors.theme.secondaryColor,
-        ),
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: IntrinsicHeight(
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _Time(
-                startTime: startTime,
-                endTime: endTime,
-              ),
-              const SizedBox(
-                width: 16.0,
-              ),
-              _Content(
-                content: "[학사일정] $content",
-              ),
-            ],
+        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border(
+          left: BorderSide(
+            color: AppColors.theme.secondaryColor,
+            width: 3,
           ),
         ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              content,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w500,
+                color: Theme.of(context).textTheme.bodyLarge?.color,
+              ),
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+            decoration: BoxDecoration(
+              color: AppColors.theme.secondaryColor.withAlpha(20),
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              '학사',
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: AppColors.theme.secondaryColor,
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

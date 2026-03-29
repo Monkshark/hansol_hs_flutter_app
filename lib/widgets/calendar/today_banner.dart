@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:intl/intl.dart';
 
 class TodayBanner extends StatelessWidget {
   final DateTime selectedDate;
@@ -13,37 +14,37 @@ class TodayBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const textStyle = TextStyle(
-      fontWeight: FontWeight.w600,
-      color: Colors.white,
-    );
+    final dateStr = DateFormat('M월 d일 (E)', 'ko_KR').format(selectedDate);
 
-    return ClipRRect(
-      borderRadius: const BorderRadius.only(
-        topLeft: Radius.circular(10.0),
-        topRight: Radius.circular(10.0),
-      ),
-      child: Container(
-        color: AppColors.theme.lighterColor,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 8.0,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+      child: Row(
+        children: [
+          Text(
+            dateStr,
+            style: TextStyle(
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+              color: Theme.of(context).textTheme.bodyLarge?.color,
+            ),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                '${selectedDate.year}년 ${selectedDate.month}월 ${selectedDate.day}일',
-                style: textStyle,
+          const SizedBox(width: 8),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            decoration: BoxDecoration(
+              color: AppColors.theme.primaryColor.withAlpha(25),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Text(
+              '$count',
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: AppColors.theme.primaryColor,
               ),
-              Text(
-                '$count개',
-                style: textStyle,
-              ),
-            ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

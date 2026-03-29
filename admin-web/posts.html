@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>게시글 관리 - 한솔고 관리자</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" style="display:flex;flex-direction:column;">
+      <h2>HS Admin</h2>
+      <a href="dashboard.html"><span>대시보드</span></a>
+      <a href="posts.html" class="active"><span>게시글 관리</span></a>
+      <a href="reports.html"><span>신고 관리</span></a>
+      <a href="users.html"><span>사용자 관리</span></a>
+      <a href="config.html"><span>앱 설정</span></a>
+      <a href="#" class="logout" id="logoutBtn"><span>로그아웃</span></a>
+    </nav>
+
+    <div class="main">
+      <h1>게시글 관리</h1>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="제목 또는 작성자로 검색...">
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>카테고리</th>
+              <th>제목</th>
+              <th>작성자</th>
+              <th>추천</th>
+              <th>댓글</th>
+              <th>작성일</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody id="postsList"><tr><td colspan="7" class="loading">로딩중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut, collection, doc, getDocs, deleteDoc, query, orderBy, limit } from './js/firebase-init.js';
+
+    let allPosts = [];
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'index.html';
+      else loadPosts();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      renderPosts(allPosts.filter(p =>
+        p.title.toLowerCase().includes(q) || p.authorName.toLowerCase().includes(q)
+      ));
+    });
+
+    async function loadPosts() {
+      const q = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(100));
+      const snap = await getDocs(q);
+      allPosts = [];
+      snap.forEach(d => allPosts.push({ id: d.id, ...d.data() }));
+      renderPosts(allPosts);
+    }
+
+    function renderPosts(posts) {
+      const tbody = document.getElementById('postsList');
+      tbody.innerHTML = '';
+      if (posts.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="color:#888;">게시글이 없습니다</td></tr>';
+        return;
+      }
+      posts.forEach(p => {
+        const time = p.createdAt?.toDate().toLocaleString('ko-KR') || '';
+        const catClass = { '자유': 'badge-blue', '질문': 'badge-green', '정보공유': 'badge-orange' }[p.category] || 'badge-blue';
+        const likes = p.likes ? Object.keys(p.likes).length : 0;
+        const dislikes = p.dislikes ? Object.keys(p.dislikes).length : 0;
+        tbody.innerHTML += `<tr>
+          <td><span class="badge ${catClass}">${p.category || ''}</span></td>
+          <td style="max-width:300px;">${p.title || ''}<br><span style="color:#888;font-size:11px;">${(p.content || '').substring(0, 50)}</span></td>
+          <td>${p.authorName || ''}${p.isAnonymous ? ' <span class="badge badge-purple">익명</span>' : ''}</td>
+          <td style="color:#3F72AF;">+${likes} <span style="color:#e53935;">-${dislikes}</span></td>
+          <td>${p.commentCount || 0}</td>
+          <td style="font-size:11px;">${time}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="deletePost('${p.id}')">삭제</button></td>
+        </tr>`;
+      });
+    }
+
+    window.deletePost = async (id) => {
+      if (!confirm('정말 이 게시글을 삭제하시겠습니까?')) return;
+      // 댓글 삭제
+      const comments = await getDocs(collection(db, 'posts', id, 'comments'));
+      for (const c of comments.docs) await deleteDoc(c.ref);
+      await deleteDoc(doc(db, 'posts', id));
+      allPosts = allPosts.filter(p => p.id !== id);
+      renderPosts(allPosts);
+    };
+  </script>
+</body>
+</html>

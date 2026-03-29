@@ -1,9 +1,18 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/data/device.dart';
+import 'package:hansol_high_school/api/meal_data_api.dart';
+import 'package:hansol_high_school/data/dday_manager.dart';
+import 'package:hansol_high_school/screens/sub/dday_screen.dart';
+import 'package:hansol_high_school/data/meal.dart';
+import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/screens/board/board_screen.dart';
+import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart';
+import 'package:hansol_high_school/screens/sub/timetable_view_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
-import 'package:hansol_high_school/widgets/home/news_card.dart';
+import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -13,72 +22,424 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  bool isSwitched = false;
+  Key _ddayKey = UniqueKey();
+
+  void _refreshDDay() {
+    setState(() => _ddayKey = UniqueKey());
+  }
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    final dateStr = DateFormat('M월 d일 EEEE', 'ko_KR').format(now);
+    final grade = SettingData().grade;
+    final classNum = SettingData().classNum;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Scaffold(
-        backgroundColor: Colors.white,
-        appBar: PreferredSize(
-          preferredSize: Size.fromHeight(Device.getHeight(23)),
-          child: AppBar(
-            backgroundColor: AppColors.theme.primaryColor,
-            actions: [
-              SizedBox(
-                child: IconButton(
-                  color: Colors.white,
-                  onPressed: () {
-                    Navigator.of(context).push(_createRoute());
-                  },
-                  icon: const Icon(Icons.settings_outlined),
-                  iconSize: 27,
-                ),
+      body: Column(
+        children: [
+          // 고정 헤더
+          Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  AppColors.theme.primaryColor,
+                  AppColors.theme.tertiaryColor,
+                ],
               ),
-            ],
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(20),
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(24)),
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(24, 8, 12, 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            dateStr,
+                            style: TextStyle(
+                              color: Colors.white.withAlpha(200),
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const SettingScreen()),
+                          ),
+                          icon: const Icon(Icons.settings_outlined),
+                          color: Colors.white,
+                        ),
+                      ],
+                    ),
+                    _UpcomingEventDDay(key: _ddayKey, onRefresh: _refreshDDay),
+                    const SizedBox(height: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withAlpha(35),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(Icons.school, color: Colors.white, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            SettingData().isGradeSet
+                                ? '한솔고 $grade학년 $classNum반'
+                                : '한솔고등학교',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 13,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    _TodayLunchPreview(),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-        body: Column(
-          children: [
-            Center(
-              child: Column(
-                children: [
+          // 스크롤 가능한 본문
+          Expanded(
+            child: ListView(
+              padding: const EdgeInsets.all(16),
+              children: [
                   const CurrentSubjectCard(),
-                  const NewsCard(
-                    title: "{news_title_1}",
+                  const SizedBox(height: 16),
+                  // 시간표 조회
+                  GestureDetector(
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const TimetableViewScreen()),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.theme.tertiaryColor.withAlpha(25),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(Icons.calendar_view_week, color: AppColors.theme.tertiaryColor, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('시간표', style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                Text('이번 주 시간표를 확인하세요', style: TextStyle(
+                                  fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                        ],
+                      ),
+                    ),
                   ),
-                ],
-              ),
+                  const SizedBox(height: 16),
+                  // 게시판
+                  GestureDetector(
+                    onTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const BoardScreen()),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              color: AppColors.theme.primaryColor.withAlpha(25),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Icon(Icons.forum_outlined, color: AppColors.theme.primaryColor, size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('게시판', style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                Text('자유롭게 소통해보세요', style: TextStyle(
+                                  fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  // 게시판 최신 글 미리보기
+                  _RecentPosts(),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(child: _LinkCard(icon: Icons.school_outlined, label: 'NEIS+', color: const Color(0xFF4CAF50), url: 'https://neisplus.kr/')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _LinkCard(icon: Icons.language_outlined, label: '리로스쿨', color: const Color(0xFF2196F3), url: 'https://sjhansol.riroschool.kr/')),
+                      const SizedBox(width: 12),
+                      Expanded(child: _LinkCard(icon: Icons.campaign_outlined, label: '한솔 공식', color: const Color(0xFFFF9800), url: 'https://sjhansol.sjeduhs.kr/sjhansol-h/main.do?sso=ok')),
+                    ],
+                  ),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
+}
 
-  Route _createRoute() {
-    return PageRouteBuilder(
-      pageBuilder: (context, animation, secondaryAnimation) => SettingScreen(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0);
-        const end = Offset.zero;
-        const curve = Curves.ease;
+class _UpcomingEventDDay extends StatelessWidget {
+  final VoidCallback onRefresh;
+  const _UpcomingEventDDay({super.key, required this.onRefresh});
 
-        var tween =
-            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
-        var offsetAnimation = animation.drive(tween);
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<DDay?>(
+      future: DDayManager.getPinned(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState != ConnectionState.done) {
+          return const Text(
+            '일정 로딩중...',
+            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+          );
+        }
 
-        return SlideTransition(
-          position: offsetAnimation,
-          child: child,
+        final pinnedDDay = snapshot.data;
+
+        // 핀 된 D-day가 없으면 설정 유도
+        if (pinnedDDay == null) {
+          return GestureDetector(
+            onTap: () => Navigator.of(context).push(
+              MaterialPageRoute(builder: (_) => const DDayScreen()),
+            ).then((_) => onRefresh()),
+            child: Row(
+              children: [
+                Icon(Icons.add_circle_outline, color: Colors.white.withAlpha(200), size: 20),
+                const SizedBox(width: 8),
+                Text(
+                  'D-day를 설정하세요',
+                  style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 16, fontWeight: FontWeight.w500),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final d = pinnedDDay.dDay;
+        final dDayText = d == 0 ? 'D-Day' : d > 0 ? 'D-$d' : 'D+${-d}';
+        final titleText = '${pinnedDDay.title} · ${DateFormat('M/d', 'ko_KR').format(pinnedDDay.date)}';
+
+        return GestureDetector(
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(builder: (_) => const DDayScreen()),
+          ).then((_) => onRefresh()),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Text(
+                dDayText,
+                style: const TextStyle(
+                  color: Colors.white, fontSize: 28,
+                  fontWeight: FontWeight.w800, letterSpacing: 1),
+              ),
+              const SizedBox(width: 10),
+              Flexible(
+                child: Text(
+                  titleText,
+                  style: TextStyle(
+                    color: Colors.white.withAlpha(220),
+                    fontSize: 16, fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
         );
       },
+    );
+  }
+}
+
+class _TodayLunchPreview extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<Meal?>(
+      future: MealDataApi.getMeal(
+        date: DateTime.now(),
+        mealType: MealDataApi.LUNCH,
+        type: MealDataApi.MENU,
+      ),
+      builder: (context, snapshot) {
+        String preview = '급식 정보 로딩중...';
+        if (snapshot.hasData && snapshot.data?.meal != null) {
+          final menu = snapshot.data!.meal!;
+          final items = menu.split('\n').take(3).map((e) =>
+            e.replaceAll(RegExp(r'\([0-9.,\s]+\)'), '').trim()
+          ).where((e) => e.isNotEmpty).join(' · ');
+          preview = '🍱 $items';
+        } else if (snapshot.hasData) {
+          preview = '오늘 급식 정보가 없습니다';
+        }
+        return Text(
+          preview,
+          style: TextStyle(
+            color: Colors.white.withAlpha(180),
+            fontSize: 12,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        );
+      },
+    );
+  }
+}
+
+class _RecentPosts extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .limit(3)
+          .snapshots(),
+      builder: (context, snapshot) {
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) return const SizedBox.shrink();
+
+        return Column(
+          children: docs.map((doc) {
+            final data = doc.data();
+            final title = data['title'] ?? '';
+            final category = data['category'] ?? '';
+            final commentCount = data['commentCount'] ?? 0;
+
+            return GestureDetector(
+              onTap: () => Navigator.push(context,
+                MaterialPageRoute(builder: (_) => PostDetailScreen(postId: doc.id))),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                margin: const EdgeInsets.only(bottom: 4),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                      decoration: BoxDecoration(
+                        color: _catColor(category).withAlpha(20),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(category,
+                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: _catColor(category))),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(title,
+                        style: TextStyle(fontSize: 13, color: textColor),
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                    ),
+                    if (commentCount > 0) ...[
+                      const SizedBox(width: 6),
+                      Text('[$commentCount]',
+                        style: TextStyle(fontSize: 11, color: AppColors.theme.primaryColor)),
+                    ],
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+
+  Color _catColor(String c) {
+    switch (c) {
+      case '자유': return AppColors.theme.primaryColor;
+      case '질문': return AppColors.theme.secondaryColor;
+      case '정보공유': return AppColors.theme.tertiaryColor;
+      default: return AppColors.theme.darkGreyColor;
+    }
+  }
+}
+
+class _LinkCard extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String url;
+  const _LinkCard({required this.icon, required this.label, required this.color, required this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 20),
+          child: Column(
+            children: [
+              Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(color: color.withAlpha(30), shape: BoxShape.circle),
+                child: Icon(icon, color: color, size: 24),
+              ),
+              const SizedBox(height: 8),
+              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

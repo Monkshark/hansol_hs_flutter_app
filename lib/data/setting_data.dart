@@ -15,13 +15,18 @@ class SettingData {
   }
 
   set grade(int value) => _sharedPreferences.setInt('Grade', value);
-  int get grade => _sharedPreferences.getInt('Grade') ?? 1;
+  int get grade => _sharedPreferences.getInt('Grade') ?? 0;
 
   set classNum(int value) => _sharedPreferences.setInt('Class', value);
-  int get classNum => _sharedPreferences.getInt('Class') ?? 1;
+  int get classNum => _sharedPreferences.getInt('Class') ?? 0;
+
+  bool get isGradeSet => grade > 0 && classNum > 0;
 
   set isDarkMode(bool value) => _sharedPreferences.setBool('isDarkMode', value);
   bool get isDarkMode => _sharedPreferences.getBool('isDarkMode') ?? false;
+
+  set themeModeIndex(int value) => _sharedPreferences.setInt('themeModeIndex', value);
+  int get themeModeIndex => _sharedPreferences.getInt('themeModeIndex') ?? 0;
 
   set isBreakfastNotificationOn(bool value) =>
       _sharedPreferences.setBool('isBreakfastNotificationOn', value);
@@ -51,4 +56,9 @@ class SettingData {
       _sharedPreferences.setString('dinnerTime', value);
   String get dinnerTime =>
       _sharedPreferences.getString('dinnerTime') ?? '17:00';
+
+  set isBoardNotificationOn(bool value) =>
+      _sharedPreferences.setBool('isBoardNotificationOn', value);
+  bool get isBoardNotificationOn =>
+      _sharedPreferences.getBool('isBoardNotificationOn') ?? true;
 }

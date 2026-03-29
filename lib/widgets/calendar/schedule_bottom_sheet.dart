@@ -1,12 +1,11 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/data/device.dart';
-import 'package:hansol_high_school/Widgets/calendar/custom_text_field.dart';
+import 'package:get_it/get_it.dart';
+import 'package:hansol_high_school/data/local_database.dart';
+import 'package:hansol_high_school/data/schedule_data.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ScheduleBottomSheet extends StatefulWidget {
   final DateTime selectedDate;
@@ -23,222 +22,191 @@ class ScheduleBottomSheet extends StatefulWidget {
 }
 
 class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
-  final GlobalKey<FormState> formKey = GlobalKey();
   TimeOfDay? startTime;
   TimeOfDay? endTime;
-  String? content;
-  final TextEditingController startTimeController = TextEditingController();
-  final TextEditingController endTimeController = TextEditingController();
   final TextEditingController contentController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final fillColor = isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5);
 
-    void onSavePressed() async {
-      if (formKey.currentState!.validate()) {
-        formKey.currentState!.save();
-
-        final prefs = await SharedPreferences.getInstance();
-        final schedules = prefs.getStringList('schedules') ?? [];
-
-        final newSchedule = {
-          'startTime': startTime!.hour * 60 + startTime!.minute,
-          'endTime': endTime!.hour * 60 + endTime!.minute,
-          'content': content,
-          'date': widget.selectedDate.toIso8601String(),
-        };
-
-        schedules.add(jsonEncode(newSchedule));
-        await prefs.setStringList('schedules', schedules);
-
-        Navigator.of(context).pop();
-
-        widget.onScheduleCreated();
-      }
-    }
-
-    Future<void> pickTime(BuildContext context, bool isStart) async {
-      final now = TimeOfDay.now();
-      final initialTime = isStart ? (startTime ?? now) : (endTime ?? now);
-
-      if (Platform.isIOS) {
-        showCupertinoModalPopup(
-          context: context,
-          builder: (context) {
-            return Container(
-              height: 250,
-              color: Colors.white,
-              child: CupertinoDatePicker(
-                mode: CupertinoDatePickerMode.time,
-                initialDateTime: DateTime(
-                  widget.selectedDate.year,
-                  widget.selectedDate.month,
-                  widget.selectedDate.day,
-                  initialTime.hour,
-                  initialTime.minute,
-                ),
-                use24hFormat: false,
-                onDateTimeChanged: (DateTime newDateTime) {
-                  setState(() {
-                    if (isStart) {
-                      startTime = TimeOfDay(
-                        hour: newDateTime.hour,
-                        minute: newDateTime.minute,
-                      );
-                      startTimeController.text = startTime!.format(context);
-                    } else {
-                      endTime = TimeOfDay(
-                        hour: newDateTime.hour,
-                        minute: newDateTime.minute,
-                      );
-                      endTimeController.text = endTime!.format(context);
-                    }
-                  });
-                },
-              ),
-            );
-          },
-        );
-      } else {
-        final pickedTime = await showTimePicker(
-          context: context,
-          initialTime: initialTime,
-          builder: (context, child) {
-            return MediaQuery(
-              data:
-                  MediaQuery.of(context).copyWith(alwaysUse24HourFormat: false),
-              child: child!,
-            );
-          },
-        );
-
-        if (pickedTime != null) {
-          setState(() {
-            if (isStart) {
-              startTime = pickedTime;
-              startTimeController.text = startTime!.format(context);
-            } else {
-              endTime = pickedTime;
-              endTimeController.text = endTime!.format(context);
-            }
-          });
-        }
-      }
-    }
-
-    return Form(
-      key: formKey,
-      child: SafeArea(
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            return Container(
-              width: constraints.maxWidth,
-              height: Device.getHeight(50) + bottomInset,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(
-                  color: Colors.white,
-                  width: 2.0,
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(12.0),
-                  topRight: Radius.circular(12.0),
+    return Dialog(
+      backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('일정 만들기', style: TextStyle(
+              fontSize: 18, fontWeight: FontWeight.w700, color: textColor)),
+            const SizedBox(height: 20),
+            // 내용
+            TextField(
+              controller: contentController,
+              style: TextStyle(color: textColor),
+              decoration: InputDecoration(
+                hintText: '일정 내용을 입력하세요',
+                hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                filled: true,
+                fillColor: fillColor,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
                 ),
               ),
-              child: Padding(
-                padding: EdgeInsets.only(
-                  left: 8.0,
-                  right: 8.0,
-                  top: 8.0,
-                  bottom: bottomInset,
+            ),
+            const SizedBox(height: 12),
+            // 시간 선택
+            Row(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _pickTime(true),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: fillColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.access_time, size: 18, color: AppColors.theme.darkGreyColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            startTime != null ? startTime!.format(context) : '시작',
+                            style: TextStyle(
+                              color: startTime != null ? textColor : AppColors.theme.darkGreyColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ),
-                child: Column(
-                  children: [
-                    const Text(
-                      '일정 만들기',
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: CustomTextField(
-                            label: '시작 시간',
-                            isTime: true,
-                            controller: startTimeController,
-                            onTap: () => pickTime(context, true),
-                            onSaved: (value) {},
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return '시작 시간을 선택해주세요';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 16.0),
-                        Expanded(
-                          child: CustomTextField(
-                            label: '종료 시간',
-                            isTime: true,
-                            controller: endTimeController,
-                            onTap: () => pickTime(context, false),
-                            onSaved: (value) {},
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return '종료 시간을 선택해주세요';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 16.0),
-                    Expanded(
-                      child: CustomTextField(
-                        label: '내용',
-                        isTime: false,
-                        controller: contentController,
-                        onSaved: (val) {
-                          content = val;
-                        },
-                        validator: (val) {
-                          if (val == null || val.isEmpty) {
-                            return "값을 입력해주세요";
-                          }
-                          return null;
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 16.0),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: onSavePressed,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.theme.primaryColor,
-                        ),
-                        child: const Text(
-                          '저장',
-                          style: TextStyle(
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 16.0)
-                  ],
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                  child: Text('~', style: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 16)),
                 ),
-              ),
-            );
-          },
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _pickTime(false),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: fillColor,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.access_time, size: 18, color: AppColors.theme.darkGreyColor),
+                          const SizedBox(width: 8),
+                          Text(
+                            endTime != null ? endTime!.format(context) : '종료',
+                            style: TextStyle(
+                              color: endTime != null ? textColor : AppColors.theme.darkGreyColor,
+                              fontSize: 14,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            // 버튼
+            Row(
+              children: [
+                Expanded(
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _onSave,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.theme.primaryColor,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: const Text('추가'),
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
+  }
+
+  Future<void> _onSave() async {
+    if (contentController.text.trim().isEmpty) return;
+
+    final schedule = Schedule(
+      startTime: startTime != null ? startTime!.hour * 60 + startTime!.minute : -1,
+      endTime: endTime != null ? endTime!.hour * 60 + endTime!.minute : -1,
+      content: contentController.text.trim(),
+      date: widget.selectedDate.toIso8601String(),
+    );
+
+    await GetIt.I<LocalDataBase>().insertSchedule(schedule);
+    Navigator.of(context).pop();
+    widget.onScheduleCreated();
+  }
+
+  Future<void> _pickTime(bool isStart) async {
+    final now = TimeOfDay.now();
+    final initial = isStart ? (startTime ?? now) : (endTime ?? now);
+
+    if (Platform.isIOS) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (ctx) => Container(
+          height: 250,
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            initialDateTime: DateTime(
+              widget.selectedDate.year, widget.selectedDate.month,
+              widget.selectedDate.day, initial.hour, initial.minute),
+            use24hFormat: false,
+            onDateTimeChanged: (dt) {
+              setState(() {
+                if (isStart) {
+                  startTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+                } else {
+                  endTime = TimeOfDay(hour: dt.hour, minute: dt.minute);
+                }
+              });
+            },
+          ),
+        ),
+      );
+    } else {
+      final picked = await showTimePicker(
+        context: context,
+        initialTime: initial,
+      );
+      if (picked != null) {
+        setState(() {
+          if (isStart) {
+            startTime = picked;
+          } else {
+            endTime = picked;
+          }
+        });
+      }
+    }
   }
 }

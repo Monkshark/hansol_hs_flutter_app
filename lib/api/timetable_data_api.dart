@@ -9,7 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetableDataApi {
-  static const TAG = 'TimetableDataApi';
+  static const _tag = 'TimetableDataApi';
   static const _subjectCacheKeyPrefix = 'subjects_grade_';
 
   static Future<Map<String, Map<String, List<String>>>> getTimeTable({
@@ -24,7 +24,7 @@ class TimetableDataApi {
         '$formattedStartDate-$formattedEndDate-$grade${classNum != null ? '-$classNum' : ''}';
     final prefs = await SharedPreferences.getInstance();
 
-    log('$TAG: getTimeTable: Checking cache for key: $cacheKey');
+    log('$_tag: getTimeTable cacheKey=$cacheKey');
     if (prefs.containsKey(cacheKey)) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
@@ -33,7 +33,7 @@ class TimetableDataApi {
       if (currentTime - cachedTimestamp < oneDay) {
         final cachedData = prefs.getString(cacheKey);
         if (cachedData != null) {
-          log('$TAG: getTimeTable: Cache hit for $cacheKey');
+          log('$_tag: getTimeTable cache HIT');
           final decoded = jsonDecode(cachedData) as Map<String, dynamic>;
           return decoded.map((key, value) => MapEntry(
                 key,
@@ -42,14 +42,12 @@ class TimetableDataApi {
               ));
         }
       } else {
-        log('$TAG: getTimeTable: Cache expired for $cacheKey, removing');
         prefs.remove(cacheKey);
         prefs.remove('$cacheKey-timestamp');
       }
     }
 
     if (await NetworkStatus.isUnconnected()) {
-      log('$TAG: getTimeTable: No internet connection');
       return {
         "error": {
           "error": ["시간표를 확인하려면 인터넷에 연결하세요"]
@@ -67,11 +65,8 @@ class TimetableDataApi {
         '&GRADE=$grade'
         '${classNum != null ? '&CLASS_NM=$classNum' : ''}';
 
-    log('$TAG: getTimeTable: Requesting URL: $requestURL');
-
-    final data = await fetchData(requestURL);
+    final data = await _fetchData(requestURL);
     if (data == null) {
-      log('$TAG: getTimeTable: No data received from API');
       return {
         "error": {
           "error": ["정보 없음"]
@@ -79,125 +74,151 @@ class TimetableDataApi {
       };
     }
 
-    final timetable = processTimetable(data['hisTimetable']);
-    log('$TAG: getTimeTable: Processed timetable: $timetable');
-    final encodedData = jsonEncode(timetable);
-    prefs.setString(cacheKey, encodedData);
-    prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
-    log('$TAG: getTimeTable: Cached timetable for $cacheKey');
+    if (data['hisTimetable'] == null) {
+      return {"error": {"error": ["정보 없음"]}};
+    }
+    final timetable = _processTimetable(data['hisTimetable']);
+    // 에러 결과는 캐시하지 않음
+    if (!timetable.containsKey('error')) {
+      final encodedData = jsonEncode(timetable);
+      prefs.setString(cacheKey, encodedData);
+      prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+    }
 
     return timetable;
   }
 
-  static Future<Map<String, dynamic>?> fetchData(String url) async {
-    log('$TAG: fetchData: Sending GET request to $url');
+  static Future<Map<String, dynamic>?> _fetchData(String url) async {
     try {
       final response = await http.get(Uri.parse(url));
-      log('$TAG: fetchData: Response status code: ${response.statusCode}');
       if (response.statusCode != 200) {
-        log('$TAG: fetchData: Failed with status code ${response.statusCode}');
+        log('$_tag: _fetchData: Failed with status code ${response.statusCode}');
         return null;
       }
       final data = jsonDecode(response.body);
-      log('$TAG: fetchData: Successfully decoded response');
       return data;
     } catch (e) {
-      log('$TAG: fetchData error: $e');
+      log('$_tag: _fetchData error: $e');
       return null;
     }
   }
 
-  static Map<String, Map<String, List<String>>> processTimetable(
+  static Map<String, Map<String, List<String>>> _processTimetable(
       List<dynamic> timetableArray) {
     Map<String, Map<String, List<String>>> resultMap = {};
-    log('$TAG: processTimetable: Starting to process timetable array with ${timetableArray.length} entries');
     try {
       for (var data in timetableArray) {
         final rowArray = data['row'] as List<dynamic>?;
-        if (rowArray != null) {
-          log('$TAG: processTimetable: Processing ${rowArray.length} rows');
-          for (var item in rowArray) {
-            final classNum = item['CLASS_NM'] as String?;
-            final date = item['ALL_TI_YMD'] as String?;
-            final content = item['ITRT_CNTNT'] as String?;
-            if (classNum != null && date != null && content != null) {
-              resultMap
-                  .putIfAbsent(date, () => {})
-                  .putIfAbsent(classNum, () => [])
-                  .add(content);
-              log('$TAG: processTimetable: Added $content for class $classNum on $date');
-            }
+        if (rowArray == null) continue;
+        for (var item in rowArray) {
+          final rawClassNum = item['CLASS_NM'];
+          final date = item['ALL_TI_YMD'] as String?;
+          final content = item['ITRT_CNTNT'] as String?;
+          final perio = int.tryParse(item['PERIO']?.toString() ?? '');
+          if (date == null || content == null || perio == null) continue;
+
+          // null CLASS_NM은 특별실로 처리
+          final classNum = rawClassNum?.toString() ?? 'special';
+
+          final dayMap = resultMap.putIfAbsent(date, () => {});
+          final classList = dayMap.putIfAbsent(classNum, () => []);
+
+          // PERIO 기반으로 정확한 위치에 삽입 (1-indexed → 0-indexed)
+          while (classList.length < perio) {
+            classList.add('');
           }
+          classList[perio - 1] = content;
         }
       }
     } catch (e) {
-      log('$TAG: processTimetable error: $e');
+      log('$_tag: _processTimetable error: $e');
       return {
         "error": {"error": []}
       };
     }
-    log('$TAG: processTimetable: Completed with ${resultMap.length} dates');
     return resultMap;
+  }
+
+  /// 이번 주 시간표 조회, 비어있으면 다음 주 → 저번 주 폴백
+  static Future<Map<String, Map<String, List<String>>>> _getWeekTimetableWithFallback(
+      String grade) async {
+    final now = DateTime.now();
+    final thisMonday = now.subtract(Duration(days: now.weekday - 1));
+
+    // 이번 주
+    var timetable = await getTimeTable(
+      startDate: thisMonday,
+      endDate: thisMonday.add(const Duration(days: 4)),
+      grade: grade,
+    );
+    if (_hasData(timetable)) return timetable;
+
+    // 다음 주
+    final nextMonday = thisMonday.add(const Duration(days: 7));
+    timetable = await getTimeTable(
+      startDate: nextMonday,
+      endDate: nextMonday.add(const Duration(days: 4)),
+      grade: grade,
+    );
+    if (_hasData(timetable)) return timetable;
+
+    // 저번 주
+    final prevMonday = thisMonday.subtract(const Duration(days: 7));
+    timetable = await getTimeTable(
+      startDate: prevMonday,
+      endDate: prevMonday.add(const Duration(days: 4)),
+      grade: grade,
+    );
+    return timetable;
+  }
+
+  static bool _hasData(Map<String, Map<String, List<String>>> timetable) {
+    if (timetable.containsKey('error')) return false;
+    return timetable.values.any((classMap) =>
+        classMap.values.any((subjects) => subjects.isNotEmpty));
   }
 
   static Future<List<String>?> getSubjects({required int grade}) async {
     final prefs = await SharedPreferences.getInstance();
     final cacheKey = 'subjects-$grade';
     final cachedData = prefs.getString(cacheKey);
-    log('$TAG: getSubjects: Checking cache for key: $cacheKey');
     if (cachedData != null) {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
-      const oneMonth = 30 * 24 * 60 * 60 * 1000;
-      if (currentTime - cachedTimestamp < oneMonth) {
-        log('$TAG: getSubjects: Cache hit for $cacheKey');
+      const oneWeek = 7 * 24 * 60 * 60 * 1000;
+      if (currentTime - cachedTimestamp < oneWeek) {
         return jsonDecode(cachedData).cast<String>();
       }
-      log('$TAG: getSubjects: Cache expired for $cacheKey');
     }
 
     List<String> subjects = [];
-    DateTime now = DateTime.now();
-    DateTime startDate = DateTime(now.year, 3, 8);
-    DateTime endDate = DateTime(now.year, 3, 14);
-    log('$TAG: getSubjects: Fetching subjects for grade $grade from $startDate to $endDate');
 
-    final timetable = await getTimeTable(
-      startDate: startDate,
-      endDate: endDate,
-      grade: grade.toString(),
-      classNum: null,
-    );
+    final timetable = await _getWeekTimetableWithFallback(grade.toString());
 
     timetable.forEach((date, classMap) {
-      log('$TAG: getSubjects: Processing date $date with ${classMap.length} classes');
+      if (date == 'error') return;
       classMap.forEach((classNum, subjectsList) {
         subjects.addAll(subjectsList
-            .where((name) => !name.contains('[보강]') && name != '토요휴업일'));
-        log('$TAG: getSubjects: Added ${subjectsList.length} subjects for class $classNum on $date');
+            .where((name) => name.isNotEmpty && !name.contains('[보강]') && name != '토요휴업일'));
       });
     });
 
     subjects = subjects.toSet().toList()..sort();
-    log('$TAG: getSubjects: Total unique subjects: ${subjects.length}');
     await prefs.setString(cacheKey, jsonEncode(subjects));
     await prefs.setInt(
         '$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
-    log('$TAG: getSubjects: Cached subjects for $cacheKey');
     return subjects;
   }
 
   static Future<List<List<String?>>> getCustomTimeTable({
     required List<Subject> userSubjects,
     required String grade,
-    bool writeLog = false,
   }) async {
     const maxPeriods = 7;
     List<List<String?>> customTimeTable = List.generate(
       6,
       (i) => i == 0 ? [] : [null, ...List.filled(maxPeriods, '')],
     );
-    log('$TAG: getCustomTimeTable: Initializing timetable for grade $grade with ${userSubjects.length} subjects');
 
     DateTime now = DateTime.now();
     DateTime startDate = now;
@@ -210,24 +231,18 @@ class TimetableDataApi {
         grade: grade,
         classNum: null,
       );
-      log('$TAG: getCustomTimeTable: Received timetable for ${timetable.length} dates');
 
       final classToSubjects = <int, List<Subject>>{};
       for (var subject in userSubjects) {
         classToSubjects
             .putIfAbsent(subject.subjectClass, () => [])
             .add(subject);
-        log('$TAG: getCustomTimeTable: Grouped subject ${subject.subjectName} for class ${subject.subjectClass}');
       }
 
       timetable.forEach((date, classMap) {
         int weekday = DateFormat('yyyyMMdd').parse(date).weekday;
-        if (weekday >= 6) {
-          log('$TAG: getCustomTimeTable: Skipping weekend date $date');
-          return;
-        }
+        if (weekday >= 6) return;
 
-        log('$TAG: getCustomTimeTable: Processing date $date for weekday $weekday');
         classMap.forEach((classNum, subjectsList) {
           final classSubjects = classToSubjects[int.parse(classNum)] ?? [];
           for (var subject in classSubjects) {
@@ -235,26 +250,19 @@ class TimetableDataApi {
               if (subjectsList[i] == subject.subjectName &&
                   subject.subjectName != '토요휴업일') {
                 customTimeTable[weekday][i + 1] = subject.subjectName;
-                log('$TAG: getCustomTimeTable: Set ${subject.subjectName} at weekday $weekday, period ${i + 1}');
               }
             }
           }
         });
       });
     } catch (e) {
-      log('$TAG: getCustomTimeTable error: $e');
+      log('$_tag: getCustomTimeTable error: $e');
       return List.generate(
         6,
         (i) => i == 0 ? [] : [null, ...List.filled(maxPeriods, '')],
       );
     }
 
-    if (writeLog) {
-      for (var weekday in customTimeTable.sublist(1)) {
-        log('$TAG: getCustomTimeTable: day${customTimeTable.indexOf(weekday)}: ${weekday.toString()}');
-      }
-    }
-    log('$TAG: getCustomTimeTable: Completed with timetable: $customTimeTable');
     return customTimeTable;
   }
 
@@ -264,11 +272,9 @@ class TimetableDataApi {
     final cachedClassCount = prefs.getInt(cacheKey);
     final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
     final currentTime = DateTime.now().millisecondsSinceEpoch;
-    const oneMonth = 30 * 24 * 60 * 60 * 1000;
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
 
-    log('$TAG: getClassCount: Checking cache for key: $cacheKey');
-    if (cachedClassCount != null && currentTime - cachedTimestamp < oneMonth) {
-      log('$TAG: getClassCount: Cache hit, returning $cachedClassCount classes');
+    if (cachedClassCount != null && currentTime - cachedTimestamp < oneWeek) {
       return cachedClassCount;
     }
 
@@ -279,19 +285,16 @@ class TimetableDataApi {
         '&AY=${DateTime.now().year}'
         '&GRADE=$grade';
 
-    log('$TAG: getClassCount: Requesting URL: $requestURL');
-
-    final data = await fetchData(requestURL);
+    final data = await _fetchData(requestURL);
     if (data == null) {
-      log('$TAG: getClassCount: No data received from API');
       return 0;
     }
 
+    if (data['classInfo'] == null) return 0;
     final classCount =
         data['classInfo'][0]['head'][0]['list_total_count'] as int;
     await prefs.setInt(cacheKey, classCount);
     await prefs.setInt('$cacheKey-timestamp', currentTime);
-    log('$TAG: getClassCount: Cached $classCount classes for $cacheKey');
     return classCount;
   }
 
@@ -300,13 +303,12 @@ class TimetableDataApi {
     final cacheKey = '$_subjectCacheKeyPrefix$grade';
     final timestampKey = '${cacheKey}_timestamp';
 
-    log('$TAG: _loadCachedSubjects: Checking cache for key: $cacheKey');
     final jsonString = prefs.getString(cacheKey);
     final cachedTimestamp = prefs.getInt(timestampKey) ?? 0;
     final currentTime = DateTime.now().millisecondsSinceEpoch;
-    const oneMonth = 30 * 24 * 60 * 60 * 1000;
+    const oneWeek = 7 * 24 * 60 * 60 * 1000;
 
-    if (jsonString != null && currentTime - cachedTimestamp < oneMonth) {
+    if (jsonString != null && currentTime - cachedTimestamp < oneWeek) {
       try {
         final List<dynamic> jsonList = json.decode(jsonString);
         final subjects = jsonList
@@ -315,14 +317,12 @@ class TimetableDataApi {
                   subjectClass: item['subjectClass'],
                 ))
             .toList();
-        log('$TAG: _loadCachedSubjects: Loaded ${subjects.length} subjects from cache');
         return subjects;
       } catch (e) {
-        log('$TAG: _loadCachedSubjects error: $e');
+        log('$_tag: _loadCachedSubjects error: $e');
         return null;
       }
     }
-    log('$TAG: _loadCachedSubjects: No valid cache found');
     return null;
   }
 
@@ -342,7 +342,6 @@ class TimetableDataApi {
 
     await prefs.setString(cacheKey, jsonString);
     await prefs.setInt(timestampKey, DateTime.now().millisecondsSinceEpoch);
-    log('$TAG: _saveSubjectsToCache: Saved ${subjects.length} subjects for grade $grade');
   }
 
   static Future<List<Subject>> getAllSubjectCombinations({
@@ -351,35 +350,33 @@ class TimetableDataApi {
   }) async {
     final cachedSubjects = await _loadCachedSubjects(grade);
     if (cachedSubjects != null && cachedSubjects.isNotEmpty) {
-      log('$TAG: getAllSubjectCombinations: Returning ${cachedSubjects.length} cached subjects for grade $grade');
       return cachedSubjects;
     }
 
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
-      log('$TAG: getAllSubjectCombinations: Attempt $attempt for grade $grade');
       try {
         Set<Subject> subjectSet = {};
-        DateTime now = DateTime.now();
-        DateTime startDate = DateTime(now.year, 3, 8);
-        DateTime endDate = DateTime(now.year, 3, 14);
 
-        final timetable = await getTimeTable(
-          startDate: startDate,
-          endDate: endDate,
-          grade: grade.toString(),
-          classNum: null,
-        );
+        final timetable = await _getWeekTimetableWithFallback(grade.toString());
+
+        // 디버그: classMap 키 확인
+        if (timetable.isNotEmpty) {
+          final firstDate = timetable.keys.first;
+          final classKeys = timetable[firstDate]?.keys.toList() ?? [];
+          log('$_tag: timetable classKeys for $firstDate: $classKeys');
+        }
 
         timetable.forEach((date, classMap) {
-          log('$TAG: getAllSubjectCombinations: Processing date $date with ${classMap.length} classes');
+          if (date == 'error') return;
           classMap.forEach((classNum, subjectsList) {
+            if (classNum == 'error') return;
+            final classInt = classNum == 'special' ? -1 : (int.tryParse(classNum) ?? -1);
             for (var subjectName in subjectsList) {
-              if (!subjectName.contains('[보강]') && subjectName != '토요휴업일') {
+              if (subjectName.isNotEmpty && !subjectName.contains('[보강]') && subjectName != '토요휴업일') {
                 subjectSet.add(Subject(
                   subjectName: subjectName,
-                  subjectClass: int.parse(classNum),
+                  subjectClass: classInt,
                 ));
-                log('$TAG: getAllSubjectCombinations: Added subject $subjectName for class $classNum');
               }
             }
           });
@@ -392,16 +389,20 @@ class TimetableDataApi {
           return a.subjectClass.compareTo(b.subjectClass);
         });
 
+        final specialCount = subjectList.where((s) => s.subjectClass < 0).length;
+        log('$_tag: getAllSubjectCombinations found ${subjectList.length} subjects ($specialCount 특별실)');
+        for (var s in subjectList) {
+          if (s.subjectClass < 0) {
+            log('$_tag: 특별실: ${s.subjectName}');
+          }
+        }
         if (subjectList.isNotEmpty) {
           await _saveSubjectsToCache(grade, subjectList);
-          log('$TAG: getAllSubjectCombinations: Saved ${subjectList.length} subjects to cache');
         }
-        log('$TAG: getAllSubjectCombinations: Returning ${subjectList.length} subjects');
         return subjectList;
       } catch (e) {
-        log('$TAG: getAllSubjectCombinations attempt $attempt failed: $e');
+        log('$_tag: getAllSubjectCombinations attempt $attempt failed: $e');
         if (attempt == maxRetries) {
-          log('$TAG: getAllSubjectCombinations: Max retries reached for grade $grade');
           return [];
         }
         await Future.delayed(Duration(seconds: 2 * attempt));
@@ -411,7 +412,6 @@ class TimetableDataApi {
   }
 
   static Future<List<Subject>> getSubjectsFromAdminFirestore(int grade) async {
-    log('$TAG: getSubjectsFromAdminFirestore: Fetching subjects for grade $grade from Firestore');
     List<Subject> result = [];
     final query = await FirebaseFirestore.instance
         .collection('grade')
@@ -429,9 +429,7 @@ class TimetableDataApi {
           isOriginal: data['isOriginal'] ?? false,
         ),
       );
-      log('$TAG: getSubjectsFromAdminFirestore: Added subject ${doc.id}');
     }
-    log('$TAG: getSubjectsFromAdminFirestore: Loaded ${result.length} subjects');
     return result;
   }
 }

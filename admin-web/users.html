@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>사용자 관리 - 한솔고 관리자</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" style="display:flex;flex-direction:column;">
+      <h2>HS Admin</h2>
+      <a href="dashboard.html"><span>대시보드</span></a>
+      <a href="posts.html"><span>게시글 관리</span></a>
+      <a href="reports.html"><span>신고 관리</span></a>
+      <a href="users.html" class="active"><span>사용자 관리</span></a>
+      <a href="config.html"><span>앱 설정</span></a>
+      <a href="#" class="logout" id="logoutBtn"><span>로그아웃</span></a>
+    </nav>
+
+    <div class="main">
+      <h1>사용자 관리</h1>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="이름 또는 학번으로 검색...">
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>이름</th>
+              <th>학번</th>
+              <th>학년/반</th>
+              <th>이메일</th>
+              <th>UID</th>
+            </tr>
+          </thead>
+          <tbody id="usersList"><tr><td colspan="5" class="loading">로딩중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut, collection, getDocs } from './js/firebase-init.js';
+
+    let allUsers = [];
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'index.html';
+      else loadUsers();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      renderUsers(allUsers.filter(u =>
+        (u.name || '').toLowerCase().includes(q) || (u.studentId || '').includes(q)
+      ));
+    });
+
+    async function loadUsers() {
+      const snap = await getDocs(collection(db, 'users'));
+      allUsers = [];
+      snap.forEach(d => allUsers.push({ uid: d.id, ...d.data() }));
+      renderUsers(allUsers);
+    }
+
+    function renderUsers(users) {
+      const tbody = document.getElementById('usersList');
+      tbody.innerHTML = '';
+      if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#888;">사용자가 없습니다</td></tr>';
+        return;
+      }
+      users.forEach(u => {
+        tbody.innerHTML += `<tr>
+          <td>${u.name || '-'}</td>
+          <td>${u.studentId || '-'}</td>
+          <td>${u.grade || '-'}학년 ${u.classNum || '-'}반</td>
+          <td style="font-size:12px;">${u.email || '-'}</td>
+          <td style="font-size:11px;color:#888;">${u.uid}</td>
+        </tr>`;
+      });
+    }
+  </script>
+</body>
+</html>

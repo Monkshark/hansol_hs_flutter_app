@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>앱 설정 - 한솔고 관리자</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" style="display:flex;flex-direction:column;">
+      <h2>HS Admin</h2>
+      <a href="dashboard.html"><span>대시보드</span></a>
+      <a href="posts.html"><span>게시글 관리</span></a>
+      <a href="reports.html"><span>신고 관리</span></a>
+      <a href="users.html"><span>사용자 관리</span></a>
+      <a href="config.html" class="active"><span>앱 설정</span></a>
+      <a href="#" class="logout" id="logoutBtn"><span>로그아웃</span></a>
+    </nav>
+
+    <div class="main">
+      <h1>앱 설정</h1>
+
+      <div class="card">
+        <h3 style="margin-bottom:16px;">앱 버전 관리</h3>
+        <p style="font-size:13px;color:#888;margin-bottom:16px;">
+          여기서 설정한 버전과 앱 버전을 비교하여 업데이트 알림을 표시합니다.
+        </p>
+
+        <div class="form-group">
+          <label>최신 버전 (latest)</label>
+          <input type="text" id="latestVersion" placeholder="예: 1.1.0">
+        </div>
+
+        <div class="form-group">
+          <label>최소 버전 (min) - 이 버전 미만이면 강제 업데이트</label>
+          <input type="text" id="minVersion" placeholder="예: 1.0.0">
+        </div>
+
+        <div class="form-group">
+          <label>업데이트 URL (Play Store 링크 등)</label>
+          <input type="text" id="updateUrl" placeholder="https://play.google.com/store/apps/...">
+        </div>
+
+        <div class="form-group">
+          <label>업데이트 메시지</label>
+          <textarea id="updateMessage" rows="3" placeholder="새로운 기능이 추가되었습니다. 업데이트 해주세요."></textarea>
+        </div>
+
+        <button class="btn btn-primary" id="saveBtn" style="padding:10px 24px;font-size:14px;">저장</button>
+        <span id="saveStatus" style="margin-left:12px;color:#4CAF50;font-size:13px;"></span>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-bottom:12px;">현재 저장된 값</h3>
+        <div id="currentConfig" style="font-size:13px;color:#888;">로딩중...</div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut, doc, getDoc, setDoc } from './js/firebase-init.js';
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'index.html';
+      else loadConfig();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    async function loadConfig() {
+      const snap = await getDoc(doc(db, 'app_config', 'version'));
+      if (snap.exists()) {
+        const d = snap.data();
+        document.getElementById('latestVersion').value = d.latest || '';
+        document.getElementById('minVersion').value = d.min || '';
+        document.getElementById('updateUrl').value = d.updateUrl || '';
+        document.getElementById('updateMessage').value = d.message || '';
+        document.getElementById('currentConfig').innerHTML =
+          `latest: <b>${d.latest || '-'}</b> | min: <b>${d.min || '-'}</b> | url: ${d.updateUrl || '-'} | message: ${d.message || '-'}`;
+      } else {
+        document.getElementById('currentConfig').textContent = '설정값이 없습니다. 처음 저장하면 생성됩니다.';
+      }
+    }
+
+    document.getElementById('saveBtn').addEventListener('click', async () => {
+      const data = {
+        latest: document.getElementById('latestVersion').value.trim(),
+        min: document.getElementById('minVersion').value.trim(),
+        updateUrl: document.getElementById('updateUrl').value.trim(),
+        message: document.getElementById('updateMessage').value.trim(),
+      };
+
+      await setDoc(doc(db, 'app_config', 'version'), data);
+      document.getElementById('saveStatus').textContent = '저장 완료!';
+      setTimeout(() => document.getElementById('saveStatus').textContent = '', 3000);
+      loadConfig();
+    });
+  </script>
+</body>
+</html>

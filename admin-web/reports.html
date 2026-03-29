@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>신고 관리 - 한솔고 관리자</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" style="display:flex;flex-direction:column;">
+      <h2>HS Admin</h2>
+      <a href="dashboard.html"><span>대시보드</span></a>
+      <a href="posts.html"><span>게시글 관리</span></a>
+      <a href="reports.html" class="active"><span>신고 관리</span></a>
+      <a href="users.html"><span>사용자 관리</span></a>
+      <a href="config.html"><span>앱 설정</span></a>
+      <a href="#" class="logout" id="logoutBtn"><span>로그아웃</span></a>
+    </nav>
+
+    <div class="main">
+      <h1>신고 관리</h1>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>신고 사유</th>
+              <th>신고자 UID</th>
+              <th>게시글 ID</th>
+              <th>신고일</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody id="reportsList"><tr><td colspan="5" class="loading">로딩중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut, collection, doc, getDocs, deleteDoc, query, orderBy } from './js/firebase-init.js';
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'index.html';
+      else loadReports();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    async function loadReports() {
+      const q = query(collection(db, 'reports'), orderBy('createdAt', 'desc'));
+      const snap = await getDocs(q);
+      const tbody = document.getElementById('reportsList');
+      tbody.innerHTML = '';
+
+      if (snap.empty) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#888;">신고가 없습니다</td></tr>';
+        return;
+      }
+
+      snap.forEach(d => {
+        const r = d.data();
+        const time = r.createdAt?.toDate().toLocaleString('ko-KR') || '';
+        tbody.innerHTML += `<tr>
+          <td><span class="badge badge-red">${r.reason || ''}</span></td>
+          <td style="font-size:11px;">${r.reporterUid || ''}</td>
+          <td style="font-size:11px;">${r.postId || ''}</td>
+          <td style="font-size:11px;">${time}</td>
+          <td>
+            <button class="btn btn-sm btn-danger" onclick="deletePostAndReport('${r.postId}', '${d.id}')">글 삭제</button>
+            <button class="btn btn-sm" style="background:#888;color:#fff;margin-left:4px;" onclick="dismissReport('${d.id}')">무시</button>
+          </td>
+        </tr>`;
+      });
+    }
+
+    window.deletePostAndReport = async (postId, reportId) => {
+      if (!confirm('신고된 게시글을 삭제하시겠습니까?')) return;
+      try {
+        const comments = await getDocs(collection(db, 'posts', postId, 'comments'));
+        for (const c of comments.docs) await deleteDoc(c.ref);
+        await deleteDoc(doc(db, 'posts', postId));
+      } catch (e) { console.log('Post already deleted'); }
+      await deleteDoc(doc(db, 'reports', reportId));
+      loadReports();
+    };
+
+    window.dismissReport = async (reportId) => {
+      if (!confirm('이 신고를 무시하시겠습니까?')) return;
+      await deleteDoc(doc(db, 'reports', reportId));
+      loadReports();
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,74 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f5f6f8; color: #1e1e1e; }
+
+/* 로그인 */
+.login-wrap { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #3F72AF, #2B5A8F); }
+.login-box { background: #fff; border-radius: 20px; padding: 40px; width: 360px; box-shadow: 0 8px 32px rgba(0,0,0,0.15); }
+.login-box h1 { font-size: 22px; margin-bottom: 8px; color: #1e1e1e; }
+.login-box p { font-size: 13px; color: #888; margin-bottom: 24px; }
+.login-box input { width: 100%; padding: 12px 16px; border: none; background: #f5f5f5; border-radius: 10px; font-size: 14px; margin-bottom: 12px; outline: none; }
+.login-box input:focus { background: #eef2f7; }
+.login-box button { width: 100%; padding: 12px; border: none; background: #3F72AF; color: #fff; border-radius: 10px; font-size: 15px; font-weight: 600; cursor: pointer; }
+.login-box button:hover { background: #2B5A8F; }
+.login-error { color: #e53935; font-size: 12px; margin-top: 8px; }
+
+/* 레이아웃 */
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #1e2028; padding: 20px 0; flex-shrink: 0; }
+.sidebar h2 { color: #fff; font-size: 16px; padding: 0 20px 20px; border-bottom: 1px solid #2a2d35; }
+.sidebar a { display: flex; align-items: center; padding: 12px 20px; color: #8b8f99; text-decoration: none; font-size: 14px; gap: 10px; transition: all 0.2s; }
+.sidebar a:hover, .sidebar a.active { color: #fff; background: rgba(255,255,255,0.05); }
+.sidebar a.active { border-left: 3px solid #3F72AF; }
+.sidebar .logout { margin-top: auto; border-top: 1px solid #2a2d35; padding-top: 12px; }
+
+.main { flex: 1; padding: 24px; overflow-y: auto; }
+.main h1 { font-size: 22px; font-weight: 700; margin-bottom: 20px; }
+
+/* 카드 */
+.card { background: #fff; border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+.card-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: #fff; border-radius: 14px; padding: 20px; text-align: center; }
+.stat-card .number { font-size: 32px; font-weight: 800; color: #3F72AF; }
+.stat-card .label { font-size: 13px; color: #888; margin-top: 4px; }
+
+/* 테이블 */
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; padding: 10px 12px; font-size: 12px; color: #888; font-weight: 600; border-bottom: 1px solid #e5e5ea; }
+td { padding: 12px; font-size: 13px; border-bottom: 1px solid #f0f0f0; vertical-align: top; }
+tr:hover td { background: #f9f9fb; }
+
+/* 버튼 */
+.btn { padding: 6px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.btn-danger { background: #e53935; color: #fff; }
+.btn-danger:hover { background: #c62828; }
+.btn-primary { background: #3F72AF; color: #fff; }
+.btn-primary:hover { background: #2B5A8F; }
+.btn-sm { padding: 4px 10px; font-size: 11px; }
+
+/* 뱃지 */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+.badge-blue { background: rgba(63,114,175,0.1); color: #3F72AF; }
+.badge-green { background: rgba(76,175,80,0.1); color: #4CAF50; }
+.badge-red { background: rgba(229,57,53,0.1); color: #e53935; }
+.badge-orange { background: rgba(255,152,0,0.1); color: #FF9800; }
+.badge-purple { background: rgba(156,39,176,0.1); color: #9C27B0; }
+
+/* 설정 폼 */
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 13px; font-weight: 600; color: #888; margin-bottom: 6px; }
+.form-group input, .form-group textarea { width: 100%; padding: 10px 14px; border: 1px solid #e5e5ea; border-radius: 10px; font-size: 14px; outline: none; }
+.form-group input:focus, .form-group textarea:focus { border-color: #3F72AF; }
+
+/* 검색 */
+.search-bar { margin-bottom: 16px; }
+.search-bar input { width: 100%; max-width: 400px; padding: 10px 16px; border: none; background: #fff; border-radius: 10px; font-size: 14px; outline: none; }
+
+/* 로딩 */
+.loading { text-align: center; padding: 40px; color: #888; }
+
+/* 반응형 */
+@media (max-width: 768px) {
+  .sidebar { width: 60px; }
+  .sidebar h2, .sidebar a span { display: none; }
+  .card-grid { grid-template-columns: 1fr 1fr; }
+}
