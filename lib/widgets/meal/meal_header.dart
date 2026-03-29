@@ -2,12 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/**
- * 급식 화면 날짜 헤더
- * - 선택된 날짜를 "M월 d일 (요일)" 한국어 형식으로 표시
- * - 오늘 날짜일 경우 '오늘' 뱃지를 함께 렌더링
- * - primaryColor 기반 뱃지 스타일 적용
- */
+/// 급식 화면 날짜 헤더
+/// - 선택된 날짜를 "M월 d일 (요일)" 한국어 형식으로 표시
+/// - 오늘 날짜일 경우 '오늘' 뱃지를 함께 렌더링
+/// - primaryColor 기반 뱃지 스타일 적용
 class MealHeader extends StatelessWidget {
   final DateTime selectedDate;
 

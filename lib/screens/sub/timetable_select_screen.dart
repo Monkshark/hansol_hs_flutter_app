@@ -7,18 +7,15 @@ import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/**
- * 선택과목 설정 화면 (TimetableSelectScreen)
- *
- * - 학년별 선택과목 목록에서 수강 과목 선택
- * - 선택 과목 간 시간표 충돌 자동 감지 및 경고
- * - 변경사항 저장 시 확인 다이얼로그 표시
- */
+/// 선택과목 설정 화면 (TimetableSelectScreen)
+///
+/// - 학년별 선택과목 목록에서 수강 과목 선택
+/// - 선택 과목 간 시간표 충돌 자동 감지 및 경고
+/// - 변경사항 저장 시 확인 다이얼로그 표시
 
-// 과목의 요일+교시 정보
 class SubjectScheduleInfo {
-  final String dayName; // 월, 화, ...
-  final int period;     // 1교시, 2교시, ...
+  final String dayName;
+  final int period;
 
   SubjectScheduleInfo({required this.dayName, required this.period});
 }
@@ -37,9 +34,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
   late int grade;
   bool _hasChanges = false;
 
-  // 과목+반 → 요일/교시 매핑
   Map<String, List<SubjectScheduleInfo>> scheduleMap = {};
-  // 충돌 정보: 과목명 → 충돌 상대 과목명 + 시간
   Map<String, String> conflictMap = {};
 
   @override
@@ -80,7 +75,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
 
   Future<void> _buildScheduleMap(int g) async {
     final now = DateTime.now();
-    // 이번 주 월~금 시간표 조회
     final monday = now.subtract(Duration(days: now.weekday - 1));
     final friday = monday.add(const Duration(days: 4));
 
@@ -122,21 +116,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
       });
     });
 
-    // 디버그: 영어 3반과 지구 7반 슬롯 출력
-    final eng3 = map['영어Ⅰ_3'];
-    final geo7 = map['지구과학_7'];
-    log('DEBUG eng3: ${eng3?.map((e) => "${e.dayName}${e.period}").toList()}');
-    log('DEBUG geo7: ${geo7?.map((e) => "${e.dayName}${e.period}").toList()}');
-    if (eng3 != null && geo7 != null) {
-      for (var a in eng3) {
-        for (var b in geo7) {
-          if (a.dayName == b.dayName && a.period == b.period) {
-            log('DEBUG CONFLICT: ${a.dayName} ${a.period}교시');
-          }
-        }
-      }
-    }
-
     setState(() => scheduleMap = map);
   }
 
@@ -152,7 +131,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
 
       for (int j = i + 1; j < selectedSubjects.length; j++) {
         final b = selectedSubjects[j];
-        // 같은 과목이면 스킵
         if (a.subjectName == b.subjectName) continue;
 
         final bKey = '${b.subjectName}_${b.subjectClass}';
@@ -162,10 +140,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
         for (var aInfo in aInfos) {
           for (var bInfo in bInfos) {
             if (aInfo.dayName == bInfo.dayName && aInfo.period == bInfo.period) {
-              // 실제 충돌: 이 시간에 학생이 두 곳에 가야 함
-              // 하지만 선택과목은 각 반에서 같은 교시에 동시 진행되므로
-              // 같은 교시 = 같은 시간대에 수업이 편성된 것
-              // → 학생이 둘 다 들을 수 없음 = 충돌
               conflictMap[a.subjectName] =
                   '${aInfo.dayName} ${aInfo.period}교시에 ${b.subjectName}과(와) 겹침';
               conflictMap[b.subjectName] =
@@ -183,7 +157,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
     final infos = scheduleMap[key];
     if (infos == null || infos.isEmpty) return '';
 
-    // 중복 제거 후 요일순 정렬
     final unique = <String>{};
     final sorted = <SubjectScheduleInfo>[];
     const dayOrder = {'월': 1, '화': 2, '수': 3, '목': 4, '금': 5};

@@ -12,14 +12,12 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
-/**
- * 글쓰기/수정 화면 (WritePostScreen)
- *
- * - 카테고리(자유/질문/정보공유) 선택 후 글 작성
- * - 투표 항목 및 일정 첨부(날짜/시간) 기능
- * - 사진 촬영 또는 갤러리에서 이미지 첨부 (압축 후 업로드)
- * - 익명 게시 옵션 및 기존 글 수정 모드 지원
- */
+/// 글쓰기/수정 화면 (WritePostScreen)
+///
+/// - 카테고리(자유/질문/정보공유) 선택 후 글 작성
+/// - 투표 항목 및 일정 첨부(날짜/시간) 기능
+/// - 사진 촬영 또는 갤러리에서 이미지 첨부 (압축 후 업로드)
+/// - 익명 게시 옵션 및 기존 글 수정 모드 지원
 class WritePostScreen extends StatefulWidget {
   final String? postId;
   final String? initialTitle;

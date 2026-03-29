@@ -1,10 +1,8 @@
-/**
- * 개인일정 데이터 모델
- *
- * - 시작/종료 시간, 내용, 날짜를 포함하는 일정 항목
- * - Map 변환 (toMap/fromMap)으로 DB 저장/조회 지원
- * - JSON 직렬화를 통한 데이터 전달
- */
+/// 개인일정 데이터 모델
+///
+/// - 시작/종료 시간, 내용, 날짜를 포함하는 일정 항목
+/// - Map 변환 (toMap/fromMap)으로 DB 저장/조회 지원
+/// - JSON 직렬화를 통한 데이터 전달
 class Schedule {
   final int? id;
   final int startTime;

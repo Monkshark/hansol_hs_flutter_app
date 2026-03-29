@@ -17,15 +17,13 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/**
- * 홈 화면 (HomeScreen)
- *
- * - 고정 헤더에 현재 날짜, D-day, 학년/반 정보를 표시
- * - 오늘의 급식 미리보기 카드 제공
- * - 시간표 및 게시판 바로가기 카드 배치
- * - 최신 게시글 목록을 Firestore에서 실시간 조회
- * - 외부 링크(학교 홈페이지 등) 바로가기 지원
- */
+/// 홈 화면 (HomeScreen)
+///
+/// - 고정 헤더에 현재 날짜, D-day, 학년/반 정보를 표시
+/// - 오늘의 급식 미리보기 카드 제공
+/// - 시간표 및 게시판 바로가기 카드 배치
+/// - 최신 게시글 목록을 Firestore에서 실시간 조회
+/// - 외부 링크(학교 홈페이지 등) 바로가기 지원
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 

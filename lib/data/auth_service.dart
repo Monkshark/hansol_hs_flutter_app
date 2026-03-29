@@ -3,13 +3,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/**
- * Google 로그인/로그아웃, Firestore 프로필 CRUD
- *
- * - Google 로그인 및 Firebase 인증 처리
- * - Firestore 사용자 프로필 생성/조회/수정
- * - 승인 여부 및 매니저 권한 체크, 5분 캐시
- */
+/// Google 로그인/로그아웃, Firestore 프로필 CRUD
+///
+/// - Google 로그인 및 Firebase 인증 처리
+/// - Firestore 사용자 프로필 생성/조회/수정
+/// - 승인 여부 및 매니저 권한 체크, 5분 캐시
 class UserProfile {
   final String uid;
   final String name;

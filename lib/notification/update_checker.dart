@@ -4,13 +4,11 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/**
- * Firestore 기반 앱 버전 체크
- * - Firestore app_config/version 문서에서 최신/최소 버전 조회
- * - 현재 버전과 비교하여 필수 업데이트 또는 선택 업데이트 판별
- * - 필수 업데이트 시 닫기 불가능한 다이얼로그 표시
- * - 업데이트 URL로 스토어 이동 지원
- */
+/// Firestore 기반 앱 버전 체크
+/// - Firestore app_config/version 문서에서 최신/최소 버전 조회
+/// - 현재 버전과 비교하여 필수 업데이트 또는 선택 업데이트 판별
+/// - 필수 업데이트 시 닫기 불가능한 다이얼로그 표시
+/// - 업데이트 URL로 스토어 이동 지원
 class UpdateChecker {
   static Future<void> check(BuildContext context) async {
     try {

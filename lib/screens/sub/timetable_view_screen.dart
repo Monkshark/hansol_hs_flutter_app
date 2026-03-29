@@ -9,14 +9,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 import 'dart:convert';
 
-/**
- * 시간표 그리드 뷰 화면 (TimetableViewScreen)
- *
- * - 요일별 교시 그리드로 주간 시간표 표시
- * - 과목별 커스텀 컬러 설정 및 저장
- * - 선택과목 충돌 시 해결 다이얼로그 제공
- * - 학년/반 변경 시 시간표 자동 갱신
- */
+/// 시간표 그리드 뷰 화면 (TimetableViewScreen)
+///
+/// - 요일별 교시 그리드로 주간 시간표 표시
+/// - 과목별 커스텀 컬러 설정 및 저장
+/// - 선택과목 충돌 시 해결 다이얼로그 제공
+/// - 학년/반 변경 시 시간표 자동 갱신
 class TimetableViewScreen extends StatefulWidget {
   const TimetableViewScreen({Key? key}) : super(key: key);
 
@@ -31,7 +29,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
   Map<String, String> _conflictResolutions = {};
   bool _isShowingConflictDialog = false;
-  Map<String, int> _subjectColors = {}; // 과목명 → Color value
+  Map<String, int> _subjectColors = {};
 
   @override
   void initState() {
@@ -156,7 +154,6 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
     const maxPeriods = 7;
     final grid = List.generate(5, (_) => List.filled(maxPeriods, ''));
-    // 충돌 슬롯: "월_3" → [과목A, 과목B]
     final conflictSlots = <String, List<String>>{};
 
     final selectedMap = <String, int>{};
@@ -185,14 +182,12 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
             if (grid[weekday - 1][p].isNotEmpty &&
                 grid[weekday - 1][p] != name) {
-              // 충돌 발생
               final existing = grid[weekday - 1][p];
               conflictSlots.putIfAbsent(slot, () => [existing]);
               if (!conflictSlots[slot]!.contains(name)) {
                 conflictSlots[slot]!.add(name);
               }
 
-              // 이전에 해결한 선택이 있으면 적용
               if (_conflictResolutions.containsKey(slot)) {
                 grid[weekday - 1][p] = _conflictResolutions[slot]!;
               }
@@ -404,7 +399,6 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
           if (isEmpty) return _buildEmptyView(false, 0);
 
-          // 미해결 충돌이 있으면 다이얼로그 표시 (한 번만)
           if (result.conflicts.isNotEmpty && !_isShowingConflictDialog) {
             final hasUnresolved = result.conflicts.keys
                 .any((k) => !_conflictResolutions.containsKey(k));
@@ -500,7 +494,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
 class _TimetableResult {
   final List<List<String>> grid;
-  final Map<String, List<String>> conflicts; // "월_3" → ["지구과학", "정보과학"]
+  final Map<String, List<String>> conflicts;
   _TimetableResult({required this.grid, required this.conflicts});
 }
 
@@ -720,7 +714,6 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            // 미리보기
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -740,10 +733,8 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
               ),
             ),
             const SizedBox(height: 16),
-            // 6x6 원형 컬러피커 버튼
             _buildCircleGrid(),
             const SizedBox(height: 12),
-            // 버튼
             Row(
               children: [
                 Expanded(

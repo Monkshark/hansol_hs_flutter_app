@@ -9,13 +9,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'nies_api_keys.dart';
 
-/**
- * NEIS 급식 API 연동
- *
- * - 월간 급식 데이터 프리페치
- * - 24시간/5분 캐시 전략
- * - 오프라인 시 캐시된 데이터 제공
- */
+/// NEIS 급식 API 연동
+///
+/// - 월간 급식 데이터 프리페치
+/// - 24시간/5분 캐시 전략
+/// - 오프라인 시 캐시된 데이터 제공
 class MealDataApi {
   static const int BREAKFAST = 1;
   static const int LUNCH = 2;

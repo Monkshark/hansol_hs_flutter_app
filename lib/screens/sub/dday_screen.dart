@@ -1,4 +1,3 @@
-/** D-day management screen for adding, pinning, and browsing upcoming personal and school events. */
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
 import 'package:hansol_high_school/data/dday_manager.dart';
@@ -7,13 +6,11 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
-/**
- * D-day 관리 화면 (DDayScreen)
- *
- * - D-day 항목 추가/삭제 및 핀(고정) 설정
- * - 개인 일정과 학사일정을 통합하여 예정 일정 표시
- * - D-day 카운트다운을 홈 화면 헤더에 연동
- */
+/// D-day 관리 화면 (DDayScreen)
+///
+/// - D-day 항목 추가/삭제 및 핀(고정) 설정
+/// - 개인 일정과 학사일정을 통합하여 예정 일정 표시
+/// - D-day 카운트다운을 홈 화면 헤더에 연동
 class DDayScreen extends StatefulWidget {
   const DDayScreen({Key? key}) : super(key: key);
 

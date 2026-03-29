@@ -10,14 +10,12 @@ import 'package:hansol_high_school/widgets/calendar/today_banner.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/**
- * 일정 화면 (NoticeScreen)
- *
- * - 월간 캘린더에서 날짜를 선택하여 일정 조회
- * - 개인 일정과 NEIS 학사일정을 함께 표시
- * - 바텀시트를 통한 개인 일정 추가 기능
- * - 스와이프 제스처로 개인 일정 삭제 지원
- */
+/// 일정 화면 (NoticeScreen)
+///
+/// - 월간 캘린더에서 날짜를 선택하여 일정 조회
+/// - 개인 일정과 NEIS 학사일정을 함께 표시
+/// - 바텀시트를 통한 개인 일정 추가 기능
+/// - 스와이프 제스처로 개인 일정 삭제 지원
 class NoticeScreen extends StatefulWidget {
   const NoticeScreen({Key? key}) : super(key: key);
 

@@ -9,14 +9,12 @@ import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/**
- * 글 상세 화면 (PostDetailScreen)
- *
- * - 게시글 본문, 이미지, 투표 항목을 표시
- * - 추천/비추천 기능 및 일정 공유(내 캘린더 추가) 지원
- * - 댓글 및 대댓글 작성, 익명 댓글 옵션 제공
- * - 부적절한 게시글/댓글 신고 기능
- */
+/// 글 상세 화면 (PostDetailScreen)
+///
+/// - 게시글 본문, 이미지, 투표 항목을 표시
+/// - 추천/비추천 기능 및 일정 공유(내 캘린더 추가) 지원
+/// - 댓글 및 대댓글 작성, 익명 댓글 옵션 제공
+/// - 부적절한 게시글/댓글 신고 기능
 class PostDetailScreen extends StatefulWidget {
   final String postId;
 

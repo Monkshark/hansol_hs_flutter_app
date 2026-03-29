@@ -2,13 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/**
- * 학년/반 선택 휠 피커
- * - CupertinoPicker 기반 학년(1~3) / 반 선택 다이얼로그
- * - 초기 학년/반 값을 받아 해당 위치로 스크롤 초기화
- * - 확인 시 [학년, 반] 리스트를 pop으로 반환
- * - 다크/라이트 테마 자동 대응
- */
+/// 학년/반 선택 휠 피커
+/// - CupertinoPicker 기반 학년(1~3) / 반 선택 다이얼로그
+/// - 초기 학년/반 값을 받아 해당 위치로 스크롤 초기화
+/// - 확인 시 [학년, 반] 리스트를 pop으로 반환
+/// - 다크/라이트 테마 자동 대응
 class GradeAndClassPickerDialog extends StatefulWidget {
   final int initialGrade;
   final int initialClass;

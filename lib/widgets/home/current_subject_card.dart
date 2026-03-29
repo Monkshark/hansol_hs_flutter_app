@@ -5,13 +5,11 @@ import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/**
- * 현재/다음 교시 실시간 표시 카드
- * - 1분 주기 타이머로 현재 시각에 맞는 교시 자동 갱신
- * - 수업 중일 때 진행률 프로그레스바 표시
- * - 다음 교시 과목명과 시간 정보 함께 표시
- * - 주말/수업 없음/학년 미설정 상태별 안내 메시지 제공
- */
+/// 현재/다음 교시 실시간 표시 카드
+/// - 1분 주기 타이머로 현재 시각에 맞는 교시 자동 갱신
+/// - 수업 중일 때 진행률 프로그레스바 표시
+/// - 다음 교시 과목명과 시간 정보 함께 표시
+/// - 주말/수업 없음/학년 미설정 상태별 안내 메시지 제공
 class CurrentSubjectCard extends StatefulWidget {
   const CurrentSubjectCard({Key? key}) : super(key: key);
 

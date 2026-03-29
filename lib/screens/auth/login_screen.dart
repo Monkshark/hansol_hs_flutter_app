@@ -1,4 +1,3 @@
-/** Login screen with Google sign-in and navigation to profile setup for new users. */
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/main.dart';
@@ -6,13 +5,11 @@ import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/**
- * 로그인 화면 (LoginScreen)
- *
- * - Google 계정을 통한 소셜 로그인 처리
- * - 로그인 성공 시 FCM 토큰 갱신
- * - 프로필 미설정 사용자는 프로필 설정 화면으로 자동 이동
- */
+/// 로그인 화면 (LoginScreen)
+///
+/// - Google 계정을 통한 소셜 로그인 처리
+/// - 로그인 성공 시 FCM 토큰 갱신
+/// - 프로필 미설정 사용자는 프로필 설정 화면으로 자동 이동
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 
-/**
- * 디바이스 크기 계산 유틸리티
- *
- * - 화면 너비/높이 측정 및 태블릿 여부 감지
- * - BuildContext 기반 초기화
- */
+/// 디바이스 크기 계산 유틸리티
+///
+/// - 화면 너비/높이 측정 및 태블릿 여부 감지
+/// - BuildContext 기반 초기화
 class Device {
   static late double width;
   static late double height;

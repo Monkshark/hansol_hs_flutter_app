@@ -27,13 +27,11 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 
-/**
- * 앱 진입점, Firebase/알림/테마 초기화, 메인 네비게이션
- *
- * - Firebase, 타임존, 알림 권한 등 앱 초기화
- * - 급식/홈/일정 3탭 하단 네비게이션 구성
- * - 앱 리프레시 및 업데이트 체크 지원
- */
+/// 앱 진입점, Firebase/알림/테마 초기화, 메인 네비게이션
+///
+/// - Firebase, 타임존, 알림 권한 등 앱 초기화
+/// - 급식/홈/일정 3탭 하단 네비게이션 구성
+/// - 앱 리프레시 및 업데이트 체크 지원
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 final ValueNotifier<int> appRefreshNotifier = ValueNotifier(0);
 

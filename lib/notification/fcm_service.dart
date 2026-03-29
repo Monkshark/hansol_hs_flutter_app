@@ -6,13 +6,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 
-/**
- * FCM(Firebase Cloud Messaging) 서비스
- * - FCM 초기화 및 알림 권한 요청
- * - Firestore에 FCM 토큰 저장 및 갱신 리스너 등록
- * - board_new_post 토픽 구독/해제로 게시판 알림 제어
- * - 포그라운드 메시지 수신 시 로컬 알림으로 표시
- */
+/// FCM(Firebase Cloud Messaging) 서비스
+/// - FCM 초기화 및 알림 권한 요청
+/// - Firestore에 FCM 토큰 저장 및 갱신 리스너 등록
+/// - board_new_post 토픽 구독/해제로 게시판 알림 제어
+/// - 포그라운드 메시지 수신 시 로컬 알림으로 표시
 class FcmService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _localNotifications =

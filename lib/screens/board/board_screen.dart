@@ -8,14 +8,12 @@ import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/**
- * 게시판 목록 화면 (BoardScreen)
- *
- * - 카테고리(전체/자유/질문/정보공유) 필터로 게시글 분류
- * - 키워드 검색으로 게시글 빠르게 탐색
- * - 내 활동(내가 쓴 글/댓글) 바로가기 제공
- * - PostCard 위젯으로 각 게시글의 요약 정보 표시
- */
+/// 게시판 목록 화면 (BoardScreen)
+///
+/// - 카테고리(전체/자유/질문/정보공유) 필터로 게시글 분류
+/// - 키워드 검색으로 게시글 빠르게 탐색
+/// - 내 활동(내가 쓴 글/댓글) 바로가기 제공
+/// - PostCard 위젯으로 각 게시글의 요약 정보 표시
 class BoardScreen extends StatefulWidget {
   const BoardScreen({Key? key}) : super(key: key);
 

@@ -4,13 +4,11 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/**
- * 관리자 화면 (AdminScreen)
- *
- * - 신고된 게시글/댓글 목록 확인 및 처리
- * - 가입 대기 사용자 승인/거절/삭제
- * - 승인된 사용자 관리 및 매니저 권한 임명
- */
+/// 관리자 화면 (AdminScreen)
+///
+/// - 신고된 게시글/댓글 목록 확인 및 처리
+/// - 가입 대기 사용자 승인/거절/삭제
+/// - 승인된 사용자 관리 및 매니저 권한 임명
 class AdminScreen extends StatefulWidget {
   const AdminScreen({Key? key}) : super(key: key);
 
