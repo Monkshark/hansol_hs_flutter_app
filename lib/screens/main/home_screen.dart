@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/meal_data_api.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/dday_manager.dart';
 import 'package:hansol_high_school/screens/sub/dday_screen.dart';
 import 'package:hansol_high_school/data/meal.dart';
