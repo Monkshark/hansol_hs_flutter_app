@@ -35,7 +35,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('관리자'),
+        title: const Text('Admin'),
         centerTitle: true,
         elevation: 0,
         bottom: TabBar(
@@ -269,9 +269,15 @@ class _UsersTab extends StatelessWidget {
                         }),
                       ] else ...[
                         // 승인됨 → 매니저 임명 (admin만)
-                        if (isAdmin && role != 'admin')
+                        // 자기 자신이 admin이면 셀프 해제
+                        if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
+                          _actionBtn('Admin 해제', AppColors.theme.darkGreyColor, () async {
+                            await docs[index].reference.update({'role': 'user'});
+                            AuthService.clearProfileCache();
+                          }),
+                        if (isAdmin && role != 'admin') ...[
                           _actionBtn(
-                            role == 'manager' ? '해제' : '매니저',
+                            role == 'manager' ? '매니저 해제' : '매니저',
                             role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
                             () async {
                               await docs[index].reference.update({
@@ -279,6 +285,15 @@ class _UsersTab extends StatelessWidget {
                               });
                             },
                           ),
+                          const SizedBox(width: 6),
+                          _actionBtn(
+                            'Admin',
+                            Colors.red,
+                            () async {
+                              await docs[index].reference.update({'role': 'admin'});
+                            },
+                          ),
+                        ],
                       ],
                     ],
                   ),

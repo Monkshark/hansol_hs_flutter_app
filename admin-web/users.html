@@ -51,14 +51,18 @@
   </div>
 
   <script type="module">
-    import { auth, db, onAuthStateChanged, signOut, collection, doc, getDocs, updateDoc, deleteDoc } from './js/firebase-init.js';
+    import { auth, db, onAuthStateChanged, signOut, collection, doc, getDoc, getDocs, updateDoc, deleteDoc } from './js/firebase-init.js';
 
     let allUsers = [];
     let currentTab = 'all';
+    let myRole = 'user';
 
-    onAuthStateChanged(auth, (user) => {
-      if (!user) window.location.href = 'index.html';
-      else loadUsers();
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) { window.location.href = 'index.html'; return; }
+      // 내 role 확인
+      const myDoc = await getDoc(doc(db, 'users', user.uid));
+      if (myDoc.exists()) myRole = myDoc.data().role || 'user';
+      loadUsers();
     });
 
     document.getElementById('logoutBtn').addEventListener('click', async (e) => {
@@ -106,15 +110,34 @@
       }
       users.forEach(u => {
         const approved = u.approved === true;
+        const role = u.role || 'user';
+        const roleBadge = role === 'admin' ? '<span class="badge badge-red">관리자</span>'
+          : role === 'manager' ? '<span class="badge badge-purple">매니저</span>'
+          : '';
         const statusBadge = approved
-          ? '<span class="badge badge-green">승인됨</span>'
+          ? `<span class="badge badge-green">승인됨</span> ${roleBadge}`
           : '<span class="badge badge-orange">대기중</span>';
-        let actionBtn;
-        if (approved) {
-          actionBtn = `<button class="btn btn-sm" style="background:#888;color:#fff;" onclick="toggleApproval('${u.uid}', false)">승인 취소</button>`;
-        } else {
+
+        let actionBtn = '';
+        if (!approved) {
           actionBtn = `<button class="btn btn-sm btn-primary" onclick="toggleApproval('${u.uid}', true)">승인</button>
             <button class="btn btn-sm btn-danger" style="margin-left:4px;" onclick="rejectUser('${u.uid}')">거절</button>`;
+        } else {
+          actionBtn = `<button class="btn btn-sm" style="background:#888;color:#fff;" onclick="toggleApproval('${u.uid}', false)">승인 취소</button>`;
+          // admin만 role 변경 가능
+          // 자기 자신이 admin이면 셀프 해제 가능
+          if (myRole === 'admin' && role === 'admin' && u.uid === auth.currentUser.uid) {
+            actionBtn += ` <button class="btn btn-sm" style="background:#888;color:#fff;margin-left:4px;" onclick="setRole('${u.uid}', 'user')">관리자 해제</button>`;
+          }
+          if (myRole === 'admin' && role !== 'admin') {
+            if (role === 'manager') {
+              actionBtn += ` <button class="btn btn-sm" style="background:#9C27B0;color:#fff;margin-left:4px;" onclick="setRole('${u.uid}', 'user')">매니저 해제</button>`;
+              actionBtn += ` <button class="btn btn-sm btn-danger" style="margin-left:4px;" onclick="setRole('${u.uid}', 'admin')">관리자 임명</button>`;
+            } else {
+              actionBtn += ` <button class="btn btn-sm" style="background:#9C27B0;color:#fff;margin-left:4px;" onclick="setRole('${u.uid}', 'manager')">매니저 임명</button>`;
+              actionBtn += ` <button class="btn btn-sm btn-danger" style="margin-left:4px;" onclick="setRole('${u.uid}', 'admin')">관리자 임명</button>`;
+            }
+          }
         }
 
         tbody.innerHTML += `<tr>
@@ -139,6 +162,15 @@
       if (!confirm('이 사용자의 가입을 거절하시겠습니까? 프로필이 삭제됩니다.')) return;
       await deleteDoc(doc(db, 'users', uid));
       allUsers = allUsers.filter(u => u.uid !== uid);
+      applyFilter();
+    };
+
+    window.setRole = async (uid, role) => {
+      const label = role === 'admin' ? '관리자' : role === 'manager' ? '매니저' : '일반 사용자';
+      if (!confirm(`이 사용자를 ${label}(으)로 변경하시겠습니까?`)) return;
+      await updateDoc(doc(db, 'users', uid), { role: role });
+      const user = allUsers.find(u => u.uid === uid);
+      if (user) user.role = role;
       applyFilter();
     };
   </script>

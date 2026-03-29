@@ -23,6 +23,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   bool _sending = false;
   bool _commentAnonymous = false;
 
+  // 대댓글
+  String? _replyToCommentId;
+  String? _replyToName;
+
   DocumentReference<Map<String, dynamic>> get _postRef =>
       FirebaseFirestore.instance.collection('posts').doc(widget.postId);
 
@@ -68,7 +72,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         const PopupMenuItem(value: 'delete', child: Text('삭제')),
                       ],
                       if (!isAuthor && isManager)
-                        const PopupMenuItem(value: 'delete', child: Text('삭제 (관리자)')),
+                        const PopupMenuItem(value: 'delete', child: Text('삭제 (Admin)')),
                       if (!isAuthor)
                         const PopupMenuItem(value: 'report', child: Text('신고')),
                     ],
@@ -272,6 +276,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                   data: c,
                                   isAuthor: canDelete,
                                   onDelete: () => _confirmDeleteComment(doc.id),
+                                  onReply: () {
+                                    setState(() {
+                                      _replyToCommentId = doc.id;
+                                      _replyToName = c['authorName'] ?? '익명';
+                                    });
+                                  },
                                 );
                               }),
                           ],
@@ -285,53 +295,75 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
           // 댓글 입력
           Container(
-            padding: EdgeInsets.fromLTRB(16, 8, 8, MediaQuery.of(context).padding.bottom + 8),
+            padding: EdgeInsets.fromLTRB(16, 0, 8, MediaQuery.of(context).padding.bottom + 8),
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E2028) : Colors.white,
               border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA))),
             ),
-            child: Row(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                GestureDetector(
-                  onTap: () => setState(() => _commentAnonymous = !_commentAnonymous),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: _commentAnonymous
-                          ? AppColors.theme.primaryColor.withAlpha(20)
-                          : Colors.transparent,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(
-                        color: _commentAnonymous
-                            ? AppColors.theme.primaryColor
-                            : AppColors.theme.darkGreyColor,
-                      ),
-                    ),
-                    child: Text('익명',
-                      style: TextStyle(
-                        fontSize: 12, fontWeight: FontWeight.w600,
-                        color: _commentAnonymous
-                            ? AppColors.theme.primaryColor
-                            : AppColors.theme.darkGreyColor,
-                      ),
+                // 답글 표시
+                if (_replyToName != null)
+                  Container(
+                    padding: const EdgeInsets.fromLTRB(12, 8, 4, 0),
+                    child: Row(
+                      children: [
+                        Icon(Icons.reply, size: 14, color: AppColors.theme.primaryColor),
+                        const SizedBox(width: 4),
+                        Text('$_replyToName에게 답글',
+                          style: TextStyle(fontSize: 12, color: AppColors.theme.primaryColor)),
+                        const Spacer(),
+                        GestureDetector(
+                          onTap: () => setState(() { _replyToCommentId = null; _replyToName = null; }),
+                          child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    style: TextStyle(fontSize: 14, color: textColor),
-                    decoration: InputDecoration(
-                      hintText: '댓글을 입력하세요',
-                      hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
-                      filled: true,
-                      fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(20),
-                        borderSide: BorderSide.none,
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    GestureDetector(
+                      onTap: () => setState(() => _commentAnonymous = !_commentAnonymous),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _commentAnonymous
+                              ? AppColors.theme.primaryColor.withAlpha(20)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _commentAnonymous
+                                ? AppColors.theme.primaryColor
+                                : AppColors.theme.darkGreyColor,
+                          ),
+                        ),
+                        child: Text('익명',
+                          style: TextStyle(
+                            fontSize: 12, fontWeight: FontWeight.w600,
+                            color: _commentAnonymous
+                                ? AppColors.theme.primaryColor
+                                : AppColors.theme.darkGreyColor,
+                          ),
+                        ),
                       ),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: TextField(
+                        controller: _commentController,
+                        style: TextStyle(fontSize: 14, color: textColor),
+                        decoration: InputDecoration(
+                          hintText: _replyToName != null ? '@$_replyToName' : '댓글을 입력하세요',
+                          hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                          filled: true,
+                          fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            borderSide: BorderSide.none,
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     ),
                   ),
                 ),
@@ -342,6 +374,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 ),
               ],
             ),
+            ],
+          ),
           ),
         ],
       ),
@@ -534,16 +568,69 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         ? '익명'
         : (profile.studentId.isNotEmpty ? '${profile.studentId} ${profile.name}' : profile.name);
 
-    await _postRef.collection('comments').add({
+    final commentData = <String, dynamic>{
       'content': text,
       'authorUid': AuthService.currentUser!.uid,
       'authorName': displayName,
       'isAnonymous': anonymous,
       'createdAt': FieldValue.serverTimestamp(),
-    });
+    };
 
+    // 대댓글이면 replyTo 정보 추가
+    if (_replyToCommentId != null) {
+      commentData['replyTo'] = _replyToCommentId;
+      commentData['replyToName'] = _replyToName;
+    }
+
+    await _postRef.collection('comments').add(commentData);
     await _postRef.update({'commentCount': FieldValue.increment(1)});
-    if (mounted) setState(() => _sending = false);
+
+    // 알림 생성
+    final postSnap = await _postRef.get();
+    final postData = postSnap.data();
+    if (postData != null) {
+      final postAuthorUid = postData['authorUid'] as String?;
+      final postTitle = postData['title'] as String? ?? '';
+      final myUid = AuthService.currentUser!.uid;
+
+      if (_replyToCommentId != null) {
+        // 대댓글 → 원 댓글 작성자에게 알림
+        final origComment = await _postRef.collection('comments').doc(_replyToCommentId).get();
+        final origUid = origComment.data()?['authorUid'] as String?;
+        if (origUid != null && origUid != myUid) {
+          await FirebaseFirestore.instance
+              .collection('users').doc(origUid).collection('notifications').add({
+            'type': 'reply',
+            'postId': widget.postId,
+            'postTitle': postTitle,
+            'senderName': displayName,
+            'content': text,
+            'read': false,
+            'createdAt': FieldValue.serverTimestamp(),
+          });
+        }
+      }
+
+      // 글 작성자에게 댓글 알림 (자기 글에 자기 댓글이면 제외)
+      if (postAuthorUid != null && postAuthorUid != myUid) {
+        await FirebaseFirestore.instance
+            .collection('users').doc(postAuthorUid).collection('notifications').add({
+          'type': 'comment',
+          'postId': widget.postId,
+          'postTitle': postTitle,
+          'senderName': displayName,
+          'content': text,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    }
+
+    if (mounted) setState(() {
+      _sending = false;
+      _replyToCommentId = null;
+      _replyToName = null;
+    });
   }
 
   Future<void> _confirmDeleteComment(String commentId) async {
@@ -960,8 +1047,9 @@ class _CommentItem extends StatelessWidget {
   final Map<String, dynamic> data;
   final bool isAuthor;
   final VoidCallback onDelete;
+  final VoidCallback onReply;
 
-  const _CommentItem({required this.data, required this.isAuthor, required this.onDelete});
+  const _CommentItem({required this.data, required this.isAuthor, required this.onDelete, required this.onReply});
 
   @override
   Widget build(BuildContext context) {
@@ -969,6 +1057,7 @@ class _CommentItem extends StatelessWidget {
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     final name = data['authorName'] ?? '익명';
     final content = data['content'] ?? '';
+    final replyToName = data['replyToName'] as String?;
     final createdAt = data['createdAt'] as Timestamp?;
     final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
 
@@ -989,6 +1078,13 @@ class _CommentItem extends StatelessWidget {
                 const SizedBox(width: 8),
                 Text(timeStr, style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor)),
                 const Spacer(),
+                GestureDetector(
+                  onTap: onReply,
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: Icon(Icons.reply, size: 16, color: AppColors.theme.darkGreyColor),
+                  ),
+                ),
                 if (isAuthor)
                   GestureDetector(
                     onTap: onDelete,
@@ -997,6 +1093,12 @@ class _CommentItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
+            if (replyToName != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Text('@$replyToName', style: TextStyle(
+                  fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
+              ),
             Text(content, style: TextStyle(fontSize: 14, color: textColor, height: 1.4)),
           ],
         ),

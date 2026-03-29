@@ -8,6 +8,7 @@ import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
+import 'package:hansol_high_school/screens/board/notification_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart';
 import 'package:hansol_high_school/screens/sub/timetable_view_screen.dart';
@@ -88,6 +89,45 @@ class _HomeScreenState extends State<HomeScreen> {
                             return const SizedBox.shrink();
                           },
                         ),
+                        // 알림 벨
+                        if (AuthService.isLoggedIn)
+                          StreamBuilder<QuerySnapshot>(
+                            stream: FirebaseFirestore.instance
+                                .collection('users')
+                                .doc(AuthService.currentUser!.uid)
+                                .collection('notifications')
+                                .where('read', isEqualTo: false)
+                                .snapshots(),
+                            builder: (context, snap) {
+                              final unread = snap.data?.docs.length ?? 0;
+                              return Stack(
+                                children: [
+                                  IconButton(
+                                    onPressed: () => Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (_) => const NotificationScreen()),
+                                    ),
+                                    icon: const Icon(Icons.notifications_outlined),
+                                    color: Colors.white,
+                                  ),
+                                  if (unread > 0)
+                                    Positioned(
+                                      right: 8, top: 8,
+                                      child: Container(
+                                        width: 16, height: 16,
+                                        decoration: const BoxDecoration(
+                                          color: Colors.red,
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: Center(child: Text(
+                                          unread > 9 ? '9+' : '$unread',
+                                          style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w700),
+                                        )),
+                                      ),
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
                         IconButton(
                           onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(builder: (_) => const SettingScreen()),
