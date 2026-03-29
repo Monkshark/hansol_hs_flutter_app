@@ -8,6 +8,13 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/**
+ * NEIS 시간표 API 연동
+ *
+ * - 시간표 데이터 조회 및 7일 캐시
+ * - 선택과목 조합 및 PERIO 기반 교시 배치
+ * - 과목 목록 추출 지원
+ */
 class TimetableDataApi {
   static const _tag = 'TimetableDataApi';
   static const _subjectCacheKeyPrefix = 'subjects_grade_';
@@ -78,7 +85,6 @@ class TimetableDataApi {
       return {"error": {"error": ["정보 없음"]}};
     }
     final timetable = _processTimetable(data['hisTimetable']);
-    // 에러 결과는 캐시하지 않음
     if (!timetable.containsKey('error')) {
       final encodedData = jsonEncode(timetable);
       prefs.setString(cacheKey, encodedData);
@@ -117,13 +123,11 @@ class TimetableDataApi {
           final perio = int.tryParse(item['PERIO']?.toString() ?? '');
           if (date == null || content == null || perio == null) continue;
 
-          // null CLASS_NM은 특별실로 처리
           final classNum = rawClassNum?.toString() ?? 'special';
 
           final dayMap = resultMap.putIfAbsent(date, () => {});
           final classList = dayMap.putIfAbsent(classNum, () => []);
 
-          // PERIO 기반으로 정확한 위치에 삽입 (1-indexed → 0-indexed)
           while (classList.length < perio) {
             classList.add('');
           }
@@ -139,13 +143,11 @@ class TimetableDataApi {
     return resultMap;
   }
 
-  /// 이번 주 시간표 조회, 비어있으면 다음 주 → 저번 주 폴백
   static Future<Map<String, Map<String, List<String>>>> _getWeekTimetableWithFallback(
       String grade) async {
     final now = DateTime.now();
     final thisMonday = now.subtract(Duration(days: now.weekday - 1));
 
-    // 이번 주
     var timetable = await getTimeTable(
       startDate: thisMonday,
       endDate: thisMonday.add(const Duration(days: 4)),
@@ -153,7 +155,6 @@ class TimetableDataApi {
     );
     if (_hasData(timetable)) return timetable;
 
-    // 다음 주
     final nextMonday = thisMonday.add(const Duration(days: 7));
     timetable = await getTimeTable(
       startDate: nextMonday,
@@ -162,7 +163,6 @@ class TimetableDataApi {
     );
     if (_hasData(timetable)) return timetable;
 
-    // 저번 주
     final prevMonday = thisMonday.subtract(const Duration(days: 7));
     timetable = await getTimeTable(
       startDate: prevMonday,
@@ -359,7 +359,6 @@ class TimetableDataApi {
 
         final timetable = await _getWeekTimetableWithFallback(grade.toString());
 
-        // 디버그: classMap 키 확인
         if (timetable.isNotEmpty) {
           final firstDate = timetable.keys.first;
           final classKeys = timetable[firstDate]?.keys.toList() ?? [];

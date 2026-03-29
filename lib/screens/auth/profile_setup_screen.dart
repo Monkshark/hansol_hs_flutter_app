@@ -1,8 +1,16 @@
+/** Profile setup screen for entering name and student ID after first login. */
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/**
+ * 프로필 설정 화면 (ProfileSetupScreen)
+ *
+ * - 사용자 이름 및 학번 입력
+ * - 입력값 유효성 검사 후 Firestore에 프로필 저장
+ * - 최초 로그인 시 필수 진행 단계
+ */
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({Key? key}) : super(key: key);
 
@@ -87,7 +95,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
               Text('기본 정보를 입력해주세요', style: TextStyle(
                 fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
               const SizedBox(height: 32),
-              // 이름
               Text('이름', style: TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
               const SizedBox(height: 8),
@@ -105,7 +112,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 ),
               ),
               const SizedBox(height: 20),
-              // 학번
               Text('학번', style: TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
               const SizedBox(height: 8),

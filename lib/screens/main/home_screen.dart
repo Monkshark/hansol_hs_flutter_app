@@ -17,6 +17,15 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/**
+ * 홈 화면 (HomeScreen)
+ *
+ * - 고정 헤더에 현재 날짜, D-day, 학년/반 정보를 표시
+ * - 오늘의 급식 미리보기 카드 제공
+ * - 시간표 및 게시판 바로가기 카드 배치
+ * - 최신 게시글 목록을 Firestore에서 실시간 조회
+ * - 외부 링크(학교 홈페이지 등) 바로가기 지원
+ */
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
@@ -43,7 +52,6 @@ class _HomeScreenState extends State<HomeScreen> {
     return Scaffold(
       body: Column(
         children: [
-          // 고정 헤더
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -89,7 +97,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             return const SizedBox.shrink();
                           },
                         ),
-                        // 알림 벨
                         if (AuthService.isLoggedIn)
                           StreamBuilder<QuerySnapshot>(
                             stream: FirebaseFirestore.instance
@@ -170,14 +177,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          // 스크롤 가능한 본문
           Expanded(
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                   const CurrentSubjectCard(),
                   const SizedBox(height: 16),
-                  // 시간표 조회
                   GestureDetector(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const TimetableViewScreen()),
@@ -217,7 +222,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  // 게시판
                   GestureDetector(
                     onTap: () => Navigator.push(
                       context,
@@ -258,7 +262,6 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  // 게시판 최신 글 미리보기
                   _RecentPosts(),
                   const SizedBox(height: 16),
                   Row(
@@ -298,7 +301,6 @@ class _UpcomingEventDDay extends StatelessWidget {
 
         final pinnedDDay = snapshot.data;
 
-        // 핀 된 D-day가 없으면 설정 유도
         if (pinnedDDay == null) {
           return GestureDetector(
             onTap: () => Navigator.of(context).push(

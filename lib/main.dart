@@ -4,6 +4,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:get_it/get_it.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/device.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
@@ -26,7 +27,15 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 
+/**
+ * 앱 진입점, Firebase/알림/테마 초기화, 메인 네비게이션
+ *
+ * - Firebase, 타임존, 알림 권한 등 앱 초기화
+ * - 급식/홈/일정 3탭 하단 네비게이션 구성
+ * - 앱 리프레시 및 업데이트 체크 지원
+ */
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+final ValueNotifier<int> appRefreshNotifier = ValueNotifier(0);
 
 final StreamController<String?> notificationStream =
     StreamController<String?>.broadcast();
@@ -61,7 +70,6 @@ Future<void> main() async {
   await DailyMealNotification().initializeNotifications();
   await DailyMealNotification().scheduleDailyNotifications();
 
-  // FCM 초기화
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   unawaited(FcmService.initialize());
 
@@ -202,7 +210,10 @@ class _HansolHighSchoolState extends State<HansolHighSchool> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
-      home: const MainScreen(),
+      home: ValueListenableBuilder<int>(
+        valueListenable: appRefreshNotifier,
+        builder: (_, value, __) => MainScreen(key: ValueKey(value)),
+      ),
     );
   }
 }
@@ -230,14 +241,30 @@ class _MainScreenState extends State<MainScreen> {
       }
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      // 온보딩
+      await _checkAccountExists();
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool('onboarding_done') != true && mounted) {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
       }
-      // 업데이트 체크
       if (mounted) UpdateChecker.check(context);
     });
+  }
+
+  Future<void> _checkAccountExists() async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final profile = await AuthService.getUserProfile();
+      if (profile == null && mounted) {
+        await AuthService.signOut();
+        AuthService.clearProfileCache();
+        appRefreshNotifier.value++;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('계정이 삭제되었습니다. 다시 가입해주세요.')),
+          );
+        }
+      }
+    } catch (_) {}
   }
 
   @override

@@ -1,10 +1,17 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/**
+ * D-day CRUD 및 SharedPreferences JSON 저장
+ *
+ * - D-day 항목 생성/조회/수정/삭제
+ * - 핀 된 D-day 조회 지원
+ * - SharedPreferences에 JSON 형태로 저장
+ */
 class DDay {
   final String title;
   final DateTime date;
-  final bool isPinned; // 홈 화면에 표시할 D-day
+  final bool isPinned;
 
   DDay({required this.title, required this.date, this.isPinned = false});
 
@@ -45,7 +52,6 @@ class DDayManager {
 
   static Future<DDay?> getPinned() async {
     final list = await loadAll();
-    // 핀 된 것 중 가장 가까운 미래 D-day
     final pinned = list.where((d) => d.isPinned && d.dDay >= 0).toList();
     if (pinned.isEmpty) return null;
     pinned.sort((a, b) => a.dDay.compareTo(b.dDay));

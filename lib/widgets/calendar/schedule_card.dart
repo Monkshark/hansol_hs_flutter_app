@@ -1,6 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/**
+ * 개인일정 카드 위젯
+ * - 왼쪽에 primaryColor 컬러바로 개인일정 시각 표시
+ * - 일정 내용과 시작~종료 시간(오전/오후 형식) 렌더링
+ * - 다크/라이트 테마 자동 대응
+ */
 class ScheduleCard extends StatelessWidget {
   final int startTimeInMinutes;
   final int endTimeInMinutes;

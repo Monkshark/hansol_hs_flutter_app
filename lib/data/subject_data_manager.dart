@@ -5,11 +5,16 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/subject.dart';
 
+/**
+ * 선택과목 로컬 저장 및 Firestore 동기화
+ *
+ * - 학년별 선택과목 로드/저장
+ * - 로컬 SharedPreferences와 Firestore 간 동기화
+ */
 class SubjectDataManager {
   static const String _selectedSubjectsKeyPrefix = 'selected_subjects_grade_';
 
   static Future<List<Subject>> loadSelectedSubjects(int grade) async {
-    // 1. 로컬 캐시 먼저
     final prefs = await SharedPreferences.getInstance();
     final jsonString = prefs.getString('$_selectedSubjectsKeyPrefix$grade');
     List<Subject> localSubjects = [];
@@ -18,7 +23,6 @@ class SubjectDataManager {
       localSubjects = jsonList.map((json) => Subject.fromJson(json)).toList();
     }
 
-    // 2. 로그인 상태면 Firestore에서도 불러오기 (로컬이 비어있을 때)
     if (localSubjects.isEmpty && AuthService.isLoggedIn) {
       try {
         final uid = AuthService.currentUser!.uid;
@@ -33,7 +37,6 @@ class SubjectDataManager {
           final list = doc.data()!['subjects'] as List<dynamic>?;
           if (list != null && list.isNotEmpty) {
             localSubjects = list.map((s) => Subject.fromJson(s)).toList();
-            // 로컬에도 저장
             await _saveLocal(prefs, grade, localSubjects);
             log('SubjectDataManager: loaded ${localSubjects.length} subjects from Firestore for grade $grade');
           }
@@ -48,11 +51,9 @@ class SubjectDataManager {
 
   static Future<void> saveSelectedSubjects(
       int grade, List<Subject> selectedSubjects) async {
-    // 1. 로컬 저장
     final prefs = await SharedPreferences.getInstance();
     await _saveLocal(prefs, grade, selectedSubjects);
 
-    // 2. 로그인 상태면 Firestore에도 저장
     if (AuthService.isLoggedIn) {
       try {
         final uid = AuthService.currentUser!.uid;

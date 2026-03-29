@@ -4,8 +4,14 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+/**
+ * Firestore 기반 앱 버전 체크
+ * - Firestore app_config/version 문서에서 최신/최소 버전 조회
+ * - 현재 버전과 비교하여 필수 업데이트 또는 선택 업데이트 판별
+ * - 필수 업데이트 시 닫기 불가능한 다이얼로그 표시
+ * - 업데이트 URL로 스토어 이동 지원
+ */
 class UpdateChecker {
-  /// 앱 시작 시 호출 - 업데이트 필요하면 다이얼로그 표시
   static Future<void> check(BuildContext context) async {
     try {
       final doc = await FirebaseFirestore.instance
@@ -99,11 +105,9 @@ class UpdateChecker {
         },
       );
     } catch (_) {
-      // 실패해도 앱 사용에 영향 없음
     }
   }
 
-  /// 버전 비교: a < b → -1, a == b → 0, a > b → 1
   static int _compareVersions(String a, String b) {
     if (a.isEmpty || b.isEmpty) return 0;
     final aParts = a.split('.').map(int.parse).toList();

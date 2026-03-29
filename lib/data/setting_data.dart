@@ -1,5 +1,11 @@
 import 'package:shared_preferences/shared_preferences.dart';
 
+/**
+ * SharedPreferences 싱글턴 래퍼
+ *
+ * - 학년/반, 테마, 알림 등 사용자 설정 저장
+ * - 싱글턴 패턴으로 앱 전체에서 공유
+ */
 class SettingData {
   static final SettingData _instance = SettingData._internal();
   late SharedPreferences _sharedPreferences;

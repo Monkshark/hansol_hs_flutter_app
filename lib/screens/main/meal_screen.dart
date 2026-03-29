@@ -6,6 +6,14 @@ import 'package:hansol_high_school/widgets/meal/meal_header.dart';
 import 'package:hansol_high_school/widgets/meal/weekly_calendar.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/**
+ * 급식 화면 (MealScreen)
+ *
+ * - 주간 캘린더로 날짜를 선택하여 급식 조회
+ * - 조식/중식/석식 메뉴를 개별 카드로 표시
+ * - 주간 단위 프리페치로 API 호출 최소화
+ * - 급식 데이터가 없을 경우 빈 상태 안내 및 새로고침 제공
+ */
 class MealScreen extends StatefulWidget {
   const MealScreen({Key? key}) : super(key: key);
 
@@ -28,7 +36,6 @@ class _MealScreenState extends State<MealScreen> {
   }
 
   void fetchMeals() {
-    // 프리페치 먼저 실행 후 개별 조회
     final prefetch = MealDataApi.prefetchWeek(selectedDate);
     setState(() {
       breakfast = prefetch.then((_) => MealDataApi.getMeal(

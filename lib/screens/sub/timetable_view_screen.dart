@@ -9,6 +9,14 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:math' as math;
 import 'dart:convert';
 
+/**
+ * 시간표 그리드 뷰 화면 (TimetableViewScreen)
+ *
+ * - 요일별 교시 그리드로 주간 시간표 표시
+ * - 과목별 커스텀 컬러 설정 및 저장
+ * - 선택과목 충돌 시 해결 다이얼로그 제공
+ * - 학년/반 변경 시 시간표 자동 갱신
+ */
 class TimetableViewScreen extends StatefulWidget {
   const TimetableViewScreen({Key? key}) : super(key: key);
 

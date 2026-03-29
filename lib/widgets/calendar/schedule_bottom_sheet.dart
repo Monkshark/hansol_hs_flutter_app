@@ -7,6 +7,13 @@ import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/**
+ * 일정 만들기 다이얼로그
+ * - 일정 내용 텍스트 입력 필드 제공
+ * - 시작/종료 시간 선택 (iOS: CupertinoPicker, Android: TimePicker)
+ * - 저장 시 LocalDataBase에 Schedule 삽입 후 콜백 호출
+ * - 다크/라이트 테마 대응 스타일 적용
+ */
 class ScheduleBottomSheet extends StatefulWidget {
   final DateTime selectedDate;
   final VoidCallback onScheduleCreated;
@@ -44,7 +51,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
             Text('일정 만들기', style: TextStyle(
               fontSize: 18, fontWeight: FontWeight.w700, color: textColor)),
             const SizedBox(height: 20),
-            // 내용
             TextField(
               controller: contentController,
               style: TextStyle(color: textColor),
@@ -60,7 +66,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
               ),
             ),
             const SizedBox(height: 12),
-            // 시간 선택
             Row(
               children: [
                 Expanded(
@@ -120,7 +125,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
               ],
             ),
             const SizedBox(height: 20),
-            // 버튼
             Row(
               children: [
                 Expanded(

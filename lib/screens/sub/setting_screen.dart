@@ -1,3 +1,4 @@
+/** Settings screen for grade/class, theme, meal notifications, board alerts, and cache management. */
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
@@ -12,6 +13,14 @@ import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/**
+ * 설정 화면 (SettingScreen)
+ *
+ * - 로그인/프로필 정보 확인 및 수정
+ * - 학년/반 설정 및 테마(라이트/다크) 변경
+ * - 급식 알림(조식/중식/석식) 시간 설정
+ * - 캐시 크기 확인 및 초기화 기능
+ */
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
 
@@ -306,7 +315,6 @@ class _SettingScreenState extends State<SettingScreen> {
                   trailing: TextButton(
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
-                      // 사용자 설정 키 보존
                       const preserveKeys = {
                         'Grade', 'Class', 'isDarkMode', 'themeModeIndex',
                         'isBreakfastNotificationOn', 'breakfastTime',
@@ -443,7 +451,9 @@ class _SettingScreenState extends State<SettingScreen> {
               trailing: TextButton(
                 onPressed: () async {
                   await AuthService.signOut();
-                  if (mounted) setState(() {});
+                  AuthService.clearProfileCache();
+                  appRefreshNotifier.value++;
+                  if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
                 },
                 child: Text('로그아웃', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
               ),

@@ -6,6 +6,12 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
+/**
+ * sqflite 기반 일정 데이터베이스
+ *
+ * - 개인 일정 CRUD (생성/조회/수정/삭제)
+ * - SharedPreferences에서 sqflite로 마이그레이션 지원
+ */
 class LocalDataBase {
   Database? _db;
 
@@ -36,7 +42,6 @@ class LocalDataBase {
     );
   }
 
-  /// 기존 SharedPreferences 데이터 → sqflite 마이그레이션
   Future<void> migrateFromPrefs() async {
     final prefs = await SharedPreferences.getInstance();
     final old = prefs.getStringList('schedules');
@@ -77,7 +82,6 @@ class LocalDataBase {
   Stream<List<Schedule>> watchSchedules(DateTime date) async* {
     final db = await database;
 
-    // date 컬럼이 ISO8601 형식이므로 날짜 부분만 비교
     final datePrefix = '${date.year.toString().padLeft(4, '0')}-'
         '${date.month.toString().padLeft(2, '0')}-'
         '${date.day.toString().padLeft(2, '0')}';

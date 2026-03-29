@@ -9,6 +9,14 @@ import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
+/**
+ * 글 상세 화면 (PostDetailScreen)
+ *
+ * - 게시글 본문, 이미지, 투표 항목을 표시
+ * - 추천/비추천 기능 및 일정 공유(내 캘린더 추가) 지원
+ * - 댓글 및 대댓글 작성, 익명 댓글 옵션 제공
+ * - 부적절한 게시글/댓글 신고 기능
+ */
 class PostDetailScreen extends StatefulWidget {
   final String postId;
 
@@ -23,7 +31,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   bool _sending = false;
   bool _commentAnonymous = false;
 
-  // 대댓글
   String? _replyToCommentId;
   String? _replyToName;
 
@@ -103,21 +110,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ? DateFormat('M월 d일 (E) HH:mm', 'ko_KR').format(createdAt.toDate())
                     : '';
 
-                // 일정 첨부 데이터
                 final hasEvent = post['eventDate'] != null;
                 final eventDate = hasEvent ? DateTime.parse(post['eventDate']) : null;
                 final eventContent = post['eventContent'] as String? ?? '';
                 final eventStartTime = post['eventStartTime'] as int? ?? -1;
                 final eventEndTime = post['eventEndTime'] as int? ?? -1;
 
-                // 추천/비추천 데이터
                 final likes = (post['likes'] as Map<String, dynamic>?) ?? {};
                 final dislikes = (post['dislikes'] as Map<String, dynamic>?) ?? {};
                 final myUid = AuthService.currentUser?.uid;
                 final hasLiked = myUid != null && likes.containsKey(myUid);
                 final hasDisliked = myUid != null && dislikes.containsKey(myUid);
 
-                // 투표 데이터
                 final pollOptions = (post['pollOptions'] as List<dynamic>?)?.cast<String>();
                 final hasPoll = pollOptions != null && pollOptions.isNotEmpty;
                 final pollVoters = (post['pollVoters'] as Map<String, dynamic>?) ?? {};
@@ -128,7 +132,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 return ListView(
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   children: [
-                    // 카테고리
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Container(
@@ -151,7 +154,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     const SizedBox(height: 16),
                     Text(content, style: TextStyle(fontSize: 15, height: 1.7, color: textColor)),
 
-                    // 이미지
                     if (post['imageUrls'] != null && (post['imageUrls'] as List).isNotEmpty) ...[
                       const SizedBox(height: 16),
                       ...(post['imageUrls'] as List).map((url) => Padding(
@@ -182,7 +184,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       )),
                     ],
 
-                    // 투표 카드
                     if (hasPoll) ...[
                       const SizedBox(height: 20),
                       _PollCard(
@@ -193,7 +194,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ),
                     ],
 
-                    // 일정 첨부 카드
                     if (hasEvent) ...[
                       const SizedBox(height: 20),
                       _EventAttachCard(
@@ -205,7 +205,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ),
                     ],
 
-                    // 추천/비추천
                     const SizedBox(height: 20),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -247,7 +246,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     const SizedBox(height: 20),
                     Divider(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA)),
                     const SizedBox(height: 12),
-                    // 댓글
                     StreamBuilder<QuerySnapshot>(
                       stream: _postRef.collection('comments').orderBy('createdAt').snapshots(),
                       builder: (context, commentSnapshot) {
@@ -268,22 +266,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 ),
                               )
                             else
-                              ...comments.map((doc) {
-                                final c = doc.data() as Map<String, dynamic>;
-                                final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
-                                final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
-                                return _CommentItem(
-                                  data: c,
-                                  isAuthor: canDelete,
-                                  onDelete: () => _confirmDeleteComment(doc.id),
-                                  onReply: () {
-                                    setState(() {
-                                      _replyToCommentId = doc.id;
-                                      _replyToName = c['authorName'] ?? '익명';
-                                    });
-                                  },
-                                );
-                              }),
+                              ..._buildThreadedComments(comments),
                           ],
                         );
                       },
@@ -293,7 +276,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               },
             ),
           ),
-          // 댓글 입력
           Container(
             padding: EdgeInsets.fromLTRB(16, 0, 8, MediaQuery.of(context).padding.bottom + 8),
             decoration: BoxDecoration(
@@ -303,7 +285,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // 답글 표시
                 if (_replyToName != null)
                   Container(
                     padding: const EdgeInsets.fromLTRB(12, 8, 4, 0),
@@ -576,7 +557,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       'createdAt': FieldValue.serverTimestamp(),
     };
 
-    // 대댓글이면 replyTo 정보 추가
     if (_replyToCommentId != null) {
       commentData['replyTo'] = _replyToCommentId;
       commentData['replyToName'] = _replyToName;
@@ -585,7 +565,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     await _postRef.collection('comments').add(commentData);
     await _postRef.update({'commentCount': FieldValue.increment(1)});
 
-    // 알림 생성
     final postSnap = await _postRef.get();
     final postData = postSnap.data();
     if (postData != null) {
@@ -594,7 +573,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final myUid = AuthService.currentUser!.uid;
 
       if (_replyToCommentId != null) {
-        // 대댓글 → 원 댓글 작성자에게 알림
         final origComment = await _postRef.collection('comments').doc(_replyToCommentId).get();
         final origUid = origComment.data()?['authorUid'] as String?;
         if (origUid != null && origUid != myUid) {
@@ -611,7 +589,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         }
       }
 
-      // 글 작성자에게 댓글 알림 (자기 글에 자기 댓글이면 제외)
       if (postAuthorUid != null && postAuthorUid != myUid) {
         await FirebaseFirestore.instance
             .collection('users').doc(postAuthorUid).collection('notifications').add({
@@ -631,6 +608,67 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       _replyToCommentId = null;
       _replyToName = null;
     });
+  }
+
+  List<Widget> _buildThreadedComments(List<QueryDocumentSnapshot> comments) {
+    final parents = <QueryDocumentSnapshot>[];
+    final childrenMap = <String, List<QueryDocumentSnapshot>>{};
+
+    for (var doc in comments) {
+      final data = doc.data() as Map<String, dynamic>;
+      final replyTo = data['replyTo'] as String?;
+      if (replyTo == null) {
+        parents.add(doc);
+      } else {
+        childrenMap.putIfAbsent(replyTo, () => []);
+        childrenMap[replyTo]!.add(doc);
+      }
+    }
+
+    final widgets = <Widget>[];
+    for (var parent in parents) {
+      widgets.add(_buildCommentWidget(parent, indent: false));
+      final children = childrenMap[parent.id] ?? [];
+      for (var child in children) {
+        widgets.add(_buildCommentWidget(child, indent: true));
+      }
+    }
+
+    final handledIds = parents.map((p) => p.id).toSet();
+    for (var doc in comments) {
+      final data = doc.data() as Map<String, dynamic>;
+      final replyTo = data['replyTo'] as String?;
+      if (replyTo != null && !handledIds.contains(replyTo)) {
+        if (!widgets.any((w) => w.key == ValueKey(doc.id))) {
+          widgets.add(_buildCommentWidget(doc, indent: true));
+        }
+      }
+    }
+
+    return widgets;
+  }
+
+  Widget _buildCommentWidget(QueryDocumentSnapshot doc, {required bool indent}) {
+    final c = doc.data() as Map<String, dynamic>;
+    final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
+    final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
+
+    return Padding(
+      padding: EdgeInsets.only(left: indent ? 32 : 0),
+      child: _CommentItem(
+        key: ValueKey(doc.id),
+        data: c,
+        isAuthor: canDelete,
+        isReply: indent,
+        onDelete: () => _confirmDeleteComment(doc.id),
+        onReply: () {
+          setState(() {
+            _replyToCommentId = doc.id;
+            _replyToName = c['authorName'] ?? '익명';
+          });
+        },
+      ),
+    );
   }
 
   Future<void> _confirmDeleteComment(String commentId) async {
@@ -773,7 +811,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 }
 
-// 일정 첨부 카드
 class _EventAttachCard extends StatelessWidget {
   final DateTime eventDate;
   final String eventContent;
@@ -926,7 +963,6 @@ class _PollCard extends StatelessWidget {
     final totalVotes = voters.length;
     final hasVoted = myVote != null;
 
-    // 각 옵션별 투표 수
     final voteCounts = List.filled(options.length, 0);
     for (var v in voters.values) {
       final idx = v as int;
@@ -977,7 +1013,6 @@ class _PollCard extends StatelessWidget {
                   ),
                   child: Stack(
                     children: [
-                      // 결과 바
                       if (hasVoted)
                         FractionallySizedBox(
                           widthFactor: ratio,
@@ -1046,10 +1081,11 @@ class _PollCard extends StatelessWidget {
 class _CommentItem extends StatelessWidget {
   final Map<String, dynamic> data;
   final bool isAuthor;
+  final bool isReply;
   final VoidCallback onDelete;
   final VoidCallback onReply;
 
-  const _CommentItem({required this.data, required this.isAuthor, required this.onDelete, required this.onReply});
+  const _CommentItem({super.key, required this.data, required this.isAuthor, this.isReply = false, required this.onDelete, required this.onReply});
 
   @override
   Widget build(BuildContext context) {
@@ -1062,12 +1098,15 @@ class _CommentItem extends StatelessWidget {
     final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: isReply ? 6 : 12),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
           color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
           borderRadius: BorderRadius.circular(12),
+          border: isReply ? Border(
+            left: BorderSide(color: AppColors.theme.primaryColor.withAlpha(100), width: 2),
+          ) : null,
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

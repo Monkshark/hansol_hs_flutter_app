@@ -7,6 +7,14 @@ import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
+/**
+ * 선택과목 설정 화면 (TimetableSelectScreen)
+ *
+ * - 학년별 선택과목 목록에서 수강 과목 선택
+ * - 선택 과목 간 시간표 충돌 자동 감지 및 경고
+ * - 변경사항 저장 시 확인 다이얼로그 표시
+ */
+
 // 과목의 요일+교시 정보
 class SubjectScheduleInfo {
   final String dayName; // 월, 화, ...
@@ -25,7 +33,9 @@ class TimetableSelectScreen extends StatefulWidget {
 class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
   late Future<Map<String, List<Subject>>> _subjectGroupsFuture;
   List<Subject> selectedSubjects = [];
+  List<Subject> _originalSubjects = [];
   late int grade;
+  bool _hasChanges = false;
 
   // 과목+반 → 요일/교시 매핑
   Map<String, List<SubjectScheduleInfo>> scheduleMap = {};
@@ -51,6 +61,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
 
   Future<void> _loadSelectedSubjects(int g) async {
     selectedSubjects = await SubjectDataManager.loadSelectedSubjects(g);
+    _originalSubjects = List.from(selectedSubjects);
   }
 
   Future<void> _saveSelectedSubjects() async {
@@ -192,7 +203,57 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return PopScope(
+      canPop: !_hasChanges,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final discard = await showDialog<bool>(
+          context: context,
+          builder: (ctx) {
+            final isDark = Theme.of(ctx).brightness == Brightness.dark;
+            return Dialog(
+              backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text('변경사항이 있습니다', style: TextStyle(
+                      fontSize: 18, fontWeight: FontWeight.w700,
+                      color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                    const SizedBox(height: 12),
+                    Text('저장하지 않고 나가시겠습니까?', style: TextStyle(
+                      fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
+                    const SizedBox(height: 20),
+                    Row(
+                      children: [
+                        Expanded(child: TextButton(
+                          onPressed: () => Navigator.pop(ctx, false),
+                          child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                        )),
+                        const SizedBox(width: 10),
+                        Expanded(child: ElevatedButton(
+                          onPressed: () => Navigator.pop(ctx, true),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                          ),
+                          child: const Text('나가기'),
+                        )),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+        if (discard == true && context.mounted) Navigator.of(context).pop();
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -200,6 +261,22 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
         title: const Text('선택과목 설정'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          if (_hasChanges)
+            IconButton(
+              onPressed: () async {
+                await _saveSelectedSubjects();
+                _originalSubjects = List.from(selectedSubjects);
+                setState(() => _hasChanges = false);
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('저장되었습니다')),
+                  );
+                }
+              },
+              icon: Icon(Icons.check, color: AppColors.theme.primaryColor, size: 28),
+            ),
+        ],
       ),
       body: FutureBuilder<Map<String, List<Subject>>>(
         future: _subjectGroupsFuture,
@@ -266,9 +343,9 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                         setState(() {
                           selectedSubjects.removeWhere((s) => s.subjectName == subjectName);
                           if (selected) selectedSubjects.add(subject);
+                          _hasChanges = true;
                           _checkConflicts();
                         });
-                        _saveSelectedSubjects();
                       },
                     );
                   },
@@ -278,6 +355,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
           );
         },
       ),
+    ),
     );
   }
 }

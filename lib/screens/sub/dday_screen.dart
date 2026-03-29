@@ -1,3 +1,4 @@
+/** D-day management screen for adding, pinning, and browsing upcoming personal and school events. */
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
 import 'package:hansol_high_school/data/dday_manager.dart';
@@ -6,6 +7,13 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
+/**
+ * D-day 관리 화면 (DDayScreen)
+ *
+ * - D-day 항목 추가/삭제 및 핀(고정) 설정
+ * - 개인 일정과 학사일정을 통합하여 예정 일정 표시
+ * - D-day 카운트다운을 홈 화면 헤더에 연동
+ */
 class DDayScreen extends StatefulWidget {
   const DDayScreen({Key? key}) : super(key: key);
 
@@ -15,7 +23,7 @@ class DDayScreen extends StatefulWidget {
 
 class _DDayScreenState extends State<DDayScreen> {
   List<DDay> _list = [];
-  List<_EventItem> _events = []; // 개인 일정 + 학사일정 통합
+  List<_EventItem> _events = [];
 
   @override
   void initState() {
@@ -29,7 +37,6 @@ class _DDayScreenState extends State<DDayScreen> {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
 
-    // 개인 일정 (30일) - DB에서 한 번에 조회
     final schedules = await GetIt.I<LocalDataBase>().getSchedulesForDateRange(now, 30);
     for (var s in schedules) {
       final d = DateTime.parse(s.date);
@@ -41,7 +48,6 @@ class _DDayScreenState extends State<DDayScreen> {
       ));
     }
 
-    // 학사일정 (NEIS) - 한 번의 API 호출로 30일치 조회
     final api = NoticeDataApi();
     final schoolEvents = await api.getEventsInRange(days: 30);
     for (var event in schoolEvents) {
@@ -212,7 +218,6 @@ class _DDayScreenState extends State<DDayScreen> {
               itemCount: _list.length + (_events.isNotEmpty ? 1 + _events.length : 0),
               separatorBuilder: (_, __) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
-                // 예정된 일정 섹션 (개인 + 학사)
                 if (index >= _list.length) {
                   final eventIndex = index - _list.length;
                   if (eventIndex == 0) {
@@ -315,7 +320,6 @@ class _DDayScreenState extends State<DDayScreen> {
                   ),
                   child: GestureDetector(
                     onTap: () {
-                      // 핀 토글
                       setState(() {
                         for (int i = 0; i < _list.length; i++) {
                           _list[i] = DDay(

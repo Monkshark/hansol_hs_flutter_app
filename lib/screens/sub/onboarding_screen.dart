@@ -1,7 +1,15 @@
+/** Onboarding screen introducing app features with swipeable pages on first launch. */
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+/**
+ * 온보딩 화면 (OnboardingScreen)
+ *
+ * - 첫 실행 시 4페이지 슬라이드로 주요 기능 안내
+ * - 급식, 시간표, 일정 관리, 게시판 기능 소개
+ * - 완료 시 SharedPreferences에 플래그 저장하여 재표시 방지
+ */
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
 
@@ -61,7 +69,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // 건너뛰기
             Align(
               alignment: Alignment.topRight,
               child: TextButton(
@@ -69,7 +76,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                 child: Text('건너뛰기', style: TextStyle(color: AppColors.theme.darkGreyColor)),
               ),
             ),
-            // 페이지
             Expanded(
               child: PageView.builder(
                 controller: _controller,
@@ -81,32 +87,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Container(
-                        width: 100, height: 100,
+                        width: 140, height: 140,
                         decoration: BoxDecoration(
                           color: page.color.withAlpha(25),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(page.icon, size: 48, color: page.color),
+                        child: Icon(page.icon, size: 68, color: page.color),
                       ),
-                      const SizedBox(height: 32),
+                      const SizedBox(height: 40),
                       Text(page.title, style: TextStyle(
-                        fontSize: 24, fontWeight: FontWeight.w700,
+                        fontSize: 30, fontWeight: FontWeight.w700,
                         color: Theme.of(context).textTheme.bodyLarge?.color)),
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 14),
                       Text(page.description, style: TextStyle(
-                        fontSize: 15, color: AppColors.theme.darkGreyColor, height: 1.5),
+                        fontSize: 17, color: AppColors.theme.darkGreyColor, height: 1.6),
                         textAlign: TextAlign.center),
                     ],
                   );
                 },
               ),
             ),
-            // 인디케이터 + 버튼
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 0, 24, 32),
               child: Row(
                 children: [
-                  // 도트 인디케이터
                   Row(
                     children: List.generate(_pages.length, (i) =>
                       Container(

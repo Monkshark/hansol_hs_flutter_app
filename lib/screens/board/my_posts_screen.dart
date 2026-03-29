@@ -1,3 +1,4 @@
+/** My posts screen with tabs for viewing user's own posts and comments. */
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -5,6 +6,13 @@ import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/**
+ * 내 활동 화면 (MyPostsScreen)
+ *
+ * - 내가 작성한 글 목록을 탭으로 조회
+ * - 내가 작성한 댓글 목록을 탭으로 조회
+ * - 각 항목 탭 시 해당 게시글 상세로 이동
+ */
 class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({Key? key}) : super(key: key);
 

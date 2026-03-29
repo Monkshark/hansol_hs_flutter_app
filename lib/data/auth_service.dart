@@ -3,6 +3,13 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+/**
+ * Google 로그인/로그아웃, Firestore 프로필 CRUD
+ *
+ * - Google 로그인 및 Firebase 인증 처리
+ * - Firestore 사용자 프로필 생성/조회/수정
+ * - 승인 여부 및 매니저 권한 체크, 5분 캐시
+ */
 class UserProfile {
   final String uid;
   final String name;
@@ -11,7 +18,7 @@ class UserProfile {
   final int classNum;
   final String email;
   final bool approved;
-  final String role; // 'user', 'manager', 'admin'
+  final String role;
 
   UserProfile({
     required this.uid,
@@ -117,7 +124,6 @@ class AuthService {
     return profile?.isManager ?? false;
   }
 
-  // 캐시된 프로필 (매번 Firestore 안 치게)
   static UserProfile? get cachedProfile => _cachedProfile;
   static UserProfile? _cachedProfile;
   static DateTime? _cacheTime;

@@ -8,6 +8,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'nies_api_keys.dart';
 
+/**
+ * NEIS 학사일정 API 연동
+ *
+ * - 날짜 범위별 학사일정 조회
+ * - 예정 이벤트 조회 지원
+ * - 12시간 캐시 적용
+ */
 class UpcomingEvent {
   final String name;
   final DateTime date;
@@ -69,13 +76,11 @@ class NoticeDataApi {
     return notice;
   }
 
-  /// 오늘부터 90일 이내 가장 가까운 학사일정 조회
   Future<UpcomingEvent?> getUpcomingEvent() async {
     final prefs = await _prefs;
     final cacheKey = 'upcoming_event';
     final now = DateTime.now();
 
-    // 캐시 확인 (6시간)
     if (prefs.containsKey(cacheKey)) {
       final ts = prefs.getInt('$cacheKey-timestamp') ?? 0;
       if (now.millisecondsSinceEpoch - ts < 6 * 60 * 60 * 1000) {
@@ -97,7 +102,6 @@ class NoticeDataApi {
 
     if (await NetworkStatus.isUnconnected()) return null;
 
-    // 오늘부터 90일 범위 조회
     final tomorrow = now.add(const Duration(days: 1));
     final endDate = now.add(const Duration(days: 90));
     final fromDate = DateFormat('yyyyMMdd').format(tomorrow);
@@ -121,7 +125,6 @@ class NoticeDataApi {
 
     if (!data.containsKey('SchoolSchedule')) return null;
 
-    // 모든 이벤트 파싱
     final events = <UpcomingEvent>[];
     final infoArray = data['SchoolSchedule'] as List<dynamic>;
 
@@ -154,11 +157,9 @@ class NoticeDataApi {
 
     if (events.isEmpty) return null;
 
-    // 가장 가까운 이벤트
     events.sort((a, b) => a.dDay.compareTo(b.dDay));
     final nearest = events.first;
 
-    // 캐시 저장
     prefs.setString(cacheKey, jsonEncode({
       'name': nearest.name,
       'date': nearest.date.toIso8601String(),
@@ -168,7 +169,6 @@ class NoticeDataApi {
     return nearest;
   }
 
-  /// 범위 내 모든 학사일정을 한 번에 조회
   Future<List<UpcomingEvent>> getEventsInRange({int days = 30}) async {
     if (await NetworkStatus.isUnconnected()) return [];
 

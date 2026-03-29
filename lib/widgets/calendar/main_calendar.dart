@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:table_calendar/table_calendar.dart';
 
+/**
+ * 일정 화면 월간 캘린더
+ * - TableCalendar 기반 월간 뷰, 한국어 로케일 적용
+ * - 토요일(파란색), 일요일(빨간색) 커스텀 색상 처리
+ * - 오늘/선택 날짜를 primaryColor로 시각 구분
+ * - 다크/라이트 테마 자동 대응
+ */
 class MainCalendar extends StatefulWidget {
   final OnDaySelected onDaySelected;
   final DateTime selectedDate;

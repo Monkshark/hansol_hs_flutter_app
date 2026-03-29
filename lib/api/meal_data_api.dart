@@ -9,6 +9,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'nies_api_keys.dart';
 
+/**
+ * NEIS 급식 API 연동
+ *
+ * - 월간 급식 데이터 프리페치
+ * - 24시간/5분 캐시 전략
+ * - 오프라인 시 캐시된 데이터 제공
+ */
 class MealDataApi {
   static const int BREAKFAST = 1;
   static const int LUNCH = 2;
@@ -21,10 +28,8 @@ class MealDataApi {
   static final Future<SharedPreferences> _prefs =
       SharedPreferences.getInstance();
 
-  // 현재 프리페치 중인 월을 추적해서 중복 요청 방지
   static final Set<String> _prefetchingMonths = {};
 
-  /// 단일 날짜 급식 조회 (캐시 우선, 없으면 해당 월 전체 프리페치)
   static Future<Meal?> getMeal({
     required DateTime date,
     required int mealType,
@@ -34,7 +39,6 @@ class MealDataApi {
     final cacheKey = _cacheKey(date, mealType);
     log('MealDataApi: getMeal cacheKey=$cacheKey');
 
-    // 1. 캐시 확인 (실제 데이터만 hit, 빈 결과는 무시)
     final cached = _getFromCache(prefs, cacheKey);
     if (cached != null && cached.meal != null && cached.meal != '급식 정보가 없습니다.' && cached.meal != '급식 정보가 없습니다') {
       log('MealDataApi: getMeal cache hit: ${cached.meal?.substring(0, cached.meal!.length > 20 ? 20 : cached.meal!.length)}');
@@ -42,9 +46,7 @@ class MealDataApi {
     }
     log('MealDataApi: getMeal cache miss');
 
-    // 2. 오프라인 체크
     if (await NetworkStatus.isUnconnected()) {
-      // 오프라인이면 빈 캐시라도 반환
       if (cached != null) return cached;
       return Meal(
         meal: "식단 정보를 확인하려면 인터넷에 연결하세요",
@@ -54,10 +56,8 @@ class MealDataApi {
       );
     }
 
-    // 3. 해당 월 전체 프리페치 (한 번만)
     await _prefetchMonth(date);
 
-    // 4. 프리페치 후 캐시 다시 확인
     final afterPrefetch = _getFromCache(prefs, cacheKey);
     if (afterPrefetch != null) {
       log('MealDataApi: getMeal after prefetch hit');
@@ -65,7 +65,6 @@ class MealDataApi {
     }
     log('MealDataApi: getMeal after prefetch miss, falling back to single');
 
-    // 5. 폴백: 단일 날짜 직접 조회
     return _fetchSingleMeal(date, mealType, prefs, cacheKey);
   }
 
@@ -106,11 +105,9 @@ class MealDataApi {
     return empty;
   }
 
-  /// 해당 월의 모든 급식을 한 번에 가져와서 캐싱
   static Future<void> _prefetchMonth(DateTime date) async {
     final monthKey = DateFormat('yyyyMM').format(date);
 
-    // 이미 프리페치 중이면 대기
     if (_prefetchingMonths.contains(monthKey)) return;
     _prefetchingMonths.add(monthKey);
 
@@ -122,7 +119,6 @@ class MealDataApi {
       final fromDate = DateFormat('yyyyMMdd').format(firstDay);
       final toDate = DateFormat('yyyyMMdd').format(lastDay);
 
-      // 조식/중식/석식 전부 한 번에 (MMEAL_SC_CODE 없이 요청하면 전체)
       final requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
           'key=${niesApiKeys.NIES_API_KEY}'
           '&Type=json&pIndex=1&pSize=100'
@@ -170,7 +166,6 @@ class MealDataApi {
           );
 
           final key = _cacheKey(mealDate, mealCode);
-          // 항상 실제 데이터로 덮어씀 (빈 캐시 포함)
           _saveToCache(prefs, key, meal);
           count++;
         }
@@ -184,16 +179,13 @@ class MealDataApi {
     }
   }
 
-  /// 주간 프리페치 (급식 화면 진입 시 호출용)
   static Future<void> prefetchWeek(DateTime baseDate) async {
     final monday = baseDate.subtract(Duration(days: baseDate.weekday - 1));
     final friday = monday.add(const Duration(days: 4));
 
-    // 같은 월이면 월간 프리페치 한 번으로 충분
     if (monday.month == friday.month) {
       await _prefetchMonth(monday);
     } else {
-      // 주가 월을 걸치면 두 달 프리페치
       await Future.wait([
         _prefetchMonth(monday),
         _prefetchMonth(friday),
@@ -221,8 +213,6 @@ class MealDataApi {
 
     final meal = Meal.fromJson(jsonDecode(data));
 
-    // 실제 급식 데이터는 24시간 캐시
-    // "급식 정보가 없습니다." 는 5분만 캐시 (프리페치로 덮어쓸 수 있도록)
     if (meal.meal == '급식 정보가 없습니다.') {
       if (age > 5 * 60 * 1000) return null;
     } else {
@@ -237,7 +227,6 @@ class MealDataApi {
     prefs.setInt('$key-ts', DateTime.now().millisecondsSinceEpoch);
   }
 
-  /// 특정 날짜의 모든 급식 캐시 삭제
   static Future<void> clearCacheForDate(DateTime date) async {
     final prefs = await _prefs;
     for (final type in [BREAKFAST, LUNCH, DINNER]) {

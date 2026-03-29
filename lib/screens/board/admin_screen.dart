@@ -4,6 +4,13 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/**
+ * 관리자 화면 (AdminScreen)
+ *
+ * - 신고된 게시글/댓글 목록 확인 및 처리
+ * - 가입 대기 사용자 승인/거절/삭제
+ * - 승인된 사용자 관리 및 매니저 권한 임명
+ */
 class AdminScreen extends StatefulWidget {
   const AdminScreen({Key? key}) : super(key: key);
 
@@ -62,7 +69,6 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   }
 }
 
-// 신고 탭
 class _ReportsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -129,7 +135,6 @@ class _ReportsTab extends StatelessWidget {
                       ),
                       GestureDetector(
                         onTap: () async {
-                          // 글 + 댓글 삭제
                           try {
                             final comments = await FirebaseFirestore.instance
                                 .collection('posts').doc(postId).collection('comments').get();
@@ -171,7 +176,6 @@ class _ReportsTab extends StatelessWidget {
   }
 }
 
-// 사용자 탭 (승인 대기 / 승인됨)
 class _UsersTab extends StatelessWidget {
   final bool showApproved;
   const _UsersTab({required this.showApproved});
@@ -259,7 +263,6 @@ class _UsersTab extends StatelessWidget {
                         ),
                       ),
                       if (!showApproved) ...[
-                        // 승인 대기 → 승인/거절
                         _actionBtn('승인', AppColors.theme.primaryColor, () async {
                           await docs[index].reference.update({'approved': true});
                         }),
@@ -268,8 +271,6 @@ class _UsersTab extends StatelessWidget {
                           await docs[index].reference.delete();
                         }),
                       ] else ...[
-                        // 승인됨 → 매니저 임명 (admin만)
-                        // 자기 자신이 admin이면 셀프 해제
                         if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
                           _actionBtn('Admin 해제', AppColors.theme.darkGreyColor, () async {
                             await docs[index].reference.update({'role': 'user'});
@@ -294,6 +295,17 @@ class _UsersTab extends StatelessWidget {
                             },
                           ),
                         ],
+                        if (uid != AuthService.currentUser?.uid && role == 'user') ...[
+                          const SizedBox(width: 6),
+                          _actionBtn('삭제', Colors.red, () async {
+                            final first = await _confirmDialog(context, '계정 삭제', '$name 계정을 삭제하시겠습니까?');
+                            if (first != true) return;
+                            final second = await _confirmDialog(context, '최종 확인', '$name 계정을 정말 삭제합니까?\n이 작업은 되돌릴 수 없습니다.');
+                            if (second == true) {
+                              await docs[index].reference.delete();
+                            }
+                          }),
+                        ],
                       ],
                     ],
                   ),
@@ -316,6 +328,52 @@ class _UsersTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  Future<bool?> _confirmDialog(BuildContext context, String title, String content) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(title, style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w700,
+                color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+              const SizedBox(height: 12),
+              Text(content, style: TextStyle(
+                fontSize: 14, color: AppColors.theme.mealTypeTextColor),
+                textAlign: TextAlign.center),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  Expanded(child: TextButton(
+                    onPressed: () => Navigator.pop(ctx, false),
+                    child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                  )),
+                  const SizedBox(width: 10),
+                  Expanded(child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, true),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      elevation: 0,
+                    ),
+                    child: const Text('삭제'),
+                  )),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

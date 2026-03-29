@@ -12,6 +12,14 @@ import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 
+/**
+ * 글쓰기/수정 화면 (WritePostScreen)
+ *
+ * - 카테고리(자유/질문/정보공유) 선택 후 글 작성
+ * - 투표 항목 및 일정 첨부(날짜/시간) 기능
+ * - 사진 촬영 또는 갤러리에서 이미지 첨부 (압축 후 업로드)
+ * - 익명 게시 옵션 및 기존 글 수정 모드 지원
+ */
 class WritePostScreen extends StatefulWidget {
   final String? postId;
   final String? initialTitle;
@@ -39,16 +47,13 @@ class _WritePostScreenState extends State<WritePostScreen> {
   bool _saving = false;
   bool _isAnonymous = false;
 
-  // 일정 첨부 (정보공유)
   bool _attachEvent = false;
   DateTime? _eventDate;
   TimeOfDay? _eventStartTime;
   TimeOfDay? _eventEndTime;
 
-  // 사진
   final List<File> _images = [];
 
-  // 투표
   bool _attachPoll = false;
   final List<TextEditingController> _pollControllers = [
     TextEditingController(),
@@ -107,7 +112,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 카테고리 선택
             Text('카테고리', style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
             const SizedBox(height: 8),
@@ -143,7 +147,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
               }).toList(),
             ),
             const SizedBox(height: 20),
-            // 제목
             TextField(
               controller: _titleController,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
@@ -159,7 +162,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
               ),
             ),
             const SizedBox(height: 12),
-            // 내용
             TextField(
               controller: _contentController,
               style: TextStyle(fontSize: 15, color: textColor, height: 1.6),
@@ -177,13 +179,11 @@ class _WritePostScreenState extends State<WritePostScreen> {
               ),
             ),
 
-            // 사진 첨부
             if (_images.isNotEmpty || !_isEdit) ...[
               const SizedBox(height: 16),
               _buildImageSection(fillColor),
             ],
 
-            // 정보공유 → 일정 첨부
             if (_category == '정보공유') ...[
               const SizedBox(height: 16),
               GestureDetector(
@@ -215,7 +215,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
               ],
             ],
 
-            // 투표 첨부
             const SizedBox(height: 16),
             GestureDetector(
               onTap: () => setState(() => _attachPoll = !_attachPoll),
@@ -246,7 +245,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
             ],
 
             const SizedBox(height: 16),
-            // 익명 토글
             GestureDetector(
               onTap: () => setState(() => _isAnonymous = !_isAnonymous),
               child: Row(
@@ -285,7 +283,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 일정 내용
           TextField(
             controller: _eventContentController,
             style: TextStyle(fontSize: 14, color: textColor),
@@ -302,7 +299,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          // 날짜 선택
           GestureDetector(
             onTap: _pickDate,
             child: Container(
@@ -330,7 +326,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
             ),
           ),
           const SizedBox(height: 10),
-          // 시간 선택 (선택사항)
           Row(
             children: [
               Expanded(
@@ -682,7 +677,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
     setState(() => _saving = true);
 
-    // 로그인 안 되어있으면 로그인 유도
     if (!AuthService.isLoggedIn) {
       if (mounted) setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -691,7 +685,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       return;
     }
 
-    // 프로필 조회 (최대 3초 대기, 재시도)
     UserProfile? profile;
     for (int i = 0; i < 3; i++) {
       profile = await AuthService.getUserProfile();
@@ -721,7 +714,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       'isAnonymous': _isAnonymous,
     };
 
-    // 투표 데이터
     if (_attachPoll) {
       final options = _pollControllers
           .map((c) => c.text.trim())
@@ -734,7 +726,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       postData['pollVoters'] = null;
     }
 
-    // 일정 첨부 데이터
     if (_attachEvent && _eventDate != null) {
       postData['eventDate'] = _eventDate!.toIso8601String();
       postData['eventContent'] = _eventContentController.text.trim();
@@ -752,7 +743,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
     }
 
     if (_isEdit) {
-      // 수정 시 이미지 추가 업로드
       if (_images.isNotEmpty) {
         final urls = await _uploadImages(widget.postId!);
         postData['imageUrls'] = FieldValue.arrayUnion(urls);
@@ -767,7 +757,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       postData['imageUrls'] = <String>[];
       final docRef = await FirebaseFirestore.instance.collection('posts').add(postData);
 
-      // 새 글 이미지 업로드
       if (_images.isNotEmpty) {
         final urls = await _uploadImages(docRef.id);
         await docRef.update({'imageUrls': urls});
