@@ -10,6 +10,8 @@ class UserProfile {
   final int grade;
   final int classNum;
   final String email;
+  final bool approved;
+  final String role; // 'user', 'manager', 'admin'
 
   UserProfile({
     required this.uid,
@@ -18,7 +20,12 @@ class UserProfile {
     required this.grade,
     required this.classNum,
     required this.email,
+    this.approved = false,
+    this.role = 'user',
   });
+
+  bool get isManager => role == 'manager' || role == 'admin';
+  bool get isAdmin => role == 'admin';
 
   Map<String, dynamic> toMap() => {
     'uid': uid,
@@ -27,6 +34,8 @@ class UserProfile {
     'grade': grade,
     'classNum': classNum,
     'email': email,
+    'approved': approved,
+    'role': role,
     'updatedAt': FieldValue.serverTimestamp(),
   };
 
@@ -37,6 +46,8 @@ class UserProfile {
     grade: map['grade'] ?? 0,
     classNum: map['classNum'] ?? 0,
     email: map['email'] ?? '',
+    approved: map['approved'] ?? false,
+    role: map['role'] ?? 'user',
   );
 }
 
@@ -93,5 +104,36 @@ class AuthService {
     if (user == null) return false;
     final doc = await _firestore.collection('users').doc(user.uid).get();
     return doc.exists && doc.data()?['name'] != null;
+  }
+
+  static Future<bool> isApproved() async {
+    final profile = await getUserProfile();
+    if (profile == null) return false;
+    return profile.approved || profile.isManager;
+  }
+
+  static Future<bool> isManager() async {
+    final profile = await getUserProfile();
+    return profile?.isManager ?? false;
+  }
+
+  // 캐시된 프로필 (매번 Firestore 안 치게)
+  static UserProfile? get cachedProfile => _cachedProfile;
+  static UserProfile? _cachedProfile;
+  static DateTime? _cacheTime;
+
+  static Future<UserProfile?> getCachedProfile() async {
+    if (_cachedProfile != null && _cacheTime != null &&
+        DateTime.now().difference(_cacheTime!).inMinutes < 5) {
+      return _cachedProfile;
+    }
+    _cachedProfile = await getUserProfile();
+    _cacheTime = DateTime.now();
+    return _cachedProfile;
+  }
+
+  static void clearProfileCache() {
+    _cachedProfile = null;
+    _cacheTime = null;
   }
 }

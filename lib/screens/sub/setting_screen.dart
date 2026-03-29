@@ -286,7 +286,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSectionTitle('게시판 알림'),
               _buildGroupedCard([
                 _buildSettingRow(
-                  '새 글 알림',
+                  '내 글 댓글 알림',
                   trailing: Switch(
                     value: SettingData().isBoardNotificationOn,
                     activeColor: AppColors.theme.primaryColor,
@@ -301,21 +301,6 @@ class _SettingScreenState extends State<SettingScreen> {
               const SizedBox(height: 24),
               _buildSectionTitle('기타'),
               _buildGroupedCard([
-                _buildSettingRow(
-                  '알림 테스트',
-                  trailing: TextButton(
-                    onPressed: () async {
-                      await DailyMealNotification().sendTestNotification();
-                      if (mounted) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('5초 후 테스트 알림이 발송됩니다')),
-                        );
-                      }
-                    },
-                    child: Text('보내기', style: TextStyle(color: AppColors.theme.primaryColor)),
-                  ),
-                ),
-                _buildDivider(),
                 _buildSettingRow(
                   '캐시 삭제${_cacheSize.isNotEmpty ? ' ($_cacheSize)' : ''}',
                   trailing: TextButton(
@@ -439,8 +424,22 @@ class _SettingScreenState extends State<SettingScreen> {
               title: Text(name.isNotEmpty ? name : '이름 없음',
                 style: TextStyle(fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.bodyLarge?.color)),
-              subtitle: Text(email,
-                style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(email,
+                    style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+                  const SizedBox(height: 2),
+                  Text(
+                    profile?.approved == true ? '승인됨' : '승인 대기중',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: profile?.approved == true ? const Color(0xFF4CAF50) : Colors.orange,
+                    ),
+                  ),
+                ],
+              ),
               trailing: TextButton(
                 onPressed: () async {
                   await AuthService.signOut();

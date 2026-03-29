@@ -183,6 +183,16 @@ class _BoardScreenState extends State<BoardScreen> {
       if (result != true) return;
     }
 
+    final approved = await AuthService.isApproved();
+    if (!approved) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('관리자 승인 대기 중입니다')),
+        );
+      }
+      return;
+    }
+
     Navigator.push(
       context,
       MaterialPageRoute(builder: (_) => const WritePostScreen()),

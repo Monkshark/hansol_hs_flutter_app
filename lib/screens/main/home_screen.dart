@@ -5,6 +5,7 @@ import 'package:hansol_high_school/data/dday_manager.dart';
 import 'package:hansol_high_school/screens/sub/dday_screen.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart';
@@ -70,6 +71,21 @@ class _HomeScreenState extends State<HomeScreen> {
                               fontSize: 14,
                             ),
                           ),
+                        ),
+                        FutureBuilder<UserProfile?>(
+                          future: AuthService.getCachedProfile(),
+                          builder: (context, snap) {
+                            if (snap.data?.isManager == true) {
+                              return IconButton(
+                                onPressed: () => Navigator.of(context).push(
+                                  MaterialPageRoute(builder: (_) => const AdminScreen()),
+                                ),
+                                icon: const Icon(Icons.shield_outlined),
+                                color: Colors.white,
+                              );
+                            }
+                            return const SizedBox.shrink();
+                          },
                         ),
                         IconButton(
                           onPressed: () => Navigator.of(context).push(

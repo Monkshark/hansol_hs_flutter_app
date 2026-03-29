@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>댓글 관리 - 한솔고 관리자</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <nav class="sidebar" style="display:flex;flex-direction:column;">
+      <h2>HS Admin</h2>
+      <a href="dashboard.html"><span>대시보드</span></a>
+      <a href="posts.html"><span>게시글 관리</span></a>
+      <a href="comments.html" class="active"><span>댓글 관리</span></a>
+      <a href="reports.html"><span>신고 관리</span></a>
+      <a href="users.html"><span>사용자 관리</span></a>
+      <a href="config.html"><span>앱 설정</span></a>
+      <a href="#" class="logout" id="logoutBtn"><span>로그아웃</span></a>
+    </nav>
+
+    <div class="main">
+      <h1>댓글 관리</h1>
+
+      <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="댓글 내용 또는 작성자로 검색...">
+      </div>
+
+      <div class="card">
+        <table>
+          <thead>
+            <tr>
+              <th>글 제목</th>
+              <th>댓글 내용</th>
+              <th>작성자</th>
+              <th>작성일</th>
+              <th>액션</th>
+            </tr>
+          </thead>
+          <tbody id="commentsList"><tr><td colspan="5" class="loading">로딩중...</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { auth, db, onAuthStateChanged, signOut, collection, doc, getDoc, getDocs, deleteDoc, updateDoc, query, orderBy, limit } from './js/firebase-init.js';
+
+    let allComments = [];
+
+    onAuthStateChanged(auth, (user) => {
+      if (!user) window.location.href = 'index.html';
+      else loadComments();
+    });
+
+    document.getElementById('logoutBtn').addEventListener('click', async (e) => {
+      e.preventDefault();
+      await signOut(auth);
+      window.location.href = 'index.html';
+    });
+
+    document.getElementById('searchInput').addEventListener('input', (e) => {
+      const q = e.target.value.toLowerCase();
+      renderComments(allComments.filter(c =>
+        c.content.toLowerCase().includes(q) || c.authorName.toLowerCase().includes(q)
+      ));
+    });
+
+    async function loadComments() {
+      const postsQ = query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(50));
+      const postsSnap = await getDocs(postsQ);
+      allComments = [];
+
+      for (const postDoc of postsSnap.docs) {
+        const postData = postDoc.data();
+        const commentsQ = query(collection(db, 'posts', postDoc.id, 'comments'), orderBy('createdAt', 'desc'));
+        const commentsSnap = await getDocs(commentsQ);
+
+        commentsSnap.forEach(commentDoc => {
+          const c = commentDoc.data();
+          allComments.push({
+            commentId: commentDoc.id,
+            postId: postDoc.id,
+            postTitle: postData.title || '(제목 없음)',
+            content: c.content || '',
+            authorName: c.authorName || '익명',
+            authorUid: c.authorUid || '',
+            isAnonymous: c.isAnonymous || false,
+            createdAt: c.createdAt,
+          });
+        });
+      }
+
+      renderComments(allComments);
+    }
+
+    function renderComments(comments) {
+      const tbody = document.getElementById('commentsList');
+      tbody.innerHTML = '';
+
+      if (comments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="color:#888;">댓글이 없습니다</td></tr>';
+        return;
+      }
+
+      comments.forEach(c => {
+        const time = c.createdAt?.toDate().toLocaleString('ko-KR') || '';
+        tbody.innerHTML += `<tr>
+          <td style="max-width:150px;font-size:12px;"><a href="posts.html?id=${c.postId}" style="color:#3F72AF;">${c.postTitle}</a></td>
+          <td style="max-width:300px;">${c.content}</td>
+          <td>${c.authorName}${c.isAnonymous ? ' <span class="badge badge-purple">익명</span>' : ''}</td>
+          <td style="font-size:11px;">${time}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="deleteComment('${c.postId}', '${c.commentId}')">삭제</button></td>
+        </tr>`;
+      });
+    }
+
+    window.deleteComment = async (postId, commentId) => {
+      if (!confirm('이 댓글을 삭제하시겠습니까?')) return;
+      await deleteDoc(doc(db, 'posts', postId, 'comments', commentId));
+
+      // commentCount 감소
+      try {
+        const postRef = doc(db, 'posts', postId);
+        const postSnap = await getDoc(postRef);
+        if (postSnap.exists()) {
+          const current = postSnap.data().commentCount || 0;
+          await updateDoc(postRef, { commentCount: Math.max(0, current - 1) });
+        }
+      } catch (e) { console.log('commentCount update failed', e); }
+
+      allComments = allComments.filter(c => c.commentId !== commentId);
+      renderComments(allComments);
+    };
+  </script>
+</body>
+</html>

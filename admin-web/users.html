@@ -12,6 +12,7 @@
       <h2>HS Admin</h2>
       <a href="dashboard.html"><span>대시보드</span></a>
       <a href="posts.html"><span>게시글 관리</span></a>
+      <a href="comments.html"><span>댓글 관리</span></a>
       <a href="reports.html"><span>신고 관리</span></a>
       <a href="users.html" class="active"><span>사용자 관리</span></a>
       <a href="config.html"><span>앱 설정</span></a>
@@ -21,6 +22,12 @@
     <div class="main">
       <h1>사용자 관리</h1>
 
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button class="btn btn-primary" id="tabAll" onclick="showTab('all')">전체</button>
+        <button class="btn" id="tabPending" style="background:#FF9800;color:#fff;" onclick="showTab('pending')">승인 대기</button>
+        <button class="btn" id="tabApproved" style="background:#4CAF50;color:#fff;" onclick="showTab('approved')">승인됨</button>
+      </div>
+
       <div class="search-bar">
         <input type="text" id="searchInput" placeholder="이름 또는 학번으로 검색...">
       </div>
@@ -29,23 +36,25 @@
         <table>
           <thead>
             <tr>
+              <th>상태</th>
               <th>이름</th>
               <th>학번</th>
               <th>학년/반</th>
               <th>이메일</th>
-              <th>UID</th>
+              <th>액션</th>
             </tr>
           </thead>
-          <tbody id="usersList"><tr><td colspan="5" class="loading">로딩중...</td></tr></tbody>
+          <tbody id="usersList"><tr><td colspan="6" class="loading">로딩중...</td></tr></tbody>
         </table>
       </div>
     </div>
   </div>
 
   <script type="module">
-    import { auth, db, onAuthStateChanged, signOut, collection, getDocs } from './js/firebase-init.js';
+    import { auth, db, onAuthStateChanged, signOut, collection, doc, getDocs, updateDoc, deleteDoc } from './js/firebase-init.js';
 
     let allUsers = [];
+    let currentTab = 'all';
 
     onAuthStateChanged(auth, (user) => {
       if (!user) window.location.href = 'index.html';
@@ -58,37 +67,80 @@
       window.location.href = 'index.html';
     });
 
-    document.getElementById('searchInput').addEventListener('input', (e) => {
-      const q = e.target.value.toLowerCase();
-      renderUsers(allUsers.filter(u =>
-        (u.name || '').toLowerCase().includes(q) || (u.studentId || '').includes(q)
-      ));
-    });
+    document.getElementById('searchInput').addEventListener('input', () => applyFilter());
+
+    window.showTab = (tab) => {
+      currentTab = tab;
+      applyFilter();
+    };
+
+    function applyFilter() {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      let filtered = allUsers;
+
+      if (currentTab === 'pending') filtered = filtered.filter(u => !u.approved);
+      else if (currentTab === 'approved') filtered = filtered.filter(u => u.approved);
+
+      if (q) {
+        filtered = filtered.filter(u =>
+          (u.name || '').toLowerCase().includes(q) || (u.studentId || '').includes(q)
+        );
+      }
+
+      renderUsers(filtered);
+    }
 
     async function loadUsers() {
       const snap = await getDocs(collection(db, 'users'));
       allUsers = [];
       snap.forEach(d => allUsers.push({ uid: d.id, ...d.data() }));
-      renderUsers(allUsers);
+      applyFilter();
     }
 
     function renderUsers(users) {
       const tbody = document.getElementById('usersList');
       tbody.innerHTML = '';
       if (users.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="5" style="color:#888;">사용자가 없습니다</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="color:#888;">사용자가 없습니다</td></tr>';
         return;
       }
       users.forEach(u => {
+        const approved = u.approved === true;
+        const statusBadge = approved
+          ? '<span class="badge badge-green">승인됨</span>'
+          : '<span class="badge badge-orange">대기중</span>';
+        let actionBtn;
+        if (approved) {
+          actionBtn = `<button class="btn btn-sm" style="background:#888;color:#fff;" onclick="toggleApproval('${u.uid}', false)">승인 취소</button>`;
+        } else {
+          actionBtn = `<button class="btn btn-sm btn-primary" onclick="toggleApproval('${u.uid}', true)">승인</button>
+            <button class="btn btn-sm btn-danger" style="margin-left:4px;" onclick="rejectUser('${u.uid}')">거절</button>`;
+        }
+
         tbody.innerHTML += `<tr>
+          <td>${statusBadge}</td>
           <td>${u.name || '-'}</td>
           <td>${u.studentId || '-'}</td>
           <td>${u.grade || '-'}학년 ${u.classNum || '-'}반</td>
           <td style="font-size:12px;">${u.email || '-'}</td>
-          <td style="font-size:11px;color:#888;">${u.uid}</td>
+          <td>${actionBtn}</td>
         </tr>`;
       });
     }
+
+    window.toggleApproval = async (uid, approve) => {
+      await updateDoc(doc(db, 'users', uid), { approved: approve });
+      const user = allUsers.find(u => u.uid === uid);
+      if (user) user.approved = approve;
+      applyFilter();
+    };
+
+    window.rejectUser = async (uid) => {
+      if (!confirm('이 사용자의 가입을 거절하시겠습니까? 프로필이 삭제됩니다.')) return;
+      await deleteDoc(doc(db, 'users', uid));
+      allUsers = allUsers.filter(u => u.uid !== uid);
+      applyFilter();
+    };
   </script>
 </body>
 </html>

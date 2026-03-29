@@ -51,20 +51,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               if (data == null) return const SizedBox.shrink();
               final isAuthor = AuthService.currentUser?.uid == data['authorUid'];
 
-              return PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'edit') _editPost(data);
-                  if (value == 'delete') _deletePost();
-                  if (value == 'report') _reportPost();
+              return FutureBuilder<UserProfile?>(
+                future: AuthService.getCachedProfile(),
+                builder: (context, profileSnap) {
+                  final isManager = profileSnap.data?.isManager ?? false;
+
+                  return PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'edit') _editPost(data);
+                      if (value == 'delete') _deletePost();
+                      if (value == 'report') _reportPost();
+                    },
+                    itemBuilder: (_) => [
+                      if (isAuthor) ...[
+                        const PopupMenuItem(value: 'edit', child: Text('수정')),
+                        const PopupMenuItem(value: 'delete', child: Text('삭제')),
+                      ],
+                      if (!isAuthor && isManager)
+                        const PopupMenuItem(value: 'delete', child: Text('삭제 (관리자)')),
+                      if (!isAuthor)
+                        const PopupMenuItem(value: 'report', child: Text('신고')),
+                    ],
+                  );
                 },
-                itemBuilder: (_) => [
-                  if (isAuthor) ...[
-                    const PopupMenuItem(value: 'edit', child: Text('수정')),
-                    const PopupMenuItem(value: 'delete', child: Text('삭제')),
-                  ],
-                  if (!isAuthor)
-                    const PopupMenuItem(value: 'report', child: Text('신고')),
-                ],
               );
             },
           ),
@@ -257,9 +266,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             else
                               ...comments.map((doc) {
                                 final c = doc.data() as Map<String, dynamic>;
+                                final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
+                                final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
                                 return _CommentItem(
                                   data: c,
-                                  isAuthor: AuthService.currentUser?.uid == c['authorUid'],
+                                  isAuthor: canDelete,
                                   onDelete: () => _confirmDeleteComment(doc.id),
                                 );
                               }),
@@ -500,6 +511,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         MaterialPageRoute(builder: (_) => const LoginScreen()),
       );
       if (result != true) return;
+    }
+
+    final approved = await AuthService.isApproved();
+    if (!approved) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('관리자 승인 대기 중입니다')),
+        );
+      }
+      return;
     }
 
     final profile = await AuthService.getUserProfile();
