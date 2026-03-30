@@ -443,6 +443,22 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (reason == null) return;
 
+    final existingReport = await FirebaseFirestore.instance
+        .collection('reports')
+        .where('postId', isEqualTo: widget.postId)
+        .where('reporterUid', isEqualTo: AuthService.currentUser!.uid)
+        .limit(1)
+        .get();
+
+    if (existingReport.docs.isNotEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('이미 신고한 게시글입니다')),
+        );
+      }
+      return;
+    }
+
     await FirebaseFirestore.instance.collection('reports').add({
       'postId': widget.postId,
       'reporterUid': AuthService.currentUser!.uid,
@@ -517,6 +533,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _submitComment() async {
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
+    if (text.length > 1000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('댓글은 1000자 이내로 입력하세요')),
+      );
+      return;
+    }
 
     if (!AuthService.isLoggedIn) {
       final result = await Navigator.push(

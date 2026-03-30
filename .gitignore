@@ -173,7 +173,6 @@ app.*.map.json
 /android/app/release
 
 /lib/api/nies_api_keys.dart
-firebase.json
 /lib/firebase_options.dart
 
 # Figma designs

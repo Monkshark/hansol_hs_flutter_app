@@ -77,6 +77,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
     for (var c in _pollControllers) {
       c.dispose();
     }
+    for (var f in _images) {
+      f.delete().ignore();
+    }
     super.dispose();
   }
 
@@ -643,9 +646,21 @@ class _WritePostScreenState extends State<WritePostScreen> {
       );
       return;
     }
+    if (title.length > 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('제목은 200자 이내로 입력하세요')),
+      );
+      return;
+    }
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('내용을 입력하세요')),
+      );
+      return;
+    }
+    if (content.length > 5000) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('내용은 5000자 이내로 입력하세요')),
       );
       return;
     }
@@ -658,6 +673,14 @@ class _WritePostScreenState extends State<WritePostScreen> {
         );
         return;
       }
+      for (var c in _pollControllers) {
+        if (c.text.trim().length > 100) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('투표 선택지는 100자 이내로 입력하세요')),
+          );
+          return;
+        }
+      }
     }
 
     if (_attachEvent && _eventDate == null) {
@@ -669,6 +692,12 @@ class _WritePostScreenState extends State<WritePostScreen> {
     if (_attachEvent && _eventContentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('일정 내용을 입력하세요')),
+      );
+      return;
+    }
+    if (_attachEvent && _eventContentController.text.trim().length > 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('일정 내용은 200자 이내로 입력하세요')),
       );
       return;
     }

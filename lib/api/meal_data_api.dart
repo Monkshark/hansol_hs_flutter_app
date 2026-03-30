@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -26,7 +27,7 @@ class MealDataApi {
   static final Future<SharedPreferences> _prefs =
       SharedPreferences.getInstance();
 
-  static final Set<String> _prefetchingMonths = {};
+  static final Map<String, Future<void>> _prefetchingMonths = {};
 
   static Future<Meal?> getMeal({
     required DateTime date,
@@ -106,8 +107,13 @@ class MealDataApi {
   static Future<void> _prefetchMonth(DateTime date) async {
     final monthKey = DateFormat('yyyyMM').format(date);
 
-    if (_prefetchingMonths.contains(monthKey)) return;
-    _prefetchingMonths.add(monthKey);
+    if (_prefetchingMonths.containsKey(monthKey)) {
+      await _prefetchingMonths[monthKey];
+      return;
+    }
+
+    final completer = Completer<void>();
+    _prefetchingMonths[monthKey] = completer.future;
 
     try {
       final prefs = await _prefs;
@@ -130,6 +136,7 @@ class MealDataApi {
       final data = await _fetchData(requestURL);
       if (data == null) {
         log('MealDataApi: prefetch $monthKey - no data (null response)');
+        completer.complete();
         return;
       }
 
@@ -137,6 +144,7 @@ class MealDataApi {
 
       if (!data.containsKey('mealServiceDietInfo')) {
         log('MealDataApi: prefetch $monthKey - no mealServiceDietInfo key');
+        completer.complete();
         return;
       }
 
@@ -170,8 +178,10 @@ class MealDataApi {
       }
 
       log('MealDataApi: prefetch $monthKey - cached $count meals');
+      completer.complete();
     } catch (e) {
       log('MealDataApi: prefetch error: $e');
+      completer.completeError(e);
     } finally {
       _prefetchingMonths.remove(monthKey);
     }
@@ -236,7 +246,7 @@ class MealDataApi {
 
   static Future<Map<String, dynamic>?> _fetchData(String url) async {
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
       if (response.statusCode != 200) return null;
 
       final data = jsonDecode(response.body);
@@ -246,6 +256,9 @@ class MealDataApi {
         return null;
       }
       return data;
+    } on TimeoutException {
+      log('MealDataApi: fetch timeout');
+      return null;
     } catch (e) {
       log('MealDataApi: fetch error: $e');
       return null;
@@ -253,26 +266,34 @@ class MealDataApi {
   }
 
   static Future<bool> isAllMealEmpty(DateTime date) async {
-    final formattedDate = DateFormat('yyyyMMdd').format(date);
-    final requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
-        '&Type=json'
-        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
-        '&MLSV_YMD=$formattedDate';
+    try {
+      final formattedDate = DateFormat('yyyyMMdd').format(date);
+      final requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
+          '&Type=json'
+          '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
+          '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+          '&MLSV_YMD=$formattedDate';
 
-    final response = await http.get(Uri.parse(requestURL));
-    final data = jsonDecode(response.body);
+      final response = await http.get(Uri.parse(requestURL)).timeout(const Duration(seconds: 10));
+      final data = jsonDecode(response.body);
 
-    if (data.containsKey('RESULT') && data['RESULT']['CODE'] == 'INFO-200') {
-      return true;
+      if (data.containsKey('RESULT') && data['RESULT']['CODE'] == 'INFO-200') {
+        return true;
+      }
+
+      if (data.containsKey('mealServiceDietInfo') &&
+          data['mealServiceDietInfo'].length > 1 &&
+          data['mealServiceDietInfo'][1].containsKey('row')) {
+        return data['mealServiceDietInfo'][1]['row'].isEmpty;
+      }
+
+      return false;
+    } on TimeoutException {
+      log('MealDataApi: isAllMealEmpty timeout');
+      return false;
+    } catch (e) {
+      log('MealDataApi: isAllMealEmpty error: $e');
+      return false;
     }
-
-    if (data.containsKey('mealServiceDietInfo') &&
-        data['mealServiceDietInfo'].length > 1 &&
-        data['mealServiceDietInfo'][1].containsKey('row')) {
-      return data['mealServiceDietInfo'][1]['row'].isEmpty;
-    }
-
-    return false;
   }
 }

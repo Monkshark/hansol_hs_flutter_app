@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
@@ -227,9 +228,12 @@ class NoticeDataApi {
 
   Future<Map<String, dynamic>?> _fetchData(String url) async {
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
       if (response.statusCode != 200) return null;
       return jsonDecode(response.body);
+    } on TimeoutException {
+      log('$_tag: fetch timeout');
+      return null;
     } catch (e) {
       log('$_tag: fetch error: $e');
       return null;
