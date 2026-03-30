@@ -190,3 +190,4 @@ admin-web/js/firebase-init.js
 
 # Cloud Functions
 functions/node_modules/
+android/.kotlin/
