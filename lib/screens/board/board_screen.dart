@@ -140,6 +140,21 @@ class _BoardScreenState extends State<BoardScreen> {
                   }).toList();
                 }
 
+                // Separate pinned and non-pinned posts
+                final pinned = docs.where((doc) => doc.data()['isPinned'] == true).toList();
+                final nonPinned = docs.where((doc) => doc.data()['isPinned'] != true).toList();
+
+                pinned.sort((a, b) {
+                  final aTime = a.data()['pinnedAt'] as Timestamp?;
+                  final bTime = b.data()['pinnedAt'] as Timestamp?;
+                  if (aTime == null && bTime == null) return 0;
+                  if (aTime == null) return 1;
+                  if (bTime == null) return -1;
+                  return bTime.compareTo(aTime);
+                });
+
+                docs = [...pinned, ...nonPinned];
+
                 if (docs.isEmpty) {
                   return Center(
                     child: Column(
@@ -250,6 +265,11 @@ class PostCard extends StatelessWidget {
           children: [
             Row(
               children: [
+                if (data['isPinned'] == true)
+                  const Padding(
+                    padding: EdgeInsets.only(right: 6),
+                    child: Icon(Icons.push_pin, size: 14, color: Colors.red),
+                  ),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(

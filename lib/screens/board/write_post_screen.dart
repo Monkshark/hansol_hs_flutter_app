@@ -44,6 +44,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
   late final TextEditingController _eventContentController;
   bool _saving = false;
   bool _isAnonymous = false;
+  bool _isPinned = false;
 
   bool _attachEvent = false;
   DateTime? _eventDate;
@@ -266,6 +267,39 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   Text('익명으로 작성', style: TextStyle(fontSize: 14, color: textColor)),
                 ],
               ),
+            ),
+
+            if (AuthService.cachedProfile?.isManager == true) ...[
+              const SizedBox(height: 16),
+              GestureDetector(
+                onTap: () => setState(() => _isPinned = !_isPinned),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 22, height: 22,
+                      decoration: BoxDecoration(
+                        color: _isPinned ? Colors.red : Colors.transparent,
+                        borderRadius: BorderRadius.circular(6),
+                        border: Border.all(
+                          color: _isPinned ? Colors.red : AppColors.theme.darkGreyColor,
+                          width: 1.5,
+                        ),
+                      ),
+                      child: _isPinned ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
+                    ),
+                    const SizedBox(width: 8),
+                    Text('공지로 등록', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
+                    const SizedBox(width: 4),
+                    const Icon(Icons.push_pin, size: 16, color: Colors.red),
+                  ],
+                ),
+              ),
+            ],
+
+            const SizedBox(height: 20),
+            Text(
+              '작성한 글은 1년 후 자동 삭제됩니다',
+              style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor),
             ),
           ],
         ),
@@ -737,7 +771,12 @@ class _WritePostScreenState extends State<WritePostScreen> {
       'authorUid': AuthService.currentUser!.uid,
       'authorName': displayName,
       'isAnonymous': _isAnonymous,
+      'isPinned': _isPinned,
     };
+
+    if (_isPinned) {
+      postData['pinnedAt'] = FieldValue.serverTimestamp();
+    }
 
     if (_attachPoll) {
       final options = _pollControllers

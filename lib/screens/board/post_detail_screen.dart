@@ -65,11 +65,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 builder: (context, profileSnap) {
                   final isManager = profileSnap.data?.isManager ?? false;
 
+                  final isPinned = data['isPinned'] == true;
+
                   return PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'edit') _editPost(data);
                       if (value == 'delete') _deletePost();
                       if (value == 'report') _reportPost();
+                      if (value == 'pin') _pinPost();
+                      if (value == 'unpin') _unpinPost();
                     },
                     itemBuilder: (_) => [
                       if (isAuthor) ...[
@@ -78,6 +82,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ],
                       if (!isAuthor && isManager)
                         const PopupMenuItem(value: 'delete', child: Text('삭제 (Admin)')),
+                      if (isManager && !isPinned)
+                        const PopupMenuItem(value: 'pin', child: Text('공지 등록')),
+                      if (isManager && isPinned)
+                        const PopupMenuItem(value: 'unpin', child: Text('공지 해제')),
                       if (!isAuthor)
                         const PopupMenuItem(value: 'report', child: Text('신고')),
                     ],
@@ -752,6 +760,45 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (confirm == true) {
       await _postRef.collection('comments').doc(commentId).delete();
       await _postRef.update({'commentCount': FieldValue.increment(-1)});
+    }
+  }
+
+  Future<void> _pinPost() async {
+    final pinnedSnapshot = await FirebaseFirestore.instance
+        .collection('posts')
+        .where('isPinned', isEqualTo: true)
+        .get();
+
+    if (pinnedSnapshot.docs.length >= 3) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('공지는 최대 3개까지 가능합니다')),
+        );
+      }
+      return;
+    }
+
+    await _postRef.update({
+      'isPinned': true,
+      'pinnedAt': FieldValue.serverTimestamp(),
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('공지로 등록되었습니다')),
+      );
+    }
+  }
+
+  Future<void> _unpinPost() async {
+    await _postRef.update({
+      'isPinned': false,
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('공지가 해제되었습니다')),
+      );
     }
   }
 

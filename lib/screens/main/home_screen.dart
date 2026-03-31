@@ -393,22 +393,37 @@ class _RecentPosts extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('posts')
-          .orderBy('createdAt', descending: true)
-          .limit(3)
-          .snapshots(),
+    return StreamBuilder<List<QuerySnapshot<Map<String, dynamic>>>>(
+      stream: _combinedStream(),
       builder: (context, snapshot) {
-        final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) return const SizedBox.shrink();
+        if (!snapshot.hasData) return const SizedBox.shrink();
+
+        final pinnedDocs = snapshot.data![0].docs;
+        final recentDocs = snapshot.data![1].docs;
+
+        // Take most recent pinned post (by pinnedAt)
+        QueryDocumentSnapshot<Map<String, dynamic>>? pinnedPost;
+        if (pinnedDocs.isNotEmpty) {
+          pinnedPost = pinnedDocs.first;
+        }
+
+        // Take up to 2 non-pinned recent posts (exclude pinned ones)
+        final pinnedIds = pinnedDocs.map((d) => d.id).toSet();
+        final nonPinned = recentDocs.where((d) => !pinnedIds.contains(d.id)).take(2).toList();
+
+        final displayDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
+        if (pinnedPost != null) displayDocs.add(pinnedPost);
+        displayDocs.addAll(nonPinned);
+
+        if (displayDocs.isEmpty) return const SizedBox.shrink();
 
         return Column(
-          children: docs.map((doc) {
+          children: displayDocs.map((doc) {
             final data = doc.data();
             final title = data['title'] ?? '';
             final category = data['category'] ?? '';
             final commentCount = data['commentCount'] ?? 0;
+            final isPinned = data['isPinned'] == true;
 
             return GestureDetector(
               onTap: () => Navigator.push(context,
@@ -423,6 +438,11 @@ class _RecentPosts extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
+                    if (isPinned)
+                      const Padding(
+                        padding: EdgeInsets.only(right: 4),
+                        child: Icon(Icons.push_pin, size: 12, color: Colors.red),
+                      ),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                       decoration: BoxDecoration(
@@ -451,6 +471,25 @@ class _RecentPosts extends StatelessWidget {
         );
       },
     );
+  }
+
+  Stream<List<QuerySnapshot<Map<String, dynamic>>>> _combinedStream() {
+    final pinnedStream = FirebaseFirestore.instance
+        .collection('posts')
+        .where('isPinned', isEqualTo: true)
+        .orderBy('pinnedAt', descending: true)
+        .limit(1)
+        .snapshots();
+
+    final recentStream = FirebaseFirestore.instance
+        .collection('posts')
+        .orderBy('createdAt', descending: true)
+        .limit(5)
+        .snapshots();
+
+    return pinnedStream.asyncExpand((pinnedSnap) {
+      return recentStream.map((recentSnap) => [pinnedSnap, recentSnap]);
+    });
   }
 
   Color _catColor(String c) {
