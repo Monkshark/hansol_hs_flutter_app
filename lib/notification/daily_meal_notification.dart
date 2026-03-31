@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hansol_high_school/api/meal_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -101,12 +102,30 @@ class DailyMealNotification {
     log('DailyMealNotification: scheduled ${settings.isBreakfastNotificationOn ? "조식" : ""} ${settings.isLunchNotificationOn ? "중식" : ""} ${settings.isDinnerNotificationOn ? "석식" : ""}');
   }
 
+  String _cleanMenu(String? menu) {
+    if (menu == null || menu == '급식 정보가 없습니다.' || menu == '급식 정보가 없습니다') return '';
+    return menu
+        .split('\n')
+        .map((e) => e.replaceAll(RegExp(r'\([0-9.,\s]+\)'), '').trim())
+        .where((e) => e.isNotEmpty)
+        .join(' · ');
+  }
+
   Future<void> _scheduleWeeklyNotification({
     required int id,
     required String mealLabel,
     required TimeOfDay time,
     required List<int> weekdays,
   }) async {
+    final mealType = id == 1 ? MealDataApi.BREAKFAST : id == 2 ? MealDataApi.LUNCH : MealDataApi.DINNER;
+    String menuPreview = '';
+    try {
+      final meal = await MealDataApi.getMeal(date: DateTime.now(), mealType: mealType, type: MealDataApi.MENU);
+      menuPreview = _cleanMenu(meal?.meal);
+    } catch (_) {}
+
+    final body = menuPreview.isNotEmpty ? menuPreview : '오늘의 $mealLabel 메뉴를 확인하세요';
+
     for (int weekday in weekdays) {
       final scheduledDate = _nextInstanceOfWeekday(time, weekday);
       final notificationId = id * 10 + weekday;
@@ -118,7 +137,7 @@ class DailyMealNotification {
         importance: Importance.high,
         priority: Priority.high,
         styleInformation: BigTextStyleInformation(
-          '오늘의 $mealLabel 메뉴가 준비되었습니다.\n앱을 열어서 확인하세요!',
+          body,
           contentTitle: '🍽️ $mealLabel 알림',
           summaryText: '한솔고등학교',
         ),
@@ -126,13 +145,13 @@ class DailyMealNotification {
       );
 
       final iosDetails = DarwinNotificationDetails(
-        subtitle: '오늘의 $mealLabel을 확인하세요',
+        subtitle: body,
       );
 
       await _localNotificationsPlugin.zonedSchedule(
         notificationId,
         '🍽️ $mealLabel 알림',
-        '오늘의 $mealLabel 메뉴를 확인하세요',
+        body,
         scheduledDate,
         NotificationDetails(android: androidDetails, iOS: iosDetails),
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

@@ -75,7 +75,11 @@ export default function CommentsPage() {
                   <td className="p-3 text-primary cursor-pointer hover:underline max-w-[150px] truncate"
                     onClick={() => router.push(`/posts/${c.postId}`)}>{c.postTitle}</td>
                   <td className="p-3 max-w-[300px] truncate">{c.content}</td>
-                  <td className="p-3 text-gray-500">{c.authorName}</td>
+                  <td className="p-3 text-gray-500">
+                    {c.isAnonymous && (c as any).authorRealName
+                      ? <>익명 <span className="text-gray-400">({(c as any).authorRealName})</span></>
+                      : c.authorName}
+                  </td>
                   <td className="p-3 text-gray-400 text-xs">{formatTime(c.createdAt)}</td>
                   <td className="p-3">
                     <button onClick={() => handleDelete(c.postId, c.id)}

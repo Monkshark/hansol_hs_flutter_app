@@ -770,6 +770,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       'category': _category,
       'authorUid': AuthService.currentUser!.uid,
       'authorName': displayName,
+      'authorRealName': profile.displayName,
       'isAnonymous': _isAnonymous,
       'isPinned': _isPinned,
     };

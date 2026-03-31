@@ -109,7 +109,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 final post = postSnapshot.data!.data()!;
                 final title = post['title'] ?? '';
                 final content = post['content'] ?? '';
-                final authorName = post['authorName'] ?? '익명';
+                final isAnon = post['isAnonymous'] == true;
+                final isManagerView = AuthService.cachedProfile?.isManager ?? false;
+                final realName = post['authorRealName'] as String?;
+                final authorName = (isAnon && isManagerView && realName != null)
+                    ? '익명 ($realName)'
+                    : (post['authorName'] ?? '익명');
                 final category = post['category'] ?? '';
                 final createdAt = post['createdAt'] as Timestamp?;
                 final timeStr = createdAt != null
@@ -589,6 +594,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       'content': text,
       'authorUid': AuthService.currentUser!.uid,
       'authorName': displayName,
+      'authorRealName': profile.displayName,
       'isAnonymous': anonymous,
       'createdAt': FieldValue.serverTimestamp(),
     };
@@ -1166,7 +1172,12 @@ class _CommentItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-    final name = data['authorName'] ?? '익명';
+    final isAnon = data['isAnonymous'] == true;
+    final isManagerView = AuthService.cachedProfile?.isManager ?? false;
+    final realName = data['authorRealName'] as String?;
+    final name = (isAnon && isManagerView && realName != null)
+        ? '익명 ($realName)'
+        : (data['authorName'] ?? '익명');
     final content = data['content'] ?? '';
     final replyToName = data['replyToName'] as String?;
     final createdAt = data['createdAt'] as Timestamp?;

@@ -24,6 +24,7 @@ export interface Post {
   category: string;
   authorUid: string;
   authorName: string;
+  authorRealName?: string;
   isAnonymous: boolean;
   isPinned: boolean;
   pinnedAt?: Timestamp;
@@ -45,6 +46,7 @@ export interface Comment {
   content: string;
   authorUid: string;
   authorName: string;
+  authorRealName?: string;
   isAnonymous: boolean;
   createdAt: Timestamp;
   replyTo?: string;

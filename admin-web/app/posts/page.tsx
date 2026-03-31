@@ -79,7 +79,11 @@ export default function PostsPage() {
                       {p.title}
                       {p.isAnonymous && <Badge label="익명" className="bg-purple-100 text-purple-600 ml-2" />}
                     </td>
-                    <td className="p-3 text-gray-500">{p.authorName}</td>
+                    <td className="p-3 text-gray-500">
+                      {p.isAnonymous && (p as any).authorRealName
+                        ? <>익명 <span className="text-gray-400">({(p as any).authorRealName})</span></>
+                        : p.authorName}
+                    </td>
                     <td className="p-3">
                       <span className="text-primary">+{likes}</span>{' '}
                       <span className="text-red-500">-{dislikes}</span>

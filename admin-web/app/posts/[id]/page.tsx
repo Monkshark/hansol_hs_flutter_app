@@ -72,7 +72,9 @@ export default function PostDetailPage() {
             {post.isAnonymous && <Badge label="익명" className="bg-purple-100 text-purple-600" />}
           </div>
           <h1 className="text-xl font-bold mb-2">{post.title}</h1>
-          <p className="text-sm text-gray-400 mb-4">{post.authorName} · {post.createdAt?.toDate().toLocaleString('ko-KR')}</p>
+          <p className="text-sm text-gray-400 mb-4">
+            {post.isAnonymous && post.authorRealName ? `익명 (${post.authorRealName})` : post.authorName} · {post.createdAt?.toDate().toLocaleString('ko-KR')}
+          </p>
           <p className="text-sm leading-7 whitespace-pre-wrap mb-4">{post.content}</p>
 
           {post.imageUrls && post.imageUrls.length > 0 && (
@@ -111,7 +113,9 @@ export default function PostDetailPage() {
                 <div key={c.id} className={`p-3 bg-gray-50 rounded-lg ${c.replyTo ? 'ml-8 border-l-2 border-primary/30' : ''}`}>
                   <div className="flex items-center justify-between">
                     <div className="text-xs">
-                      <span className="font-semibold">{c.authorName}</span>
+                      <span className="font-semibold">
+                        {c.isAnonymous && c.authorRealName ? `익명 (${c.authorRealName})` : c.authorName}
+                      </span>
                       <span className="text-gray-400 ml-2">{c.createdAt?.toDate().toLocaleString('ko-KR')}</span>
                     </div>
                     <button onClick={() => handleDeleteComment(c.id)}

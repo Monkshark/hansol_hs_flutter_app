@@ -242,7 +242,12 @@ class PostCard extends StatelessWidget {
 
     final title = data['title'] ?? '';
     final content = data['content'] ?? '';
-    final authorName = data['authorName'] ?? '익명';
+    final isAnon = data['isAnonymous'] == true;
+    final isManagerView = AuthService.cachedProfile?.isManager ?? false;
+    final realName = data['authorRealName'] as String?;
+    final authorName = (isAnon && isManagerView && realName != null)
+        ? '익명 ($realName)'
+        : (data['authorName'] ?? '익명');
     final category = data['category'] ?? '';
     final commentCount = data['commentCount'] ?? 0;
     final likeCount = (data['likes'] as Map<String, dynamic>?)?.length ?? 0;
