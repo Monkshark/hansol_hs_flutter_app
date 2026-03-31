@@ -186,7 +186,11 @@ ios/Runner/GoogleService-Info.plist
 macos/Runner/GoogleService-Info.plist
 
 # Admin web - Firebase config (API keys)
-admin-web/js/firebase-init.js
+admin-static/js/firebase-init.js
+admin-web/node_modules/
+admin-web/.next/
+admin-web/out/
+admin-web/.env.local
 
 # Cloud Functions
 functions/node_modules/
