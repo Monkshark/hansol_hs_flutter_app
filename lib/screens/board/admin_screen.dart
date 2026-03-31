@@ -22,7 +22,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 4, vsync: this);
   }
 
   @override
@@ -48,10 +48,12 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           labelColor: AppColors.theme.primaryColor,
           unselectedLabelColor: AppColors.theme.darkGreyColor,
           indicatorColor: AppColors.theme.primaryColor,
+          isScrollable: true,
           tabs: const [
             Tab(text: '신고'),
             Tab(text: '승인 대기'),
-            Tab(text: '승인됨'),
+            Tab(text: '사용자'),
+            Tab(text: '정지'),
           ],
         ),
       ),
@@ -59,8 +61,9 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
         controller: _tabController,
         children: [
           _ReportsTab(),
-          _UsersTab(showApproved: false),
-          _UsersTab(showApproved: true),
+          _UsersTab(filter: 'pending'),
+          _UsersTab(filter: 'approved'),
+          _UsersTab(filter: 'suspended'),
         ],
       ),
     );
@@ -175,8 +178,26 @@ class _ReportsTab extends StatelessWidget {
 }
 
 class _UsersTab extends StatelessWidget {
-  final bool showApproved;
-  const _UsersTab({required this.showApproved});
+  final String filter;
+  const _UsersTab({required this.filter});
+
+  bool _isSuspended(Map<String, dynamic> data) {
+    final ts = data['suspendedUntil'] as Timestamp?;
+    if (ts == null) return false;
+    return DateTime.now().isBefore(ts.toDate());
+  }
+
+  String _suspendRemaining(Timestamp ts) {
+    final diff = ts.toDate().difference(DateTime.now());
+    final d = diff.inDays;
+    final h = diff.inHours % 24;
+    final m = diff.inMinutes % 60;
+    final parts = <String>[];
+    if (d > 0) parts.add('${d}일');
+    if (h > 0) parts.add('${h}시간');
+    if (m > 0) parts.add('${m}분');
+    return parts.isEmpty ? '1분 미만' : parts.join(' ');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -188,21 +209,46 @@ class _UsersTab extends StatelessWidget {
       builder: (context, snapshot) {
         final allDocs = snapshot.data?.docs ?? [];
         final docs = allDocs.where((d) {
-          final approved = d.data()['approved'] == true;
-          return showApproved ? approved : !approved;
+          final data = d.data();
+          final approved = data['approved'] == true;
+          final role = data['role'] ?? 'user';
+          final suspended = _isSuspended(data);
+
+          switch (filter) {
+            case 'pending': return !approved;
+            case 'approved':
+              if (!approved) return false;
+              if (suspended) return false;
+              return true;
+            case 'suspended': return approved && suspended;
+            default: return false;
+          }
         }).toList();
 
+        if (filter == 'approved') {
+          docs.sort((a, b) {
+            final roleOrder = {'admin': 0, 'manager': 1, 'user': 2};
+            final ra = roleOrder[a.data()['role'] ?? 'user'] ?? 2;
+            final rb = roleOrder[b.data()['role'] ?? 'user'] ?? 2;
+            return ra.compareTo(rb);
+          });
+        }
+
+        final emptyMsg = {
+          'pending': '대기 중인 사용자가 없습니다',
+          'approved': '승인된 사용자가 없습니다',
+          'suspended': '정지된 사용자가 없습니다',
+        };
+
         if (docs.isEmpty) {
-          return Center(child: Text(
-            showApproved ? '승인된 사용자가 없습니다' : '대기 중인 사용자가 없습니다',
+          return Center(child: Text(emptyMsg[filter] ?? '',
             style: TextStyle(color: AppColors.theme.darkGreyColor)));
         }
 
         return FutureBuilder<UserProfile?>(
           future: AuthService.getCachedProfile(),
           builder: (context, myProfileSnap) {
-            final myProfile = myProfileSnap.data;
-            final isAdmin = myProfile?.isAdmin ?? false;
+            final isAdmin = myProfileSnap.data?.isAdmin ?? false;
 
             return ListView.separated(
               padding: const EdgeInsets.all(16),
@@ -223,107 +269,123 @@ class _UsersTab extends StatelessWidget {
                     color: isDark ? const Color(0xFF1E2028) : Colors.white,
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: Row(
+                  child: Column(
                     children: [
-                      CircleAvatar(
-                        radius: 18,
-                        backgroundColor: role == 'manager'
-                            ? AppColors.theme.secondaryColor
-                            : AppColors.theme.primaryColor,
-                        child: Text(name.isNotEmpty ? name[0] : '?',
-                          style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
+                      Row(
+                        children: [
+                          CircleAvatar(
+                            radius: 18,
+                            backgroundColor: role == 'admin' ? Colors.red
+                                : role == 'manager' ? AppColors.theme.secondaryColor
+                                : AppColors.theme.primaryColor,
+                            child: Text(name.isNotEmpty ? name[0] : '?',
+                              style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
-                                if (role == 'manager') ...[
-                                  const SizedBox(width: 6),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                                    decoration: BoxDecoration(
-                                      color: AppColors.theme.secondaryColor.withAlpha(20),
-                                      borderRadius: BorderRadius.circular(4),
-                                    ),
-                                    child: Text('매니저', style: TextStyle(
-                                      fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.theme.secondaryColor)),
-                                  ),
+                                Row(
+                                  children: [
+                                    Flexible(child: Text(name, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
+                                      overflow: TextOverflow.ellipsis)),
+                                    if (role == 'admin') ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                        decoration: BoxDecoration(
+                                          color: Colors.red.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+                                        child: const Text('Admin', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.red)),
+                                      ),
+                                    ],
+                                    if (role == 'manager') ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.theme.secondaryColor.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+                                        child: Text('매니저', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.theme.secondaryColor)),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                                Text('$studentId · ${grade}학년 ${classNum}반',
+                                  style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                if (filter == 'suspended') ...[
+                                  const SizedBox(height: 4),
+                                  Text('남은 기간: ${_suspendRemaining(data['suspendedUntil'] as Timestamp)}',
+                                    style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.orange)),
                                 ],
                               ],
                             ),
-                            Text('$studentId · ${grade}학년 ${classNum}반',
-                              style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
-                          ],
-                        ),
+                          ),
+                        ],
                       ),
-                      if (!showApproved) ...[
-                        _actionBtn('승인', AppColors.theme.primaryColor, () async {
-                          await docs[index].reference.update({'approved': true});
-                          await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다. 앱의 모든 기능을 사용할 수 있습니다.');
-                        }),
-                        const SizedBox(width: 6),
-                        _actionBtn('거절', Colors.red, () async {
-                          await _sendAccountNotification(uid, '가입 거절', '가입이 거절되었습니다.');
-                          await docs[index].reference.delete();
-                        }),
-                      ] else ...[
-                        if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
-                          _actionBtn('Admin 해제', AppColors.theme.darkGreyColor, () async {
-                            await docs[index].reference.update({'role': 'user'});
-                            AuthService.clearProfileCache();
-                          }),
-                        if (isAdmin && role != 'admin') ...[
-                          _actionBtn(
-                            role == 'manager' ? '매니저 해제' : '매니저',
-                            role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
-                            () async {
-                              await docs[index].reference.update({
-                                'role': role == 'manager' ? 'user' : 'manager',
-                              });
-                            },
-                          ),
-                          const SizedBox(width: 6),
-                          _actionBtn(
-                            'Admin',
-                            Colors.red,
-                            () async {
-                              await docs[index].reference.update({'role': 'admin'});
-                            },
-                          ),
-                        ],
-                        if (uid != AuthService.currentUser?.uid && role == 'user') ...[
-                          const SizedBox(width: 6),
-                          _actionBtn('정지', Colors.orange, () async {
-                            final hours = await _showSuspendDialog(context, name);
-                            if (hours != null) {
-                              final until = DateTime.now().add(Duration(hours: hours));
-                              await docs[index].reference.update({
-                                'suspendedUntil': Timestamp.fromDate(until),
-                              });
-                              await _sendAccountNotification(uid, '계정 정지',
-                                '${_formatDuration(hours)} 동안 계정이 정지되었습니다.');
-                              if (context.mounted) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(content: Text('$name 계정이 정지되었습니다')));
-                              }
-                            }
-                          }),
-                          const SizedBox(width: 6),
-                          _actionBtn('삭제', Colors.red, () async {
-                            final first = await _confirmDialog(context, '계정 삭제', '$name 계정을 삭제하시겠습니까?');
-                            if (first != true) return;
-                            final second = await _confirmDialog(context, '최종 확인', '$name 계정을 정말 삭제합니까?\n이 작업은 되돌릴 수 없습니다.');
-                            if (second == true) {
-                              await _sendAccountNotification(uid, '계정 삭제', '관리자에 의해 계정이 삭제되었습니다.');
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          if (filter == 'pending') ...[
+                            _actionBtn('승인', AppColors.theme.primaryColor, () async {
+                              await docs[index].reference.update({'approved': true});
+                              await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다.');
+                            }),
+                            const SizedBox(width: 6),
+                            _actionBtn('거절', Colors.red, () async {
+                              await _sendAccountNotification(uid, '가입 거절', '가입이 거절되었습니다.');
                               await docs[index].reference.delete();
-                            }
-                          }),
+                            }),
+                          ],
+                          if (filter == 'approved') ...[
+                            if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
+                              _actionBtn('Admin 해제', AppColors.theme.darkGreyColor, () async {
+                                await docs[index].reference.update({'role': 'user'});
+                                AuthService.clearProfileCache();
+                              }),
+                            if (isAdmin && role != 'admin') ...[
+                              _actionBtn(
+                                role == 'manager' ? '매니저 해제' : '매니저',
+                                role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
+                                () async {
+                                  await docs[index].reference.update({'role': role == 'manager' ? 'user' : 'manager'});
+                                },
+                              ),
+                              const SizedBox(width: 6),
+                              _actionBtn('Admin', Colors.red, () async {
+                                await docs[index].reference.update({'role': 'admin'});
+                              }),
+                            ],
+                            if (uid != AuthService.currentUser?.uid && role == 'user') ...[
+                              const SizedBox(width: 6),
+                              _actionBtn('정지', Colors.orange, () async {
+                                final hours = await _showSuspendDialog(context, name);
+                                if (hours != null) {
+                                  final until = DateTime.now().add(Duration(hours: hours));
+                                  await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
+                                  await _sendAccountNotification(uid, '계정 정지', '${_formatDuration(hours)} 동안 계정이 정지되었습니다.');
+                                }
+                              }),
+                              const SizedBox(width: 6),
+                              _actionBtn('삭제', Colors.red, () async {
+                                final first = await _confirmDialog(context, '계정 삭제', '$name 계정을 삭제하시겠습니까?');
+                                if (first != true) return;
+                                final second = await _confirmDialog(context, '최종 확인', '$name 계정을 정말 삭제합니까?\n되돌릴 수 없습니다.');
+                                if (second == true) {
+                                  await _sendAccountNotification(uid, '계정 삭제', '관리자에 의해 계정이 삭제되었습니다.');
+                                  await docs[index].reference.delete();
+                                }
+                              }),
+                            ],
+                          ],
+                          if (filter == 'suspended') ...[
+                            _actionBtn('정지 해제', AppColors.theme.primaryColor, () async {
+                              await docs[index].reference.update({'suspendedUntil': null});
+                              await _sendAccountNotification(uid, '정지 해제', '계정 정지가 해제되었습니다.');
+                            }),
+                          ],
                         ],
-                      ],
+                      ),
                     ],
                   ),
                 );
