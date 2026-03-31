@@ -68,6 +68,39 @@ class _WritePostScreenState extends State<WritePostScreen> {
     _titleController = TextEditingController(text: widget.initialTitle ?? '');
     _contentController = TextEditingController(text: widget.initialContent ?? '');
     _eventContentController = TextEditingController();
+    if (_isEdit) _loadExistingData();
+  }
+
+  Future<void> _loadExistingData() async {
+    try {
+      final doc = await FirebaseFirestore.instance.collection('posts').doc(widget.postId).get();
+      if (!doc.exists || !mounted) return;
+      final data = doc.data()!;
+
+      setState(() {
+        _isAnonymous = data['isAnonymous'] == true;
+        _isPinned = data['isPinned'] == true;
+
+        if (data['pollOptions'] != null && (data['pollOptions'] as List).isNotEmpty) {
+          _attachPoll = true;
+          final options = (data['pollOptions'] as List).cast<String>();
+          _pollControllers.clear();
+          for (var o in options) {
+            _pollControllers.add(TextEditingController(text: o));
+          }
+        }
+
+        if (data['eventDate'] != null) {
+          _attachEvent = true;
+          _eventDate = DateTime.parse(data['eventDate']);
+          _eventContentController.text = data['eventContent'] ?? '';
+          final st = data['eventStartTime'] as int?;
+          final et = data['eventEndTime'] as int?;
+          if (st != null && st >= 0) _eventStartTime = TimeOfDay(hour: st ~/ 60, minute: st % 60);
+          if (et != null && et >= 0) _eventEndTime = TimeOfDay(hour: et ~/ 60, minute: et % 60);
+        }
+      });
+    } catch (_) {}
   }
 
   @override

@@ -101,6 +101,7 @@ class _BoardScreenState extends State<BoardScreen> {
                   onTap: () => setState(() => _selectedIndex = index),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: selected
                           ? AppColors.theme.primaryColor

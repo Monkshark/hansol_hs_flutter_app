@@ -49,8 +49,10 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
+  try {
+    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+  } catch (_) {}
   await Future.wait([
-    Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform),
     SettingData().init(),
     _requestNotificationPermission(),
   ]);
@@ -258,16 +260,16 @@ class _MainScreenState extends State<MainScreen> {
       if (!profile.needsProfileUpdate) return;
       if (!mounted) return;
 
-      // 시간표 리셋
-      final prefs = await SharedPreferences.getInstance();
-      final keys = prefs.getKeys().where((k) => k.startsWith('selected_subjects_')).toList();
-      for (var k in keys) {
-        await prefs.remove(k);
-      }
-      // 시간표 캐시 리셋
-      final ttKeys = prefs.getKeys().where((k) => k.contains('timetable') || k.contains('subject_colors') || k.contains('conflict_')).toList();
-      for (var k in ttKeys) {
-        await prefs.remove(k);
+      if (profile.isStudent) {
+        final prefs = await SharedPreferences.getInstance();
+        final keys = prefs.getKeys().where((k) => k.startsWith('selected_subjects_')).toList();
+        for (var k in keys) {
+          await prefs.remove(k);
+        }
+        final ttKeys = prefs.getKeys().where((k) => k.contains('timetable') || k.contains('subject_colors') || k.contains('conflict_')).toList();
+        for (var k in ttKeys) {
+          await prefs.remove(k);
+        }
       }
 
       await Navigator.push(
