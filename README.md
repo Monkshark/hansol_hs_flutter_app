@@ -96,20 +96,20 @@ hansol_hs_flutter_app/
 ## 아키텍처
 
 ```
-┌─────────────┐     ┌──────────────┐     ┌─────────────────┐
+┌──────────────┐     ┌──────────────┐     ┌─────────────────┐
 │  Flutter App │────▶│   Firebase   │◀────│  Next.js Admin  │
-│  (Android/   │     │              │     │  (TypeScript +   │
-│   iOS)       │     │  Auth        │     │   Tailwind CSS)  │
+│  (Android/   │     │              │     │  (TypeScript +  │
+│   iOS)       │     │  Auth        │     │   Tailwind CSS) │
 └──────┬───────┘     │  Firestore   │     └─────────────────┘
        │             │  Storage     │
        │             │  FCM         │
        ▼             └──────┬───────┘
 ┌─────────────┐             │
 │  NEIS API   │             ▼
-│  (급식,시간표│     ┌──────────────┐
-│   학사일정)  │     │ Cloud Func.  │
+│  (급식,시간표 │     ┌──────────────┐
+│   학사일정)   │     │ Cloud Func.  │
 └─────────────┘     │ (Node.js)    │
-                    │ 푸시 알림     │
+                    │ 푸시 알림      │
                     └──────────────┘
 ```
 
@@ -117,7 +117,6 @@ hansol_hs_flutter_app/
 
 - Firestore 보안 규칙: 역할 기반 접근 제어 (`isAdmin()`, `isAdminOrManager()`)
 - Firebase config 환경변수 분리 (`.env.local`, `.gitignore`)
-- API 키 Git 히스토리 완전 제거 (`git-filter-repo`)
 - 입력값 길이 제한, 중복 신고 방지, HTTP 타임아웃
 - Cloud Functions: 사용자 승인 상태 검증 후 알림 발송
 - 글 만료 (Firestore TTL), 이미지 자동 압축 (640px)
