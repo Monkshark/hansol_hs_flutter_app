@@ -95,23 +95,16 @@ hansol_hs_flutter_app/
 
 ## 아키텍처
 
-```
-┌──────────────┐     ┌──────────────┐     ┌─────────────────┐
-│  Flutter App │────▶│   Firebase   │◀────│  Next.js Admin  │
-│  (Android/   │     │              │     │  (TypeScript +  │
-│   iOS)       │     │  Auth        │     │   Tailwind CSS) │
-└──────┬───────┘     │  Firestore   │     └─────────────────┘
-       │             │  Storage     │
-       │             │  FCM         │
-       ▼             └──────┬───────┘
-┌─────────────┐             │
-│  NEIS API   │             ▼
-│  (급식,시간표 │     ┌──────────────┐
-│   학사일정)   │     │ Cloud Func.  │
-└─────────────┘     │ (Node.js)    │
-                    │ 푸시 알림      │
-                    └──────────────┘
-```
+**Flutter App** (Android / iOS)
+- ← NEIS API (급식, 시간표, 학사일정)
+- ↔ **Firebase** (Auth, Firestore, Storage, FCM)
+
+**Next.js Admin** (TypeScript + Tailwind CSS)
+- ↔ **Firebase** (동일 Firestore 공유)
+
+**Cloud Functions** (Node.js)
+- ← Firestore 트리거 (댓글 생성, 사용자 생성/수정/삭제)
+- → FCM 푸시 알림 발송
 
 ## 보안
 
