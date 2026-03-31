@@ -76,7 +76,7 @@
 | API | NEIS 공공데이터 API (급식, 시간표, 학사일정) |
 | Local DB | sqflite (개인일정) |
 | Storage | SharedPreferences (설정, 캐시) |
-| Admin | HTML/JS/CSS + Firebase SDK |
+| Admin | Next.js 14 + TypeScript + Tailwind CSS + Firebase SDK |
 
 ## 프로젝트 구조
 
@@ -93,14 +93,18 @@ hansol_hs_flutter_app/
 │   │   └── sub/            # 설정, D-day, 시간표, 온보딩
 │   ├── styles/             # 테마 컬러 (라이트/다크)
 │   └── widgets/            # 공용 위젯 (급식, 캘린더, 홈, 설정)
-├── admin-web/              # 관리자 웹 페이지
-│   ├── index.html          # 로그인 (이메일 + Google)
-│   ├── dashboard.html      # 대시보드 (통계)
-│   ├── posts.html          # 게시글 관리
-│   ├── comments.html       # 댓글 관리
-│   ├── reports.html        # 신고 관리
-│   ├── users.html          # 사용자 관리 (승인/정지/역할)
-│   └── config.html         # 앱 버전 설정
+├── admin-web/              # 관리자 웹 (Next.js)
+│   ├── app/
+│   │   ├── page.tsx        # 로그인 (이메일 + Google)
+│   │   ├── dashboard/      # 대시보드 (통계 카드, 최근 활동)
+│   │   ├── posts/          # 게시글 목록 + 상세 (댓글, 이미지, 공지)
+│   │   ├── comments/       # 댓글 관리
+│   │   ├── reports/        # 신고 관리
+│   │   ├── users/          # 사용자 목록 + 상세 (활동 내역)
+│   │   └── settings/       # 앱 버전 + 공지 관리
+│   ├── components/         # Sidebar, StatsCard, Badge
+│   └── lib/                # Firebase, Auth, Types, Utils
+├── admin-static/           # 관리자 웹 (HTML/JS, 레거시)
 ├── functions/              # Cloud Functions (알림, 계정 이벤트)
 ├── firestore.rules         # Firestore 보안 규칙
 └── assets/images/          # 이미지 에셋
@@ -114,14 +118,15 @@ hansol_hs_flutter_app/
 - **사용자**: Admin/매니저 상단 정렬, 역할 임명, 정지/삭제
 - **정지**: 정지된 사용자 목록, 남은 기간 표시, 정지 해제
 
-### 관리자 웹 (`admin-web/`)
-- **로그인**: 이메일/비밀번호 (Admin) + Google (매니저)
+### 관리자 웹 (`admin-web/`) — Next.js 14 + TypeScript + Tailwind CSS
+- **로그인**: 이메일/비밀번호 (Admin) + Google (매니저), 역할 검증
 - **대시보드**: 전체 사용자/게시글/신고 수, 오늘 게시글, 최근 활동
-- **게시글 관리**: 검색, 삭제 (댓글 포함)
-- **댓글 관리**: 전체 댓글 조회, 삭제
+- **게시글 관리**: 검색, 삭제, 상세 페이지 (본문/이미지/댓글/투표/공지 등록)
+- **댓글 관리**: 전체 댓글 검색/삭제
 - **신고 관리**: 신고 사유 확인, 글 삭제 또는 무시
-- **사용자 관리**: 사용자/정지 탭, 승인/거절/삭제, 역할 임명, 정지/해제
-- **앱 설정**: 최신 버전/최소 버전/업데이트 URL/메시지 설정
+- **사용자 관리**: 3탭 (승인 대기/사용자/정지), 역할 임명, 정지/해제/삭제
+- **사용자 상세**: 프로필 정보, 신분, 작성 글 목록
+- **설정**: 앱 버전 관리 + 공지 목록 관리 (등록/해제)
 
 ## 빌드
 
@@ -137,4 +142,10 @@ flutter run --release -d [기기ID]
 
 # Cloud Functions 배포 (Blaze 필요)
 firebase deploy --only functions --project [프로젝트ID]
+
+# 관리자 웹 (개발)
+cd admin-web
+npm install
+npm run dev
+# http://localhost:3000
 ```
