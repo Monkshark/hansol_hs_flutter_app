@@ -46,8 +46,11 @@ class _DDayScreenState extends State<DDayScreen> {
     }
 
     final api = NoticeDataApi();
-    final schoolEvents = await api.getEventsInRange(days: 30);
+    final schoolEvents = await api.getEventsInRange(days: 180);
+    String? prevName;
     for (var event in schoolEvents) {
+      if (event.name == prevName) continue;
+      prevName = event.name;
       items.add(_EventItem(
         title: event.name,
         date: event.date,

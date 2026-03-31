@@ -17,6 +17,10 @@ class UserProfile {
   final String email;
   final bool approved;
   final String role;
+  final String userType;
+  final String lastProfileUpdate;
+  final int? graduationYear;
+  final String? teacherSubject;
 
   UserProfile({
     required this.uid,
@@ -27,10 +31,38 @@ class UserProfile {
     required this.email,
     this.approved = false,
     this.role = 'user',
+    this.userType = 'student',
+    this.lastProfileUpdate = '',
+    this.graduationYear,
+    this.teacherSubject,
   });
 
   bool get isManager => role == 'manager' || role == 'admin';
   bool get isAdmin => role == 'admin';
+  bool get isStudent => userType == 'student';
+  bool get isGraduate => userType == 'graduate';
+  bool get isTeacher => userType == 'teacher';
+  bool get isParent => userType == 'parent';
+
+  String get displayName {
+    switch (userType) {
+      case 'graduate':
+        return '졸업(${graduationYear ?? ''}) $name';
+      case 'teacher':
+        return '교사 $name';
+      case 'parent':
+        return '학부모 $name';
+      default:
+        return studentId.isNotEmpty ? '$studentId $name' : name;
+    }
+  }
+
+  bool get needsProfileUpdate {
+    if (lastProfileUpdate.isEmpty) return true;
+    final now = DateTime.now();
+    final currentYear = now.year.toString();
+    return lastProfileUpdate != currentYear && now.month >= 3;
+  }
 
   Map<String, dynamic> toMap() => {
     'uid': uid,
@@ -41,6 +73,10 @@ class UserProfile {
     'email': email,
     'approved': approved,
     'role': role,
+    'userType': userType,
+    'lastProfileUpdate': lastProfileUpdate,
+    'graduationYear': graduationYear,
+    'teacherSubject': teacherSubject,
     'updatedAt': FieldValue.serverTimestamp(),
   };
 
@@ -53,6 +89,10 @@ class UserProfile {
     email: map['email'] ?? '',
     approved: map['approved'] ?? false,
     role: map['role'] ?? 'user',
+    userType: map['userType'] ?? 'student',
+    lastProfileUpdate: map['lastProfileUpdate'] ?? '',
+    graduationYear: map['graduationYear'],
+    teacherSubject: map['teacherSubject'],
   );
 }
 

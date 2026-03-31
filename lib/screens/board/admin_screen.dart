@@ -263,9 +263,12 @@ class _UsersTab extends StatelessWidget {
                       if (!showApproved) ...[
                         _actionBtn('승인', AppColors.theme.primaryColor, () async {
                           await docs[index].reference.update({'approved': true});
+                          await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다. 앱의 모든 기능을 사용할 수 있습니다.');
+                          await _notifyAdmins('가입 승인', '$name님의 가입이 승인되었습니다.');
                         }),
                         const SizedBox(width: 6),
                         _actionBtn('거절', Colors.red, () async {
+                          await _sendAccountNotification(uid, '가입 거절', '가입이 거절되었습니다.');
                           await docs[index].reference.delete();
                         }),
                       ] else ...[
@@ -300,6 +303,7 @@ class _UsersTab extends StatelessWidget {
                             if (first != true) return;
                             final second = await _confirmDialog(context, '최종 확인', '$name 계정을 정말 삭제합니까?\n이 작업은 되돌릴 수 없습니다.');
                             if (second == true) {
+                              await _sendAccountNotification(uid, '계정 삭제', '관리자에 의해 계정이 삭제되었습니다.');
                               await docs[index].reference.delete();
                             }
                           }),
@@ -328,6 +332,43 @@ class _UsersTab extends StatelessWidget {
         child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
       ),
     );
+  }
+
+  Future<void> _sendAccountNotification(String targetUid, String title, String body) async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('users').doc(targetUid).collection('notifications').add({
+        'type': 'account',
+        'postId': '',
+        'postTitle': title,
+        'senderName': 'Admin',
+        'content': body,
+        'read': false,
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+    } catch (_) {}
+  }
+
+  Future<void> _notifyAdmins(String title, String body) async {
+    try {
+      final admins = await FirebaseFirestore.instance
+          .collection('users')
+          .where('role', whereIn: ['admin', 'manager']).get();
+      final myUid = AuthService.currentUser?.uid;
+      for (var doc in admins.docs) {
+        if (doc.id == myUid) continue;
+        await FirebaseFirestore.instance
+            .collection('users').doc(doc.id).collection('notifications').add({
+          'type': 'account',
+          'postId': '',
+          'postTitle': title,
+          'senderName': 'System',
+          'content': body,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+    } catch (_) {}
   }
 
   Future<bool?> _confirmDialog(BuildContext context, String title, String content) {

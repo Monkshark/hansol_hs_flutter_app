@@ -565,9 +565,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final anonymous = _commentAnonymous;
     _commentController.clear();
 
-    final displayName = anonymous
-        ? '익명'
-        : (profile.studentId.isNotEmpty ? '${profile.studentId} ${profile.name}' : profile.name);
+    final displayName = anonymous ? '익명' : profile.displayName;
 
     final commentData = <String, dynamic>{
       'content': text,

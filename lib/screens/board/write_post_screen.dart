@@ -728,9 +728,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       return;
     }
 
-    final displayName = _isAnonymous
-        ? '익명'
-        : (profile.studentId.isNotEmpty ? '${profile.studentId} ${profile.name}' : profile.name);
+    final displayName = _isAnonymous ? '익명' : profile.displayName;
 
     final postData = <String, dynamic>{
       'title': title,
@@ -780,6 +778,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
           .update(postData);
     } else {
       postData['createdAt'] = FieldValue.serverTimestamp();
+      postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
       postData['commentCount'] = 0;
       postData['imageUrls'] = <String>[];
       final docRef = await FirebaseFirestore.instance.collection('posts').add(postData);

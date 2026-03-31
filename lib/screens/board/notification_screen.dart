@@ -77,18 +77,25 @@ class NotificationScreen extends StatelessWidget {
               final createdAt = data['createdAt'] as Timestamp?;
               final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
 
+              final isAccount = type == 'account';
               final icon = type == 'comment'
                   ? Icons.chat_bubble_outline
-                  : Icons.reply;
+                  : isAccount
+                      ? Icons.person_outline
+                      : Icons.reply;
               final message = type == 'comment'
                   ? '$senderName님이 댓글을 남겼습니다'
-                  : '$senderName님이 답글을 남겼습니다';
+                  : isAccount
+                      ? postTitle
+                      : '$senderName님이 답글을 남겼습니다';
 
               return GestureDetector(
                 onTap: () {
                   if (!isRead) docs[index].reference.update({'read': true});
-                  Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => PostDetailScreen(postId: postId)));
+                  if (!isAccount && postId.isNotEmpty) {
+                    Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => PostDetailScreen(postId: postId)));
+                  }
                 },
                 child: Container(
                   padding: const EdgeInsets.all(14),

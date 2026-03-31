@@ -11,6 +11,7 @@ import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/notification/update_checker.dart';
+import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
 import 'package:hansol_high_school/screens/sub/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -240,12 +241,42 @@ class _MainScreenState extends State<MainScreen> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _checkAccountExists();
+      await _checkNewSemester();
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool('onboarding_done') != true && mounted) {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
       }
       if (mounted) UpdateChecker.check(context);
     });
+  }
+
+  Future<void> _checkNewSemester() async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final profile = await AuthService.getCachedProfile();
+      if (profile == null) return;
+      if (!profile.needsProfileUpdate) return;
+      if (!mounted) return;
+
+      // 시간표 리셋
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys().where((k) => k.startsWith('selected_subjects_')).toList();
+      for (var k in keys) {
+        await prefs.remove(k);
+      }
+      // 시간표 캐시 리셋
+      final ttKeys = prefs.getKeys().where((k) => k.contains('timetable') || k.contains('subject_colors') || k.contains('conflict_')).toList();
+      for (var k in ttKeys) {
+        await prefs.remove(k);
+      }
+
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ProfileSetupScreen(isUpdate: true)),
+      );
+      AuthService.clearProfileCache();
+      appRefreshNotifier.value++;
+    } catch (_) {}
   }
 
   Future<void> _checkAccountExists() async {
