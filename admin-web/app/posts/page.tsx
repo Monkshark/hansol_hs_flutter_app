@@ -48,14 +48,14 @@ export default function PostsPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">
         <h1 className="text-2xl font-bold mb-5">게시글 관리</h1>
 
         <input type="text" placeholder="제목 또는 작성자 검색..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-md p-3 bg-white rounded-xl mb-4 outline-none text-sm shadow-sm" />
+          className="w-full md:max-w-md p-3 bg-white rounded-xl mb-4 outline-none text-sm shadow-sm" />
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
-          <table className="w-full text-sm">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto">
+          <table className="w-full text-sm min-w-[700px]">
             <thead><tr className="bg-gray-50 text-gray-400 text-xs">
               <th className="text-left p-3">카테고리</th>
               <th className="text-left p-3">제목</th>

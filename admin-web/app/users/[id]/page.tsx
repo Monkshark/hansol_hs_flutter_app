@@ -31,7 +31,7 @@ export default function UserDetailPage() {
     } catch { setPosts([]); }
   }
 
-  if (loading || !profile || !user) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-6">로딩중...</main></div>;
+  if (loading || !profile || !user) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main></div>;
 
   const badge = roleBadge(user.role);
   const suspended = isSuspended(user.suspendedUntil);
@@ -40,7 +40,7 @@ export default function UserDetailPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 max-w-4xl">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
         <button onClick={() => router.back()} className="text-sm text-gray-400 mb-4 hover:text-gray-600">← 뒤로</button>
 
         <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
@@ -58,7 +58,7 @@ export default function UserDetailPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
             <div><span className="text-gray-400">신분:</span> {typeLabels[user.userType] || user.userType}</div>
             <div><span className="text-gray-400">학번:</span> {user.studentId || '-'}</div>
             <div><span className="text-gray-400">학년/반:</span> {user.grade}학년 {user.classNum}반</div>

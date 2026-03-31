@@ -54,14 +54,14 @@ export default function SettingsPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 max-w-3xl">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-3xl">
         <h1 className="text-2xl font-bold mb-5">설정</h1>
 
         <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
           <h3 className="font-bold mb-4">앱 버전 관리</h3>
           <p className="text-sm text-gray-400 mb-4">버전을 설정하면 앱에서 업데이트 알림을 표시합니다.</p>
 
-          <div className="grid grid-cols-2 gap-4 mb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="text-xs text-gray-500 font-semibold">최신 버전 (latest)</label>
               <input value={latest} onChange={e => setLatest(e.target.value)} placeholder="1.1.0"

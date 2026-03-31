@@ -1,4 +1,5 @@
 'use client';
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
@@ -15,15 +16,17 @@ const nav = [
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const [open, setOpen] = useState(false);
 
-  return (
-    <aside className="w-56 bg-dark-card min-h-screen flex flex-col">
-      <div className="p-5 border-b border-gray-700">
+  const sidebarContent = (
+    <>
+      <div className="p-5 border-b border-gray-700 flex items-center justify-between">
         <h2 className="text-white font-bold text-lg">HS Admin</h2>
+        <button onClick={() => setOpen(false)} className="md:hidden text-gray-400 hover:text-white text-xl">✕</button>
       </div>
       <nav className="flex-1 py-2">
         {nav.map((item) => (
-          <Link key={item.href} href={item.href}
+          <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
             className={`flex items-center gap-3 px-5 py-3 text-sm transition-colors ${
               pathname.startsWith(item.href) ? 'text-white bg-white/5 border-l-2 border-primary' : 'text-gray-400 hover:text-white hover:bg-white/5'
             }`}>
@@ -36,6 +39,35 @@ export default function Sidebar() {
         className="flex items-center gap-3 px-5 py-3 text-sm text-gray-400 hover:text-white border-t border-gray-700">
         <span>🚪</span><span>로그아웃</span>
       </button>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      {/* Mobile hamburger button */}
+      <button onClick={() => setOpen(true)}
+        className="md:hidden fixed top-3 left-3 z-50 bg-dark-card text-white p-2 rounded-lg shadow-lg">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+
+      {/* Mobile overlay */}
+      {open && (
+        <div className="md:hidden fixed inset-0 bg-black/50 z-40" onClick={() => setOpen(false)} />
+      )}
+
+      {/* Mobile sidebar */}
+      <aside className={`md:hidden fixed top-0 left-0 h-full w-56 bg-dark-card z-50 flex flex-col transform transition-transform duration-200 ${
+        open ? 'translate-x-0' : '-translate-x-full'
+      }`}>
+        {sidebarContent}
+      </aside>
+
+      {/* Desktop sidebar */}
+      <aside className="hidden md:flex w-56 bg-dark-card min-h-screen flex-col">
+        {sidebarContent}
+      </aside>
+    </>
   );
 }

@@ -63,17 +63,17 @@ export default function DashboardPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">
         <h1 className="text-2xl font-bold mb-5">대시보드</h1>
 
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
           <StatsCard label="전체 사용자" value={stats.users} />
           <StatsCard label="전체 게시글" value={stats.posts} />
           <StatsCard label="미처리 신고" value={stats.reports} color="text-red-500" />
           <StatsCard label="오늘 게시글" value={stats.todayPosts} color="text-green-500" />
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="bg-white rounded-xl p-5 shadow-sm">
             <h3 className="font-bold mb-3">최근 신고</h3>
             {recentReports.length === 0 ? (

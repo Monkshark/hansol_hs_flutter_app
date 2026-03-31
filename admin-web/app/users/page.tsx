@@ -93,10 +93,10 @@ export default function UsersPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">
         <h1 className="text-2xl font-bold mb-5">사용자 관리</h1>
 
-        <div className="flex gap-2 mb-4">
+        <div className="flex flex-wrap gap-2 mb-4">
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
@@ -106,13 +106,13 @@ export default function UsersPage() {
         </div>
 
         <input type="text" placeholder="이름 또는 학번 검색..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full max-w-md p-3 bg-white rounded-xl mb-4 outline-none text-sm shadow-sm" />
+          className="w-full md:max-w-md p-3 bg-white rounded-xl mb-4 outline-none text-sm shadow-sm" />
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto">
           {filtered.length === 0 ? (
             <p className="p-6 text-gray-400 text-sm">사용자가 없습니다</p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[600px]">
               <thead><tr className="bg-gray-50 text-gray-400 text-xs">
                 <th className="text-left p-3">이름</th>
                 <th className="text-left p-3">학번</th>

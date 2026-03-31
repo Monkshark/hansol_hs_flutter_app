@@ -45,14 +45,14 @@ export default function ReportsPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">
         <h1 className="text-2xl font-bold mb-5">신고 관리</h1>
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto">
           {reports.length === 0 ? (
             <p className="p-6 text-gray-400 text-sm">신고가 없습니다</p>
           ) : (
-            <table className="w-full text-sm">
+            <table className="w-full text-sm min-w-[500px]">
               <thead><tr className="bg-gray-50 text-gray-400 text-xs">
                 <th className="text-left p-3">사유</th>
                 <th className="text-left p-3">신고자</th>
@@ -65,7 +65,7 @@ export default function ReportsPage() {
                     <td className="p-3"><Badge label={r.reason} className="bg-red-100 text-red-600" /></td>
                     <td className="p-3 text-gray-400 text-xs">{r.reporterUid.substring(0, 8)}...</td>
                     <td className="p-3 text-gray-400 text-xs">{formatTime(r.createdAt)}</td>
-                    <td className="p-3 flex gap-2">
+                    <td className="p-3 flex gap-2 flex-wrap">
                       <button onClick={() => router.push(`/posts/${r.postId}`)}
                         className="px-3 py-1 bg-primary text-white rounded-lg text-xs font-semibold">글 보기</button>
                       <button onClick={() => handleDeletePost(r.postId, r.id)}

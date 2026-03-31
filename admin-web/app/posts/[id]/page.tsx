@@ -54,7 +54,7 @@ export default function PostDetailPage() {
     loadPost();
   }
 
-  if (loading || !profile || !post) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-6">로딩중...</main></div>;
+  if (loading || !profile || !post) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main></div>;
 
   const likes = post.likes ? Object.keys(post.likes).length : 0;
   const dislikes = post.dislikes ? Object.keys(post.dislikes).length : 0;
@@ -62,7 +62,7 @@ export default function PostDetailPage() {
   return (
     <div className="flex min-h-screen">
       <Sidebar />
-      <main className="flex-1 p-6 max-w-4xl">
+      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
         <button onClick={() => router.back()} className="text-sm text-gray-400 mb-4 hover:text-gray-600">← 뒤로</button>
 
         <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
