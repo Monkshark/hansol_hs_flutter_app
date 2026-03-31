@@ -114,14 +114,6 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
     await sendPush(token, "가입 승인", "가입이 승인되었습니다. 앱의 모든 기능을 사용할 수 있습니다.", {
       type: "account", _targetUid: userId,
     });
-    await sendPushToAdmins("가입 승인", `${after.name || ""}님의 가입이 승인되었습니다.`, null);
-  }
-
-  if (before.approved && !after.approved) {
-    const token = after.fcmToken;
-    await sendPush(token, "계정 정지", "관리자에 의해 계정이 정지되었습니다.", {
-      type: "account", _targetUid: userId,
-    });
   }
 
   if (before.role !== after.role) {

@@ -264,7 +264,6 @@ class _UsersTab extends StatelessWidget {
                         _actionBtn('승인', AppColors.theme.primaryColor, () async {
                           await docs[index].reference.update({'approved': true});
                           await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다. 앱의 모든 기능을 사용할 수 있습니다.');
-                          await _notifyAdmins('가입 승인', '$name님의 가입이 승인되었습니다.');
                         }),
                         const SizedBox(width: 6),
                         _actionBtn('거절', Colors.red, () async {
