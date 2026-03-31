@@ -16,15 +16,17 @@
 - 과목 충돌 감지 + 해결 팝업
 - 과목별 컬러 커스터마이징 (원형 컬러피커)
 - 현재 교시 실시간 표시 (1분 갱신, 프로그레스 바)
+- 새 학기(3월) 시간표 자동 리셋
 
 ### 일정 관리
 - 월간 캘린더 (한국어, 토/일 색상 구분)
 - 개인일정 CRUD (sqflite 로컬 DB)
-- NEIS 학사일정 자동 표시
+- NEIS 학사일정 자동 표시 (6개월, 연속 중복 제거)
 - D-day 관리 + 홈 화면 핀 고정
 
 ### 게시판
 - 카테고리: 자유 / 질문 / 정보공유
+- 공지 시스템 (📌 최대 3개, 관리자/매니저 전용, 목록 상단 고정)
 - 글 작성/수정/삭제, 댓글 + 대댓글 (들여쓰기)
 - 익명 기능 (글 + 댓글, 계정 연결 유지)
 - 투표 첨부 (최대 6개 선택지, 실시간 결과 바)
@@ -32,25 +34,30 @@
 - 사진 첨부 (640px 자동 압축, 최대 5장, 전체화면 뷰어)
 - 추천/비추천, 글 검색, 내 활동 모아보기
 - 신고 기능 (사유 선택 → Firestore 저장)
+- 글 자동 삭제 (1년 후 Firestore TTL)
 
 ### 알림
 - 급식 알림 (조식/중식/석식, 시간 설정 가능)
 - 댓글/답글 알림 (벨 아이콘 + 읽지 않은 알림 빨간 뱃지)
+- 계정 알림 (가입 요청/승인/거절/삭제/정지)
 - FCM + Cloud Functions 기반 푸시 알림 (Blaze 요금제 필요)
 
 ### 인증 & 권한
 - Google 로그인 + 프로필 설정 (이름, 학번)
+- 신분 선택: 재학생 / 졸업생 / 교사 / 학부모
 - 가입 요청 → 관리자 승인 플로우
 - 역할 시스템: user / manager / admin
-- 매니저: 타인 글/댓글 삭제, 신고 처리, 사용자 승인
+- 매니저: 타인 글/댓글 삭제, 신고 처리, 사용자 승인, 공지 등록
 - Admin: 매니저 임명/해제, 관리자 임명 (셀프 해제만 가능)
+- 계정 정지 (1시간~30일, 기간 선택, 남은 시간 표시)
+- 새 학기(3월) 프로필 업데이트 강제
 
 ### 설정
 - 학년/반 선택 (휠 피커)
 - 테마 모드 (라이트/다크/시스템)
 - 급식 알림 + 게시판 알림 ON/OFF
 - 캐시 크기 확인 및 삭제
-- 승인 상태 표시
+- 승인/정지 상태 표시
 
 ### 기타
 - 앱 업데이트 체크 (Firestore 기반, 필수/선택 업데이트)
@@ -80,7 +87,7 @@ hansol_hs_flutter_app/
 │   ├── data/               # 데이터 모델, DB, Auth, 설정
 │   ├── notification/       # 알림 (로컬, FCM, 업데이트 체크)
 │   ├── screens/
-│   │   ├── auth/           # 로그인, 프로필 설정
+│   │   ├── auth/           # 로그인, 프로필 설정 (신분 선택)
 │   │   ├── board/          # 게시판, 글 상세, 관리자, 알림
 │   │   ├── main/           # 메인 3탭 (급식/홈/일정)
 │   │   └── sub/            # 설정, D-day, 시간표, 온보딩
@@ -92,35 +99,29 @@ hansol_hs_flutter_app/
 │   ├── posts.html          # 게시글 관리
 │   ├── comments.html       # 댓글 관리
 │   ├── reports.html        # 신고 관리
-│   ├── users.html          # 사용자 관리 (승인/거절/매니저 임명)
+│   ├── users.html          # 사용자 관리 (승인/정지/역할)
 │   └── config.html         # 앱 버전 설정
-├── functions/              # Cloud Functions (댓글 알림, 새 글 알림)
+├── functions/              # Cloud Functions (알림, 계정 이벤트)
+├── firestore.rules         # Firestore 보안 규칙
 └── assets/images/          # 이미지 에셋
 ```
 
-## 관리자 웹
+## 관리자
 
-`admin-web/` 폴더의 별도 웹 관리자 페이지:
-- **로그인**: 이메일/비밀번호 (admin) + Google (매니저)
+### 앱 내 Admin 화면
+- **신고**: 신고된 글 확인, 글 삭제 또는 무시
+- **승인 대기**: 가입 요청 승인/거절
+- **사용자**: Admin/매니저 상단 정렬, 역할 임명, 정지/삭제
+- **정지**: 정지된 사용자 목록, 남은 기간 표시, 정지 해제
+
+### 관리자 웹 (`admin-web/`)
+- **로그인**: 이메일/비밀번호 (Admin) + Google (매니저)
 - **대시보드**: 전체 사용자/게시글/신고 수, 오늘 게시글, 최근 활동
 - **게시글 관리**: 검색, 삭제 (댓글 포함)
 - **댓글 관리**: 전체 댓글 조회, 삭제
 - **신고 관리**: 신고 사유 확인, 글 삭제 또는 무시
-- **사용자 관리**: 승인 대기/승인됨 탭, 승인/거절/삭제, 매니저/관리자 임명
+- **사용자 관리**: 사용자/정지 탭, 승인/거절/삭제, 역할 임명, 정지/해제
 - **앱 설정**: 최신 버전/최소 버전/업데이트 URL/메시지 설정
-
-## 설정 방법
-
-1. Firebase 프로젝트 생성
-2. `google-services.json`을 `android/app/`에 배치
-3. `lib/api/nies_api_keys.dart`에 NEIS API 키 설정
-4. `lib/firebase_options.dart` 생성 (FlutterFire CLI)
-5. `admin-web/js/firebase-init.js`에 Firebase config 설정
-6. Firebase Console에서 Firestore 보안 규칙 + 복합 인덱스 설정
-7. Firebase Console에서 Authentication → 이메일/비밀번호 + Google 로그인 활성화
-8. Firestore에 관리자 프로필 문서 생성 (`role: 'admin'`)
-9. Cloud Functions 배포: `firebase deploy --only functions` (Blaze 요금제 필요)
-10. Firebase Storage 규칙 설정 (사진 첨부 사용 시)
 
 ## 빌드
 
@@ -133,4 +134,7 @@ flutter build apk --release
 
 # 릴리즈 직접 설치
 flutter run --release -d [기기ID]
+
+# Cloud Functions 배포 (Blaze 필요)
+firebase deploy --only functions --project [프로젝트ID]
 ```
