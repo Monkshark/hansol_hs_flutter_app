@@ -116,6 +116,13 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
     });
   }
 
+  if (!before.suspendedUntil && after.suspendedUntil) {
+    const token = after.fcmToken;
+    await sendPush(token, "계정 정지", "관리자에 의해 계정이 정지되었습니다.", {
+      type: "account", _targetUid: userId,
+    });
+  }
+
   if (before.role !== after.role) {
     const token = after.fcmToken;
     const roleNames = { admin: "Admin", manager: "매니저", user: "일반 사용자" };

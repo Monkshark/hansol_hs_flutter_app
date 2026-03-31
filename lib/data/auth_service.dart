@@ -21,6 +21,7 @@ class UserProfile {
   final String lastProfileUpdate;
   final int? graduationYear;
   final String? teacherSubject;
+  final DateTime? suspendedUntil;
 
   UserProfile({
     required this.uid,
@@ -35,10 +36,12 @@ class UserProfile {
     this.lastProfileUpdate = '',
     this.graduationYear,
     this.teacherSubject,
+    this.suspendedUntil,
   });
 
   bool get isManager => role == 'manager' || role == 'admin';
   bool get isAdmin => role == 'admin';
+  bool get isSuspended => suspendedUntil != null && DateTime.now().isBefore(suspendedUntil!);
   bool get isStudent => userType == 'student';
   bool get isGraduate => userType == 'graduate';
   bool get isTeacher => userType == 'teacher';
@@ -77,6 +80,7 @@ class UserProfile {
     'lastProfileUpdate': lastProfileUpdate,
     'graduationYear': graduationYear,
     'teacherSubject': teacherSubject,
+    if (suspendedUntil != null) 'suspendedUntil': Timestamp.fromDate(suspendedUntil!),
     'updatedAt': FieldValue.serverTimestamp(),
   };
 
@@ -93,6 +97,7 @@ class UserProfile {
     lastProfileUpdate: map['lastProfileUpdate'] ?? '',
     graduationYear: map['graduationYear'],
     teacherSubject: map['teacherSubject'],
+    suspendedUntil: map['suspendedUntil'] != null ? (map['suspendedUntil'] as Timestamp).toDate() : null,
   );
 }
 
@@ -154,7 +159,24 @@ class AuthService {
   static Future<bool> isApproved() async {
     final profile = await getUserProfile();
     if (profile == null) return false;
+    if (profile.isSuspended) return false;
     return profile.approved || profile.isManager;
+  }
+
+  static Future<String?> getSuspendedMessage() async {
+    final profile = await getCachedProfile();
+    if (profile == null || !profile.isSuspended) return null;
+    final diff = profile.suspendedUntil!.difference(DateTime.now());
+    final days = diff.inDays;
+    final hours = diff.inHours % 24;
+    final minutes = diff.inMinutes % 60;
+    final seconds = diff.inSeconds % 60;
+    final parts = <String>[];
+    if (days > 0) parts.add('${days}일');
+    if (hours > 0) parts.add('${hours}시간');
+    if (minutes > 0) parts.add('${minutes}분');
+    if (parts.isEmpty) parts.add('${seconds}초');
+    return parts.join(' ');
   }
 
   static Future<bool> isManager() async {

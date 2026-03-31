@@ -297,6 +297,22 @@ class _UsersTab extends StatelessWidget {
                         ],
                         if (uid != AuthService.currentUser?.uid && role == 'user') ...[
                           const SizedBox(width: 6),
+                          _actionBtn('정지', Colors.orange, () async {
+                            final hours = await _showSuspendDialog(context, name);
+                            if (hours != null) {
+                              final until = DateTime.now().add(Duration(hours: hours));
+                              await docs[index].reference.update({
+                                'suspendedUntil': Timestamp.fromDate(until),
+                              });
+                              await _sendAccountNotification(uid, '계정 정지',
+                                '${_formatDuration(hours)} 동안 계정이 정지되었습니다.');
+                              if (context.mounted) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(content: Text('$name 계정이 정지되었습니다')));
+                              }
+                            }
+                          }),
+                          const SizedBox(width: 6),
                           _actionBtn('삭제', Colors.red, () async {
                             final first = await _confirmDialog(context, '계정 삭제', '$name 계정을 삭제하시겠습니까?');
                             if (first != true) return;
@@ -329,6 +345,68 @@ class _UsersTab extends StatelessWidget {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(text, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+      ),
+    );
+  }
+
+  String _formatDuration(int hours) {
+    if (hours < 24) return '$hours시간';
+    return '${hours ~/ 24}일';
+  }
+
+  Future<int?> _showSuspendDialog(BuildContext context, String name) async {
+    final options = [
+      {'label': '1시간', 'hours': 1},
+      {'label': '6시간', 'hours': 6},
+      {'label': '12시간', 'hours': 12},
+      {'label': '1일', 'hours': 24},
+      {'label': '3일', 'hours': 72},
+      {'label': '7일', 'hours': 168},
+      {'label': '30일', 'hours': 720},
+    ];
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return showDialog<int>(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('$name 정지', style: TextStyle(
+                fontSize: 18, fontWeight: FontWeight.w700,
+                color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+              const SizedBox(height: 8),
+              Text('정지 기간을 선택하세요', style: TextStyle(
+                fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
+              const SizedBox(height: 16),
+              ...options.map((o) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, o['hours'] as int),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.orange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      elevation: 0,
+                    ),
+                    child: Text(o['label'] as String),
+                  ),
+                ),
+              )),
+              const SizedBox(height: 4),
+              TextButton(
+                onPressed: () => Navigator.pop(ctx),
+                child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

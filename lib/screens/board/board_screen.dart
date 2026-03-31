@@ -186,6 +186,16 @@ class _BoardScreenState extends State<BoardScreen> {
       if (result != true) return;
     }
 
+    final suspendMsg = await AuthService.getSuspendedMessage();
+    if (suspendMsg != null) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('계정 정지 상태입니다\n남은 기간: $suspendMsg')),
+        );
+      }
+      return;
+    }
+
     final approved = await AuthService.isApproved();
     if (!approved) {
       if (mounted) {
