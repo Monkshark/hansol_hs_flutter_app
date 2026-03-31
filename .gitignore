@@ -195,4 +195,6 @@ admin-web/.env.local
 # Cloud Functions
 functions/node_modules/
 android/.kotlin/
+android/key.properties
+android/app/release-key.jks
 .claude/
