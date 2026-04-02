@@ -38,7 +38,7 @@ class WritePostScreen extends StatefulWidget {
 }
 
 class _WritePostScreenState extends State<WritePostScreen> {
-  static const _categories = ['자유', '질문', '정보공유'];
+  static const _categories = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   late String _category;
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;

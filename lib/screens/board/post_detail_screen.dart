@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -178,22 +179,20 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           onTap: () => _showFullImage(context, url as String),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(12),
-                            child: Image.network(
-                              url as String,
+                            child: CachedNetworkImage(
+                              imageUrl: url as String,
                               width: double.infinity,
                               fit: BoxFit.fitWidth,
-                              loadingBuilder: (context, child, progress) {
-                                if (progress == null) return child;
-                                return Container(
-                                  height: 200,
-                                  alignment: Alignment.center,
-                                  child: CircularProgressIndicator(
-                                    value: progress.expectedTotalBytes != null
-                                        ? progress.cumulativeBytesLoaded / progress.expectedTotalBytes!
-                                        : null,
-                                  ),
-                                );
-                              },
+                              placeholder: (context, url) => Container(
+                                height: 200,
+                                alignment: Alignment.center,
+                                child: CircularProgressIndicator(),
+                              ),
+                              errorWidget: (context, url, error) => Container(
+                                height: 200,
+                                alignment: Alignment.center,
+                                child: Icon(Icons.broken_image, color: Colors.grey),
+                              ),
                             ),
                           ),
                         ),
@@ -258,6 +257,25 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ],
                       ],
                     ),
+
+                    if (category == '분실물' && AuthService.currentUser?.uid == post['authorUid']) ...[
+                      const SizedBox(height: 16),
+                      SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: post['isResolved'] == true ? null : _resolvePost,
+                          icon: Icon(post['isResolved'] == true ? Icons.check_circle : Icons.check, size: 18),
+                          label: Text(post['isResolved'] == true ? '해결됨' : '찾았어요'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: post['isResolved'] == true ? Colors.grey : const Color(0xFF4CAF50),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            elevation: 0,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ],
 
                     const SizedBox(height: 20),
                     Divider(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA)),
@@ -390,7 +408,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         ),
         body: Center(
           child: InteractiveViewer(
-            child: Image.network(url, fit: BoxFit.contain),
+            child: CachedNetworkImage(
+              imageUrl: url,
+              fit: BoxFit.contain,
+              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
+              errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 48)),
+            ),
           ),
         ),
       ),
@@ -960,7 +983,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       case '자유': return AppColors.theme.primaryColor;
       case '질문': return AppColors.theme.secondaryColor;
       case '정보공유': return AppColors.theme.tertiaryColor;
+      case '분실물': return const Color(0xFFFF5722);
+      case '학생회': return const Color(0xFF4CAF50);
+      case '동아리': return const Color(0xFF9C27B0);
       default: return AppColors.theme.darkGreyColor;
+    }
+  }
+
+  Future<void> _resolvePost() async {
+    await _postRef.update({'isResolved': true});
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('해결됨으로 표시되었습니다')),
+      );
     }
   }
 }

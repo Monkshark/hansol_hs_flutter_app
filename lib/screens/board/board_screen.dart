@@ -22,7 +22,7 @@ class BoardScreen extends StatefulWidget {
 }
 
 class _BoardScreenState extends State<BoardScreen> {
-  static const _categories = ['전체', '자유', '질문', '정보공유'];
+  static const _categories = ['전체', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   static const _pageSize = 20;
   int _selectedIndex = 0;
   String _searchQuery = '';
@@ -371,6 +371,19 @@ class PostCard extends StatelessWidget {
                   child: Text(category,
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _categoryColor(category))),
                 ),
+                if (data['isResolved'] == true && category == '분실물')
+                  Padding(
+                    padding: const EdgeInsets.only(left: 6),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF4CAF50).withAlpha(20),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: const Text('해결',
+                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF4CAF50))),
+                    ),
+                  ),
                 const Spacer(),
                 if (hasImages)
                   Padding(padding: const EdgeInsets.only(right: 8),
@@ -424,6 +437,9 @@ class PostCard extends StatelessWidget {
       case '자유': return AppColors.theme.primaryColor;
       case '질문': return AppColors.theme.secondaryColor;
       case '정보공유': return AppColors.theme.tertiaryColor;
+      case '분실물': return const Color(0xFFFF5722);
+      case '학생회': return const Color(0xFF4CAF50);
+      case '동아리': return const Color(0xFF9C27B0);
       default: return AppColors.theme.darkGreyColor;
     }
   }
