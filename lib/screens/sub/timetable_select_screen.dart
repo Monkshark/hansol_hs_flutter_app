@@ -1,11 +1,9 @@
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/subject.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
-import 'package:intl/intl.dart';
 
 /// 선택과목 설정 화면 (TimetableSelectScreen)
 ///
@@ -30,7 +28,6 @@ class TimetableSelectScreen extends StatefulWidget {
 class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
   late Future<Map<String, List<Subject>>> _subjectGroupsFuture;
   List<Subject> selectedSubjects = [];
-  List<Subject> _originalSubjects = [];
   late int grade;
   bool _hasChanges = false;
 
@@ -56,7 +53,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
 
   Future<void> _loadSelectedSubjects(int g) async {
     selectedSubjects = await SubjectDataManager.loadSelectedSubjects(g);
-    _originalSubjects = List.from(selectedSubjects);
   }
 
   Future<void> _saveSelectedSubjects() async {
@@ -239,7 +235,6 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
             IconButton(
               onPressed: () async {
                 await _saveSelectedSubjects();
-                _originalSubjects = List.from(selectedSubjects);
                 setState(() => _hasChanges = false);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -427,9 +422,6 @@ class _SubjectSwipeCardState extends State<_SubjectSwipeCard> {
     final classCount = widget.classes.length;
 
     final hasConflict = widget.conflictText != null;
-    final borderColor = hasConflict
-        ? const Color(0xFFFF9800).withAlpha(150)
-        : AppColors.theme.primaryColor.withAlpha(100);
 
     return AnimatedSize(
       duration: const Duration(milliseconds: 300),

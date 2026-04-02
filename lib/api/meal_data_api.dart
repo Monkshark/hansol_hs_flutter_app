@@ -205,12 +205,6 @@ class MealDataApi {
     return 'meal_${DateFormat('yyyyMMdd').format(date)}_$mealType';
   }
 
-  static bool _isCacheValid(SharedPreferences prefs, String key) {
-    if (!prefs.containsKey(key)) return false;
-    final ts = prefs.getInt('$key-ts') ?? 0;
-    return DateTime.now().millisecondsSinceEpoch - ts < 24 * 60 * 60 * 1000;
-  }
-
   static Meal? _getFromCache(SharedPreferences prefs, String key) {
     if (!prefs.containsKey(key)) return null;
     final ts = prefs.getInt('$key-ts') ?? 0;

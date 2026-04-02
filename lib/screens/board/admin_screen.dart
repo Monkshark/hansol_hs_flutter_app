@@ -74,7 +74,6 @@ class _ReportsTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
@@ -222,7 +221,6 @@ class _UsersTab extends StatelessWidget {
         final docs = allDocs.where((d) {
           final data = d.data();
           final approved = data['approved'] == true;
-          final role = data['role'] ?? 'user';
           final suspended = _isSuspended(data);
 
           switch (filter) {
@@ -504,28 +502,6 @@ class _UsersTab extends StatelessWidget {
         'read': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
-    } catch (_) {}
-  }
-
-  Future<void> _notifyAdmins(String title, String body) async {
-    try {
-      final admins = await FirebaseFirestore.instance
-          .collection('users')
-          .where('role', whereIn: ['admin', 'manager']).get();
-      final myUid = AuthService.currentUser?.uid;
-      for (var doc in admins.docs) {
-        if (doc.id == myUid) continue;
-        await FirebaseFirestore.instance
-            .collection('users').doc(doc.id).collection('notifications').add({
-          'type': 'account',
-          'postId': '',
-          'postTitle': title,
-          'senderName': 'System',
-          'content': body,
-          'read': false,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
     } catch (_) {}
   }
 
