@@ -27,6 +27,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
+import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSdk;
 
 /// 앱 진입점, Firebase/알림/테마 초기화, 메인 네비게이션
 ///
@@ -52,6 +53,7 @@ Future<void> main() async {
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   } catch (_) {}
+  KakaoSdk.init(nativeAppKey: const String.fromEnvironment('KAKAO_NATIVE_KEY', defaultValue: ''));
   await Future.wait([
     SettingData().init(),
     _requestNotificationPermission(),

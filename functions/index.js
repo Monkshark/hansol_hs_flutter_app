@@ -1,9 +1,46 @@
 const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
+const { onRequest } = require("firebase-functions/v2/https");
 const { initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
 const { getFirestore } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
 
 initializeApp();
+
+exports.kakaoCustomAuth = onRequest(async (req, res) => {
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
+
+  const { token } = req.body;
+  if (!token) { res.status(400).json({ error: "token required" }); return; }
+
+  try {
+    const kakaoRes = await fetch("https://kapi.kakao.com/v2/user/me", {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!kakaoRes.ok) { res.status(401).json({ error: "Invalid kakao token" }); return; }
+
+    const kakaoUser = await kakaoRes.json();
+    const uid = `kakao:${kakaoUser.id}`;
+    const email = kakaoUser.kakao_account?.email || null;
+    const name = kakaoUser.kakao_account?.profile?.nickname || "카카오 사용자";
+
+    let firebaseUser;
+    try {
+      firebaseUser = await getAuth().getUser(uid);
+    } catch {
+      firebaseUser = await getAuth().createUser({
+        uid,
+        displayName: name,
+        ...(email && { email }),
+      });
+    }
+
+    const customToken = await getAuth().createCustomToken(uid);
+    res.json({ firebaseToken: customToken });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 async function sendPush(token, title, body, data = {}) {
   if (!token) return;
