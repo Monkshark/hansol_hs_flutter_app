@@ -16,7 +16,6 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
           channel: 'stable'
 
       - name: Create dummy secret files
@@ -38,6 +37,11 @@ jobs:
             static FirebaseOptions get currentPlatform => const FirebaseOptions(
               apiKey: 'dummy', appId: 'dummy', messagingSenderId: 'dummy', projectId: 'dummy',
             );
+          }
+          DART
+          cat > lib/api/kakao_keys.dart << 'DART'
+          class KakaoKeys {
+            static const nativeAppKey = 'dummy';
           }
           DART
 
