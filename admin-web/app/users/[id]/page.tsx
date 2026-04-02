@@ -63,6 +63,10 @@ export default function UserDetailPage() {
             <div><span className="text-gray-400">학번:</span> {user.studentId || '-'}</div>
             <div><span className="text-gray-400">학년/반:</span> {user.grade}학년 {user.classNum}반</div>
             <div><span className="text-gray-400">승인:</span> {user.approved ? '승인됨' : '대기중'}</div>
+            <div><span className="text-gray-400">로그인:</span> {
+              (user as any).loginProvider === 'kakao' ? 'Kakao' :
+              (user as any).loginProvider === 'apple' ? 'Apple' : 'Google'
+            }</div>
             {user.graduationYear && <div><span className="text-gray-400">졸업연도:</span> {user.graduationYear}</div>}
             {user.teacherSubject && <div><span className="text-gray-400">담당과목:</span> {user.teacherSubject}</div>}
             {suspended && <div><span className="text-gray-400">정지 남은 기간:</span> <span className="text-red-500 font-semibold">{suspendRemaining(user.suspendedUntil)}</span></div>}

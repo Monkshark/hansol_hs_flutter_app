@@ -12,6 +12,7 @@ export interface UserProfile {
   userType: 'student' | 'graduate' | 'teacher' | 'parent';
   fcmToken?: string;
   suspendedUntil?: Timestamp;
+  loginProvider?: string;
   lastProfileUpdate?: string;
   graduationYear?: number;
   teacherSubject?: string;

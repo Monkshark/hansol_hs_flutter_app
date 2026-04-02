@@ -435,7 +435,8 @@ class _SettingScreenState extends State<SettingScreen> {
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(email,
+                      Text(
+                        email.isNotEmpty ? email : _providerLabel(profile?.loginProvider ?? 'google'),
                         style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
                       const SizedBox(height: 2),
                       Text(
@@ -597,6 +598,14 @@ class _SettingScreenState extends State<SettingScreen> {
         ],
       ),
     );
+  }
+
+  String _providerLabel(String provider) {
+    switch (provider) {
+      case 'kakao': return 'Kakao 로그인';
+      case 'apple': return 'Apple 로그인';
+      default: return 'Google 로그인';
+    }
   }
 
   Future<void> _deleteAccount() async {

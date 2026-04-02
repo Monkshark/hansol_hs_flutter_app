@@ -77,6 +77,13 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     final user = AuthService.currentUser;
     if (user == null) return;
 
+    String provider = 'google';
+    if (user.uid.startsWith('kakao:')) {
+      provider = 'kakao';
+    } else if (user.providerData.any((p) => p.providerId == 'apple.com')) {
+      provider = 'apple';
+    }
+
     final profile = UserProfile(
       uid: user.uid,
       name: name,
@@ -88,6 +95,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       lastProfileUpdate: DateTime.now().year.toString(),
       graduationYear: _userType == 'graduate' ? int.tryParse(_gradYearController.text.trim()) : null,
       teacherSubject: _userType == 'teacher' ? _teacherSubjectController.text.trim() : null,
+      loginProvider: provider,
     );
 
     await AuthService.saveUserProfile(profile);

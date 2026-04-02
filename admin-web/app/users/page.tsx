@@ -117,6 +117,7 @@ export default function UsersPage() {
                 <th className="text-left p-3">이름</th>
                 <th className="text-left p-3">학번</th>
                 <th className="text-left p-3">학년/반</th>
+                <th className="text-left p-3">로그인</th>
                 {tab === 'suspended' && <th className="text-left p-3">남은 기간</th>}
                 <th className="text-left p-3">액션</th>
               </tr></thead>
@@ -133,6 +134,15 @@ export default function UsersPage() {
                       </td>
                       <td className="p-3 text-gray-500">{u.studentId || '-'}</td>
                       <td className="p-3 text-gray-500">{u.grade || '-'}학년 {u.classNum || '-'}반</td>
+                      <td className="p-3">
+                        <span className={`text-xs font-semibold ${
+                          (u as any).loginProvider === 'kakao' ? 'text-yellow-600' :
+                          (u as any).loginProvider === 'apple' ? 'text-gray-600' : 'text-blue-500'
+                        }`}>
+                          {(u as any).loginProvider === 'kakao' ? 'Kakao' :
+                           (u as any).loginProvider === 'apple' ? 'Apple' : 'Google'}
+                        </span>
+                      </td>
                       {tab === 'suspended' && (
                         <td className="p-3 text-red-500 font-semibold text-xs">{suspendRemaining(u.suspendedUntil)}</td>
                       )}
