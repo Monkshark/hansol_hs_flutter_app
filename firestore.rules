@@ -31,7 +31,7 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if request.auth != null;
       allow create: if request.auth != null;
-      allow update: if request.auth != null && (request.auth.uid == resource.data.authorUid || isAdminOrManager());
+      allow update: if request.auth != null;
       allow delete: if request.auth != null && (request.auth.uid == resource.data.authorUid || isAdminOrManager());
       match /comments/{commentId} {
         allow read: if request.auth != null;
