@@ -8,6 +8,7 @@ import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
+import 'package:hansol_high_school/screens/chat/chat_list_screen.dart';
 import 'package:hansol_high_school/screens/board/notification_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart';
@@ -260,6 +261,45 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
+                  if (AuthService.isLoggedIn)
+                    GestureDetector(
+                      onTap: () => Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const ChatListScreen())),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 40, height: 40,
+                              decoration: BoxDecoration(
+                                color: AppColors.theme.secondaryColor.withAlpha(25),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.chat_outlined, color: AppColors.theme.secondaryColor, size: 22),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('채팅', style: TextStyle(
+                                    fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                  Text('1:1 대화하기', style: TextStyle(
+                                    fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                ],
+                              ),
+                            ),
+                            Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                          ],
+                        ),
+                      ),
+                    ),
+                  if (AuthService.isLoggedIn) const SizedBox(height: 8),
                   _RecentPosts(),
                   const SizedBox(height: 16),
                   Row(

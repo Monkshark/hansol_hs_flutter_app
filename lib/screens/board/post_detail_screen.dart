@@ -7,6 +7,7 @@ import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
+import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -75,6 +76,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       if (value == 'delete') _deletePost();
                       if (value == 'report') _reportPost();
                       if (value == 'block') _blockUser(data['authorUid']);
+                      if (value == 'chat') startChat(context, data['authorUid'], data['authorName'] ?? '');
                       if (value == 'pin') _pinPost();
                       if (value == 'unpin') _unpinPost();
                     },
@@ -93,6 +95,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         const PopupMenuItem(value: 'report', child: Text('신고')),
                       if (!isAuthor)
                         const PopupMenuItem(value: 'block', child: Text('차단')),
+                      if (!isAuthor && data['isAnonymous'] != true)
+                        const PopupMenuItem(value: 'chat', child: Text('채팅')),
                     ],
                   );
                 },
