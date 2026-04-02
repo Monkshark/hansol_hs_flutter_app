@@ -26,6 +26,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/api/kakao_keys.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSdk;
@@ -77,7 +78,7 @@ Future<void> main() async {
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   unawaited(FcmService.initialize());
 
-  initializeDateFormatting().then((_) => runApp(const HansolHighSchool()));
+  initializeDateFormatting().then((_) => runApp(const ProviderScope(child: HansolHighSchool())));
 }
 
 ThemeMode _indexToThemeMode(int index) {
