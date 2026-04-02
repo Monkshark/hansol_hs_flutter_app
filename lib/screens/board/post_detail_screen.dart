@@ -110,6 +110,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 }
 
                 final post = postSnapshot.data!.data()!;
+                _currentPostAuthorUid = post['authorUid'] as String?;
                 final title = post['title'] ?? '';
                 final content = post['content'] ?? '';
                 final isAnon = post['isAnonymous'] == true;
@@ -741,10 +742,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     return widgets;
   }
 
+  String? _currentPostAuthorUid;
+
   Widget _buildCommentWidget(QueryDocumentSnapshot doc, {required bool indent}) {
     final c = doc.data() as Map<String, dynamic>;
     final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
     final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
+    final isPostAuthor = c['authorUid'] == _currentPostAuthorUid;
 
     return Padding(
       padding: EdgeInsets.only(left: indent ? 32 : 0),
@@ -753,6 +757,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         data: c,
         isAuthor: canDelete,
         isReply: indent,
+        isPostAuthor: isPostAuthor,
         onDelete: () => _confirmDeleteComment(doc.id),
         onReply: () {
           setState(() {
@@ -1214,10 +1219,11 @@ class _CommentItem extends StatelessWidget {
   final Map<String, dynamic> data;
   final bool isAuthor;
   final bool isReply;
+  final bool isPostAuthor;
   final VoidCallback onDelete;
   final VoidCallback onReply;
 
-  const _CommentItem({super.key, required this.data, required this.isAuthor, this.isReply = false, required this.onDelete, required this.onReply});
+  const _CommentItem({super.key, required this.data, required this.isAuthor, this.isReply = false, this.isPostAuthor = false, required this.onDelete, required this.onReply});
 
   @override
   Widget build(BuildContext context) {
@@ -1239,7 +1245,9 @@ class _CommentItem extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+          color: isPostAuthor
+              ? (isDark ? const Color(0xFF1E2840) : const Color(0xFFEBF0FF))
+              : (isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5)),
           borderRadius: BorderRadius.circular(12),
           border: isReply ? Border(
             left: BorderSide(color: AppColors.theme.primaryColor.withAlpha(100), width: 2),
@@ -1251,6 +1259,18 @@ class _CommentItem extends StatelessWidget {
             Row(
               children: [
                 Text(name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
+                if (isPostAuthor) ...[
+                  const SizedBox(width: 4),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
+                    decoration: BoxDecoration(
+                      color: AppColors.theme.primaryColor.withAlpha(20),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text('글쓴이', style: TextStyle(
+                      fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.theme.primaryColor)),
+                  ),
+                ],
                 const SizedBox(width: 8),
                 Text(timeStr, style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor)),
                 const Spacer(),
