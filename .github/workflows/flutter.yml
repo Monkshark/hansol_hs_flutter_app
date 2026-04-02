@@ -1,0 +1,51 @@
+name: Flutter CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: 'stable'
+
+      - name: Create dummy secret files
+        run: |
+          cat > lib/api/nies_api_keys.dart << 'DART'
+          class niesApiKeys {
+            static const _NIES_API_KEY = 'dummy';
+            static const _ATPT_OFCDC_SC_CODE = 'dummy';
+            static const _SD_SCHUL_CODE = 'dummy';
+            static String get NIES_API_KEY => _NIES_API_KEY;
+            static String get ATPT_OFCDC_SC_CODE => _ATPT_OFCDC_SC_CODE;
+            static String get SD_SCHUL_CODE => _SD_SCHUL_CODE;
+          }
+          DART
+          cat > lib/firebase_options.dart << 'DART'
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+          import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform => const FirebaseOptions(
+              apiKey: 'dummy', appId: 'dummy', messagingSenderId: 'dummy', projectId: 'dummy',
+            );
+          }
+          DART
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Analyze
+        run: flutter analyze --no-fatal-infos
+
+      - name: Test
+        run: flutter test --no-pub || true

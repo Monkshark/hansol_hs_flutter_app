@@ -854,6 +854,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
       postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
       postData['commentCount'] = 0;
       postData['imageUrls'] = <String>[];
+      postData['anonymousCount'] = 0;
+      postData['anonymousMapping'] = <String, dynamic>{};
       final docRef = await FirebaseFirestore.instance.collection('posts').add(postData);
 
       if (_images.isNotEmpty) {

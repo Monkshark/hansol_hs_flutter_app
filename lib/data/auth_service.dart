@@ -22,6 +22,7 @@ class UserProfile {
   final int? graduationYear;
   final String? teacherSubject;
   final DateTime? suspendedUntil;
+  final List<String> blockedUsers;
 
   UserProfile({
     required this.uid,
@@ -37,6 +38,7 @@ class UserProfile {
     this.graduationYear,
     this.teacherSubject,
     this.suspendedUntil,
+    this.blockedUsers = const [],
   });
 
   bool get isManager => role == 'manager' || role == 'admin';
@@ -81,6 +83,7 @@ class UserProfile {
     'graduationYear': graduationYear,
     'teacherSubject': teacherSubject,
     if (suspendedUntil != null) 'suspendedUntil': Timestamp.fromDate(suspendedUntil!),
+    'blockedUsers': blockedUsers,
     'updatedAt': FieldValue.serverTimestamp(),
   };
 
@@ -98,6 +101,7 @@ class UserProfile {
     graduationYear: map['graduationYear'],
     teacherSubject: map['teacherSubject'],
     suspendedUntil: map['suspendedUntil'] != null ? (map['suspendedUntil'] as Timestamp).toDate() : null,
+    blockedUsers: map['blockedUsers'] != null ? List<String>.from(map['blockedUsers'] as List) : [],
   );
 }
 

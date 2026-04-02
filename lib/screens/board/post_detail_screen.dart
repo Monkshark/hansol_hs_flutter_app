@@ -72,6 +72,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       if (value == 'edit') _editPost(data);
                       if (value == 'delete') _deletePost();
                       if (value == 'report') _reportPost();
+                      if (value == 'block') _blockUser(data['authorUid']);
                       if (value == 'pin') _pinPost();
                       if (value == 'unpin') _unpinPost();
                     },
@@ -88,6 +89,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         const PopupMenuItem(value: 'unpin', child: Text('공지 해제')),
                       if (!isAuthor)
                         const PopupMenuItem(value: 'report', child: Text('신고')),
+                      if (!isAuthor)
+                        const PopupMenuItem(value: 'block', child: Text('차단')),
                     ],
                   );
                 },
@@ -392,6 +395,22 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     ));
   }
 
+  Future<void> _blockUser(String authorUid) async {
+    if (!AuthService.isLoggedIn) return;
+    final uid = AuthService.currentUser?.uid;
+    if (uid == null) return;
+
+    await FirebaseFirestore.instance.collection('users').doc(uid).update({
+      'blockedUsers': FieldValue.arrayUnion([authorUid]),
+    });
+    AuthService.clearProfileCache();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('해당 사용자를 차단했습니다')),
+      );
+    }
+  }
+
   Future<void> _reportPost() async {
     if (!AuthService.isLoggedIn) return;
 
@@ -588,7 +607,39 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final anonymous = _commentAnonymous;
     _commentController.clear();
 
-    final displayName = anonymous ? '익명' : profile.displayName;
+    String displayName = anonymous ? '익명' : profile.displayName;
+
+    if (anonymous) {
+      final myUid = AuthService.currentUser!.uid;
+
+      // Check if post author
+      final postSnap = await _postRef.get();
+      final postAuthorUid = postSnap.data()?['authorUid'];
+
+      if (myUid == postAuthorUid) {
+        displayName = '익명(글쓴이)';
+      } else {
+        // Use transaction for atomic anonymous number assignment
+        displayName = await FirebaseFirestore.instance.runTransaction<String>((transaction) async {
+          final postDoc = await transaction.get(_postRef);
+          final data = postDoc.data() ?? {};
+          final mapping = Map<String, dynamic>.from(data['anonymousMapping'] ?? {});
+          final count = (data['anonymousCount'] as int?) ?? 0;
+
+          if (mapping.containsKey(myUid)) {
+            return '익명${mapping[myUid]}';
+          } else {
+            final newNum = count + 1;
+            mapping[myUid] = newNum;
+            transaction.update(_postRef, {
+              'anonymousMapping': mapping,
+              'anonymousCount': newNum,
+            });
+            return '익명$newNum';
+          }
+        });
+      }
+    }
 
     final commentData = <String, dynamic>{
       'content': text,

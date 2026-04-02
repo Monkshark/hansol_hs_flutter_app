@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -417,45 +418,57 @@ class _SettingScreenState extends State<SettingScreen> {
           final name = profile?.name ?? AuthService.currentUser?.displayName ?? '';
           final email = AuthService.currentUser?.email ?? '';
 
-          return _buildGroupedCard([
-            ListTile(
-              leading: CircleAvatar(
-                backgroundColor: AppColors.theme.primaryColor,
-                child: Text(
-                  name.isNotEmpty ? name[0] : '?',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
-                ),
-              ),
-              title: Text(name.isNotEmpty ? name : '이름 없음',
-                style: TextStyle(fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.bodyLarge?.color)),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(email,
-                    style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
-                  const SizedBox(height: 2),
-                  Text(
-                    profile?.approved == true ? '승인됨' : '승인 대기중',
-                    style: TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: profile?.approved == true ? const Color(0xFF4CAF50) : Colors.orange,
+          return Column(
+            children: [
+              _buildGroupedCard([
+                ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: AppColors.theme.primaryColor,
+                    child: Text(
+                      name.isNotEmpty ? name[0] : '?',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                   ),
-                ],
-              ),
-              trailing: TextButton(
-                onPressed: () async {
-                  await AuthService.signOut();
-                  AuthService.clearProfileCache();
-                  appRefreshNotifier.value++;
-                  if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
-                },
-                child: Text('로그아웃', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
-              ),
-            ),
-          ]);
+                  title: Text(name.isNotEmpty ? name : '이름 없음',
+                    style: TextStyle(fontWeight: FontWeight.w600,
+                        color: Theme.of(context).textTheme.bodyLarge?.color)),
+                  subtitle: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(email,
+                        style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+                      const SizedBox(height: 2),
+                      Text(
+                        profile?.approved == true ? '승인됨' : '승인 대기중',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w600,
+                          color: profile?.approved == true ? const Color(0xFF4CAF50) : Colors.orange,
+                        ),
+                      ),
+                    ],
+                  ),
+                  trailing: TextButton(
+                    onPressed: () async {
+                      await AuthService.signOut();
+                      AuthService.clearProfileCache();
+                      appRefreshNotifier.value++;
+                      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+                    },
+                    child: Text('로그아웃', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                  ),
+                ),
+              ]),
+              const SizedBox(height: 8),
+              _buildGroupedCard([
+                ListTile(
+                  leading: const Icon(Icons.delete_forever, color: Colors.red),
+                  title: const Text('회원 탈퇴', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                  onTap: () => _deleteAccount(),
+                ),
+              ]),
+            ],
+          );
         },
       );
     }
@@ -584,6 +597,53 @@ class _SettingScreenState extends State<SettingScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _deleteAccount() async {
+    final confirm1 = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('회원 탈퇴'),
+        content: const Text('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('확인', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirm1 != true) return;
+
+    final confirm2 = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('최종 확인'),
+        content: const Text('회원 탈퇴를 진행합니다.'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('탈퇴', style: TextStyle(color: Colors.red))),
+        ],
+      ),
+    );
+    if (confirm2 != true) return;
+
+    try {
+      final uid = AuthService.currentUser?.uid;
+      if (uid != null) {
+        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      }
+      await AuthService.currentUser?.delete();
+      await AuthService.signOut();
+      AuthService.clearProfileCache();
+      appRefreshNotifier.value++;
+      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+    } catch (e) {
+      log('Account deletion error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('회원 탈퇴에 실패했습니다. 다시 시도해주세요.')),
+        );
+      }
+    }
   }
 
   void _selectGradeAndClass() async {
