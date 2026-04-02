@@ -75,8 +75,20 @@
             android:name="flutterEmbedding"
             android:value="2" />
 
+        <activity
+            android:name="com.kakao.sdk.flutter.AuthCodeHandlerActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="oauth" android:scheme="kakao7b6f97457a59e116674f98aa0a1a3034" />
+            </intent-filter>
+        </activity>
+
     </application>
     <queries>
+        <package android:name="com.kakao.talk" />
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>

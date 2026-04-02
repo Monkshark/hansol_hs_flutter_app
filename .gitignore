@@ -173,6 +173,7 @@ app.*.map.json
 /android/app/release
 
 /lib/api/nies_api_keys.dart
+/lib/api/kakao_keys.dart
 /lib/firebase_options.dart
 
 # Figma designs
@@ -180,6 +181,7 @@ app.*.map.json
 
 # Secret files
 lib/api/nies_api_keys.dart
+lib/api/kakao_keys.dart
 lib/firebase_options.dart
 android/app/google-services.json
 ios/Runner/GoogleService-Info.plist
