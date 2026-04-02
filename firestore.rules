@@ -47,6 +47,10 @@ service cloud.firestore {
       allow read: if true;
       allow write: if isAdminOrManager();
     }
+    match /admin_logs/{logId} {
+      allow create: if isAdminOrManager();
+      allow read: if isAdminOrManager();
+    }
     match /{path=**}/comments/{commentId} {
       allow read: if request.auth != null;
     }

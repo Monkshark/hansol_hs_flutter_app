@@ -181,6 +181,17 @@ class _UsersTab extends StatelessWidget {
   final String filter;
   const _UsersTab({required this.filter});
 
+  Future<void> _logAdminAction(String action, String targetUid, String targetName) async {
+    await FirebaseFirestore.instance.collection('admin_logs').add({
+      'action': action,
+      'targetUid': targetUid,
+      'targetName': targetName,
+      'adminUid': AuthService.currentUser?.uid ?? '',
+      'adminName': AuthService.cachedProfile?.displayName ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   bool _isSuspended(Map<String, dynamic> data) {
     final ts = data['suspendedUntil'] as Timestamp?;
     if (ts == null) return false;
@@ -330,11 +341,13 @@ class _UsersTab extends StatelessWidget {
                             _actionBtn('승인', AppColors.theme.primaryColor, () async {
                               await docs[index].reference.update({'approved': true});
                               await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다.');
+                              await _logAdminAction('승인', uid, name);
                             }),
                             const SizedBox(width: 6),
                             _actionBtn('거절', Colors.red, () async {
                               await _sendAccountNotification(uid, '가입 거절', '가입이 거절되었습니다.');
                               await docs[index].reference.delete();
+                              await _logAdminAction('거절', uid, name);
                             }),
                           ],
                           if (filter == 'approved') ...[
@@ -348,12 +361,15 @@ class _UsersTab extends StatelessWidget {
                                 role == 'manager' ? '매니저 해제' : '매니저',
                                 role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
                                 () async {
-                                  await docs[index].reference.update({'role': role == 'manager' ? 'user' : 'manager'});
+                                  final newRole = role == 'manager' ? 'user' : 'manager';
+                                  await docs[index].reference.update({'role': newRole});
+                                  await _logAdminAction('역할 변경: $newRole', uid, name);
                                 },
                               ),
                               const SizedBox(width: 6),
                               _actionBtn('Admin', Colors.red, () async {
                                 await docs[index].reference.update({'role': 'admin'});
+                                await _logAdminAction('역할 변경: admin', uid, name);
                               }),
                             ],
                             if (uid != AuthService.currentUser?.uid && role == 'user') ...[
@@ -364,6 +380,7 @@ class _UsersTab extends StatelessWidget {
                                   final until = DateTime.now().add(Duration(hours: hours));
                                   await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
                                   await _sendAccountNotification(uid, '계정 정지', '${_formatDuration(hours)} 동안 계정이 정지되었습니다.');
+                                  await _logAdminAction('정지', uid, name);
                                 }
                               }),
                               const SizedBox(width: 6),
@@ -374,6 +391,7 @@ class _UsersTab extends StatelessWidget {
                                 if (second == true) {
                                   await _sendAccountNotification(uid, '계정 삭제', '관리자에 의해 계정이 삭제되었습니다.');
                                   await docs[index].reference.delete();
+                                  await _logAdminAction('삭제', uid, name);
                                 }
                               }),
                             ],
@@ -382,6 +400,7 @@ class _UsersTab extends StatelessWidget {
                             _actionBtn('정지 해제', AppColors.theme.primaryColor, () async {
                               await docs[index].reference.update({'suspendedUntil': null});
                               await _sendAccountNotification(uid, '정지 해제', '계정 정지가 해제되었습니다.');
+                              await _logAdminAction('정지 해제', uid, name);
                             }),
                           ],
                         ],

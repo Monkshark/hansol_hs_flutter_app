@@ -11,6 +11,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 글쓰기/수정 화면 (WritePostScreen)
 ///
@@ -769,6 +770,21 @@ class _WritePostScreenState extends State<WritePostScreen> {
       return;
     }
 
+    // Rate limiting: 30 seconds between posts
+    if (!_isEdit) {
+      final prefs = await SharedPreferences.getInstance();
+      final lastPostTime = prefs.getInt('last_post_time') ?? 0;
+      final now = DateTime.now().millisecondsSinceEpoch;
+      if (now - lastPostTime < 30000) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('게시글은 30초에 한 번만 작성할 수 있습니다')),
+          );
+        }
+        return;
+      }
+    }
+
     setState(() => _saving = true);
 
     if (!AuthService.isLoggedIn) {
@@ -862,6 +878,12 @@ class _WritePostScreenState extends State<WritePostScreen> {
         final urls = await _uploadImages(docRef.id);
         await docRef.update({'imageUrls': urls});
       }
+    }
+
+    // Save last post time for rate limiting
+    if (!_isEdit) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt('last_post_time', DateTime.now().millisecondsSinceEpoch);
     }
 
     if (mounted) Navigator.pop(context);

@@ -12,6 +12,7 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 /// 설정 화면 (SettingScreen)
 ///
@@ -308,6 +309,17 @@ class _SettingScreenState extends State<SettingScreen> {
               const SizedBox(height: 24),
               _buildSectionTitle('기타'),
               _buildGroupedCard([
+                GestureDetector(
+                  onTap: () {
+                    launchUrl(Uri.parse('https://hansol-high-school-46fc9.web.app/privacy'),
+                      mode: LaunchMode.externalApplication);
+                  },
+                  child: _buildSettingRow(
+                    '개인정보 처리방침',
+                    trailing: Icon(Icons.open_in_new, size: 18, color: AppColors.theme.darkGreyColor),
+                  ),
+                ),
+                _buildDivider(),
                 _buildSettingRow(
                   '캐시 삭제${_cacheSize.isNotEmpty ? ' ($_cacheSize)' : ''}',
                   trailing: TextButton(

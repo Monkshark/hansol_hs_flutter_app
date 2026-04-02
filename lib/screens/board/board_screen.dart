@@ -23,20 +23,84 @@ class BoardScreen extends StatefulWidget {
 
 class _BoardScreenState extends State<BoardScreen> {
   static const _categories = ['전체', '자유', '질문', '정보공유'];
+  static const _pageSize = 20;
   int _selectedIndex = 0;
   String _searchQuery = '';
   bool _isSearching = false;
+  final ScrollController _scrollController = ScrollController();
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _allDocs = [];
+  DocumentSnapshot? _lastDoc;
+  bool _hasMore = true;
+  bool _loadingMore = false;
+  bool _initialLoading = true;
 
   String get _selectedCategory => _categories[_selectedIndex];
 
-  Query<Map<String, dynamic>> get _query {
-    final base = FirebaseFirestore.instance
+  @override
+  void initState() {
+    super.initState();
+    _loadPosts();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      _loadMorePosts();
+    }
+  }
+
+  Future<void> _loadPosts() async {
+    setState(() { _initialLoading = true; _allDocs = []; _lastDoc = null; _hasMore = true; });
+
+    Query<Map<String, dynamic>> q = FirebaseFirestore.instance
         .collection('posts')
         .orderBy('createdAt', descending: true)
-        .limit(50);
+        .limit(_pageSize);
 
-    if (_selectedCategory == '전체') return base;
-    return base.where('category', isEqualTo: _selectedCategory);
+    if (_selectedCategory != '전체') {
+      q = q.where('category', isEqualTo: _selectedCategory);
+    }
+
+    final snap = await q.get();
+    if (mounted) {
+      setState(() {
+        _allDocs = snap.docs;
+        _lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
+        _hasMore = snap.docs.length == _pageSize;
+        _initialLoading = false;
+      });
+    }
+  }
+
+  Future<void> _loadMorePosts() async {
+    if (!_hasMore || _loadingMore || _lastDoc == null) return;
+    setState(() => _loadingMore = true);
+
+    Query<Map<String, dynamic>> q = FirebaseFirestore.instance
+        .collection('posts')
+        .orderBy('createdAt', descending: true)
+        .startAfterDocument(_lastDoc!)
+        .limit(_pageSize);
+
+    if (_selectedCategory != '전체') {
+      q = q.where('category', isEqualTo: _selectedCategory);
+    }
+
+    final snap = await q.get();
+    if (mounted) {
+      setState(() {
+        _allDocs.addAll(snap.docs);
+        _lastDoc = snap.docs.isNotEmpty ? snap.docs.last : _lastDoc;
+        _hasMore = snap.docs.length == _pageSize;
+        _loadingMore = false;
+      });
+    }
   }
 
   @override
@@ -98,7 +162,10 @@ class _BoardScreenState extends State<BoardScreen> {
               itemBuilder: (context, index) {
                 final selected = _selectedIndex == index;
                 return GestureDetector(
-                  onTap: () => setState(() => _selectedIndex = index),
+                  onTap: () {
+                    setState(() => _selectedIndex = index);
+                    _loadPosts();
+                  },
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                     alignment: Alignment.center,
@@ -123,14 +190,13 @@ class _BoardScreenState extends State<BoardScreen> {
           ),
           const SizedBox(height: 8),
           Expanded(
-            child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-              stream: _query.snapshots(),
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
+            child: Builder(
+              builder: (context) {
+                if (_initialLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                var docs = snapshot.data?.docs ?? [];
+                var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs);
 
                 final blockedUsers = AuthService.cachedProfile?.blockedUsers ?? [];
                 if (blockedUsers.isNotEmpty) {
@@ -179,18 +245,30 @@ class _BoardScreenState extends State<BoardScreen> {
                   );
                 }
 
-                return ListView.separated(
-                  padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 80),
-                  itemCount: docs.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) => PostCard(
-                    doc: docs[index],
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) => PostDetailScreen(postId: docs[index].id),
-                      ),
-                    ),
+                return RefreshIndicator(
+                  onRefresh: _loadPosts,
+                  child: ListView.separated(
+                    controller: _scrollController,
+                    padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 80),
+                    itemCount: docs.length + (_loadingMore ? 1 : 0),
+                    separatorBuilder: (_, __) => const SizedBox(height: 8),
+                    itemBuilder: (context, index) {
+                      if (index == docs.length) {
+                        return const Padding(
+                          padding: EdgeInsets.all(16),
+                          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                        );
+                      }
+                      return PostCard(
+                        doc: docs[index],
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => PostDetailScreen(postId: docs[index].id),
+                          ),
+                        ),
+                      );
+                    },
                   ),
                 );
               },

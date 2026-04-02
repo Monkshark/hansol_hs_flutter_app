@@ -8,6 +8,7 @@ import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// 글 상세 화면 (PostDetailScreen)
 ///
@@ -601,6 +602,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       return;
     }
 
+    // Rate limiting: 10 seconds between comments
+    final prefs = await SharedPreferences.getInstance();
+    final lastCommentTime = prefs.getInt('last_comment_time') ?? 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+    if (now - lastCommentTime < 10000) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('댓글은 10초에 한 번만 작성할 수 있습니다')),
+        );
+      }
+      return;
+    }
+
     final profile = await AuthService.getUserProfile();
     if (profile == null) return;
 
@@ -696,6 +710,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         });
       }
     }
+
+    // Save last comment time for rate limiting
+    await prefs.setInt('last_comment_time', DateTime.now().millisecondsSinceEpoch);
 
     if (mounted) setState(() {
       _sending = false;
