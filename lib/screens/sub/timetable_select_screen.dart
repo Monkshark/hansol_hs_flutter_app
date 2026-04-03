@@ -436,7 +436,7 @@ class _SubjectSwipeCardState extends State<_SubjectSwipeCard> {
                 ? const Color(0xFFFF9800).withAlpha(150)
                 : isChecked
                     ? AppColors.theme.primaryColor.withAlpha(100)
-                    : Colors.transparent,
+                    : AppColors.theme.lightGreyColor,
             width: 1.5,
           ),
         ),

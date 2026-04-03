@@ -308,10 +308,13 @@ class _BoardScreenState extends State<BoardScreen> {
       return;
     }
 
-    Navigator.push(
+    final result = await Navigator.push<bool>(
       context,
       MaterialPageRoute(builder: (_) => const WritePostScreen()),
     );
+    if (result == true && mounted) {
+      _loadPosts();
+    }
   }
 }
 

@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
@@ -7,11 +8,6 @@ import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 
-/// 로그인 화면 (LoginScreen)
-///
-/// - Google / Apple / Kakao 소셜 로그인 지원
-/// - 로그인 성공 시 FCM 토큰 갱신
-/// - 프로필 미설정 사용자는 프로필 설정 화면으로 자동 이동
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -39,7 +35,14 @@ class _LoginScreenState extends State<LoginScreen> {
 
     FcmService.onUserLogin();
 
-    final hasProfile = await AuthService.hasProfile();
+    // auth 토큰 강제 갱신 후 프로필 확인 (최대 3회 재시도)
+    await user.getIdToken(true);
+    bool hasProfile = false;
+    for (int i = 0; i < 3; i++) {
+      hasProfile = await AuthService.hasProfile();
+      if (hasProfile) break;
+      await Future.delayed(const Duration(milliseconds: 300));
+    }
     if (!mounted) return;
 
     if (hasProfile) {
@@ -110,37 +113,53 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
               const Spacer(flex: 3),
 
+              // Google — 흰 배경, 회색 테두리, 컬러 로고
               _loginButton(
-                label: 'Google로 로그인',
-                icon: Icons.g_mobiledata,
-                iconColor: const Color(0xFF4285F4),
-                bgColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-                borderColor: isDark ? const Color(0xFF3A3A3C) : const Color(0xFFE0E0E0),
-                textColor: Theme.of(context).textTheme.bodyLarge?.color,
+                label: 'Google로 계속하기',
+                svgAsset: 'assets/icons/google.svg',
+                bgColor: isDark ? const Color(0xFF2A2D35) : Colors.white,
+                borderColor: isDark ? const Color(0xFF3A3D45) : const Color(0xFFDADCE0),
+                textColor: isDark ? Colors.white : const Color(0xFF3C4043),
                 onTap: () => _handleLogin(AuthService.signInWithGoogle),
               ),
 
               const SizedBox(height: 10),
 
+              // Apple (iOS only) — 검정 배경, 흰 로고
               if (Platform.isIOS) ...[
                 _loginButton(
-                  label: 'Apple로 로그인',
-                  icon: Icons.apple,
-                  iconColor: isDark ? Colors.white : Colors.black,
-                  bgColor: isDark ? Colors.white.withAlpha(15) : Colors.black,
-                  textColor: isDark ? Colors.white : Colors.white,
+                  label: 'Apple로 계속하기',
+                  svgAsset: 'assets/icons/apple.svg',
+                  svgColor: Colors.white,
+                  bgColor: Colors.black,
+                  textColor: Colors.white,
                   onTap: () => _handleLogin(AuthService.signInWithApple),
                 ),
                 const SizedBox(height: 10),
               ],
 
+              // Kakao
               _loginButton(
-                label: 'Kakao로 로그인',
-                icon: Icons.chat_bubble,
-                iconColor: const Color(0xFF3C1E1E),
-                bgColor: const Color(0xFFFEE500),
-                textColor: const Color(0xFF3C1E1E),
+                label: '카카오로 계속하기',
+                svgAsset: 'assets/icons/kakao.svg',
+                svgColor: isDark ? const Color(0xFFFEE500) : const Color(0xFF181600),
+                bgColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFFEE500),
+                borderColor: isDark ? const Color(0xFF3A3D45) : null,
+                textColor: isDark ? Colors.white : const Color(0xFF181600),
                 onTap: () => _handleLogin(_kakaoLogin),
+              ),
+
+              const SizedBox(height: 10),
+
+              // GitHub — 다크 배경, 흰 로고
+              _loginButton(
+                label: 'GitHub로 계속하기',
+                svgAsset: 'assets/icons/github.svg',
+                svgColor: Colors.white,
+                bgColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFF24292F),
+                borderColor: isDark ? const Color(0xFF3A3D45) : null,
+                textColor: Colors.white,
+                onTap: () => _handleLogin(AuthService.signInWithGitHub),
               ),
 
               const SizedBox(height: 16),
@@ -158,8 +177,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _loginButton({
     required String label,
-    required IconData icon,
-    required Color iconColor,
+    required String svgAsset,
+    Color? svgColor,
     required Color bgColor,
     Color? borderColor,
     Color? textColor,
@@ -183,7 +202,8 @@ class _LoginScreenState extends State<LoginScreen> {
             : Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(icon, size: 24, color: iconColor),
+                  SvgPicture.asset(svgAsset, width: 22, height: 22,
+                    colorFilter: svgColor != null ? ColorFilter.mode(svgColor, BlendMode.srcIn) : null),
                   const SizedBox(width: 10),
                   Text(label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
                 ],

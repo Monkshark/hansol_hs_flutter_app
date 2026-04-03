@@ -264,6 +264,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     switch (p) {
       case 'kakao': return 'Kakao';
       case 'apple': return 'Apple';
+      case 'github': return 'GitHub';
       default: return 'Google';
     }
   }

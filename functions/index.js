@@ -1,5 +1,6 @@
 const { onDocumentCreated, onDocumentUpdated, onDocumentDeleted } = require("firebase-functions/v2/firestore");
 const { onRequest } = require("firebase-functions/v2/https");
+const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
 const { getFirestore } = require("firebase-admin/firestore");
@@ -100,9 +101,12 @@ exports.onCommentCreated = onDocumentCreated(
     if (comment.authorUid !== postAuthorUid) {
       const userDoc = await getFirestore().doc(`users/${postAuthorUid}`).get();
       if (userDoc.exists) {
-        await sendPush(userDoc.data().fcmToken, post.title || "", `${name}: ${content}`, {
-          type: "comment", postId, _targetUid: postAuthorUid,
-        });
+        const userData = userDoc.data();
+        if (userData.notiComment !== false) {
+          await sendPush(userData.fcmToken, post.title || "", `${name}: ${content}`, {
+            type: "comment", postId, _targetUid: postAuthorUid,
+          });
+        }
         notifiedUids.add(postAuthorUid);
       }
     }
@@ -115,9 +119,12 @@ exports.onCommentCreated = onDocumentCreated(
         if (parentAuthorUid && parentAuthorUid !== comment.authorUid && !notifiedUids.has(parentAuthorUid)) {
           const parentUserDoc = await getFirestore().doc(`users/${parentAuthorUid}`).get();
           if (parentUserDoc.exists) {
-            await sendPush(parentUserDoc.data().fcmToken, "답글 알림", `${name}: ${content}`, {
-              type: "comment", postId, _targetUid: parentAuthorUid,
-            });
+            const parentUserData = parentUserDoc.data();
+            if (parentUserData.notiReply !== false) {
+              await sendPush(parentUserData.fcmToken, "답글 알림", `${name}: ${content}`, {
+                type: "comment", postId, _targetUid: parentAuthorUid,
+              });
+            }
           }
         }
       }
@@ -163,6 +170,8 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
   const after = event.data.after.data();
   const userId = event.params.userId;
 
+  if (after.notiAccount === false) return;
+
   if (!before.approved && after.approved) {
     const token = after.fcmToken;
     await sendPush(token, "가입 승인", "가입이 승인되었습니다. 앱의 모든 기능을 사용할 수 있습니다.", {
@@ -173,6 +182,13 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
   if (!before.suspendedUntil && after.suspendedUntil) {
     const token = after.fcmToken;
     await sendPush(token, "계정 정지", "관리자에 의해 계정이 정지되었습니다.", {
+      type: "account", _targetUid: userId,
+    });
+  }
+
+  if (before.suspendedUntil && !after.suspendedUntil) {
+    const token = after.fcmToken;
+    await sendPush(token, "정지 해제", "계정 정지가 해제되었습니다. 앱을 정상적으로 이용할 수 있습니다.", {
       type: "account", _targetUid: userId,
     });
   }
@@ -189,15 +205,32 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
 exports.onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
   const user = event.data.data();
   const token = user.fcmToken;
+  const userId = event.params.userId;
 
+  // 푸시 알림
   if (token && !user.approved) {
     await sendPush(token, "가입 거절", "가입이 거절되었습니다.", {
-      type: "account", _targetUid: event.params.userId,
+      type: "account", _targetUid: userId,
     });
   } else if (token && user.approved) {
     await sendPush(token, "계정 삭제", "관리자에 의해 계정이 삭제되었습니다.", {
-      type: "account", _targetUid: event.params.userId,
+      type: "account", _targetUid: userId,
     });
+  }
+
+  // Firebase Auth 계정 삭제
+  try {
+    await getAuth().deleteUser(userId);
+  } catch (e) {}
+
+  // 하위 컬렉션 삭제 (subjects, notifications)
+  const db = getFirestore();
+  const subcollections = ["subjects", "notifications"];
+  for (const sub of subcollections) {
+    const snap = await db.collection(`users/${userId}/${sub}`).get();
+    const batch = db.batch();
+    snap.docs.forEach((doc) => batch.delete(doc.ref));
+    if (snap.docs.length > 0) await batch.commit();
   }
 });
 
@@ -214,8 +247,21 @@ exports.onChatMessageCreated = onDocumentCreated(
     if (!recipientUid) return;
     const recipientDoc = await getFirestore().doc(`users/${recipientUid}`).get();
     if (!recipientDoc.exists) return;
-    await sendPush(recipientDoc.data().fcmToken, message.senderName || "알 수 없음",
+    const recipientData = recipientDoc.data();
+    if (recipientData.notiChat === false) return;
+    await sendPush(recipientData.fcmToken, message.senderName || "알 수 없음",
       (message.content || "").substring(0, 100),
       { type: "chat", chatId, _targetUid: recipientUid });
   }
 );
+
+// 매시간 정지 만료된 유저 확인 → suspendedUntil 삭제 → onUserUpdated 트리거 → 정지 해제 알림
+exports.checkSuspensionExpiry = onSchedule("every 1 hours", async () => {
+  const now = new Date();
+  const snap = await getFirestore().collection("users")
+    .where("suspendedUntil", "<=", now).get();
+
+  for (const doc of snap.docs) {
+    await doc.ref.update({ suspendedUntil: null });
+  }
+});

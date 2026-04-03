@@ -83,6 +83,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       provider = 'kakao';
     } else if (user.providerData.any((p) => p.providerId == 'apple.com')) {
       provider = 'apple';
+    } else if (user.providerData.any((p) => p.providerId == 'github.com')) {
+      provider = 'github';
     }
 
     final profile = UserProfile(

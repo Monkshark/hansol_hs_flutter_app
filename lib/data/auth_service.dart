@@ -200,6 +200,17 @@ class AuthService {
     }
   }
 
+  static Future<User?> signInWithGitHub() async {
+    try {
+      final githubProvider = GithubAuthProvider();
+      final result = await _auth.signInWithProvider(githubProvider);
+      return result.user;
+    } catch (e) {
+      log('AuthService: GitHub sign in error: $e');
+      return null;
+    }
+  }
+
   static String _generateNonce([int length = 32]) {
     const charset = '0123456789ABCDEFGHIJKLMNOPQRSTUVXYZabcdefghijklmnopqrstuvwxyz-._';
     final random = math.Random.secure();
@@ -236,8 +247,13 @@ class AuthService {
   static Future<bool> hasProfile() async {
     final user = currentUser;
     if (user == null) return false;
-    final doc = await _firestore.collection('users').doc(user.uid).get();
-    return doc.exists && doc.data()?['name'] != null;
+    try {
+      final doc = await _firestore.collection('users').doc(user.uid).get();
+      return doc.exists && doc.data()?['name'] != null;
+    } catch (e) {
+      log('AuthService: hasProfile error: $e');
+      return false;
+    }
   }
 
   static Future<bool> isApproved() async {

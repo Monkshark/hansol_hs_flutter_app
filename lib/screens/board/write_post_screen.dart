@@ -885,6 +885,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       await prefs.setInt('last_post_time', DateTime.now().millisecondsSinceEpoch);
     }
 
-    if (mounted) Navigator.pop(context);
+    if (mounted) Navigator.pop(context, true);
   }
 }

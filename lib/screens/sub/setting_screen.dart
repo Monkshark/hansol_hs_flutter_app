@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
-import 'package:hansol_high_school/notification/daily_meal_notification.dart';
-import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/auth/profile_edit_screen.dart';
 import 'package:hansol_high_school/screens/sub/feedback_screen.dart';
+import 'package:hansol_high_school/screens/sub/notification_setting_screen.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
@@ -263,52 +262,18 @@ class _SettingScreenState extends State<SettingScreen> {
               const SizedBox(height: 24),
               _buildSectionTitle('알림'),
               _buildGroupedCard([
-                _buildNotificationRow('조식 알림', breakfastTime, isBreakfastNotificationOn,
-                  (t) {
-                    setState(() { breakfastTime = t; _saveSettings(); DailyMealNotification().updateNotifications(); });
-                  },
-                  (v) {
-                    setState(() { isBreakfastNotificationOn = v; _saveSettings(); DailyMealNotification().updateNotifications(); });
-                  },
-                ),
-                _buildDivider(),
-                _buildNotificationRow('중식 알림', lunchTime, isLunchNotificationOn,
-                  (t) {
-                    setState(() { lunchTime = t; _saveSettings(); DailyMealNotification().updateNotifications(); });
-                  },
-                  (v) {
-                    setState(() { isLunchNotificationOn = v; _saveSettings(); DailyMealNotification().updateNotifications(); });
-                  },
-                ),
-                _buildDivider(),
-                _buildNotificationRow('석식 알림', dinnerTime, isDinnerNotificationOn,
-                  (t) {
-                    setState(() { dinnerTime = t; _saveSettings(); DailyMealNotification().updateNotifications(); });
-                  },
-                  (v) {
-                    setState(() { isDinnerNotificationOn = v; _saveSettings(); DailyMealNotification().updateNotifications(); });
-                  },
-                ),
-              ]),
-              const SizedBox(height: 24),
-              _buildSectionTitle('게시판 알림'),
-              _buildGroupedCard([
-                _buildSettingRow(
-                  '내 글 댓글 알림',
-                  trailing: Switch(
-                    value: SettingData().isBoardNotificationOn,
-                    activeColor: AppColors.theme.primaryColor,
-                    onChanged: (v) {
-                      setState(() {
-                        FcmService.toggleBoardNotification(v);
-                      });
-                    },
+                GestureDetector(
+                  onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const NotificationSettingScreen())),
+                  child: _buildSettingRow(
+                    '알림 설정',
+                    trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                   ),
                 ),
               ]),
               if (AuthService.isLoggedIn) ...[
                 const SizedBox(height: 24),
-                _buildSectionTitle('건의사��'),
+                _buildSectionTitle('건의사항'),
                 _buildGroupedCard([
                   GestureDetector(
                     onTap: () => Navigator.push(context,
@@ -580,68 +545,11 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
-  Widget _buildNotificationRow(
-    String name,
-    TimeOfDay selectedTime,
-    bool isSwitched,
-    ValueChanged<TimeOfDay> onTimeChanged,
-    ValueChanged<bool> onSwitchChanged,
-  ) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 16,
-              color: Theme.of(context).textTheme.bodyLarge?.color,
-            ),
-          ),
-          Row(
-            children: [
-              GestureDetector(
-                onTap: isSwitched
-                    ? () async {
-                        TimeOfDay? pickedTime = await showTimePicker(
-                          context: context,
-                          initialTime: selectedTime,
-                        );
-                        if (pickedTime != null && pickedTime != selectedTime) {
-                          onTimeChanged(pickedTime);
-                        }
-                      }
-                    : null,
-                child: Text(
-                  selectedTime.format(context),
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: isSwitched
-                        ? AppColors.theme.primaryColor
-                        : AppColors.theme.darkGreyColor,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Switch.adaptive(
-                value: isSwitched,
-                activeColor: AppColors.theme.primaryColor,
-                onChanged: (newValue) {
-                  onSwitchChanged(newValue);
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   String _providerLabel(String provider) {
     switch (provider) {
       case 'kakao': return 'Kakao 로그인';
       case 'apple': return 'Apple 로그인';
+      case 'github': return 'GitHub 로그인';
       default: return 'Google 로그인';
     }
   }
