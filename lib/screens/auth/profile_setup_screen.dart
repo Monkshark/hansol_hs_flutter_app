@@ -25,6 +25,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _teacherSubjectController = TextEditingController();
   String _userType = 'student';
   bool _isSaving = false;
+  bool _privacyAgreed = false;
 
   @override
   void initState() {
@@ -219,11 +220,38 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                     style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
                 ],
 
-                const SizedBox(height: 32),
+                if (!widget.isUpdate) ...[
+                  const SizedBox(height: 24),
+                  GestureDetector(
+                    onTap: () => setState(() => _privacyAgreed = !_privacyAgreed),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 22, height: 22, child: Checkbox(
+                          value: _privacyAgreed,
+                          onChanged: (v) => setState(() => _privacyAgreed = v ?? false),
+                          activeColor: AppColors.theme.primaryColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        )),
+                        const SizedBox(width: 10),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text('개인정보 수집·이용 동의 (필수)', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                            color: _privacyAgreed ? (isDark ? Colors.white : Colors.black87) : AppColors.theme.darkGreyColor)),
+                          const SizedBox(height: 4),
+                          Text('원활한 서비스 제공을 위해 이름, 학번 등 기본 정보를 수집합니다. 수집된 정보는 앱 이용 목적으로만 사용되며, 회원 탈퇴 시 즉시 삭제됩니다.',
+                            style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor, height: 1.5)),
+                        ])),
+                      ],
+                    ),
+                  ),
+                ],
+
+                const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity, height: 52,
                   child: ElevatedButton(
-                    onPressed: _isSaving ? null : _save,
+                    onPressed: (_isSaving || (!widget.isUpdate && !_privacyAgreed)) ? null : _save,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.theme.primaryColor,
                       foregroundColor: Colors.white,

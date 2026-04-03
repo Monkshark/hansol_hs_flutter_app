@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
+import 'package:hansol_high_school/screens/sub/feedback_list_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 관리자 화면 (AdminScreen)
@@ -22,7 +23,7 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 6, vsync: this);
   }
 
   @override
@@ -54,6 +55,8 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
             Tab(text: '승인 대기'),
             Tab(text: '사용자'),
             Tab(text: '정지'),
+            Tab(text: '앱 건의'),
+            Tab(text: '학생회'),
           ],
         ),
       ),
@@ -64,6 +67,8 @@ class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStat
           _UsersTab(filter: 'pending'),
           _UsersTab(filter: 'approved'),
           _UsersTab(filter: 'suspended'),
+          const FeedbackListScreen(type: 'app'),
+          const FeedbackListScreen(type: 'council'),
         ],
       ),
     );

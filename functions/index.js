@@ -91,20 +91,37 @@ exports.onCommentCreated = onDocumentCreated(
     if (!postDoc.exists) return;
 
     const post = postDoc.data();
-    const authorUid = post.authorUid;
-
-    if (comment.authorUid === authorUid) return;
-
-    const userDoc = await getFirestore().doc(`users/${authorUid}`).get();
-    if (!userDoc.exists) return;
-
-    const fcmToken = userDoc.data().fcmToken;
+    const postAuthorUid = post.authorUid;
     const name = (comment.authorName || "익명").substring(0, 50);
     const content = (comment.content || "").substring(0, 100);
+    const notifiedUids = new Set();
 
-    await sendPush(fcmToken, post.title || "", `${name}: ${content}`, {
-      type: "comment", postId, _targetUid: authorUid,
-    });
+    // 글 작성자에게 알림
+    if (comment.authorUid !== postAuthorUid) {
+      const userDoc = await getFirestore().doc(`users/${postAuthorUid}`).get();
+      if (userDoc.exists) {
+        await sendPush(userDoc.data().fcmToken, post.title || "", `${name}: ${content}`, {
+          type: "comment", postId, _targetUid: postAuthorUid,
+        });
+        notifiedUids.add(postAuthorUid);
+      }
+    }
+
+    // 대댓글: 부모 댓글 작성자에게도 알림
+    if (comment.parentId) {
+      const parentDoc = await getFirestore().doc(`posts/${postId}/comments/${comment.parentId}`).get();
+      if (parentDoc.exists) {
+        const parentAuthorUid = parentDoc.data().authorUid;
+        if (parentAuthorUid && parentAuthorUid !== comment.authorUid && !notifiedUids.has(parentAuthorUid)) {
+          const parentUserDoc = await getFirestore().doc(`users/${parentAuthorUid}`).get();
+          if (parentUserDoc.exists) {
+            await sendPush(parentUserDoc.data().fcmToken, "답글 알림", `${name}: ${content}`, {
+              type: "comment", postId, _targetUid: parentAuthorUid,
+            });
+          }
+        }
+      }
+    }
   }
 );
 
@@ -183,3 +200,22 @@ exports.onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
     });
   }
 });
+
+exports.onChatMessageCreated = onDocumentCreated(
+  "chats/{chatId}/messages/{messageId}",
+  async (event) => {
+    const message = event.data.data();
+    const chatId = event.params.chatId;
+    if (!message.senderUid || !message.content) return;
+    const chatDoc = await getFirestore().doc(`chats/${chatId}`).get();
+    if (!chatDoc.exists) return;
+    const chat = chatDoc.data();
+    const recipientUid = (chat.participants || []).find((uid) => uid !== message.senderUid);
+    if (!recipientUid) return;
+    const recipientDoc = await getFirestore().doc(`users/${recipientUid}`).get();
+    if (!recipientDoc.exists) return;
+    await sendPush(recipientDoc.data().fcmToken, message.senderName || "알 수 없음",
+      (message.content || "").substring(0, 100),
+      { type: "chat", chatId, _targetUid: recipientUid });
+  }
+);

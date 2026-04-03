@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -7,12 +6,13 @@ import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
+import 'package:hansol_high_school/screens/auth/profile_edit_screen.dart';
+import 'package:hansol_high_school/screens/sub/feedback_screen.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 /// 설정 화면 (SettingScreen)
 ///
@@ -306,17 +306,38 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
               ]),
+              if (AuthService.isLoggedIn) ...[
+                const SizedBox(height: 24),
+                _buildSectionTitle('건의사��'),
+                _buildGroupedCard([
+                  GestureDetector(
+                    onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const FeedbackScreen(type: 'app'))),
+                    child: _buildSettingRow(
+                      '앱 건의사항 & 버그 제보',
+                      trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                    ),
+                  ),
+                  _buildDivider(),
+                  GestureDetector(
+                    onTap: () => Navigator.push(context,
+                      MaterialPageRoute(builder: (_) => const FeedbackScreen(type: 'council'))),
+                    child: _buildSettingRow(
+                      '학생회 건의사항',
+                      trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                    ),
+                  ),
+                ]),
+              ],
               const SizedBox(height: 24),
               _buildSectionTitle('기타'),
               _buildGroupedCard([
                 GestureDetector(
-                  onTap: () {
-                    launchUrl(Uri.parse('https://hansol-high-school-46fc9.web.app/privacy'),
-                      mode: LaunchMode.externalApplication);
-                  },
+                  onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const _PrivacyPolicyScreen())),
                   child: _buildSettingRow(
                     '개인정보 처리방침',
-                    trailing: Icon(Icons.open_in_new, size: 18, color: AppColors.theme.darkGreyColor),
+                    trailing: Icon(Icons.chevron_right, size: 18, color: AppColors.theme.darkGreyColor),
                   ),
                 ),
                 _buildDivider(),
@@ -475,9 +496,14 @@ class _SettingScreenState extends State<SettingScreen> {
               const SizedBox(height: 8),
               _buildGroupedCard([
                 ListTile(
-                  leading: const Icon(Icons.delete_forever, color: Colors.red),
-                  title: const Text('회원 탈퇴', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                  onTap: () => _deleteAccount(),
+                  leading: Icon(Icons.edit, size: 20, color: AppColors.theme.primaryColor),
+                  title: Text('내 계정', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
+                    color: Theme.of(context).textTheme.bodyLarge?.color)),
+                  trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                  onTap: () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (_) => const ProfileEditScreen()));
+                    if (mounted) setState(() {});
+                  },
                 ),
               ]),
             ],
@@ -620,53 +646,6 @@ class _SettingScreenState extends State<SettingScreen> {
     }
   }
 
-  Future<void> _deleteAccount() async {
-    final confirm1 = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('회원 탈퇴'),
-        content: const Text('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('확인', style: TextStyle(color: Colors.red))),
-        ],
-      ),
-    );
-    if (confirm1 != true) return;
-
-    final confirm2 = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('최종 확인'),
-        content: const Text('회원 탈퇴를 진행합니다.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('탈퇴', style: TextStyle(color: Colors.red))),
-        ],
-      ),
-    );
-    if (confirm2 != true) return;
-
-    try {
-      final uid = AuthService.currentUser?.uid;
-      if (uid != null) {
-        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
-      }
-      await AuthService.currentUser?.delete();
-      await AuthService.signOut();
-      AuthService.clearProfileCache();
-      appRefreshNotifier.value++;
-      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
-    } catch (e) {
-      log('Account deletion error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('회원 탈퇴에 실패했습니다. 다시 시도해주세요.')),
-        );
-      }
-    }
-  }
-
   void _selectGradeAndClass() async {
     final pickerGrade = grade > 0 ? grade : 1;
     final pickerClass = classNum > 0 ? classNum : 1;
@@ -692,4 +671,44 @@ class _SettingScreenState extends State<SettingScreen> {
       });
     }
   }
+}
+
+class _PrivacyPolicyScreen extends StatelessWidget {
+  const _PrivacyPolicyScreen();
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final subColor = AppColors.theme.darkGreyColor;
+    return Scaffold(
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      appBar: AppBar(backgroundColor: Theme.of(context).scaffoldBackgroundColor, foregroundColor: textColor,
+        title: const Text('개인정보 처리방침'), centerTitle: true, elevation: 0),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 32),
+        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+          _t('1. 수집하는 개인정보 항목', textColor),
+          _b('이름, 학번, 학년/반(재학생), 졸업연도(졸업생), 담당과목(교사), 이메일, 프로필 사진(선택), 기기 토큰(푸시 알림용)', subColor),
+          _t('2. 수집·이용 목적', textColor),
+          _b('사용자 식별 및 가입 승인, 커뮤니티 서비스 제공, 맞춤 정보 제공, 푸시 알림, 부적절한 이용 방지', subColor),
+          _t('3. 보유 및 이용 기간', textColor),
+          _b('회원 탈퇴 시 즉시 삭제. 게시글은 작성일로부터 1년 후 자동 삭제.', subColor),
+          _t('4. 제3자 제공', textColor),
+          _b('수집된 개인정보는 제3자에게 제공하지 않습니다. 법령에 의한 요청 시 예외.', subColor),
+          _t('5. 파기 절차', textColor),
+          _b('회원 탈퇴 시 Firebase Authentication, Firestore 데이터, Storage 프로필 사진 즉시 삭제.', subColor),
+          _t('6. 이용자의 권리', textColor),
+          _b('언제든지 회원정보 조회, 수정, 탈퇴 가능.', subColor),
+          _t('7. 보호 조치', textColor),
+          _b('Firebase 보안 규칙, 역할 기반 권한, HTTPS 암호화, API 키 환경변수 분리.', subColor),
+          const SizedBox(height: 16),
+          Text('시행일: 2025년 1월 1일', style: TextStyle(fontSize: 12, color: subColor)),
+        ]),
+      ),
+    );
+  }
+
+  Widget _t(String text, Color? c) => Padding(padding: const EdgeInsets.only(top: 20, bottom: 8),
+    child: Text(text, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c)));
+  Widget _b(String text, Color c) => Text(text, style: TextStyle(fontSize: 13, color: c, height: 1.7));
 }

@@ -3,15 +3,17 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 
-/// 채팅 목록 화면
-///
-/// - 내가 참여한 1:1 채팅 목록 표시
-/// - 마지막 메시지 + 시간 + 읽지 않은 수 표시
-/// - 탭하면 채팅방 진입
-class ChatListScreen extends StatelessWidget {
+class ChatListScreen extends StatefulWidget {
   const ChatListScreen({Key? key}) : super(key: key);
+
+  @override
+  State<ChatListScreen> createState() => _ChatListScreenState();
+}
+
+class _ChatListScreenState extends State<ChatListScreen> {
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,9 @@ class ChatListScreen extends StatelessWidget {
             .orderBy('lastMessageAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const ChatListSkeleton();
+          }
           final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {
@@ -80,6 +85,7 @@ class ChatListScreen extends StatelessWidget {
                 onTap: () => Navigator.push(context, MaterialPageRoute(
                   builder: (_) => ChatRoomScreen(chatId: docs[index].id, otherName: otherName, otherUid: otherUid),
                 )),
+                onLongPress: () => _showLeaveDialog(docs[index].id, otherName),
                 child: Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
@@ -142,6 +148,53 @@ class ChatListScreen extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _showLeaveDialog(String chatId, String otherName) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showModalBottomSheet(
+      context: context, backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(color: isDark ? const Color(0xFF1E2028) : Colors.white, borderRadius: BorderRadius.circular(16)),
+        child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 36, height: 4, decoration: BoxDecoration(color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 12),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text('$otherName 님과의 채팅방을 나가시겠습니까?\n상대방에게 퇴장 메시지가 표시됩니다.',
+              textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black87, height: 1.5))),
+          const SizedBox(height: 16),
+          ListTile(
+            leading: const Icon(Icons.exit_to_app, color: Colors.redAccent, size: 22),
+            title: const Text('채팅방 나가기', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
+            onTap: () { Navigator.pop(ctx); _leaveChat(chatId); },
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+          const SizedBox(height: 8),
+        ])),
+      ),
+    );
+  }
+
+  Future<void> _leaveChat(String chatId) async {
+    try {
+      final uid = AuthService.currentUser?.uid;
+      if (uid == null) return;
+      final profile = await AuthService.getCachedProfile();
+      final myName = profile?.displayName ?? '알 수 없음';
+      final chatRef = FirebaseFirestore.instance.collection('chats').doc(chatId);
+      await chatRef.collection('messages').add({
+        'type': 'system', 'content': '$myName님이 채팅방을 나갔습니다.', 'createdAt': FieldValue.serverTimestamp(),
+      });
+      await chatRef.update({
+        'participants': FieldValue.arrayRemove([uid]),
+        'lastMessage': '$myName님이 나갔습니다.', 'lastMessageAt': FieldValue.serverTimestamp(),
+      });
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('채팅방을 나갔습니다')));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('채팅방 나가기에 실패했습니다')));
+    }
   }
 
   String _formatTime(DateTime dt) {

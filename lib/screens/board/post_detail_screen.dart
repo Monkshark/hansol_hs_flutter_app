@@ -70,33 +70,35 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                   final isPinned = data['isPinned'] == true;
 
-                  return PopupMenuButton<String>(
-                    onSelected: (value) {
-                      if (value == 'edit') _editPost(data);
-                      if (value == 'delete') _deletePost();
-                      if (value == 'report') _reportPost();
-                      if (value == 'block') _blockUser(data['authorUid']);
-                      if (value == 'chat') startChat(context, data['authorUid'], data['authorName'] ?? '');
-                      if (value == 'pin') _pinPost();
-                      if (value == 'unpin') _unpinPost();
-                    },
-                    itemBuilder: (_) => [
-                      if (isAuthor) ...[
-                        const PopupMenuItem(value: 'edit', child: Text('수정')),
-                        const PopupMenuItem(value: 'delete', child: Text('삭제')),
-                      ],
-                      if (!isAuthor && isManager)
-                        const PopupMenuItem(value: 'delete', child: Text('삭제 (Admin)')),
-                      if (isManager && !isPinned)
-                        const PopupMenuItem(value: 'pin', child: Text('공지 등록')),
-                      if (isManager && isPinned)
-                        const PopupMenuItem(value: 'unpin', child: Text('공지 해제')),
-                      if (!isAuthor)
-                        const PopupMenuItem(value: 'report', child: Text('신고')),
-                      if (!isAuthor)
-                        const PopupMenuItem(value: 'block', child: Text('차단')),
+                  final bookmarkedBy = List<String>.from(data['bookmarkedBy'] ?? []);
+                  final isBookmarked = AuthService.currentUser != null &&
+                      bookmarkedBy.contains(AuthService.currentUser!.uid);
+
+                  return Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (AuthService.isLoggedIn)
+                        IconButton(
+                          icon: Icon(
+                            isBookmarked ? Icons.bookmark : Icons.bookmark_border,
+                            size: 22,
+                            color: isBookmarked ? AppColors.theme.primaryColor : null,
+                          ),
+                          tooltip: '저장',
+                          onPressed: () => _toggleBookmark(isBookmarked),
+                        ),
                       if (!isAuthor && data['isAnonymous'] != true)
-                        const PopupMenuItem(value: 'chat', child: Text('채팅')),
+                        IconButton(
+                          icon: const Icon(Icons.chat_bubble_outline, size: 22),
+                          tooltip: '채팅',
+                          onPressed: () => startChat(context, data['authorUid'], data['authorName'] ?? ''),
+                        ),
+                      IconButton(
+                        icon: const Icon(Icons.more_vert, size: 22),
+                        onPressed: () => _showActionSheet(
+                          context, data, isAuthor, isManager, isPinned,
+                        ),
+                      ),
                     ],
                   );
                 },
@@ -438,6 +440,78 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         const SnackBar(content: Text('해당 사용자를 차단했습니다')),
       );
     }
+  }
+
+  Future<void> _toggleBookmark(bool isCurrentlyBookmarked) async {
+    final uid = AuthService.currentUser?.uid;
+    if (uid == null) return;
+    await _postRef.update({
+      'bookmarkedBy': isCurrentlyBookmarked
+          ? FieldValue.arrayRemove([uid])
+          : FieldValue.arrayUnion([uid]),
+    });
+  }
+
+  void _showActionSheet(
+    BuildContext context,
+    Map<String, dynamic> data,
+    bool isAuthor,
+    bool isManager,
+    bool isPinned,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final items = <_ActionItem>[];
+    if (isAuthor) {
+      items.add(_ActionItem(Icons.edit_outlined, '수정', () => _editPost(data)));
+      items.add(_ActionItem(Icons.delete_outline, '삭제', _deletePost, isDestructive: true));
+    }
+    if (!isAuthor && isManager)
+      items.add(_ActionItem(Icons.delete_outline, '삭제 (관리자)', _deletePost, isDestructive: true));
+    if (isManager && !isPinned)
+      items.add(_ActionItem(Icons.push_pin_outlined, '공지 등록', _pinPost));
+    if (isManager && isPinned)
+      items.add(_ActionItem(Icons.push_pin, '공지 해제', _unpinPost));
+    if (!isAuthor) {
+      items.add(_ActionItem(Icons.flag_outlined, '신고', _reportPost, isDestructive: true));
+      items.add(_ActionItem(Icons.block, '차단', () => _blockUser(data['authorUid']), isDestructive: true));
+    }
+
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(
+                width: 36, height: 4,
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[600] : Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 12),
+              ...items.map((item) => ListTile(
+                leading: Icon(item.icon,
+                  color: item.isDestructive ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black87), size: 22),
+                title: Text(item.label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
+                  color: item.isDestructive ? Colors.redAccent : (isDark ? Colors.white : Colors.black87))),
+                onTap: () { Navigator.pop(ctx); item.onTap(); },
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              )),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   Future<void> _reportPost() async {
@@ -1366,4 +1440,12 @@ class _CommentItem extends StatelessWidget {
     if (diff.inDays < 7) return '${diff.inDays}일 전';
     return DateFormat('M/d').format(dt);
   }
+}
+
+class _ActionItem {
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
+  _ActionItem(this.icon, this.label, this.onTap, {this.isDestructive = false});
 }

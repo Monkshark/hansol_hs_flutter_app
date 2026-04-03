@@ -3,6 +3,8 @@ import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
+import 'package:hansol_high_school/screens/sub/teacher_timetable_select_screen.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -30,6 +32,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
   Map<String, String> _conflictResolutions = {};
   bool _isShowingConflictDialog = false;
   Map<String, int> _subjectColors = {};
+  bool _isTeacher = false;
 
   @override
   void initState() {
@@ -38,6 +41,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     _classNum = SettingData().classNum;
     _loadConflictResolutions();
     _loadSubjectColors();
+    _checkTeacher();
     if (SettingData().isGradeSet) {
       _future = _buildTimetable();
     } else {
@@ -95,6 +99,58 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(
         'conflict_resolutions_$_grade', jsonEncode(_conflictResolutions));
+  }
+
+  Future<void> _checkTeacher() async {
+    final profile = await AuthService.getCachedProfile();
+    if (profile?.isTeacher == true && mounted) {
+      setState(() => _isTeacher = true);
+      _future = _buildTeacherTimetable();
+      setState(() {});
+    }
+  }
+
+  Future<_TimetableResult> _buildTeacherTimetable() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString('teacher_timetable_selections');
+    if (json == null) return _TimetableResult(grid: List.generate(5, (_) => List.filled(7, '')), conflicts: {});
+    final selectedKeys = Set<String>.from(jsonDecode(json));
+    final teacherSubjects = <int, Map<String, Set<int>>>{};
+    for (var key in selectedKeys) {
+      final parts = key.split('_');
+      if (parts.length < 3) continue;
+      final g = int.tryParse(parts[0]);
+      final c = int.tryParse(parts.last);
+      if (g == null || c == null) continue;
+      final name = parts.sublist(1, parts.length - 1).join('_');
+      teacherSubjects.putIfAbsent(g, () => {}).putIfAbsent(name, () => {}).add(c);
+    }
+    const maxPeriods = 7;
+    final grid = List.generate(5, (_) => List.filled(maxPeriods, ''));
+    final now = DateTime.now();
+    final monday = now.subtract(Duration(days: now.weekday - 1));
+    final friday = monday.add(const Duration(days: 4));
+    for (var entry in teacherSubjects.entries) {
+      final timetable = await TimetableDataApi.getTimeTable(startDate: monday, endDate: friday, grade: entry.key.toString());
+      timetable.forEach((dateStr, classMap) {
+        if (dateStr == 'error') return;
+        final weekday = DateTime(int.parse(dateStr.substring(0, 4)), int.parse(dateStr.substring(4, 6)), int.parse(dateStr.substring(6, 8))).weekday;
+        if (weekday > 5) return;
+        classMap.forEach((classNum, subjects) {
+          if (classNum == 'error') return;
+          final classInt = classNum == 'special' ? -1 : (int.tryParse(classNum) ?? -1);
+          for (int p = 0; p < subjects.length && p < maxPeriods; p++) {
+            final name = subjects[p];
+            if (name.isEmpty || name.contains('[보강]') || name == '토요휴업일') continue;
+            if (entry.value.containsKey(name) && entry.value[name]!.contains(classInt)) {
+              final label = classInt < 0 ? '특' : '$classInt';
+              grid[weekday - 1][p] = '$name\n(${entry.key}-$label)';
+            }
+          }
+        });
+      });
+    }
+    return _TimetableResult(grid: grid, conflicts: {});
   }
 
   Future<_TimetableResult> _buildTimetable() async {
@@ -255,7 +311,14 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     IconData buttonIcon;
     VoidCallback onPressed;
 
-    if (notSet) {
+    if (_isTeacher) {
+      title = '수업을 설정하면 시간표가 표시됩니다';
+      buttonLabel = '수업 설정'; buttonIcon = Icons.settings;
+      onPressed = () async {
+        await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeacherTimetableSelectScreen()));
+        _future = _buildTeacherTimetable(); setState(() {});
+      };
+    } else if (notSet) {
       title = '학년/반을 먼저 설정해주세요';
       buttonLabel = '학년/반 설정';
       buttonIcon = Icons.school;
@@ -358,19 +421,26 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-        title: Text(SettingData().isGradeSet
-            ? '$_grade학년 $_classNum반 시간표'
-            : '시간표'),
+        title: Text(_isTeacher ? '내 수업 시간표' : SettingData().isGradeSet ? '$_grade학년 $_classNum반 시간표' : '시간표'),
         centerTitle: true,
         elevation: 0,
         actions: [
-          if (_grade == 1)
+          if (_isTeacher)
+            IconButton(
+              icon: const Icon(Icons.settings),
+              onPressed: () async {
+                await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeacherTimetableSelectScreen()));
+                _future = _buildTeacherTimetable(); setState(() {});
+              },
+              tooltip: '수업 설정',
+            ),
+          if (!_isTeacher && _grade == 1)
             IconButton(
               icon: const Icon(Icons.swap_horiz),
               onPressed: _showClassPicker,
               tooltip: '반 변경',
             ),
-          if (_grade >= 2)
+          if (!_isTeacher && _grade >= 2)
             IconButton(
               icon: const Icon(Icons.refresh),
               onPressed: () {
@@ -417,78 +487,47 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
   }
 
   Widget _buildGridView(_TimetableResult result, bool isDark) {
-    return Column(
-      children: [
-        Expanded(
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-                12, 8, 12, MediaQuery.of(context).padding.bottom + 12),
-            child: Column(
-              children: [
-                Row(
-                  children: [
-                    const SizedBox(width: 28),
-                    ...['월', '화', '수', '목', '금'].map((d) => Expanded(
-                      child: Center(
-                        child: Text(d, style: TextStyle(
-                          fontSize: 13, fontWeight: FontWeight.w700,
-                          color: AppColors.theme.darkGreyColor,
-                        )),
-                      ),
-                    )),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Expanded(
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      SizedBox(
-                        width: 28,
-                        child: Column(
-                          children: List.generate(7, (p) => Expanded(
-                            child: Center(
-                              child: Text('${p + 1}', style: TextStyle(
-                                fontSize: 11, fontWeight: FontWeight.w600,
-                                color: AppColors.theme.darkGreyColor,
-                              )),
-                            ),
-                          )),
-                        ),
-                      ),
-                      ...List.generate(5, (day) => Expanded(
-                        child: Column(
-                          children: List.generate(7, (p) {
-                            final name = result.grid[day][p];
-                            final slot =
-                                '${['월', '화', '수', '목', '금'][day]}_${p + 1}';
-                            final isConflict =
-                                result.conflicts.containsKey(slot);
-                            return Expanded(
-                              child: _Cell(
-                                subject: name,
-                                isConflict: isConflict,
-                                isDark: isDark,
-                                customColor: _subjectColors.containsKey(name)
-                                    ? Color(_subjectColors[name]! | 0xFF000000)
-                                    : null,
-                                onLongPress: name.isEmpty
-                                    ? null
-                                    : () => _showColorPicker(name),
-                              ),
-                            );
-                          }),
-                        ),
-                      )),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
-    );
+    final todayWeekday = DateTime.now().weekday;
+    final days = ['월', '화', '수', '목', '금'];
+    int maxPeriod = 0;
+    for (int d = 0; d < 5; d++) for (int p = 6; p >= 0; p--) if (result.grid[d][p].isNotEmpty) { if (p + 1 > maxPeriod) maxPeriod = p + 1; break; }
+    if (maxPeriod == 0) maxPeriod = 7;
+
+    return Column(children: [Expanded(child: Padding(
+      padding: EdgeInsets.fromLTRB(10, 8, 10, MediaQuery.of(context).padding.bottom + 12),
+      child: Column(children: [
+        Row(children: [
+          const SizedBox(width: 30),
+          ...List.generate(5, (i) {
+            final isToday = todayWeekday == i + 1;
+            return Expanded(child: Center(child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: isToday ? BoxDecoration(color: AppColors.theme.primaryColor, borderRadius: BorderRadius.circular(12)) : null,
+              child: Text(days[i], style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+                color: isToday ? Colors.white : AppColors.theme.darkGreyColor)),
+            )));
+          }),
+        ]),
+        const SizedBox(height: 8),
+        Expanded(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          SizedBox(width: 30, child: Column(children: List.generate(maxPeriod, (p) => Expanded(
+            child: Center(child: Text('${p + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor))))))),
+          ...List.generate(5, (day) {
+            final isToday = todayWeekday == day + 1;
+            return Expanded(child: Container(
+              decoration: isToday ? BoxDecoration(color: (isDark ? Colors.white : AppColors.theme.primaryColor).withAlpha(8), borderRadius: BorderRadius.circular(10)) : null,
+              child: Column(children: List.generate(maxPeriod, (p) {
+                final name = result.grid[day][p];
+                final slot = '${days[day]}_${p + 1}';
+                return Expanded(child: _Cell(subject: name, isConflict: result.conflicts.containsKey(slot), isDark: isDark, isToday: isToday,
+                  customColor: _subjectColors.containsKey(name) ? Color(_subjectColors[name]! | 0xFF000000) : null,
+                  onLongPress: name.isEmpty ? null : () => _showColorPicker(name)));
+              })),
+            ));
+          }),
+        ])),
+      ]),
+    ))]);
   }
 }
 
@@ -569,6 +608,7 @@ class _Cell extends StatelessWidget {
   final String subject;
   final bool isConflict;
   final bool isDark;
+  final bool isToday;
   final Color? customColor;
   final VoidCallback? onLongPress;
 
@@ -576,6 +616,7 @@ class _Cell extends StatelessWidget {
     required this.subject,
     required this.isConflict,
     required this.isDark,
+    this.isToday = false,
     this.customColor,
     this.onLongPress,
   });
@@ -609,8 +650,8 @@ class _Cell extends StatelessWidget {
       return Container(
         margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E2028) : const Color(0xFFF8F8F8),
-          borderRadius: BorderRadius.circular(8),
+          color: isDark ? const Color(0xFF1A1C22) : const Color(0xFFF8F9FA),
+          borderRadius: BorderRadius.circular(10),
         ),
       );
     }
@@ -637,20 +678,21 @@ class _Cell extends StatelessWidget {
         margin: const EdgeInsets.all(1.5),
         decoration: BoxDecoration(
           color: bg,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(10),
         ),
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 3, vertical: 2),
             child: Text(
               subject,
               textAlign: TextAlign.center,
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                fontWeight: FontWeight.w700,
                 color: textColor,
+                height: 1.2,
               ),
             ),
           ),

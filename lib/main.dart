@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:get_it/get_it.dart';
@@ -11,6 +13,7 @@ import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/notification/update_checker.dart';
+import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
 import 'package:hansol_high_school/screens/sub/onboarding_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -55,6 +58,12 @@ Future<void> main() async {
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   } catch (_) {}
+
+  FlutterError.onError = (details) {
+    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
+    _logCrashToFirestore(details);
+  };
+
   KakaoSdk.init(nativeAppKey: KakaoKeys.nativeAppKey);
   await Future.wait([
     SettingData().init(),
@@ -87,6 +96,18 @@ ThemeMode _indexToThemeMode(int index) {
     case 2: return ThemeMode.system;
     default: return ThemeMode.light;
   }
+}
+
+void _logCrashToFirestore(FlutterErrorDetails details) {
+  try {
+    FirebaseFirestore.instance.collection('crash_logs').add({
+      'error': details.exceptionAsString().substring(0, details.exceptionAsString().length.clamp(0, 500)),
+      'stack': details.stack?.toString().substring(0, details.stack.toString().length.clamp(0, 1000)) ?? '',
+      'library': details.library ?? '',
+      'uid': AuthService.currentUser?.uid ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  } catch (_) {}
 }
 
 Future<void> _preloadSubjects(int grade) async {
@@ -232,13 +253,15 @@ class MainScreen extends StatefulWidget {
 
 class _MainScreenState extends State<MainScreen> {
   int _currentIndex = 1;
-  final List<Widget> _pages = const [MealScreen(), HomeScreen(), NoticeScreen()];
+  final _homeKey = GlobalKey<HomeScreenState>();
+  late final List<Widget> _pages;
   final PageController _pageController = PageController(initialPage: 1);
   StreamSubscription<String?>? _notificationSubscription;
 
   @override
   void initState() {
     super.initState();
+    _pages = [const MealScreen(), HomeScreen(key: _homeKey), const NoticeScreen()];
     _notificationSubscription = notificationStream.stream.listen((payload) {
       if (payload == 'meal_screen') {
         setState(() => _currentIndex = 0);
@@ -251,6 +274,9 @@ class _MainScreenState extends State<MainScreen> {
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool('onboarding_done') != true && mounted) {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+      }
+      if (!AuthService.isLoggedIn && mounted) {
+        await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       }
       if (mounted) UpdateChecker.check(context);
     });
@@ -315,7 +341,10 @@ class _MainScreenState extends State<MainScreen> {
     return Scaffold(
       body: PageView(
         controller: _pageController,
-        onPageChanged: (index) => setState(() => _currentIndex = index),
+        onPageChanged: (index) {
+          setState(() => _currentIndex = index);
+          if (index == 1) _homeKey.currentState?.refresh();
+        },
         physics: const PageScrollPhysics(),
         children: _pages,
       ),

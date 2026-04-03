@@ -23,7 +23,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -57,9 +57,12 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
           labelColor: AppColors.theme.primaryColor,
           unselectedLabelColor: AppColors.theme.darkGreyColor,
           indicatorColor: AppColors.theme.primaryColor,
+          indicatorSize: TabBarIndicatorSize.label,
+          labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           tabs: const [
             Tab(text: '내가 쓴 글'),
             Tab(text: '내가 쓴 댓글'),
+            Tab(text: '저장한 글'),
           ],
         ),
       ),
@@ -68,6 +71,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
         children: [
           _MyPostsList(uid: uid),
           _MyCommentsList(uid: uid),
+          _BookmarkedPostsList(uid: uid),
         ],
       ),
     );
@@ -196,5 +200,37 @@ class _MyCommentsList extends StatelessWidget {
     if (diff.inHours < 24) return '${diff.inHours}시간 전';
     if (diff.inDays < 7) return '${diff.inDays}일 전';
     return '${dt.month}/${dt.day}';
+  }
+}
+
+class _BookmarkedPostsList extends StatelessWidget {
+  final String uid;
+  const _BookmarkedPostsList({required this.uid});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance.collection('posts')
+          .where('bookmarkedBy', arrayContains: uid)
+          .orderBy('createdAt', descending: true).limit(50).snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting)
+          return const Center(child: CircularProgressIndicator());
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.bookmark_border, size: 40, color: AppColors.theme.darkGreyColor),
+          const SizedBox(height: 8),
+          Text('저장한 글이 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+        ]));
+        return ListView.separated(
+          padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
+          itemCount: docs.length, separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (context, index) => PostCard(
+            doc: docs[index],
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => PostDetailScreen(postId: docs[index].id))),
+          ),
+        );
+      },
+    );
   }
 }

@@ -29,11 +29,33 @@ class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  State<HomeScreen> createState() => HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Key _ddayKey = UniqueKey();
+  Key _refreshKey = UniqueKey();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) refresh();
+  }
+
+  void refresh() {
+    if (mounted) setState(() { _ddayKey = UniqueKey(); _refreshKey = UniqueKey(); });
+  }
 
   void _refreshDDay() {
     setState(() => _ddayKey = UniqueKey());
@@ -177,7 +199,11 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
           Expanded(
-            child: ListView(
+            key: _refreshKey,
+            child: RefreshIndicator(
+              onRefresh: () async => refresh(),
+              color: AppColors.theme.primaryColor,
+              child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
                   const CurrentSubjectCard(),
@@ -260,6 +286,8 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(height: 4),
+                  _RecentPosts(),
                   const SizedBox(height: 8),
                   if (AuthService.isLoggedIn)
                     GestureDetector(
@@ -299,8 +327,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                     ),
-                  if (AuthService.isLoggedIn) const SizedBox(height: 8),
-                  _RecentPosts(),
                   const SizedBox(height: 16),
                   Row(
                     children: [
@@ -313,6 +339,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
               ],
+            ),
             ),
           ),
         ],

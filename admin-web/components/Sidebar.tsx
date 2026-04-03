@@ -11,6 +11,7 @@ const nav = [
   { href: '/comments', label: '댓글', icon: '💬' },
   { href: '/reports', label: '신고', icon: '🚨' },
   { href: '/users', label: '사용자', icon: '👥' },
+  { href: '/feedbacks', label: '건의사항', icon: '📮' },
   { href: '/settings', label: '설정', icon: '⚙️' },
 ];
 
