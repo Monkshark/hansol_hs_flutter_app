@@ -29,6 +29,7 @@ class UserProfile {
   final DateTime? suspendedUntil;
   final List<String> blockedUsers;
   final String loginProvider;
+  final String? profilePhotoUrl;
 
   UserProfile({
     required this.uid,
@@ -46,6 +47,7 @@ class UserProfile {
     this.suspendedUntil,
     this.blockedUsers = const [],
     this.loginProvider = 'google',
+    this.profilePhotoUrl,
   });
 
   bool get isManager => role == 'manager' || role == 'admin';
@@ -92,6 +94,7 @@ class UserProfile {
     if (suspendedUntil != null) 'suspendedUntil': Timestamp.fromDate(suspendedUntil!),
     'blockedUsers': blockedUsers,
     'loginProvider': loginProvider,
+    if (profilePhotoUrl != null) 'profilePhotoUrl': profilePhotoUrl,
     'updatedAt': FieldValue.serverTimestamp(),
   };
 
@@ -111,6 +114,7 @@ class UserProfile {
     suspendedUntil: map['suspendedUntil'] != null ? (map['suspendedUntil'] as Timestamp).toDate() : null,
     blockedUsers: map['blockedUsers'] != null ? List<String>.from(map['blockedUsers'] as List) : [],
     loginProvider: map['loginProvider'] ?? 'google',
+    profilePhotoUrl: map['profilePhotoUrl'],
   );
 }
 
