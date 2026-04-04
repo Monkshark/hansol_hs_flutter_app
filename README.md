@@ -179,7 +179,18 @@ graph TD
 - **익명 실명 확인**, 감사 로그, **다크모드**, 모바일 반응형
 </details>
 
-## 보안
+<details>
+<summary><b>앱 업데이트 & 오프라인</b></summary>
+
+- **업데이트 체커**: Firestore `app_config/version`에서 최신/최소 버전 비교
+  - **필수 업데이트**: 닫기 불가 다이얼로그 + 스토어 이동
+  - **선택 업데이트**: "나중에" 버튼 포함 안내 다이얼로그
+  - 버전 비교 로직 (`major.minor.patch`)
+- **오프라인 배너**: 네트워크 끊기면 상단에 빨간 "오프라인 상태입니다" 표시, 재연결 시 자동 소멸
+- **오프라인 캐시**: 급식/시간표는 로컬 캐시로 오프라인에서도 조회 가능
+</details>
+
+## 보안 & 개인정보 보호
 
 - **Firestore 규칙**: 역할 기반 접근 제어, 필드 단위 update 검증
 - **Rate Limiting**: 글 30초, 댓글 10초 쿨타임
@@ -187,6 +198,85 @@ graph TD
 - **감사 로그**: 모든 관리 행위 + 게시글 삭제 이력 기록
 - **크래시 모니터링**: Crashlytics + Firestore 기록
 - **데이터 보호**: 이미지 압축, TTL 만료, 사용자 차단, 개인정보 동의
+- **OAuth 전용 인증**: 비밀번호를 저장하지 않는 소셜 로그인 체계
+- **회원 탈퇴 시 즉시 파기**: 이름, 프로필 사진, Firestore 문서, Firebase Auth, 하위 컬렉션 완전 삭제
+- **개인정보 처리방침**: 앱 내 표시, 가입 시 동의 필수
+
+## 테스트 & CI/CD
+
+| 구분 | 내용 |
+|------|------|
+| **Unit Test** | 급식 데이터 파싱, 일정 모델 직렬화, 사용자 프로필 검증 (18개) |
+| **CI** | GitHub Actions — Push 시 자동 `flutter analyze` + `flutter test` 수행 |
+| **정적 분석** | `--no-fatal-infos --no-fatal-warnings` 레벨로 코드 품질 관리 |
+| **더미 데이터** | Node.js 스크립트로 Firestore 더미 데이터 삽입/삭제 자동화 |
+
+## 데이터 모델
+
+```mermaid
+erDiagram
+    users ||--o{ posts : "작성"
+    users ||--o{ notifications : "수신"
+    users ||--o{ subjects : "선택과목"
+    posts ||--o{ comments : "포함"
+    posts ||--o{ reports : "신고"
+    chats ||--o{ messages : "포함"
+    users }o--o{ chats : "참여"
+
+    users {
+        string uid PK
+        string name
+        string studentId
+        string role
+        string userType
+        boolean approved
+        timestamp suspendedUntil
+        string profilePhotoUrl
+        string fcmToken
+        boolean notiComment
+        boolean notiChat
+    }
+
+    posts {
+        string id PK
+        string title
+        string content
+        string category
+        string authorUid FK
+        boolean isAnonymous
+        boolean isPinned
+        int likes
+        int dislikes
+        array bookmarkedBy
+        array pollOptions
+        map pollVotes
+    }
+
+    comments {
+        string id PK
+        string authorUid FK
+        string content
+        boolean isAnonymous
+        string parentId
+        timestamp createdAt
+    }
+
+    chats {
+        string id PK
+        array participants
+        map participantNames
+        string lastMessage
+        map unreadCount
+    }
+
+    messages {
+        string id PK
+        string senderUid FK
+        string content
+        boolean deleted
+        array deletedFor
+    }
+```
 
 ## Technical Challenges & Solutions
 

@@ -37,12 +37,38 @@ export default function PostDetailPage() {
     const commentList = cSnap.docs.map(d => ({ id: d.id, postId, ...d.data() } as Comment));
     postData.commentCount = commentList.length;
 
-    // 댓글 익명 실명 (일괄 조회)
+    // 유저 실명 맵
     const usersSnap = await getDocs(collection(db, 'users'));
     const nameMap: Record<string, string> = {};
     usersSnap.forEach(d => { nameMap[d.id] = displayName(d.data() as any); });
+
+    // anonymousMap에서 익명 번호 추출
+    const anonMap: Record<string, number> = (postData as any).anonymousMap || {};
+
     for (const c of commentList) {
-      if (c.isAnonymous && nameMap[c.authorUid]) (c as any).authorRealName = nameMap[c.authorUid];
+      // 실명 매핑
+      if (nameMap[c.authorUid]) (c as any).authorRealName = nameMap[c.authorUid];
+
+      // 익명 번호 + 글쓴이 구분
+      if (c.isAnonymous) {
+        const isPostAuthor = c.authorUid === postData.authorUid;
+        const anonNum = anonMap[c.authorUid];
+        if (isPostAuthor) {
+          (c as any).anonLabel = '익명(글쓴이)';
+        } else if (anonNum != null) {
+          (c as any).anonLabel = `익명${anonNum}`;
+        } else {
+          (c as any).anonLabel = '익명';
+        }
+      }
+
+      // 글쓴이 여부
+      (c as any).isPostAuthor = c.authorUid === postData.authorUid;
+    }
+
+    // 게시글 작성자 익명 라벨
+    if (postData.isAnonymous) {
+      (postData as any).anonLabel = '익명(글쓴이)';
     }
 
     setPost(postData);
@@ -95,7 +121,9 @@ export default function PostDetailPage() {
           </div>
           <h1 className="text-xl font-bold mb-2">{post.title}</h1>
           <p className="text-sm text-gray-400 mb-4">
-            {post.isAnonymous && post.authorRealName ? `익명 (${post.authorRealName})` : post.authorName} · {post.createdAt?.toDate().toLocaleString('ko-KR')}
+            {post.isAnonymous
+              ? <>{(post as any).anonLabel} <span className="text-gray-400">({post.authorRealName})</span></>
+              : post.authorName} · {post.createdAt?.toDate().toLocaleString('ko-KR')}
           </p>
           <p className="text-sm leading-7 whitespace-pre-wrap mb-4">{post.content}</p>
 
@@ -141,14 +169,20 @@ export default function PostDetailPage() {
                 });
                 parents.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
 
+                const renderName = (c: any) => {
+                  if (c.isAnonymous) {
+                    return <>{c.anonLabel || '익명'} <span className="text-gray-400">({c.authorRealName})</span></>;
+                  }
+                  return c.authorName;
+                };
+
                 return parents.map(p => (
                   <div key={p.id}>
-                    <div className="p-3 bg-gray-50 dark:bg-dark-input rounded-lg">
+                    <div className={`p-3 rounded-lg ${(p as any).isPostAuthor ? 'bg-blue-50 dark:bg-blue-950/50 border border-blue-200 dark:border-blue-800' : 'bg-gray-50 dark:bg-dark-input'}`}>
                       <div className="flex items-center justify-between">
                         <div className="text-xs">
-                          <span className="font-semibold">
-                            {p.isAnonymous && (p as any).authorRealName ? `익명 (${(p as any).authorRealName})` : p.authorName}
-                          </span>
+                          {(p as any).isPostAuthor && <span className="text-blue-500 bg-blue-100 dark:bg-blue-900/40 px-1.5 py-0.5 rounded text-[10px] font-bold mr-1.5">글쓴이</span>}
+                          <span className="font-semibold">{renderName(p)}</span>
                           <span className="text-gray-400 ml-2">{p.createdAt?.toDate().toLocaleString('ko-KR')}</span>
                         </div>
                         <button onClick={() => handleDeleteComment(p.id)}
@@ -159,13 +193,12 @@ export default function PostDetailPage() {
                     {(childMap[p.id] || [])
                       .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0))
                       .map(child => (
-                      <div key={child.id} className="ml-8 mt-2 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border-l-2 border-blue-300">
+                      <div key={child.id} className={`ml-8 mt-2 p-3 rounded-lg border-l-2 ${(child as any).isPostAuthor ? 'bg-blue-50 dark:bg-blue-950/50 border-blue-400' : 'bg-gray-50 dark:bg-dark-input border-gray-300 dark:border-gray-600'}`}>
                         <div className="flex items-center justify-between">
                           <div className="text-xs">
-                            <span className="text-blue-500 font-semibold mr-1">↳</span>
-                            <span className="font-semibold">
-                              {child.isAnonymous && (child as any).authorRealName ? `익명 (${(child as any).authorRealName})` : child.authorName}
-                            </span>
+                            <span className="text-gray-400 font-semibold mr-1">↳</span>
+                            {(child as any).isPostAuthor && <span className="text-blue-500 bg-blue-100 dark:bg-blue-900/40 px-1.5 py-0.5 rounded text-[10px] font-bold mr-1.5">글쓴이</span>}
+                            <span className="font-semibold">{renderName(child)}</span>
                             <span className="text-gray-400 ml-2">{child.createdAt?.toDate().toLocaleString('ko-KR')}</span>
                           </div>
                           <button onClick={() => handleDeleteComment(child.id)}

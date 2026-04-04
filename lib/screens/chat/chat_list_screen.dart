@@ -6,6 +6,12 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 
+/// 채팅 목록 화면
+///
+/// - 내가 참여한 1:1 채팅 목록 표시
+/// - 마지막 메시지 + 시간 + 읽지 않은 수 표시
+/// - 길게 누르면 채팅방 나가기
+/// - 스켈레톤 로딩 UI
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({Key? key}) : super(key: key);
 

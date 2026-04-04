@@ -22,7 +22,9 @@ class UpdateChecker {
       final data = doc.data()!;
       final latestVersion = data['latest'] as String? ?? '';
       final minVersion = data['min'] as String? ?? '';
-      final updateUrl = data['updateUrl'] as String? ?? '';
+      final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+      final updateUrl = (isIOS ? data['updateUrlIOS'] : data['updateUrlAndroid']) as String?
+          ?? data['updateUrl'] as String? ?? '';
       final updateMessage = data['message'] as String? ?? '새로운 버전이 출시되었습니다.';
 
       final packageInfo = await PackageInfo.fromPlatform();

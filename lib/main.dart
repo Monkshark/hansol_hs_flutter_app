@@ -22,6 +22,7 @@ import 'package:hansol_high_school/screens/main/home_screen.dart';
 import 'package:hansol_high_school/screens/main/meal_screen.dart';
 import 'package:hansol_high_school/screens/main/notice_screen.dart';
 import 'package:hansol_high_school/firebase_options.dart';
+import 'package:hansol_high_school/widgets/offline_banner.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/timezone.dart' as tz;
@@ -339,7 +340,10 @@ class _MainScreenState extends State<MainScreen> {
   Widget build(BuildContext context) {
     Device.init(context);
     return Scaffold(
-      body: PageView(
+      body: Column(
+        children: [
+          const OfflineBanner(),
+          Expanded(child: PageView(
         controller: _pageController,
         onPageChanged: (index) {
           setState(() => _currentIndex = index);
@@ -347,6 +351,8 @@ class _MainScreenState extends State<MainScreen> {
         },
         physics: const PageScrollPhysics(),
         children: _pages,
+      )),
+        ],
       ),
       bottomNavigationBar: SizedBox(
         height: 56 + MediaQuery.of(context).padding.bottom,

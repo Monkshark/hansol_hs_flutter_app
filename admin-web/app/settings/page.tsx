@@ -11,7 +11,8 @@ export default function SettingsPage() {
   const router = useRouter();
   const [latest, setLatest] = useState('');
   const [min, setMin] = useState('');
-  const [updateUrl, setUpdateUrl] = useState('');
+  const [updateUrlAndroid, setUpdateUrlAndroid] = useState('');
+  const [updateUrlIOS, setUpdateUrlIOS] = useState('');
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(false);
   const [pinnedPosts, setPinnedPosts] = useState<{ id: string; title: string }[]>([]);
@@ -25,7 +26,8 @@ export default function SettingsPage() {
       const d = snap.data();
       setLatest(d.latest || '');
       setMin(d.min || '');
-      setUpdateUrl(d.updateUrl || '');
+      setUpdateUrlAndroid(d.updateUrlAndroid || d.updateUrl || '');
+      setUpdateUrlIOS(d.updateUrlIOS || '');
       setMessage(d.message || '');
     }
   }
@@ -39,7 +41,7 @@ export default function SettingsPage() {
   }
 
   async function saveConfig() {
-    await setDoc(doc(db, 'app_config', 'version'), { latest, min, updateUrl, message });
+    await setDoc(doc(db, 'app_config', 'version'), { latest, min, updateUrlAndroid, updateUrlIOS, message });
     setSaved(true);
     setTimeout(() => setSaved(false), 3000);
   }
@@ -74,10 +76,17 @@ export default function SettingsPage() {
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="text-xs text-gray-500 font-semibold">업데이트 URL</label>
-            <input value={updateUrl} onChange={e => setUpdateUrl(e.target.value)} placeholder="https://play.google.com/..."
-              className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm" />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="text-xs text-gray-500 font-semibold">Android 업데이트 URL</label>
+              <input value={updateUrlAndroid} onChange={e => setUpdateUrlAndroid(e.target.value)} placeholder="https://play.google.com/..."
+                className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm" />
+            </div>
+            <div>
+              <label className="text-xs text-gray-500 font-semibold">iOS 업데이트 URL</label>
+              <input value={updateUrlIOS} onChange={e => setUpdateUrlIOS(e.target.value)} placeholder="https://apps.apple.com/..."
+                className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm" />
+            </div>
           </div>
 
           <div className="mb-4">

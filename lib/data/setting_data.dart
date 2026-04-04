@@ -30,7 +30,7 @@ class SettingData {
   bool get isDarkMode => _sharedPreferences.getBool('isDarkMode') ?? false;
 
   set themeModeIndex(int value) => _sharedPreferences.setInt('themeModeIndex', value);
-  int get themeModeIndex => _sharedPreferences.getInt('themeModeIndex') ?? 0;
+  int get themeModeIndex => _sharedPreferences.getInt('themeModeIndex') ?? 2;
 
   set isBreakfastNotificationOn(bool value) =>
       _sharedPreferences.setBool('isBreakfastNotificationOn', value);

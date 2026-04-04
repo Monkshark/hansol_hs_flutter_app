@@ -3,6 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
+/// 1:1 채팅방 화면
+///
+/// - Firestore 실시간 메시지 스트림 (limit 30)
+/// - 읽음 표시 (unreadCount 기반)
+/// - 메시지 삭제 (나만/같이), 채팅방 나가기 (시스템 메시지)
+/// - 시스템 메시지 렌더링
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
   final String otherName;

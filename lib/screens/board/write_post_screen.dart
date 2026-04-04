@@ -464,32 +464,60 @@ class _WritePostScreenState extends State<WritePostScreen> {
         if (_images.isNotEmpty)
           SizedBox(
             height: 100,
-            child: ListView.separated(
+            child: ReorderableListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: _images.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
+              onReorder: (oldIndex, newIndex) {
+                setState(() {
+                  if (newIndex > oldIndex) newIndex--;
+                  final item = _images.removeAt(oldIndex);
+                  _images.insert(newIndex, item);
+                });
+              },
+              proxyDecorator: (child, index, animation) => Material(
+                color: Colors.transparent,
+                elevation: 4,
+                borderRadius: BorderRadius.circular(10),
+                child: child,
+              ),
               itemBuilder: (context, index) {
-                return Stack(
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: Image.file(_images[index], width: 100, height: 100, fit: BoxFit.cover),
-                    ),
-                    Positioned(
-                      top: 4, right: 4,
-                      child: GestureDetector(
-                        onTap: () => setState(() => _images.removeAt(index)),
-                        child: Container(
-                          width: 22, height: 22,
-                          decoration: const BoxDecoration(
-                            color: Colors.black54,
-                            shape: BoxShape.circle,
+                return Padding(
+                  key: ValueKey(_images[index].path),
+                  padding: EdgeInsets.only(right: index < _images.length - 1 ? 8 : 0),
+                  child: Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(10),
+                        child: Image.file(_images[index], width: 100, height: 100, fit: BoxFit.cover),
+                      ),
+                      Positioned(
+                        top: 4, right: 4,
+                        child: GestureDetector(
+                          onTap: () => setState(() => _images.removeAt(index)),
+                          child: Container(
+                            width: 22, height: 22,
+                            decoration: const BoxDecoration(
+                              color: Colors.black54,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.close, size: 14, color: Colors.white),
                           ),
-                          child: const Icon(Icons.close, size: 14, color: Colors.white),
                         ),
                       ),
-                    ),
-                  ],
+                      Positioned(
+                        bottom: 4, left: 4,
+                        child: Container(
+                          width: 20, height: 20,
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Center(child: Text('${index + 1}',
+                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700))),
+                        ),
+                      ),
+                    ],
+                  ),
                 );
               },
             ),

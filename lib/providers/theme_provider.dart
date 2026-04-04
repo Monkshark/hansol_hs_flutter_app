@@ -2,6 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 
+/// 테마 모드 관리 (라이트/다크/시스템)
+///
+/// - SettingData의 themeModeIndex와 동기화
+/// - Riverpod StateNotifier로 앱 전체 테마 상태 관리
 class ThemeNotifier extends StateNotifier<ThemeMode> {
   ThemeNotifier() : super(_indexToMode(SettingData().themeModeIndex));
 
