@@ -94,6 +94,7 @@ async function sendPushToAdmins(title, body, excludeUid) {
 exports.onCommentCreated = onDocumentCreated(
   "posts/{postId}/comments/{commentId}",
   async (event) => {
+    try {
     const comment = event.data.data();
     const postId = event.params.postId;
 
@@ -145,6 +146,7 @@ exports.onCommentCreated = onDocumentCreated(
         }
       }
     }
+  } catch (e) { await logError("onCommentCreated", e, { postId: event.params.postId }); }
   }
 );
 
@@ -175,13 +177,15 @@ exports.onPostCreated = onDocumentCreated("posts/{postId}", async (event) => {
 });
 
 exports.onUserCreated = onDocumentCreated("users/{userId}", async (event) => {
-  const user = event.data.data();
-  const name = user.name || "새 사용자";
-
-  await sendPushToAdmins("가입 요청", `${name}님이 가입을 요청했습니다.`, event.params.userId);
+  try {
+    const user = event.data.data();
+    const name = user.name || "새 사용자";
+    await sendPushToAdmins("가입 요청", `${name}님이 가입을 요청했습니다.`, event.params.userId);
+  } catch (e) { await logError("onUserCreated", e, { userId: event.params.userId }); }
 });
 
 exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
+  try {
   const before = event.data.before.data();
   const after = event.data.after.data();
   const userId = event.params.userId;
@@ -216,6 +220,7 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
       type: "account", _targetUid: userId,
     });
   }
+  } catch (e) { await logError("onUserUpdated", e, { userId: event.params.userId }); }
 });
 
 exports.onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
@@ -253,6 +258,7 @@ exports.onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
 exports.onChatMessageCreated = onDocumentCreated(
   "chats/{chatId}/messages/{messageId}",
   async (event) => {
+    try {
     const message = event.data.data();
     const chatId = event.params.chatId;
     if (!message.senderUid || !message.content) return;
@@ -268,6 +274,7 @@ exports.onChatMessageCreated = onDocumentCreated(
     await sendPush(recipientData.fcmToken, message.senderName || "알 수 없음",
       (message.content || "").substring(0, 100),
       { type: "chat", chatId, _targetUid: recipientUid });
+    } catch (e) { await logError("onChatMessageCreated", e, { chatId: event.params.chatId }); }
   }
 );
 

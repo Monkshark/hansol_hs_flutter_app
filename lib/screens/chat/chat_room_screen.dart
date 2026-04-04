@@ -174,6 +174,9 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   Future<void> _deleteForAll(DocumentReference ref) async {
     await ref.update({'content': '삭제된 메시지입니다.', 'deleted': true});
+    // 채팅 목록 미리보기 업데이트
+    final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
+    await chatRef.update({'lastMessage': '삭제된 메시지입니다.'});
   }
 
   Future<void> _sendMessage() async {

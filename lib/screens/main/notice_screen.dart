@@ -282,7 +282,6 @@ class _NoticeScreenState extends State<NoticeScreen> {
     final db = GetIt.I<LocalDataBase>();
     final start = DateTime.parse(schedule.date);
     final end = DateTime.parse(schedule.endDate!);
-    final excStr = excludeDate.toIso8601String().substring(0, 10);
     final startStr = schedule.date;
     final endStr = schedule.endDate!;
 

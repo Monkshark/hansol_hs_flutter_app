@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
 /// 개인일정 카드 위젯
@@ -22,14 +21,6 @@ class ScheduleCard extends StatelessWidget {
     this.date,
     Key? key,
   }) : super(key: key);
-
-  String _formatTime(int minutes) {
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    final period = h < 12 ? '오전' : '오후';
-    final hour = h == 0 ? 12 : (h > 12 ? h - 12 : h);
-    return '$period $hour:${m.toString().padLeft(2, '0')}';
-  }
 
   @override
   Widget build(BuildContext context) {

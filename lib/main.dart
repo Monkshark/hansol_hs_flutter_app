@@ -61,8 +61,8 @@ Future<void> main() async {
   } catch (_) {}
 
   FlutterError.onError = (details) {
-    FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-    _logCrashToFirestore(details);
+    try { FirebaseCrashlytics.instance.recordFlutterFatalError(details); } catch (_) {}
+    try { _logCrashToFirestore(details); } catch (_) {}
   };
 
   KakaoSdk.init(nativeAppKey: KakaoKeys.nativeAppKey);

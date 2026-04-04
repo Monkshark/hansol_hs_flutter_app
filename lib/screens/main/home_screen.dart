@@ -461,7 +461,6 @@ class _TodayLunchPreview extends StatelessWidget {
 class _RecentPosts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
     return StreamBuilder<List<QuerySnapshot<Map<String, dynamic>>>>(
