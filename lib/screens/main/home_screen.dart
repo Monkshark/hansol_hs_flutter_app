@@ -292,7 +292,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
                   if (AuthService.isLoggedIn)
                     GestureDetector(
                       onTap: () => Navigator.push(context,
