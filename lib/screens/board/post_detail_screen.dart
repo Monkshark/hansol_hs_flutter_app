@@ -439,21 +439,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     ));
   }
 
-  Future<void> _blockUser(String authorUid) async {
-    if (!AuthService.isLoggedIn) return;
-    final uid = AuthService.currentUser?.uid;
-    if (uid == null) return;
-
-    await FirebaseFirestore.instance.collection('users').doc(uid).update({
-      'blockedUsers': FieldValue.arrayUnion([authorUid]),
-    });
-    AuthService.clearProfileCache();
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('해당 사용자를 차단했습니다')),
-      );
-    }
-  }
 
   Future<void> _toggleBookmark(bool isCurrentlyBookmarked) async {
     final uid = AuthService.currentUser?.uid;
@@ -486,7 +471,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       items.add(_ActionItem(Icons.push_pin, '공지 해제', _unpinPost));
     if (!isAuthor) {
       items.add(_ActionItem(Icons.flag_outlined, '신고', _reportPost, isDestructive: true));
-      items.add(_ActionItem(Icons.block, '차단', () => _blockUser(data['authorUid']), isDestructive: true));
     }
 
     showModalBottomSheet(

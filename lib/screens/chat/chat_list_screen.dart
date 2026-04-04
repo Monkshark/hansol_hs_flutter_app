@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
+import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
@@ -42,6 +43,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
         title: const Text('채팅'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person_add_outlined, size: 22),
+            tooltip: '새 채팅',
+            onPressed: () => _showUserSearch(context, uid),
+          ),
+        ],
       ),
       body: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
         stream: FirebaseFirestore.instance
@@ -153,6 +161,142 @@ class _ChatListScreenState extends State<ChatListScreen> {
           );
         },
       ),
+    );
+  }
+
+  void _showUserSearch(BuildContext context, String myUid) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final searchController = TextEditingController();
+    List<Map<String, dynamic>> results = [];
+    List<Map<String, dynamic>> admins = [];
+    List<Map<String, dynamic>> allUsers = [];
+    bool loaded = false;
+
+    Future<void> loadUsers(void Function(void Function()) setSheetState) async {
+      if (loaded) return;
+      final snap = await FirebaseFirestore.instance.collection('users')
+          .where('approved', isEqualTo: true).get();
+      allUsers = snap.docs.where((d) => d.id != myUid).map((d) => {'uid': d.id, ...d.data()}).toList();
+      admins = allUsers.where((u) => u['role'] == 'admin' || u['role'] == 'manager').toList();
+      loaded = true;
+      setSheetState(() {});
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) {
+          if (!loaded) loadUsers(setSheetState);
+          return Container(
+          height: MediaQuery.of(context).size.height * 0.7,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E2028) : Colors.white,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 36, height: 4, decoration: BoxDecoration(
+                color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: TextField(
+                  controller: searchController,
+                  autofocus: true,
+                  style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
+                  decoration: InputDecoration(
+                    hintText: '이름 또는 학번으로 검색',
+                    hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                    prefixIcon: Icon(Icons.search, color: AppColors.theme.darkGreyColor),
+                    filled: true,
+                    fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                  ),
+                  onChanged: (query) {
+                    if (query.trim().length < 2) {
+                      setSheetState(() => results = []);
+                      return;
+                    }
+                    final q = query.trim().toLowerCase();
+                    final filtered = allUsers.where((u) {
+                      final name = (u['name'] ?? '').toString().toLowerCase();
+                      final sid = (u['studentId'] ?? '').toString().toLowerCase();
+                      return name.contains(q) || sid.contains(q);
+                    }).toList();
+                    setSheetState(() => results = filtered);
+                  },
+                ),
+              ),
+              Expanded(
+                child: _buildUserList(context, searchController.text.trim().length >= 2 ? results : admins,
+                  searchController.text.trim().length >= 2, ctx),
+              ),
+            ],
+          ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildUserList(BuildContext context, List<Map<String, dynamic>> list, bool isSearch, BuildContext sheetCtx) {
+    if (list.isEmpty) {
+      return Center(child: Text(
+        isSearch ? '검색 결과가 없습니다' : '관리자를 불러오는 중...',
+        style: TextStyle(color: AppColors.theme.darkGreyColor)));
+    }
+    return ListView.builder(
+      itemCount: list.length,
+      itemBuilder: (_, index) {
+        final user = list[index];
+        final name = user['name'] ?? '';
+        final sid = user['studentId'] ?? '';
+        final userType = user['userType'] ?? 'student';
+        final role = user['role'] ?? 'user';
+
+        String displayName;
+        switch (userType) {
+          case 'teacher': displayName = '교사 $name'; break;
+          case 'parent': displayName = '학부모 $name'; break;
+          case 'graduate': displayName = '졸업생 $name'; break;
+          default: displayName = sid.isNotEmpty ? '$sid $name' : name;
+        }
+
+        return ListTile(
+          leading: CircleAvatar(
+            radius: 20,
+            backgroundColor: AppColors.theme.primaryColor,
+            child: Text(name.isNotEmpty ? name[0] : '?',
+              style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+          ),
+          title: Row(children: [
+            Text(displayName, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+              color: Theme.of(context).textTheme.bodyLarge?.color)),
+            if (role == 'admin' || role == 'manager') ...[
+              const SizedBox(width: 6),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                decoration: BoxDecoration(
+                  color: role == 'admin' ? Colors.red.withAlpha(25) : AppColors.theme.primaryColor.withAlpha(25),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(role == 'admin' ? 'Admin' : '매니저',
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
+                    color: role == 'admin' ? Colors.red : AppColors.theme.primaryColor)),
+              ),
+            ],
+          ]),
+          subtitle: userType == 'teacher' && (user['teacherSubject'] ?? '').isNotEmpty
+              ? Text(user['teacherSubject'], style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor))
+              : null,
+          onTap: () {
+            Navigator.pop(sheetCtx);
+            startChat(context, user['uid'], displayName);
+          },
+        );
+      },
     );
   }
 

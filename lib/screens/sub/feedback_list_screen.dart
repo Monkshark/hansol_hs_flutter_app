@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -123,6 +124,25 @@ class FeedbackListScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _deleteFeedback(BuildContext context, DocumentSnapshot<Map<String, dynamic>> doc) async {
+    final data = doc.data()!;
+    final profile = await AuthService.getCachedProfile();
+    // 삭제 로그
+    await FirebaseFirestore.instance.collection('admin_logs').add({
+      'action': 'delete_feedback',
+      'adminUid': AuthService.currentUser?.uid ?? '',
+      'adminName': profile?.displayName ?? '',
+      'feedbackType': type,
+      'feedbackContent': (data['content'] ?? '').toString().substring(0, (data['content'] ?? '').toString().length.clamp(0, 100)),
+      'feedbackAuthorName': data['authorName'] ?? '',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+    await doc.reference.delete();
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('삭제되었습니다')));
+    }
+  }
+
   void _showDetail(BuildContext context, DocumentSnapshot<Map<String, dynamic>> doc) {
     final data = doc.data()!;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -225,6 +245,19 @@ class FeedbackListScreen extends StatelessWidget {
                           ),
                       ],
                     ),
+                    if (status == 'resolved') ...[
+                      const SizedBox(height: 12),
+                      SizedBox(
+                        width: double.infinity,
+                        child: TextButton(
+                          onPressed: () async {
+                            Navigator.pop(ctx);
+                            await _deleteFeedback(context, doc);
+                          },
+                          child: const Text('삭제', style: TextStyle(color: Colors.red, fontSize: 13)),
+                        ),
+                      ),
+                    ],
                   ],
                 ),
               ),

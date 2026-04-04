@@ -13,12 +13,21 @@ export default function SettingsPage() {
   const [min, setMin] = useState('');
   const [updateUrlAndroid, setUpdateUrlAndroid] = useState('');
   const [updateUrlIOS, setUpdateUrlIOS] = useState('');
+  // 팝업
+  const [popupActive, setPopupActive] = useState(false);
+  const [popupType, setPopupType] = useState('notice');
+  const [popupTitle, setPopupTitle] = useState('');
+  const [popupContent, setPopupContent] = useState('');
+  const [popupStart, setPopupStart] = useState('');
+  const [popupEnd, setPopupEnd] = useState('');
+  const [popupDismissible, setPopupDismissible] = useState(true);
+  const [popupSaved, setPopupSaved] = useState(false);
   const [message, setMessage] = useState('');
   const [saved, setSaved] = useState(false);
   const [pinnedPosts, setPinnedPosts] = useState<{ id: string; title: string }[]>([]);
 
   useEffect(() => { if (!loading && !profile) router.push('/'); }, [loading, profile, router]);
-  useEffect(() => { if (profile) { loadConfig(); loadPinned(); } }, [profile]);
+  useEffect(() => { if (profile) { loadConfig(); loadPinned(); loadPopup(); } }, [profile]);
 
   async function loadConfig() {
     const snap = await getDoc(doc(db, 'app_config', 'version'));
@@ -30,6 +39,29 @@ export default function SettingsPage() {
       setUpdateUrlIOS(d.updateUrlIOS || '');
       setMessage(d.message || '');
     }
+  }
+
+  async function loadPopup() {
+    const snap = await getDoc(doc(db, 'app_config', 'popup'));
+    if (snap.exists()) {
+      const d = snap.data();
+      setPopupActive(d.active || false);
+      setPopupType(d.type || 'notice');
+      setPopupTitle(d.title || '');
+      setPopupContent(d.content || '');
+      setPopupStart(d.startDate || '');
+      setPopupEnd(d.endDate || '');
+      setPopupDismissible(d.dismissible ?? true);
+    }
+  }
+
+  async function savePopup() {
+    await setDoc(doc(db, 'app_config', 'popup'), {
+      active: popupActive, type: popupType, title: popupTitle,
+      content: popupContent, startDate: popupStart, endDate: popupEnd, dismissible: popupDismissible,
+    });
+    setPopupSaved(true);
+    setTimeout(() => setPopupSaved(false), 3000);
   }
 
   async function loadPinned() {
@@ -120,6 +152,60 @@ export default function SettingsPage() {
               ))}
             </div>
           )}
+        </div>
+
+        <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm mt-4">
+          <h3 className="font-bold mb-4">긴급 팝업 공지</h3>
+          <p className="text-sm text-gray-400 mb-4">앱 실행 시 사용자에게 팝업을 표시합니다.</p>
+
+          <div className="flex items-center gap-3 mb-4">
+            <label className="text-sm font-semibold">활성화</label>
+            <button onClick={() => setPopupActive(!popupActive)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold ${popupActive ? 'bg-red-500 text-white' : 'bg-gray-200 dark:bg-dark-input text-gray-500'}`}>
+              {popupActive ? 'ON' : 'OFF'}
+            </button>
+          </div>
+
+          <div className="flex gap-2 mb-4">
+            {['emergency', 'notice', 'event'].map(t => (
+              <button key={t} onClick={() => setPopupType(t)}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition ${
+                  popupType === t
+                    ? t === 'emergency' ? 'bg-red-500 text-white' : t === 'event' ? 'bg-green-500 text-white' : 'bg-primary text-white'
+                    : 'bg-gray-100 dark:bg-dark-input text-gray-500'
+                }`}>
+                {t === 'emergency' ? '긴급' : t === 'event' ? '이벤트' : '공지'}
+              </button>
+            ))}
+          </div>
+
+          <input value={popupTitle} onChange={e => setPopupTitle(e.target.value)} placeholder="제목"
+            className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mb-3 outline-none text-sm" />
+          <textarea value={popupContent} onChange={e => setPopupContent(e.target.value)} rows={3} placeholder="내용"
+            className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mb-3 outline-none text-sm resize-none" />
+
+          <div className="grid grid-cols-2 gap-3 mb-3">
+            <input type="date" value={popupStart} onChange={e => setPopupStart(e.target.value)}
+              className="p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl outline-none text-sm" />
+            <input type="date" value={popupEnd} onChange={e => setPopupEnd(e.target.value)}
+              className="p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl outline-none text-sm" />
+          </div>
+
+          <div className="flex items-center gap-3 mb-4">
+            <label className="text-sm text-gray-500">"오늘 안 보기" 허용</label>
+            <button onClick={() => setPopupDismissible(!popupDismissible)}
+              className={`px-4 py-1.5 rounded-full text-xs font-semibold ${popupDismissible ? 'bg-primary text-white' : 'bg-gray-200 dark:bg-dark-input text-gray-500'}`}>
+              {popupDismissible ? 'ON' : 'OFF'}
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button onClick={savePopup}
+              className="px-6 py-2 bg-red-500 text-white rounded-xl font-semibold hover:bg-red-600 transition text-sm">
+              저장
+            </button>
+            {popupSaved && <span className="text-green-500 text-sm">저장 완료!</span>}
+          </div>
         </div>
       </main>
     </div>

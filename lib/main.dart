@@ -12,6 +12,7 @@ import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
+import 'package:hansol_high_school/notification/popup_notice.dart';
 import 'package:hansol_high_school/notification/update_checker.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
@@ -280,6 +281,7 @@ class _MainScreenState extends State<MainScreen> {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       }
       if (mounted) UpdateChecker.check(context);
+      if (mounted) PopupNotice.check(context);
     });
   }
 

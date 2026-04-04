@@ -204,14 +204,6 @@ class _BoardScreenState extends State<BoardScreen> {
 
                 var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs);
 
-                final blockedUsers = AuthService.cachedProfile?.blockedUsers ?? [];
-                if (blockedUsers.isNotEmpty) {
-                  docs = docs.where((doc) {
-                    final data = doc.data();
-                    return !blockedUsers.contains(data['authorUid']);
-                  }).toList();
-                }
-
                 if (_searchQuery.isNotEmpty) {
                   docs = docs.where((doc) {
                     final data = doc.data();
