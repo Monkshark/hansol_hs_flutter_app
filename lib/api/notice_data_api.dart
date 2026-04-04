@@ -49,7 +49,7 @@ class NoticeDataApi {
       return "학사일정을 확인하려면 인터넷에 연결하세요";
     }
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
         '&AA_YMD=$formattedDate';
@@ -106,7 +106,7 @@ class NoticeDataApi {
     final fromDate = DateFormat('yyyyMMdd').format(tomorrow);
     final toDate = DateFormat('yyyyMMdd').format(endDate);
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&pIndex=1&pSize=100'
         '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
@@ -177,7 +177,7 @@ class NoticeDataApi {
     final fromDate = DateFormat('yyyyMMdd').format(now);
     final toDate = DateFormat('yyyyMMdd').format(endDate);
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
         '&Type=json&pIndex=1&pSize=100'
         '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
         '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
@@ -219,6 +219,65 @@ class NoticeDataApi {
 
     events.sort((a, b) => a.dDay.compareTo(b.dDay));
     return events;
+  }
+
+  /// 월별 학사일정 맵 반환: { DateTime(날짜): "일정명" }
+  Future<Map<DateTime, String>> getMonthEvents(DateTime month) async {
+    final prefs = await _prefs;
+    final monthKey = DateFormat('yyyyMM').format(month);
+    final cacheKey = 'month_events_v2_$monthKey';
+
+    // 캐시 확인 (12시간)
+    if (prefs.containsKey(cacheKey)) {
+      final ts = prefs.getInt('$cacheKey-timestamp') ?? 0;
+      if (DateTime.now().millisecondsSinceEpoch - ts < 12 * 60 * 60 * 1000) {
+        final cached = jsonDecode(prefs.getString(cacheKey)!) as Map<String, dynamic>;
+        return cached.map((k, v) => MapEntry(DateTime.parse(k), v as String));
+      }
+    }
+
+    if (await NetworkStatus.isUnconnected()) return {};
+
+    final firstDay = DateTime(month.year, month.month, 1);
+    final lastDay = DateTime(month.year, month.month + 1, 0);
+    final fromDate = DateFormat('yyyyMMdd').format(firstDay);
+    final toDate = DateFormat('yyyyMMdd').format(lastDay);
+
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
+        '&Type=json&pIndex=1&pSize=100'
+        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
+        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&AA_FROM_YMD=$fromDate'
+        '&AA_TO_YMD=$toDate';
+
+    final data = await _fetchData(requestURL);
+    final result = <DateTime, String>{};
+
+    if (data != null && data.containsKey('SchoolSchedule')) {
+      final infoArray = data['SchoolSchedule'] as List<dynamic>;
+      for (var info in infoArray) {
+        if (!info.containsKey('row')) continue;
+        for (var row in info['row']) {
+          if (!row.containsKey('EVENT_NM')) continue;
+          final name = row['EVENT_NM'] as String;
+          if (name == '토요휴업일') continue;
+          final dateStr = row['AA_YMD'] as String;
+          final date = DateTime(
+            int.parse(dateStr.substring(0, 4)),
+            int.parse(dateStr.substring(4, 6)),
+            int.parse(dateStr.substring(6, 8)),
+          );
+          result[date] = name;
+        }
+      }
+    }
+
+    // 캐시 저장
+    final cacheMap = result.map((k, v) => MapEntry(k.toIso8601String(), v));
+    prefs.setString(cacheKey, jsonEncode(cacheMap));
+    prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
+
+    return result;
   }
 
   void _cache(SharedPreferences prefs, String cacheKey, String value) {

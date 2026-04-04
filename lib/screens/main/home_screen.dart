@@ -247,47 +247,51 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  GestureDetector(
-                    onTap: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const BoardScreen()),
+                  Container(
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                      borderRadius: BorderRadius.circular(14),
                     ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E2028) : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 40, height: 40,
-                            decoration: BoxDecoration(
-                              color: AppColors.theme.primaryColor.withAlpha(25),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: Icon(Icons.forum_outlined, color: AppColors.theme.primaryColor, size: 22),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
+                    child: Column(
+                      children: [
+                        GestureDetector(
+                          onTap: () => Navigator.push(context,
+                            MaterialPageRoute(builder: (_) => const BoardScreen())),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Row(
                               children: [
-                                Text('게시판', style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
-                                Text('자유롭게 소통해보세요', style: TextStyle(
-                                  fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                Container(
+                                  width: 40, height: 40,
+                                  decoration: BoxDecoration(
+                                    color: AppColors.theme.primaryColor.withAlpha(25),
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Icon(Icons.forum_outlined, color: AppColors.theme.primaryColor, size: 22),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text('게시판', style: TextStyle(
+                                        fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                      Text('자유롭게 소통해보세요', style: TextStyle(
+                                        fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                    ],
+                                  ),
+                                ),
+                                Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                               ],
                             ),
                           ),
-                          Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
-                        ],
-                      ),
+                        ),
+                        Divider(height: 1, color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFEEEEEE)),
+                        _RecentPosts(),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 4),
-                  _RecentPosts(),
                   const SizedBox(height: 8),
                   if (AuthService.isLoggedIn)
                     GestureDetector(
@@ -498,11 +502,6 @@ class _RecentPosts extends StatelessWidget {
               child: Container(
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                margin: const EdgeInsets.only(bottom: 4),
-                decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF1E2028) : Colors.white,
-                  borderRadius: BorderRadius.circular(10),
-                ),
                 child: Row(
                   children: [
                     if (isPinned)

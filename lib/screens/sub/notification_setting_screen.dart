@@ -7,6 +7,11 @@ import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 알림 설정 화면
+/// 알림 설정 화면
+///
+/// - 급식 알림: 조식/중식/석식 시간 설정 + on/off
+/// - 푸시 알림: 댓글/대댓글/새글/채팅/계정 카테고리별 on/off
+/// - Firestore users/{uid}에 설정값 저장, Cloud Functions에서 체크
 class NotificationSettingScreen extends StatefulWidget {
   const NotificationSettingScreen({Key? key}) : super(key: key);
 

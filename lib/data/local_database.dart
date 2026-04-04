@@ -25,7 +25,7 @@ class LocalDataBase {
 
     return openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE schedules (
@@ -33,9 +33,17 @@ class LocalDataBase {
             startTime INTEGER NOT NULL,
             endTime INTEGER NOT NULL,
             content TEXT NOT NULL,
-            date TEXT NOT NULL
+            date TEXT NOT NULL,
+            endDate TEXT,
+            color INTEGER DEFAULT 4284811951
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('ALTER TABLE schedules ADD COLUMN endDate TEXT');
+          await db.execute('ALTER TABLE schedules ADD COLUMN color INTEGER DEFAULT 4284811951');
+        }
       },
     );
   }
@@ -80,14 +88,15 @@ class LocalDataBase {
   Stream<List<Schedule>> watchSchedules(DateTime date) async* {
     final db = await database;
 
-    final datePrefix = '${date.year.toString().padLeft(4, '0')}-'
+    final dateStr = '${date.year.toString().padLeft(4, '0')}-'
         '${date.month.toString().padLeft(2, '0')}-'
         '${date.day.toString().padLeft(2, '0')}';
 
+    // 하루 일정 + 연속 일정 (date <= 선택일 <= endDate)
     final results = await db.query(
       'schedules',
-      where: 'date LIKE ?',
-      whereArgs: ['$datePrefix%'],
+      where: "date LIKE ? OR (endDate IS NOT NULL AND date <= ? AND endDate >= ?)",
+      whereArgs: ['$dateStr%', '$dateStr', '$dateStr'],
       orderBy: 'startTime ASC',
     );
 

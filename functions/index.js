@@ -8,6 +8,19 @@ const { getMessaging } = require("firebase-admin/messaging");
 
 initializeApp();
 
+async function logError(functionName, error, extra = {}) {
+  try {
+    await getFirestore().collection("function_logs").add({
+      function: functionName,
+      error: error.message || String(error),
+      code: error.code || "",
+      stack: (error.stack || "").substring(0, 1000),
+      ...extra,
+      createdAt: new Date(),
+    });
+  } catch (_) {}
+}
+
 exports.kakaoCustomAuth = onRequest(async (req, res) => {
   if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
 
@@ -39,6 +52,7 @@ exports.kakaoCustomAuth = onRequest(async (req, res) => {
     const customToken = await getAuth().createCustomToken(uid);
     res.json({ firebaseToken: customToken });
   } catch (error) {
+    await logError("kakaoCustomAuth", error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -61,6 +75,8 @@ async function sendPush(token, title, body, data = {}) {
       if (uid) {
         await getFirestore().doc(`users/${uid}`).update({ fcmToken: null }).catch(() => {});
       }
+    } else {
+      await logError("sendPush", error, { title, _targetUid: data._targetUid });
     }
   }
 }
@@ -155,7 +171,7 @@ exports.onPostCreated = onDocumentCreated("posts/{postId}", async (event) => {
       data: { type: "new_post", postId },
       android: { notification: { channelId: "board_channel" } },
     });
-  } catch (error) {}
+  } catch (error) { await logError("onPostCreated", error, { postId }); }
 });
 
 exports.onUserCreated = onDocumentCreated("users/{userId}", async (event) => {
@@ -221,7 +237,7 @@ exports.onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
   // Firebase Auth 계정 삭제
   try {
     await getAuth().deleteUser(userId);
-  } catch (e) {}
+  } catch (e) { await logError("onUserDeleted.deleteAuth", e, { userId }); }
 
   // 하위 컬렉션 삭제 (subjects, notifications)
   const db = getFirestore();

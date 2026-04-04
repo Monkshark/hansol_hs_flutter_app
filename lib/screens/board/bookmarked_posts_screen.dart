@@ -6,6 +6,10 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
 /// 저장한 게시글 목록 화면
+/// 저장한 게시글 목록 화면
+///
+/// - bookmarkedBy 배열에 uid가 포함된 게시글 실시간 조회
+/// - 탭하면 게시글 상세로 이동
 class BookmarkedPostsScreen extends StatelessWidget {
   const BookmarkedPostsScreen({Key? key}) : super(key: key);
 

@@ -151,12 +151,16 @@ class _WritePostScreenState extends State<WritePostScreen> {
             Text('카테고리', style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
             const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _categories.map((cat) {
-                final selected = _category == cat;
-                return GestureDetector(
+            SizedBox(
+              height: 36,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: _categories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final cat = _categories[index];
+                  final selected = _category == cat;
+                  return GestureDetector(
                     onTap: () => setState(() {
                       _category = cat;
                       if (cat != '정보공유') _attachEvent = false;
@@ -178,8 +182,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
                         ),
                       ),
                     ),
-                );
-              }).toList(),
+                  );
+                },
+              ),
             ),
             const SizedBox(height: 20),
             TextField(

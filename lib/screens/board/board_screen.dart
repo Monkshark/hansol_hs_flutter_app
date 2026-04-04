@@ -108,7 +108,13 @@ class _BoardScreenState extends State<BoardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
-    return Scaffold(
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity != null && details.primaryVelocity! > 300) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -261,12 +267,15 @@ class _BoardScreenState extends State<BoardScreen> {
                       }
                       return PostCard(
                         doc: docs[index],
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => PostDetailScreen(postId: docs[index].id),
-                          ),
-                        ),
+                        onTap: () async {
+                          await Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => PostDetailScreen(postId: docs[index].id),
+                            ),
+                          );
+                          if (mounted) _loadPosts();
+                        },
                       );
                     },
                   ),
@@ -276,6 +285,7 @@ class _BoardScreenState extends State<BoardScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -340,8 +350,10 @@ class PostCard extends StatelessWidget {
         : (data['authorName'] ?? '익명');
     final category = data['category'] ?? '';
     final commentCount = data['commentCount'] ?? 0;
-    final likeCount = (data['likes'] as Map<String, dynamic>?)?.length ?? 0;
-    final dislikeCount = (data['dislikes'] as Map<String, dynamic>?)?.length ?? 0;
+    final rawLikes = data['likes'];
+    final rawDislikes = data['dislikes'];
+    final likeCount = rawLikes is int ? rawLikes : (rawLikes is Map ? rawLikes.length : 0);
+    final dislikeCount = rawDislikes is int ? rawDislikes : (rawDislikes is Map ? rawDislikes.length : 0);
     final hasImages = data['imageUrls'] != null && (data['imageUrls'] as List).isNotEmpty;
     final hasPoll = data['pollOptions'] != null && (data['pollOptions'] as List).isNotEmpty;
     final createdAt = data['createdAt'] as Timestamp?;
@@ -394,12 +406,11 @@ class PostCard extends StatelessWidget {
                 if (hasPoll)
                   Padding(padding: const EdgeInsets.only(right: 8),
                     child: Icon(Icons.poll, size: 14, color: AppColors.theme.darkGreyColor)),
-                if (commentCount > 0)
-                  Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(Icons.chat_bubble_outline, size: 14, color: AppColors.theme.darkGreyColor),
-                    const SizedBox(width: 3),
-                    Text('$commentCount', style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
-                  ]),
+                Row(mainAxisSize: MainAxisSize.min, children: [
+                  Icon(Icons.chat_bubble_outline, size: 14, color: AppColors.theme.darkGreyColor),
+                  const SizedBox(width: 3),
+                  Text('$commentCount', style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                ]),
               ],
             ),
             const SizedBox(height: 8),

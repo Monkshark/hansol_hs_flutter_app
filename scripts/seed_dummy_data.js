@@ -79,10 +79,28 @@ async function seed() {
     { title: "학부모 간담회 일정 문의", content: "이번 학기 학부모 간담회 일정이 언제인가요?\n작년에는 5월에 했던 것 같은데 올해 일정을 모르겠어요.", category: "질문", authorUid: "demo_parent", authorName: "학부모 김영숙", isAnonymous: false, likes: 12, dislikes: 0, isPinned: false },
   ];
 
+  // likes/dislikes를 Map으로 변환
+  const allUids = ["demo_user1","demo_user2","demo_user3","demo_user4","demo_user5","demo_user6","demo_user7","demo_user8","demo_user9","demo_user10",REAL_UID];
+  function makeLikesMap(count) {
+    const map = {};
+    const shuffled = [...allUids].sort(() => Math.random() - 0.5);
+    for (let i = 0; i < Math.min(count, shuffled.length); i++) map[shuffled[i]] = true;
+    return map;
+  }
+
   const postIds = [];
   for (let i = 0; i < posts.length; i++) {
+    const p = posts[i];
+    const likesMap = makeLikesMap(typeof p.likes === 'number' ? p.likes : 0);
+    const dislikesMap = makeLikesMap(typeof p.dislikes === 'number' ? p.dislikes : 0);
+    // pollVoters를 Map으로
+    const pollVoters = p.pollVoters && Array.isArray(p.pollVoters) ? {} : (p.pollVoters || {});
+    const { likes, dislikes, pollVoters: _pv, ...rest } = p;
     const ref = await db.collection("posts").add({
-      ...posts[i],
+      ...rest,
+      likes: likesMap,
+      dislikes: dislikesMap,
+      ...(p.pollVoters !== undefined ? { pollVoters } : {}),
       likedBy: [], dislikedBy: [], bookmarkedBy: i < 5 ? [REAL_UID, "demo_user1"] : [],
       createdAt: ago(i * 90 + 10),
       commentCount: 0,
@@ -173,12 +191,34 @@ async function seed() {
     { key: "c21c", postIdx: 21, authorUid: "demo_manager", authorName: "20302 김매니저", content: "본관 3층 시청각실입니다!", isAnonymous: false, parentKey: "c21b" },
   ];
 
-  // 댓글 삽입 (parentId 참조를 위해 key→id 맵 관리)
+  // 댓글 삽입 (parentId 참조 + anonymousMapping 생성)
   const commentIdMap = {};
+  const anonMappings = {}; // postIdx → { uid: number }
+  const anonCounts = {};   // postIdx → count
   let commentCount = 0;
+
   for (const c of commentDefs) {
+    let authorName = c.authorName;
+
+    // 익명 번호 할당
+    if (c.isAnonymous) {
+      const pi = c.postIdx;
+      if (!anonMappings[pi]) { anonMappings[pi] = {}; anonCounts[pi] = 0; }
+      const postAuthorUid = posts[pi].authorUid;
+
+      if (c.authorUid === postAuthorUid) {
+        authorName = '익명(글쓴이)';
+      } else if (anonMappings[pi][c.authorUid]) {
+        authorName = `익명${anonMappings[pi][c.authorUid]}`;
+      } else {
+        anonCounts[pi]++;
+        anonMappings[pi][c.authorUid] = anonCounts[pi];
+        authorName = `익명${anonCounts[pi]}`;
+      }
+    }
+
     const data = {
-      authorUid: c.authorUid, authorName: c.authorName, content: c.content, isAnonymous: c.isAnonymous,
+      authorUid: c.authorUid, authorName, content: c.content, isAnonymous: c.isAnonymous,
       createdAt: ago(Math.floor(Math.random() * 500) + 10),
     };
     if (c.parentKey && commentIdMap[c.parentKey]) {
@@ -188,7 +228,21 @@ async function seed() {
     commentIdMap[c.key] = ref.id;
     commentCount++;
   }
-  console.log(`✓ 댓글 ${commentCount}개 생성 (대댓글 포함)`);
+
+  // anonymousMapping + commentCount를 게시글에 저장
+  const commentCounts = {};
+  for (const c of commentDefs) {
+    commentCounts[c.postIdx] = (commentCounts[c.postIdx] || 0) + 1;
+  }
+  for (const [pi, count] of Object.entries(commentCounts)) {
+    const updates = { commentCount: count };
+    if (anonMappings[Number(pi)]) {
+      updates.anonymousMapping = anonMappings[Number(pi)];
+      updates.anonymousCount = anonCounts[Number(pi)];
+    }
+    await db.collection("posts").doc(postIds[Number(pi)]).update(updates);
+  }
+  console.log(`✓ 댓글 ${commentCount}개 생성 (대댓글 + 익명번호 포함)`);
 
   // ── 채팅 (실제 유저와 더미 유저 3개) ──
   const chats = [

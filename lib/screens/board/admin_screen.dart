@@ -24,7 +24,11 @@ class _AdminScreenState extends State<AdminScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final cardColor = isDark ? const Color(0xFF1E2028) : Colors.white;
 
-    return Scaffold(
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity != null && details.primaryVelocity! > 300) Navigator.of(context).pop();
+      },
+      child: Scaffold(
       backgroundColor: isDark ? const Color(0xFF14151A) : const Color(0xFFF5F5F5),
       appBar: AppBar(
         backgroundColor: isDark ? const Color(0xFF14151A) : const Color(0xFFF5F5F5),
@@ -69,6 +73,7 @@ class _AdminScreenState extends State<AdminScreen> {
           ]),
         ],
       ),
+    ),
     );
   }
 }

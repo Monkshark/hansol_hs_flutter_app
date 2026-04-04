@@ -49,7 +49,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
-    return Scaffold(
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity != null && details.primaryVelocity! > 300) {
+          Navigator.of(context).pop();
+        }
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -119,6 +125,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                 final post = postSnapshot.data!.data()!;
                 _currentPostAuthorUid = post['authorUid'] as String?;
+                _anonymousMapping = Map<String, dynamic>.from(post['anonymousMapping'] ?? {});
                 final title = post['title'] ?? '';
                 final content = post['content'] ?? '';
                 final isAnon = post['isAnonymous'] == true;
@@ -139,15 +146,20 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 final eventStartTime = post['eventStartTime'] as int? ?? -1;
                 final eventEndTime = post['eventEndTime'] as int? ?? -1;
 
-                final likes = (post['likes'] as Map<String, dynamic>?) ?? {};
-                final dislikes = (post['dislikes'] as Map<String, dynamic>?) ?? {};
+                final rawLikes = post['likes'];
+                final rawDislikes = post['dislikes'];
+                final likes = rawLikes is Map<String, dynamic> ? rawLikes : <String, dynamic>{};
+                final dislikes = rawDislikes is Map<String, dynamic> ? rawDislikes : <String, dynamic>{};
+                final likesCount = rawLikes is int ? rawLikes : likes.length;
+                final dislikesCount = rawDislikes is int ? rawDislikes : dislikes.length;
                 final myUid = AuthService.currentUser?.uid;
                 final hasLiked = myUid != null && likes.containsKey(myUid);
                 final hasDisliked = myUid != null && dislikes.containsKey(myUid);
 
                 final pollOptions = (post['pollOptions'] as List<dynamic>?)?.cast<String>();
                 final hasPoll = pollOptions != null && pollOptions.isNotEmpty;
-                final pollVoters = (post['pollVoters'] as Map<String, dynamic>?) ?? {};
+                final rawPollVoters = post['pollVoters'];
+                final pollVoters = rawPollVoters is Map<String, dynamic> ? rawPollVoters : <String, dynamic>{};
                 final myVote = AuthService.currentUser != null
                     ? pollVoters[AuthService.currentUser!.uid]
                     : null;
@@ -233,7 +245,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         _VoteButton(
                           icon: Icons.thumb_up_outlined,
                           activeIcon: Icons.thumb_up,
-                          count: likes.length,
+                          count: likesCount,
                           isActive: hasLiked,
                           activeColor: AppColors.theme.primaryColor,
                           onTap: () => _toggleLike(hasLiked, hasDisliked),
@@ -242,7 +254,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         _VoteButton(
                           icon: Icons.thumb_down_outlined,
                           activeIcon: Icons.thumb_down,
-                          count: dislikes.length,
+                          count: dislikesCount,
                           isActive: hasDisliked,
                           activeColor: Colors.redAccent,
                           onTap: () => _toggleDislike(hasLiked, hasDisliked),
@@ -400,6 +412,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -608,11 +621,26 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
+  Future<void> _ensureLikesMap() async {
+    final snap = await _postRef.get();
+    final data = snap.data();
+    if (data == null) return;
+    final updates = <String, dynamic>{};
+    // int(더미)이면 Map으로 변환하되 값은 유지하지 않음 (첫 투표 시 리셋 불가피)
+    // null이면 빈 Map으로 초기화
+    if (data['likes'] == null) updates['likes'] = {};
+    if (data['dislikes'] == null) updates['dislikes'] = {};
+    if (data['likes'] is int) updates['likes'] = {};
+    if (data['dislikes'] is int) updates['dislikes'] = {};
+    if (updates.isNotEmpty) await _postRef.update(updates);
+  }
+
   Future<void> _toggleLike(bool hasLiked, bool hasDisliked) async {
     if (!AuthService.isLoggedIn) {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       return;
     }
+    await _ensureLikesMap();
     final uid = AuthService.currentUser!.uid;
     if (hasLiked) {
       await _postRef.update({'likes.$uid': FieldValue.delete()});
@@ -628,6 +656,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       return;
     }
+    await _ensureLikesMap();
     final uid = AuthService.currentUser!.uid;
     if (hasDisliked) {
       await _postRef.update({'dislikes.$uid': FieldValue.delete()});
@@ -767,6 +796,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     };
 
     if (_replyToCommentId != null) {
+      commentData['parentId'] = _replyToCommentId;
       commentData['replyTo'] = _replyToCommentId;
       commentData['replyToName'] = _replyToName;
     }
@@ -828,32 +858,40 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     for (var doc in comments) {
       final data = doc.data() as Map<String, dynamic>;
-      final replyTo = data['replyTo'] as String?;
-      if (replyTo == null) {
+      final parentRef = data['parentId'] as String? ?? data['replyTo'] as String?;
+      if (parentRef == null) {
         parents.add(doc);
       } else {
-        childrenMap.putIfAbsent(replyTo, () => []);
-        childrenMap[replyTo]!.add(doc);
+        childrenMap.putIfAbsent(parentRef, () => []).add(doc);
       }
     }
+
+    // 시간순 정렬
+    int getTs(QueryDocumentSnapshot d) {
+      final data = d.data() as Map<String, dynamic>;
+      final ts = data['createdAt'];
+      if (ts is Timestamp) return ts.millisecondsSinceEpoch;
+      return 0;
+    }
+    parents.sort((a, b) => getTs(a).compareTo(getTs(b)));
+    childrenMap.forEach((_, list) => list.sort((a, b) => getTs(a).compareTo(getTs(b))));
 
     final widgets = <Widget>[];
+    final handled = <String>{};
+
     for (var parent in parents) {
       widgets.add(_buildCommentWidget(parent, indent: false));
-      final children = childrenMap[parent.id] ?? [];
-      for (var child in children) {
+      handled.add(parent.id);
+      for (var child in childrenMap[parent.id] ?? []) {
         widgets.add(_buildCommentWidget(child, indent: true));
+        handled.add(child.id);
       }
     }
 
-    final handledIds = parents.map((p) => p.id).toSet();
+    // 부모가 삭제된 고아 대댓글
     for (var doc in comments) {
-      final data = doc.data() as Map<String, dynamic>;
-      final replyTo = data['replyTo'] as String?;
-      if (replyTo != null && !handledIds.contains(replyTo)) {
-        if (!widgets.any((w) => w.key == ValueKey(doc.id))) {
-          widgets.add(_buildCommentWidget(doc, indent: true));
-        }
+      if (!handled.contains(doc.id)) {
+        widgets.add(_buildCommentWidget(doc, indent: true));
       }
     }
 
@@ -861,12 +899,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   String? _currentPostAuthorUid;
+  Map<String, dynamic> _anonymousMapping = {};
 
   Widget _buildCommentWidget(QueryDocumentSnapshot doc, {required bool indent}) {
-    final c = doc.data() as Map<String, dynamic>;
+    final c = Map<String, dynamic>.from(doc.data() as Map<String, dynamic>);
     final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
     final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
     final isPostAuthor = c['authorUid'] == _currentPostAuthorUid;
+
+    // 익명 번호 적용
+    if (c['isAnonymous'] == true && c['authorUid'] != null) {
+      final uid = c['authorUid'] as String;
+      if (uid == _currentPostAuthorUid) {
+        c['authorName'] = '익명(글쓴이)';
+      } else if (_anonymousMapping.containsKey(uid)) {
+        c['authorName'] = '익명${_anonymousMapping[uid]}';
+      }
+    }
 
     return Padding(
       padding: EdgeInsets.only(left: indent ? 32 : 0),

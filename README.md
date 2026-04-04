@@ -4,16 +4,27 @@
 
 Flutter 기반 모바일 앱 + Next.js 관리자 대시보드로 구성된 풀스택 프로젝트입니다. NEIS 공공데이터 API 연동, Firebase 실시간 데이터베이스, 역할 기반 권한 시스템, 푸시 알림, 1:1 채팅 등 실서비스 수준의 기능을 구현했습니다.
 
-<!-- ## 스크린샷
+## 스크린샷
 
-| 홈 | 급식 | 게시판 | 채팅 |
+| 온보딩 | 로그인 | 홈 | 홈 (라이트) |
 |:--:|:--:|:--:|:--:|
-| ![홈](screenshots/home.png) | ![급식](screenshots/meal.png) | ![게시판](screenshots/board.png) | ![채팅](screenshots/chat.png) |
+| ![온보딩](screenshots/onboarding.png) | ![로그인](screenshots/login.png) | ![홈](screenshots/home.png) | ![홈 라이트](screenshots/home_light.png) |
 
-| 시간표 | 설정 | Admin | Admin Web |
+| 급식 | 일정 | 일정 만들기 | 게시판 |
 |:--:|:--:|:--:|:--:|
-| ![시간표](screenshots/timetable.png) | ![설정](screenshots/settings.png) | ![Admin](screenshots/admin.png) | ![웹](screenshots/admin_web.png) |
--->
+| ![급식](screenshots/meal.png) | ![일정](screenshots/calendar.png) | ![일정만들기](screenshots/schedule_create.png) | ![게시판](screenshots/board.png) |
+
+| 게시글 상세 | 글쓰기 | 채팅 목록 | 채팅방 |
+|:--:|:--:|:--:|:--:|
+| ![상세](screenshots/post_detail.png) | ![글쓰기](screenshots/write_post.png) | ![채팅목록](screenshots/chat_list.png) | ![채팅방](screenshots/chat_room.png) |
+
+| 시간표 | 설정 | 내 계정 | 알림 설정 |
+|:--:|:--:|:--:|:--:|
+| ![시간표](screenshots/timetable.png) | ![설정](screenshots/settings.png) | ![내계정](screenshots/profile.png) | ![알림설정](screenshots/noti_settings.png) |
+
+| Admin | Admin Web | Admin Web (다크) |
+|:--:|:--:|:--:|
+| ![Admin](screenshots/admin.png) | ![웹](screenshots/admin_web.png) | ![웹다크](screenshots/admin_web_dark.png) |
 
 ## Metrics
 

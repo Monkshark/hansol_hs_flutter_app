@@ -13,6 +13,8 @@ const nav = [
   { href: '/reports', label: '신고', icon: '🚨' },
   { href: '/users', label: '사용자', icon: '👥' },
   { href: '/feedbacks', label: '건의사항', icon: '📮' },
+  { href: '/crashes', label: '앱 크래시', icon: '🐛' },
+  { href: '/function-logs', label: 'Functions 로그', icon: '⚡' },
   { href: '/settings', label: '설정', icon: '⚙️' },
 ];
 

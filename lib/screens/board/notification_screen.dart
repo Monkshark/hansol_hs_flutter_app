@@ -25,7 +25,11 @@ class NotificationScreen extends StatelessWidget {
       );
     }
 
-    return Scaffold(
+    return GestureDetector(
+      onHorizontalDragEnd: (details) {
+        if (details.primaryVelocity != null && details.primaryVelocity! > 300) Navigator.of(context).pop();
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -151,6 +155,7 @@ class NotificationScreen extends StatelessWidget {
           );
         },
       ),
+    ),
     );
   }
 

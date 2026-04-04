@@ -8,6 +8,10 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 
 /// 건의사항 & 버그 제보 / 학생회 건의사항 공용 화면
+/// 건의사항 작성 화면 (앱 건의/버그 + 학생회 건의)
+///
+/// - 텍스트(1000자) + 사진 첨부(최대 3장, 640px 압축)
+/// - type에 따라 app_feedbacks / council_feedbacks 컬렉션에 저장
 class FeedbackScreen extends StatefulWidget {
   final String type; // 'app' or 'council'
 

@@ -41,8 +41,13 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     _classNum = SettingData().classNum;
     _loadConflictResolutions();
     _loadSubjectColors();
-    _checkTeacher();
-    if (SettingData().isGradeSet) {
+
+    // 캐시된 프로필로 동기적 체크
+    final cached = AuthService.cachedProfile;
+    if (cached?.isTeacher == true) {
+      _isTeacher = true;
+      _future = _buildTeacherTimetable();
+    } else if (SettingData().isGradeSet) {
       _future = _buildTimetable();
     } else {
       _future = Future.value(_TimetableResult(
@@ -50,6 +55,8 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         conflicts: {},
       ));
     }
+    // 비동기 재확인
+    _checkTeacher();
   }
 
   Future<void> _loadSubjectColors() async {
@@ -402,12 +409,20 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         );
       }
       _conflictResolutions.clear();
-      setState(() => _future = _buildTimetable());
+      _future = _buildTimetable();
+      if (mounted) setState(() {});
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // 설정에서 학년/반 변경 후 돌아왔을 때 자동 새로고침
+    if (!_isTeacher && SettingData().isGradeSet &&
+        (_grade != SettingData().grade || _classNum != SettingData().classNum)) {
+      _grade = SettingData().grade;
+      _classNum = SettingData().classNum;
+      _future = _buildTimetable();
+    }
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return GestureDetector(
@@ -719,10 +734,7 @@ class _ColorPickerDialog extends StatefulWidget {
 
 class _ColorPickerDialogState extends State<_ColorPickerDialog> {
   double _hue = 0;
-  double _saturation = 0.35;
-  double _lightness = 0.82;
-  int _selectedRow = -1;
-  int _selectedCol = -1;
+  double _lightness = 0.5;
 
   @override
   void initState() {
@@ -730,23 +742,50 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
     if (widget.currentColor != null) {
       final hsl = HSLColor.fromColor(widget.currentColor!);
       _hue = hsl.hue;
-      _saturation = hsl.saturation.clamp(0.15, 0.6);
-      _lightness = hsl.lightness.clamp(0.7, 0.92);
+      _lightness = hsl.lightness.clamp(0.2, 0.8);
     }
   }
 
-  Color get _selectedColor =>
-      HSLColor.fromAHSL(1, _hue, _saturation, _lightness).toColor();
+  Color get _selectedColor => HSLColor.fromAHSL(1, _hue, 0.7, _lightness).toColor();
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final previewBg = isDark
-        ? HSLColor.fromAHSL(1, _hue, _saturation * 0.6, 0.15).toColor()
+        ? HSLColor.fromAHSL(1, _hue, 0.4, 0.15).toColor()
         : _selectedColor;
     final previewText = isDark
-        ? HSLColor.fromAHSL(1, _hue, _saturation, 0.75).toColor()
-        : HSLColor.fromAHSL(1, _hue, _saturation, 0.35).toColor();
+        ? HSLColor.fromAHSL(1, _hue, 0.7, 0.75).toColor()
+        : HSLColor.fromAHSL(1, _hue, 0.7, 0.35).toColor();
+
+    const size = 220.0;
+    const center = Offset(size / 2, size / 2);
+    const radius = size / 2;
+    const innerR = radius * 0.38;
+
+    String? _dragZone;
+
+    void startDrag(Offset pos) {
+      final dx = pos.dx - center.dx;
+      final dy = pos.dy - center.dy;
+      final dist = math.sqrt(dx * dx + dy * dy);
+      if (dist > radius) return;
+      _dragZone = dist <= innerR ? 'inner' : 'outer';
+    }
+
+    void updateFromPos(Offset pos) {
+      final dx = pos.dx - center.dx;
+      final dy = pos.dy - center.dy;
+      final dist = math.sqrt(dx * dx + dy * dy);
+      if (dist > radius) return;
+      setState(() {
+        if (_dragZone == 'inner') {
+          _lightness = (1 - (pos.dy / size)).clamp(0.2, 0.8);
+        } else if (_dragZone == 'outer') {
+          _hue = (180 / math.pi * math.atan2(dy, dx) + 360) % 360;
+        }
+      });
+    }
 
     return Dialog(
       backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
@@ -763,19 +802,24 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                 color: previewBg,
                 borderRadius: BorderRadius.circular(12),
               ),
-              child: Center(
-                child: Text(
-                  widget.subjectName,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: previewText,
-                  ),
+              child: Center(child: Text(widget.subjectName, style: TextStyle(
+                fontSize: 14, fontWeight: FontWeight.w600, color: previewText))),
+            ),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: size, height: size,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onPanStart: (d) { startDrag(d.localPosition); updateFromPos(d.localPosition); },
+                onPanUpdate: (d) => updateFromPos(d.localPosition),
+                onPanEnd: (_) => _dragZone = null,
+                onTapDown: (d) { startDrag(d.localPosition); updateFromPos(d.localPosition); },
+                child: CustomPaint(
+                  size: const Size(size, size),
+                  painter: _TimetableColorPainter(selectedHue: _hue, lightness: _lightness),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
-            _buildCircleGrid(),
             const SizedBox(height: 12),
             Row(
               children: [
@@ -800,7 +844,7 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
                       Navigator.of(context).pop();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.theme.primaryColor,
+                      backgroundColor: _selectedColor,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -827,72 +871,61 @@ class _ColorPickerDialogState extends State<_ColorPickerDialog> {
       ),
     );
   }
+}
 
-  Widget _buildCircleGrid() {
-    const gridSize = 12;
-    const totalSize = 230.0;
-    const cellSize = totalSize / gridSize;
-    const center = totalSize / 2;
+class _TimetableColorPainter extends CustomPainter {
+  final double selectedHue;
+  final double lightness;
+  _TimetableColorPainter({required this.selectedHue, required this.lightness});
 
-    return Container(
-      width: totalSize,
-      height: totalSize,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: AppColors.theme.darkGreyColor.withAlpha(60),
-          width: 1.5,
-        ),
-      ),
-      child: ClipOval(
-        child: Column(
-          children: List.generate(gridSize, (row) {
-            return Expanded(
-              child: Row(
-                children: List.generate(gridSize, (col) {
-                  final dx = (col + 0.5) * cellSize - center;
-                  final dy = (row + 0.5) * cellSize - center;
-                  final dist = math.sqrt(dx * dx + dy * dy);
-                  final hue = (math.atan2(dy, dx) * 180 / math.pi + 360) % 360;
-                  final t = (dist / center).clamp(0.0, 1.0);
-                  final lightness = 0.90 - t * 0.26;
-                  final sat = 0.25 + t * 0.30;
-                  final color = HSLColor.fromAHSL(1, hue, sat, lightness).toColor();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.width / 2;
+    final innerR = radius * 0.38;
 
-                  final isSelected = _selectedRow == row && _selectedCol == col;
+    for (double angle = 0; angle < 360; angle += 1) {
+      final paint = Paint()
+        ..color = HSLColor.fromAHSL(1, angle, 0.7, lightness).toColor()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = radius * 0.35;
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius * 0.82),
+        angle * math.pi / 180, math.pi / 180 + 0.02, false, paint,
+      );
+    }
 
-                  return Expanded(
-                    child: GestureDetector(
-                      onTap: () => setState(() {
-                        _hue = hue;
-                        _saturation = sat;
-                        _lightness = lightness;
-                        _selectedRow = row;
-                        _selectedCol = col;
-                      }),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: color,
-                          border: isSelected
-                              ? Border.all(
-                                  color: Theme.of(context).textTheme.bodyLarge?.color ?? Colors.black,
-                                  width: 2.5,
-                                )
-                              : null,
-                        ),
-                        child: isSelected
-                            ? const Center(child: Icon(Icons.check, color: Colors.white, size: 16))
-                            : null,
-                      ),
-                    ),
-                  );
-                }),
-              ),
-            );
-          }),
-        ),
-      ),
+    final selectedColor = HSLColor.fromAHSL(1, selectedHue, 0.7, 0.5);
+    final gradient = LinearGradient(
+      begin: Alignment.topCenter,
+      end: Alignment.bottomCenter,
+      colors: [
+        selectedColor.withLightness(0.8).toColor(),
+        selectedColor.withLightness(0.5).toColor(),
+        selectedColor.withLightness(0.2).toColor(),
+      ],
     );
+    canvas.save();
+    canvas.clipPath(Path()..addOval(Rect.fromCircle(center: center, radius: innerR)));
+    final rect = Rect.fromCircle(center: center, radius: innerR);
+    canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
+    canvas.restore();
+
+    final lY = center.dy - innerR + (1 - lightness) * innerR * 2;
+    canvas.drawLine(
+      Offset(center.dx - innerR * 0.6, lY),
+      Offset(center.dx + innerR * 0.6, lY),
+      Paint()..color = Colors.white..strokeWidth = 2..strokeCap = StrokeCap.round,
+    );
+
+    final indicatorRad = selectedHue * math.pi / 180;
+    final ix = center.dx + radius * 0.82 * math.cos(indicatorRad);
+    final iy = center.dy + radius * 0.82 * math.sin(indicatorRad);
+    canvas.drawCircle(Offset(ix, iy), 8, Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 3);
   }
+
+  @override
+  bool shouldRepaint(covariant _TimetableColorPainter old) =>
+      old.selectedHue != selectedHue || old.lightness != lightness;
 }
 

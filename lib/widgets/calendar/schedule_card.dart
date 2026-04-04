@@ -1,19 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:intl/intl.dart';
 
 /// 개인일정 카드 위젯
-/// - 왼쪽에 primaryColor 컬러바로 개인일정 시각 표시
-/// - 일정 내용과 시작~종료 시간(오전/오후 형식) 렌더링
-/// - 다크/라이트 테마 자동 대응
+/// - 왼쪽 컬러바 (일정 색상)
+/// - 일정 내용, 시간, 연속일정 날짜 표시
 class ScheduleCard extends StatelessWidget {
   final int startTimeInMinutes;
   final int endTimeInMinutes;
   final String content;
+  final int color;
+  final String? endDate;
+  final String? date;
 
   const ScheduleCard({
     required this.startTimeInMinutes,
     required this.endTimeInMinutes,
     required this.content,
+    this.color = 0xFF3F72AF,
+    this.endDate,
+    this.date,
     Key? key,
   }) : super(key: key);
 
@@ -28,6 +34,7 @@ class ScheduleCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = Color(color);
 
     return Container(
       width: double.infinity,
@@ -36,10 +43,7 @@ class ScheduleCard extends StatelessWidget {
         color: isDark ? const Color(0xFF1E2028) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border(
-          left: BorderSide(
-            color: AppColors.theme.primaryColor,
-            width: 3,
-          ),
+          left: BorderSide(color: cardColor, width: 3),
         ),
       ),
       child: Column(
@@ -53,18 +57,24 @@ class ScheduleCard extends StatelessWidget {
               color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
-          if (startTimeInMinutes >= 0 && endTimeInMinutes >= 0) ...[
+          if (endDate != null && date != null) ...[
             const SizedBox(height: 4),
             Text(
-              '${_formatTime(startTimeInMinutes)} - ${_formatTime(endTimeInMinutes)}',
-              style: TextStyle(
-                fontSize: 12,
-                color: AppColors.theme.darkGreyColor,
-              ),
+              '${_formatDate(date!)} ~ ${_formatDate(endDate!)}',
+              style: TextStyle(fontSize: 12, color: cardColor),
             ),
           ],
         ],
       ),
     );
+  }
+
+  String _formatDate(String isoDate) {
+    try {
+      final dt = DateTime.parse(isoDate);
+      return DateFormat('M/d').format(dt);
+    } catch (_) {
+      return isoDate;
+    }
   }
 }
