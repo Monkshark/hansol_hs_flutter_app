@@ -19,12 +19,14 @@ class MealCard extends StatefulWidget {
   final DateTime date;
   final int mealType;
   final String kcal;
+  final String ntrInfo;
 
   const MealCard({
     required this.meal,
     required this.date,
     required this.mealType,
     required this.kcal,
+    this.ntrInfo = '',
     Key? key,
   }) : super(key: key);
 
@@ -50,6 +52,7 @@ class _MealCardState extends State<MealCard>
       date: widget.date,
       mealType: widget.mealType,
       kcal: widget.kcal,
+      ntrInfo: widget.ntrInfo,
     );
     _controller = AnimationController(
       vsync: this,
@@ -170,26 +173,21 @@ class _MealCardState extends State<MealCard>
                 const SizedBox(height: 16),
                 _infoRow('식사', mealData.getMealType()),
                 _infoRow('칼로리', mealData.kcal.isNotEmpty ? mealData.kcal : '정보 없음'),
-                const SizedBox(height: 12),
-                const Divider(),
-                const SizedBox(height: 12),
-                Text(
-                  '메뉴',
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  mealData.meal ?? '정보 없음',
-                  style: TextStyle(
-                    fontSize: 14,
-                    height: 1.8,
-                    color: Theme.of(context).textTheme.bodyLarge?.color,
-                  ),
-                ),
+                if (mealData.ntrInfo.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  const Divider(),
+                  const SizedBox(height: 12),
+                  Text('영양 성분', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600,
+                    color: Theme.of(context).textTheme.bodyLarge?.color)),
+                  const SizedBox(height: 8),
+                  ...mealData.ntrInfo.split('\n').where((s) => s.trim().isNotEmpty).map((line) {
+                    final parts = line.split(':');
+                    if (parts.length >= 2) {
+                      return _infoRow(parts[0].trim(), parts.sublist(1).join(':').trim());
+                    }
+                    return _infoRow('', line.trim());
+                  }),
+                ],
                 if (allergyNumbers.isNotEmpty) ...[
                   const SizedBox(height: 16),
                   const Divider(),

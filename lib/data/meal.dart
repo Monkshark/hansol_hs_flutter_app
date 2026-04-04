@@ -8,12 +8,14 @@ class Meal {
   final DateTime date;
   final int mealType;
   final String kcal;
+  final String ntrInfo; // 영양정보 (탄수화물, 단백질, 지방 등)
 
   Meal({
     required this.meal,
     required this.date,
     required this.mealType,
     required this.kcal,
+    this.ntrInfo = '',
   });
 
   @override
@@ -26,6 +28,7 @@ class Meal {
         'date': date.toIso8601String(),
         'mealType': mealType,
         'kcal': kcal,
+        'ntrInfo': ntrInfo,
       };
 
   factory Meal.fromJson(Map<String, dynamic> json) => Meal(
@@ -33,6 +36,7 @@ class Meal {
         date: DateTime.parse(json['date']),
         mealType: json['mealType'],
         kcal: json['kcal'],
+        ntrInfo: json['ntrInfo'] ?? '',
       );
 
   String getMealType() {

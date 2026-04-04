@@ -93,6 +93,7 @@ class MealDataApi {
           date: date,
           mealType: mealType,
           kcal: row['CAL_INFO'] as String,
+          ntrInfo: (row['NTR_INFO'] as String?)?.replaceAll('<br/>', '\n') ?? '',
         );
         _saveToCache(prefs, cacheKey, meal);
         return meal;
@@ -164,11 +165,13 @@ class MealDataApi {
             int.parse(dateStr.substring(6, 8)),
           );
 
+          final ntrInfo = (row['NTR_INFO'] as String?)?.replaceAll('<br/>', '\n') ?? '';
           final meal = Meal(
             meal: menu,
             date: mealDate,
             mealType: mealCode,
             kcal: calorie,
+            ntrInfo: ntrInfo,
           );
 
           final key = _cacheKey(mealDate, mealCode);

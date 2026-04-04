@@ -152,6 +152,7 @@ class _MealScreenState extends State<MealScreen> {
                                       date: meal.date,
                                       mealType: meal.mealType,
                                       kcal: meal.kcal,
+                                      ntrInfo: meal.ntrInfo,
                                     ),
                                   ],
                                 ),
