@@ -61,7 +61,7 @@ class UserProfile {
   String get displayName {
     switch (userType) {
       case 'graduate':
-        return '졸업(${graduationYear ?? ''}) $name';
+        return '졸업생 $name';
       case 'teacher':
         return '교사 $name';
       case 'parent':

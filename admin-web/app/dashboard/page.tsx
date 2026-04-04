@@ -55,9 +55,9 @@ export default function DashboardPage() {
   if (loading || !profile) return <div className="min-h-screen flex items-center justify-center">로딩중...</div>;
 
   const catColor: Record<string, string> = {
-    '자유': 'bg-blue-100 text-blue-600',
-    '질문': 'bg-green-100 text-green-600',
-    '정보공유': 'bg-orange-100 text-orange-600',
+    '자유': 'bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400',
+    '질문': 'bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-400',
+    '정보공유': 'bg-orange-100 dark:bg-orange-900/40 text-orange-600 dark:text-orange-400',
   };
 
   return (
@@ -74,7 +74,7 @@ export default function DashboardPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-white rounded-xl p-5 shadow-sm">
+          <div className="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm">
             <h3 className="font-bold mb-3">최근 신고</h3>
             {recentReports.length === 0 ? (
               <p className="text-gray-400 text-sm">신고가 없습니다</p>
@@ -85,8 +85,8 @@ export default function DashboardPage() {
                 </tr></thead>
                 <tbody>
                   {recentReports.map(r => (
-                    <tr key={r.id} className="border-t border-gray-50">
-                      <td className="py-2"><Badge label={r.reason} className="bg-red-100 text-red-600" /></td>
+                    <tr key={r.id} className="border-t border-gray-50 dark:border-gray-800">
+                      <td className="py-2"><Badge label={r.reason} className="bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" /></td>
                       <td className="py-2 text-gray-400">{formatTime(r.createdAt)}</td>
                     </tr>
                   ))}
@@ -95,7 +95,7 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <div className="bg-white rounded-xl p-5 shadow-sm">
+          <div className="bg-white dark:bg-dark-card rounded-xl p-5 shadow-sm">
             <h3 className="font-bold mb-3">최근 게시글</h3>
             <table className="w-full text-sm">
               <thead><tr className="text-gray-400 text-xs">
@@ -103,9 +103,9 @@ export default function DashboardPage() {
               </tr></thead>
               <tbody>
                 {recentPosts.map(p => (
-                  <tr key={p.id} className="border-t border-gray-50 cursor-pointer hover:bg-gray-50"
+                  <tr key={p.id} className="border-t border-gray-50 dark:border-gray-800 cursor-pointer hover:bg-gray-50 dark:hover:bg-dark-input"
                     onClick={() => router.push(`/posts/${p.id}`)}>
-                    <td className="py-2"><Badge label={p.category} className={catColor[p.category] || 'bg-gray-100 text-gray-600'} /></td>
+                    <td className="py-2"><Badge label={p.category} className={catColor[p.category] || 'bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300'} /></td>
                     <td className="py-2">{p.isPinned && <span className="text-red-500 mr-1">📌</span>}{p.title}</td>
                     <td className="py-2 text-gray-400">{p.authorName}</td>
                   </tr>

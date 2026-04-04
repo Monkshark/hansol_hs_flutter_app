@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { useTheme } from '@/lib/theme';
 
 const nav = [
   { href: '/dashboard', label: '대시보드', icon: '📊' },
@@ -18,6 +19,7 @@ const nav = [
 export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const { dark, toggle } = useTheme();
 
   const sidebarContent = (
     <>
@@ -36,6 +38,10 @@ export default function Sidebar() {
           </Link>
         ))}
       </nav>
+      <button onClick={toggle}
+        className="flex items-center gap-3 px-5 py-3 text-sm text-gray-400 hover:text-white border-t border-gray-700">
+        <span>{dark ? '☀️' : '🌙'}</span><span>{dark ? '라이트 모드' : '다크 모드'}</span>
+      </button>
       <button onClick={() => signOut(auth)}
         className="flex items-center gap-3 px-5 py-3 text-sm text-gray-400 hover:text-white border-t border-gray-700">
         <span>🚪</span><span>로그아웃</span>

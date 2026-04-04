@@ -44,15 +44,15 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-primary to-primary-dark">
-      <div className="bg-white rounded-2xl p-10 w-96 shadow-2xl">
+      <div className="bg-white dark:bg-dark-card rounded-2xl p-10 w-96 shadow-2xl">
         <h1 className="text-2xl font-bold mb-1">한솔고 Admin</h1>
         <p className="text-sm text-gray-400 mb-6">관리자 계정으로 로그인하세요</p>
 
         <input type="email" placeholder="이메일" value={email} onChange={e => setEmail(e.target.value)}
-          className="w-full p-3 bg-gray-100 rounded-xl mb-3 outline-none focus:bg-gray-200 text-sm" />
+          className="w-full p-3 bg-gray-100 dark:bg-dark-input rounded-xl mb-3 outline-none focus:bg-gray-200 dark:focus:bg-dark-card dark:text-gray-100 text-sm" />
         <input type="password" placeholder="비밀번호" value={password} onChange={e => setPassword(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && handleEmail()}
-          className="w-full p-3 bg-gray-100 rounded-xl mb-3 outline-none focus:bg-gray-200 text-sm" />
+          className="w-full p-3 bg-gray-100 dark:bg-dark-input rounded-xl mb-3 outline-none focus:bg-gray-200 dark:focus:bg-dark-card dark:text-gray-100 text-sm" />
         <button onClick={handleEmail}
           className="w-full p-3 bg-primary text-white rounded-xl font-semibold hover:bg-primary-dark transition">
           이메일 로그인
@@ -61,7 +61,7 @@ export default function LoginPage() {
         <div className="text-center text-gray-400 text-sm my-3">또는</div>
 
         <button onClick={handleGoogle}
-          className="w-full p-3 bg-white border border-gray-200 rounded-xl font-semibold hover:bg-gray-50 transition text-sm">
+          className="w-full p-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-dark-input transition text-sm">
           Google 로그인 (매니저)
         </button>
 

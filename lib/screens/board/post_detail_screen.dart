@@ -1047,6 +1047,24 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
 
     if (confirm == true) {
+      // 관리자 삭제 로그
+      final uid = AuthService.currentUser?.uid;
+      final postSnap = await _postRef.get();
+      final postData = postSnap.data();
+      if (postData != null && uid != null && uid != postData['authorUid']) {
+        final profile = await AuthService.getCachedProfile();
+        await FirebaseFirestore.instance.collection('admin_logs').add({
+          'action': 'delete_post',
+          'adminUid': uid,
+          'adminName': profile?.displayName ?? '',
+          'postId': widget.postId,
+          'postTitle': postData['title'] ?? '',
+          'postAuthorUid': postData['authorUid'] ?? '',
+          'postAuthorName': postData['authorName'] ?? '',
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
+
       final comments = await _postRef.collection('comments').get();
       for (var doc in comments.docs) {
         await doc.reference.delete();

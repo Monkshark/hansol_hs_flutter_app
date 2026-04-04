@@ -100,20 +100,20 @@ export default function UsersPage() {
           {tabs.map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
-                tab === t.key ? `${t.color} text-white` : 'bg-gray-100 text-gray-500'
+                tab === t.key ? `${t.color} text-white` : 'bg-gray-100 dark:bg-dark-input text-gray-500 dark:text-gray-400'
               }`}>{t.label}</button>
           ))}
         </div>
 
         <input type="text" placeholder="이름 또는 학번 검색..." value={search} onChange={e => setSearch(e.target.value)}
-          className="w-full md:max-w-md p-3 bg-white rounded-xl mb-4 outline-none text-sm shadow-sm" />
+          className="w-full md:max-w-md p-3 bg-white dark:bg-dark-card rounded-xl mb-4 outline-none text-sm shadow-sm" />
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto">
+        <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm overflow-hidden overflow-x-auto">
           {filtered.length === 0 ? (
             <p className="p-6 text-gray-400 text-sm">사용자가 없습니다</p>
           ) : (
             <table className="w-full text-sm min-w-[600px]">
-              <thead><tr className="bg-gray-50 text-gray-400 text-xs">
+              <thead><tr className="bg-gray-50 dark:bg-dark-input text-gray-400 dark:text-gray-500 text-xs">
                 <th className="text-left p-3">이름</th>
                 <th className="text-left p-3">학번</th>
                 <th className="text-left p-3">학년/반</th>
@@ -125,7 +125,7 @@ export default function UsersPage() {
                 {filtered.map(u => {
                   const badge = roleBadge(u.role);
                   return (
-                    <tr key={u.uid} className="border-t border-gray-50 hover:bg-gray-50">
+                    <tr key={u.uid} className="border-t border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-dark-input">
                       <td className="p-3">
                         <span className="cursor-pointer hover:text-primary" onClick={() => router.push(`/users/${u.uid}`)}>
                           {u.name || '-'}

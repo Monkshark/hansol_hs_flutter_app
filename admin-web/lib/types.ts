@@ -32,8 +32,8 @@ export interface Post {
   createdAt: Timestamp;
   expireAt?: Timestamp;
   commentCount: number;
-  likes?: Record<string, boolean>;
-  dislikes?: Record<string, boolean>;
+  likes?: number | Record<string, boolean>;
+  dislikes?: number | Record<string, boolean>;
   imageUrls?: string[];
   pollOptions?: string[];
   pollVoters?: Record<string, number>;
@@ -52,6 +52,7 @@ export interface Comment {
   createdAt: Timestamp;
   replyTo?: string;
   replyToName?: string;
+  parentId?: string;
 }
 
 export interface Report {

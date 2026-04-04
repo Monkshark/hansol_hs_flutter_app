@@ -200,3 +200,4 @@ android/.kotlin/
 android/key.properties
 android/app/release-key.jks
 .claude/
+scripts/service-account.json

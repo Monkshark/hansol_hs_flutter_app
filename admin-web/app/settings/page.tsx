@@ -57,7 +57,7 @@ export default function SettingsPage() {
       <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-3xl">
         <h1 className="text-2xl font-bold mb-5">설정</h1>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
+        <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm mb-4">
           <h3 className="font-bold mb-4">앱 버전 관리</h3>
           <p className="text-sm text-gray-400 mb-4">버전을 설정하면 앱에서 업데이트 알림을 표시합니다.</p>
 
@@ -65,26 +65,26 @@ export default function SettingsPage() {
             <div>
               <label className="text-xs text-gray-500 font-semibold">최신 버전 (latest)</label>
               <input value={latest} onChange={e => setLatest(e.target.value)} placeholder="1.1.0"
-                className="w-full p-3 bg-gray-50 rounded-xl mt-1 outline-none text-sm" />
+                className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm" />
             </div>
             <div>
               <label className="text-xs text-gray-500 font-semibold">최소 버전 (min)</label>
               <input value={min} onChange={e => setMin(e.target.value)} placeholder="1.0.0"
-                className="w-full p-3 bg-gray-50 rounded-xl mt-1 outline-none text-sm" />
+                className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm" />
             </div>
           </div>
 
           <div className="mb-4">
             <label className="text-xs text-gray-500 font-semibold">업데이트 URL</label>
             <input value={updateUrl} onChange={e => setUpdateUrl(e.target.value)} placeholder="https://play.google.com/..."
-              className="w-full p-3 bg-gray-50 rounded-xl mt-1 outline-none text-sm" />
+              className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm" />
           </div>
 
           <div className="mb-4">
             <label className="text-xs text-gray-500 font-semibold">메시지</label>
             <textarea value={message} onChange={e => setMessage(e.target.value)} rows={3}
               placeholder="새로운 기능이 추가되었습니다."
-              className="w-full p-3 bg-gray-50 rounded-xl mt-1 outline-none text-sm resize-none" />
+              className="w-full p-3 bg-gray-50 dark:bg-dark-input dark:text-gray-100 rounded-xl mt-1 outline-none text-sm resize-none" />
           </div>
 
           <div className="flex items-center gap-3">
@@ -96,14 +96,14 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm">
           <h3 className="font-bold mb-3">공지 관리 ({pinnedPosts.length}/3)</h3>
           {pinnedPosts.length === 0 ? (
             <p className="text-gray-400 text-sm">등록된 공지가 없습니다</p>
           ) : (
             <div className="space-y-2">
               {pinnedPosts.map(p => (
-                <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-dark-input rounded-lg">
                   <span className="text-sm">📌 {p.title}</span>
                   <button onClick={() => unpinPost(p.id)}
                     className="px-3 py-1 bg-gray-400 text-white rounded-lg text-xs font-semibold">해제</button>

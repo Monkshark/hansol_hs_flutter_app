@@ -17,58 +17,56 @@ class AdminScreen extends StatefulWidget {
   State<AdminScreen> createState() => _AdminScreenState();
 }
 
-class _AdminScreenState extends State<AdminScreen> with SingleTickerProviderStateMixin {
-  late final TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 6, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
+class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = isDark ? const Color(0xFF1E2028) : Colors.white;
 
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+      backgroundColor: isDark ? const Color(0xFF14151A) : const Color(0xFFF5F5F5),
       appBar: AppBar(
-        backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+        backgroundColor: isDark ? const Color(0xFF14151A) : const Color(0xFFF5F5F5),
         foregroundColor: textColor,
         title: const Text('Admin'),
         centerTitle: true,
         elevation: 0,
-        bottom: TabBar(
-          controller: _tabController,
-          labelColor: AppColors.theme.primaryColor,
-          unselectedLabelColor: AppColors.theme.darkGreyColor,
-          indicatorColor: AppColors.theme.primaryColor,
-          isScrollable: true,
-          tabs: const [
-            Tab(text: '신고'),
-            Tab(text: '승인 대기'),
-            Tab(text: '사용자'),
-            Tab(text: '정지'),
-            Tab(text: '앱 건의'),
-            Tab(text: '학생회'),
-          ],
-        ),
       ),
-      body: TabBarView(
-        controller: _tabController,
+      body: ListView(
+        padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
         children: [
-          _ReportsTab(),
-          _UsersTab(filter: 'pending'),
-          _UsersTab(filter: 'approved'),
-          _UsersTab(filter: 'suspended'),
-          const FeedbackListScreen(type: 'app'),
-          const FeedbackListScreen(type: 'council'),
+          // 사용자 관리
+          _AdminSection(title: '사용자 관리', icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
+            _AdminTile(title: '승인 대기', icon: Icons.hourglass_top, color: Colors.orange, initiallyExpanded: true,
+              cardColor: cardColor, child: _UsersTab(filter: 'pending')),
+            const SizedBox(height: 8),
+            _AdminTile(title: '정지된 사용자', icon: Icons.block, color: Colors.red,
+              cardColor: cardColor, child: _UsersTab(filter: 'suspended')),
+            const SizedBox(height: 8),
+            _AdminTile(title: '일반 사용자', icon: Icons.person_outline, color: AppColors.theme.primaryColor,
+              cardColor: cardColor, child: _UsersTab(filter: 'approved')),
+          ]),
+          const SizedBox(height: 16),
+
+          // 게시판 관리
+          _AdminSection(title: '게시판 관리', icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
+            _AdminTile(title: '신고', icon: Icons.flag_outlined, color: Colors.red, initiallyExpanded: true,
+              cardColor: cardColor, child: _ReportsTab()),
+            const SizedBox(height: 8),
+            _AdminTile(title: '삭제 로그', icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
+              cardColor: cardColor, child: const _DeleteLogsTab()),
+          ]),
+          const SizedBox(height: 16),
+
+          // 건의사항
+          _AdminSection(title: '건의사항', icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
+            _AdminTile(title: '학생회 건의', icon: Icons.school_outlined, color: const Color(0xFF4CAF50), initiallyExpanded: true,
+              cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
+            const SizedBox(height: 8),
+            _AdminTile(title: '앱 건의/버그', icon: Icons.bug_report_outlined, color: AppColors.theme.primaryColor,
+              cardColor: cardColor, child: const FeedbackListScreen(type: 'app')),
+          ]),
         ],
       ),
     );
@@ -93,6 +91,8 @@ class _ReportsTab extends StatelessWidget {
         }
 
         return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
           padding: const EdgeInsets.all(16),
           itemCount: docs.length,
           separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -265,6 +265,8 @@ class _UsersTab extends StatelessWidget {
             final isAdmin = myProfileSnap.data?.isAdmin ?? false;
 
             return ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               itemCount: docs.length,
               separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -556,3 +558,175 @@ class _UsersTab extends StatelessWidget {
     );
   }
 }
+
+class _DeleteLogsTab extends StatelessWidget {
+  const _DeleteLogsTab();
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
+    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      stream: FirebaseFirestore.instance
+          .collection('admin_logs')
+          .where('action', isEqualTo: 'delete_post')
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .snapshots(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        final docs = snapshot.data?.docs ?? [];
+        if (docs.isEmpty) {
+          return Center(
+            child: Text('삭제 로그가 없습니다',
+                style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          );
+        }
+
+        return ListView.separated(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.all(16),
+          itemCount: docs.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 8),
+          itemBuilder: (context, index) {
+            final data = docs[index].data();
+            final adminName = data['adminName'] ?? '관리자';
+            final postTitle = data['postTitle'] ?? '제목 없음';
+            final postAuthorName = data['postAuthorName'] ?? '알 수 없음';
+            final createdAt = data['createdAt'] as Timestamp?;
+            final timeStr = createdAt != null
+                ? '${createdAt.toDate().month}/${createdAt.toDate().day} ${createdAt.toDate().hour}:${createdAt.toDate().minute.toString().padLeft(2, '0')}'
+                : '';
+
+            return Container(
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: Colors.red.withAlpha(25),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text('삭제', style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w700, color: Colors.red)),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(postTitle, style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 6),
+                  Text('작성자: $postAuthorName', style: TextStyle(
+                      fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                  const SizedBox(height: 2),
+                  Row(
+                    children: [
+                      Text('삭제: $adminName', style: TextStyle(
+                          fontSize: 12, color: AppColors.theme.primaryColor)),
+                      const Spacer(),
+                      Text(timeStr, style: TextStyle(
+                          fontSize: 11, color: AppColors.theme.darkGreyColor)),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+}
+
+// ── 공용 위젯 ──
+
+class _AdminSection extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final Color cardColor;
+  final List<Widget> children;
+
+  const _AdminSection({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.cardColor,
+    required this.children,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 10),
+          child: Row(
+            children: [
+              Icon(icon, size: 18, color: color),
+              const SizedBox(width: 6),
+              Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textColor)),
+            ],
+          ),
+        ),
+        ...children,
+      ],
+    );
+  }
+}
+
+class _AdminTile extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final Color cardColor;
+  final bool initiallyExpanded;
+  final Widget child;
+
+  const _AdminTile({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.cardColor,
+    this.initiallyExpanded = false,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(12),
+      child: ExpansionTile(
+        initiallyExpanded: initiallyExpanded,
+        collapsedBackgroundColor: cardColor,
+        backgroundColor: cardColor,
+        tilePadding: const EdgeInsets.symmetric(horizontal: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        leading: Icon(icon, size: 20, color: color),
+        title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+          color: Theme.of(context).textTheme.bodyLarge?.color)),
+        children: [child],
+      ),
+    );
+  }
+}
+

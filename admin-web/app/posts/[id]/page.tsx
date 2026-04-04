@@ -7,6 +7,7 @@ import { useRouter, useParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import Badge from '@/components/Badge';
 import { Post, Comment } from '@/lib/types';
+import { displayName } from '@/lib/utils';
 
 export default function PostDetailPage() {
   const { profile, loading } = useAuth();
@@ -21,10 +22,31 @@ export default function PostDetailPage() {
 
   async function loadPost() {
     const snap = await getDoc(doc(db, 'posts', postId));
-    if (snap.exists()) setPost({ id: snap.id, ...snap.data() } as Post);
+    if (!snap.exists()) return;
+    const postData = { id: snap.id, ...snap.data() } as Post;
+
+    // 익명 실명 조회
+    if (postData.isAnonymous) {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', postData.authorUid));
+        if (userDoc.exists()) (postData as any).authorRealName = displayName(userDoc.data() as any);
+      } catch {}
+    }
 
     const cSnap = await getDocs(collection(db, 'posts', postId, 'comments'));
-    setComments(cSnap.docs.map(d => ({ id: d.id, postId, ...d.data() } as Comment)));
+    const commentList = cSnap.docs.map(d => ({ id: d.id, postId, ...d.data() } as Comment));
+    postData.commentCount = commentList.length;
+
+    // 댓글 익명 실명 (일괄 조회)
+    const usersSnap = await getDocs(collection(db, 'users'));
+    const nameMap: Record<string, string> = {};
+    usersSnap.forEach(d => { nameMap[d.id] = displayName(d.data() as any); });
+    for (const c of commentList) {
+      if (c.isAnonymous && nameMap[c.authorUid]) (c as any).authorRealName = nameMap[c.authorUid];
+    }
+
+    setPost(postData);
+    setComments(commentList);
   }
 
   async function handleDeletePost() {
@@ -56,8 +78,8 @@ export default function PostDetailPage() {
 
   if (loading || !profile || !post) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main></div>;
 
-  const likes = post.likes ? Object.keys(post.likes).length : 0;
-  const dislikes = post.dislikes ? Object.keys(post.dislikes).length : 0;
+  const likes = typeof post.likes === 'number' ? post.likes : (post.likes ? Object.keys(post.likes).length : 0);
+  const dislikes = typeof post.dislikes === 'number' ? post.dislikes : (post.dislikes ? Object.keys(post.dislikes).length : 0);
 
   return (
     <div className="flex min-h-screen">
@@ -65,11 +87,11 @@ export default function PostDetailPage() {
       <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
         <button onClick={() => router.back()} className="text-sm text-gray-400 mb-4 hover:text-gray-600">← 뒤로</button>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm mb-4">
+        <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm mb-4">
           <div className="flex items-center gap-2 mb-3">
             {post.isPinned && <span className="text-red-500">📌</span>}
             <Badge label={post.category} />
-            {post.isAnonymous && <Badge label="익명" className="bg-purple-100 text-purple-600" />}
+            {post.isAnonymous && <Badge label="익명" className="bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400" />}
           </div>
           <h1 className="text-xl font-bold mb-2">{post.title}</h1>
           <p className="text-sm text-gray-400 mb-4">
@@ -91,9 +113,9 @@ export default function PostDetailPage() {
             <span className="text-gray-400">💬 {post.commentCount || 0}</span>
           </div>
 
-          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100">
+          <div className="flex gap-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
             <button onClick={togglePin}
-              className={`px-4 py-2 rounded-lg text-xs font-semibold ${post.isPinned ? 'bg-gray-200 text-gray-600' : 'bg-red-100 text-red-600'}`}>
+              className={`px-4 py-2 rounded-lg text-xs font-semibold ${post.isPinned ? 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300' : 'bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400'}`}>
               {post.isPinned ? '📌 공지 해제' : '📌 공지 등록'}
             </button>
             <button onClick={handleDeletePost}
@@ -103,28 +125,58 @@ export default function PostDetailPage() {
           </div>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm">
+        <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm">
           <h3 className="font-bold mb-3">댓글 ({comments.length})</h3>
           {comments.length === 0 ? (
             <p className="text-gray-400 text-sm">댓글이 없습니다</p>
           ) : (
             <div className="space-y-3">
-              {comments.map(c => (
-                <div key={c.id} className={`p-3 bg-gray-50 rounded-lg ${c.replyTo ? 'ml-8 border-l-2 border-primary/30' : ''}`}>
-                  <div className="flex items-center justify-between">
-                    <div className="text-xs">
-                      <span className="font-semibold">
-                        {c.isAnonymous && c.authorRealName ? `익명 (${c.authorRealName})` : c.authorName}
-                      </span>
-                      <span className="text-gray-400 ml-2">{c.createdAt?.toDate().toLocaleString('ko-KR')}</span>
+              {(() => {
+                const parents = comments.filter(c => !(c as any).parentId);
+                const childMap: Record<string, typeof comments> = {};
+                comments.filter(c => (c as any).parentId).forEach(c => {
+                  const pid = (c as any).parentId;
+                  if (!childMap[pid]) childMap[pid] = [];
+                  childMap[pid].push(c);
+                });
+                parents.sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0));
+
+                return parents.map(p => (
+                  <div key={p.id}>
+                    <div className="p-3 bg-gray-50 dark:bg-dark-input rounded-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs">
+                          <span className="font-semibold">
+                            {p.isAnonymous && (p as any).authorRealName ? `익명 (${(p as any).authorRealName})` : p.authorName}
+                          </span>
+                          <span className="text-gray-400 ml-2">{p.createdAt?.toDate().toLocaleString('ko-KR')}</span>
+                        </div>
+                        <button onClick={() => handleDeleteComment(p.id)}
+                          className="text-xs text-red-400 hover:text-red-600">삭제</button>
+                      </div>
+                      <p className="text-sm mt-1">{p.content}</p>
                     </div>
-                    <button onClick={() => handleDeleteComment(c.id)}
-                      className="text-xs text-red-400 hover:text-red-600">삭제</button>
+                    {(childMap[p.id] || [])
+                      .sort((a, b) => (a.createdAt?.seconds || 0) - (b.createdAt?.seconds || 0))
+                      .map(child => (
+                      <div key={child.id} className="ml-8 mt-2 p-3 bg-blue-50 dark:bg-blue-950 rounded-lg border-l-2 border-blue-300">
+                        <div className="flex items-center justify-between">
+                          <div className="text-xs">
+                            <span className="text-blue-500 font-semibold mr-1">↳</span>
+                            <span className="font-semibold">
+                              {child.isAnonymous && (child as any).authorRealName ? `익명 (${(child as any).authorRealName})` : child.authorName}
+                            </span>
+                            <span className="text-gray-400 ml-2">{child.createdAt?.toDate().toLocaleString('ko-KR')}</span>
+                          </div>
+                          <button onClick={() => handleDeleteComment(child.id)}
+                            className="text-xs text-red-400 hover:text-red-600">삭제</button>
+                        </div>
+                        <p className="text-sm mt-1">{child.content}</p>
+                      </div>
+                    ))}
                   </div>
-                  {c.replyToName && <p className="text-xs text-primary font-semibold mt-1">@{c.replyToName}</p>}
-                  <p className="text-sm mt-1">{c.content}</p>
-                </div>
-              ))}
+                ));
+              })()}
             </div>
           )}
         </div>

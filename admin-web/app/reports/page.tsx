@@ -48,12 +48,12 @@ export default function ReportsPage() {
       <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">
         <h1 className="text-2xl font-bold mb-5">신고 관리</h1>
 
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden overflow-x-auto">
+        <div className="bg-white dark:bg-dark-card rounded-xl shadow-sm overflow-hidden overflow-x-auto">
           {reports.length === 0 ? (
             <p className="p-6 text-gray-400 text-sm">신고가 없습니다</p>
           ) : (
             <table className="w-full text-sm min-w-[500px]">
-              <thead><tr className="bg-gray-50 text-gray-400 text-xs">
+              <thead><tr className="bg-gray-50 dark:bg-dark-input text-gray-400 dark:text-gray-500 text-xs">
                 <th className="text-left p-3">사유</th>
                 <th className="text-left p-3">신고자</th>
                 <th className="text-left p-3">시간</th>
@@ -61,8 +61,8 @@ export default function ReportsPage() {
               </tr></thead>
               <tbody>
                 {reports.map(r => (
-                  <tr key={r.id} className="border-t border-gray-50 hover:bg-gray-50">
-                    <td className="p-3"><Badge label={r.reason} className="bg-red-100 text-red-600" /></td>
+                  <tr key={r.id} className="border-t border-gray-50 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-dark-input">
+                    <td className="p-3"><Badge label={r.reason} className="bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400" /></td>
                     <td className="p-3 text-gray-400 text-xs">{r.reporterUid.substring(0, 8)}...</td>
                     <td className="p-3 text-gray-400 text-xs">{formatTime(r.createdAt)}</td>
                     <td className="p-3 flex gap-2 flex-wrap">

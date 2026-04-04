@@ -33,6 +33,15 @@ export function suspendRemaining(suspendedUntil?: Timestamp): string {
   return parts.join(' ') || '1분 미만';
 }
 
+export function displayName(user: { name: string; userType?: string; studentId?: string; graduationYear?: number }): string {
+  switch (user.userType) {
+    case 'graduate': return `졸업생 ${user.name}`;
+    case 'teacher': return `교사 ${user.name}`;
+    case 'parent': return `학부모 ${user.name}`;
+    default: return user.studentId ? `${user.studentId} ${user.name}` : user.name;
+  }
+}
+
 export function roleBadge(role: string) {
   switch (role) {
     case 'admin': return { label: 'Admin', color: 'bg-red-100 text-red-600' };
