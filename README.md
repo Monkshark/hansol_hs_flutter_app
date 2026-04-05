@@ -412,3 +412,30 @@ erDiagram
 **해결:** Cloud Functions Scheduler로 매시간 `suspendedUntil <= now`인 유저를 조회하여 필드 삭제 → `onUserUpdated` 트리거 → 정지 해제 푸시 발송
 </details>
 
+<details>
+<summary><b>관리자 화면 Firestore 읽기 과다 (Stream → Future 전환)</b></summary>
+<br>
+
+**문제:** 관리자 화면이 `StreamBuilder`로 유저/신고/로그를 실시간 감시하여, 화면 열기만 해도 130+ 읽기 발생. 데이터 변경 시마다 전체 재조회
+
+**해결:** `StreamBuilder` → `FutureBuilder`로 전환하여 열 때 1회만 조회 + 액션(승인/삭제 등) 후 `_refresh()`로 수동 갱신. `ExpansionTile`을 펼칠 때만 child를 렌더링하여 접힌 탭은 읽기 0. 결과: **130 → 20~30 읽기로 감소**
+</details>
+
+<details>
+<summary><b>계정 삭제 순서 문제 (Auth → Firestore 권한 소실)</b></summary>
+<br>
+
+**문제:** `user.delete()` 호출 시 Firebase Auth가 즉시 로그아웃되어, 이후 Firestore 문서 삭제가 PERMISSION_DENIED로 실패
+
+**해결:** Firestore 문서를 먼저 삭제(인증 상태 유지 중)한 후 Auth 계정 삭제. `uid`를 미리 변수에 저장하여 삭제 순서 역전에 의한 참조 소실 방지
+</details>
+
+<details>
+<summary><b>홈 위젯 데이터 동기화 (Flutter ↔ Native)</b></summary>
+<br>
+
+**문제:** Android 위젯(Java)은 Dart 코드를 직접 실행할 수 없어 NEIS API 데이터를 위젯에 전달할 방법이 필요
+
+**해결:** `home_widget` 패키지로 Dart → SharedPreferences → Java 브릿지 구성. 시간표는 앱 내 `timetable_view_screen`에서 완성된 그리드를 저장하고 위젯이 읽기만 수행. 자정 갱신은 `AlarmManager` → `HomeWidgetBackgroundIntent`로 Dart 엔진을 백그라운드 실행하여 API 직접 호출
+</details>
+
