@@ -97,17 +97,9 @@ class _LoginScreenState extends State<LoginScreen> {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              Container(
-                width: 80, height: 80,
-                decoration: BoxDecoration(
-                  color: AppColors.theme.primaryColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: const Center(
-                  child: Text('HS', style: TextStyle(
-                    color: Colors.white, fontSize: 32,
-                    fontWeight: FontWeight.w800, letterSpacing: 2)),
-                ),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset('assets/images/app_icon.png', width: 80, height: 80),
               ),
               const SizedBox(height: 24),
               Text('한솔고등학교', style: TextStyle(
