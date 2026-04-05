@@ -29,7 +29,7 @@ service cloud.firestore {
       }
     }
     match /posts/{postId} {
-      allow read: if request.auth != null;
+      allow read: if true;
       allow create: if request.auth != null;
       allow update: if request.auth != null && (
         request.auth.uid == resource.data.authorUid ||
@@ -40,7 +40,7 @@ service cloud.firestore {
       );
       allow delete: if request.auth != null && (request.auth.uid == resource.data.authorUid || isAdminOrManager());
       match /comments/{commentId} {
-        allow read: if request.auth != null;
+        allow read: if true;
         allow create: if request.auth != null;
         allow delete: if request.auth != null && (request.auth.uid == resource.data.authorUid || isAdminOrManager());
       }
@@ -81,7 +81,7 @@ service cloud.firestore {
       allow read, update, delete: if isAdminOrManager();
     }
     match /{path=**}/comments/{commentId} {
-      allow read: if request.auth != null;
+      allow read: if true;
     }
   }
 }
