@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="meal_widget_desc">오늘의 급식 (조식/중식/석식)</string>
+    <string name="timetable_widget_desc">오늘의 시간표</string>
+    <string name="combined_widget_desc">오늘의 급식 + 시간표</string>
+</resources>

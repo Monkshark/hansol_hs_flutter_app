@@ -58,6 +58,7 @@ dependencies:
   firebase_crashlytics: ^4.3.10
   shimmer: ^3.0.0
   flutter_svg: ^2.2.4
+  home_widget: ^0.7.0
 
 dev_dependencies:
   flutter_test:

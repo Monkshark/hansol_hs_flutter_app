@@ -34,6 +34,8 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/api/kakao_keys.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
+import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
+import 'package:home_widget/home_widget.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSdk;
 
 /// 앱 진입점, Firebase/알림/테마 초기화, 메인 네비게이션
@@ -88,6 +90,10 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   unawaited(FcmService.initialize());
+  unawaited(WidgetService.initialize().then((_) {
+    WidgetService.updateAll();
+    HomeWidget.registerInteractivityCallback(widgetBackgroundCallback);
+  }));
 
   initializeDateFormatting().then((_) => runApp(const ProviderScope(child: HansolHighSchool())));
 }

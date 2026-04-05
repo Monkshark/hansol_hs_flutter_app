@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="12dp">
+
+    <TextView
+        android:id="@+id/timetable_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="13sp"
+        android:textColor="#3F72AF"
+        android:textStyle="bold"
+        android:text=""
+        android:layout_marginBottom="6dp" />
+
+    <TextView
+        android:id="@+id/empty_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="시간표 정보 없음"
+        android:textSize="12sp"
+        android:textColor="#999999"
+        android:gravity="center"
+        android:visibility="gone"
+        android:layout_marginTop="16dp" />
+
+    <LinearLayout android:id="@+id/row_1" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_1" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_2" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_2" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_3" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_3" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_4" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_4" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_5" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_5" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_6" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_6" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/row_7" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingTop="2dp" android:paddingBottom="2dp" android:visibility="gone">
+        <TextView android:id="@+id/period_7" android:layout_width="48dp" android:layout_height="wrap_content" android:textSize="11sp" android:textColor="#999999" />
+        <TextView android:id="@+id/subject_7" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="13sp" android:textColor="#333333" android:textStyle="bold" />
+    </LinearLayout>
+
+</LinearLayout>
