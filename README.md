@@ -374,3 +374,4 @@ erDiagram
 
 **해결:** Cloud Functions Scheduler로 매시간 `suspendedUntil <= now`인 유저를 조회하여 필드 삭제 → `onUserUpdated` 트리거 → 정지 해제 푸시 발송
 </details>
+
