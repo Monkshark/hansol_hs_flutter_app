@@ -20,7 +20,6 @@ class PopupNotice {
       final data = doc.data()!;
       if (data['active'] != true) return;
 
-      // 날짜 범위 체크
       final now = DateTime.now();
       final todayStr = '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
       final startDate = data['startDate'] as String? ?? '';
@@ -28,7 +27,6 @@ class PopupNotice {
       if (startDate.isNotEmpty && todayStr.compareTo(startDate) < 0) return;
       if (endDate.isNotEmpty && todayStr.compareTo(endDate) > 0) return;
 
-      // 오늘 안 보기 체크
       final prefs = await SharedPreferences.getInstance();
       final dismissKey = 'popup_dismissed_$todayStr';
       if (prefs.getBool(dismissKey) == true) return;

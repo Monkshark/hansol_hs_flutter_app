@@ -1,5 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -202,40 +204,65 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   }
 
   Future<void> _deleteAccount() async {
-    final confirm1 = await showDialog<bool>(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final confirm1 = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('회원 탈퇴'),
-        content: const Text('정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-          TextButton(onPressed: () => Navigator.pop(context, true),
-            child: const Text('확인', style: TextStyle(color: Colors.red))),
-        ],
-      ),
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _confirmSheet(ctx, isDark, '회원 탈퇴', '정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.', '확인'),
     );
     if (confirm1 != true) return;
 
-    final confirm2 = await showDialog<bool>(
+    final userEmail = AuthService.currentUser?.email ?? _email;
+    final confirm2 = await showModalBottomSheet<bool>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('최종 확인'),
-        content: const Text('회원 탈퇴를 진행합니다.'),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('취소')),
-          TextButton(onPressed: () => Navigator.pop(context, true),
-            child: const Text('탈퇴', style: TextStyle(color: Colors.red))),
-        ],
-      ),
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _emailConfirmSheet(ctx, isDark, userEmail),
     );
     if (confirm2 != true) return;
 
     try {
-      final uid = AuthService.currentUser?.uid;
-      if (uid != null) {
-        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+      final user = AuthService.currentUser;
+      if (user == null) return;
+      final uid = user.uid;
+
+      // Firestore 데이터 먼저 삭제 (인증 상태 유지 중)
+      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
+
+      try {
+        await user.delete();
+      } on FirebaseAuthException catch (e) {
+        if (e.code == 'requires-recent-login') {
+          // Google 재인증 후 재시도
+          try {
+            final googleUser = await GoogleSignIn().signIn();
+            if (googleUser != null) {
+              final googleAuth = await googleUser.authentication;
+              final credential = GoogleAuthProvider.credential(
+                accessToken: googleAuth.accessToken,
+                idToken: googleAuth.idToken,
+              );
+              await user.reauthenticateWithCredential(credential);
+              await user.delete();
+            } else {
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('재인증이 필요합니다. 다시 로그인 후 시도해주세요.')));
+              }
+              return;
+            }
+          } catch (_) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('재인증에 실패했습니다. 다시 로그인 후 시도해주세요.')));
+            }
+            return;
+          }
+        } else {
+          rethrow;
+        }
       }
-      await AuthService.currentUser?.delete();
+
       await AuthService.signOut();
       AuthService.clearProfileCache();
       appRefreshNotifier.value++;
@@ -298,7 +325,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).padding.bottom + 32),
         child: Column(
           children: [
-            // 프로필 사진 + 이름
             const SizedBox(height: 8),
             GestureDetector(
               onTap: _isSaving ? null : _pickPhoto,
@@ -353,7 +379,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
             const SizedBox(height: 28),
 
-            // 내 정보 카드
             Container(
               width: double.infinity,
               padding: const EdgeInsets.all(20),
@@ -380,7 +405,6 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
             const SizedBox(height: 48),
 
-            // 회원 탈퇴
             GestureDetector(
               onTap: _deleteAccount,
               child: Text('회원 탈퇴',
@@ -409,6 +433,105 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _emailConfirmSheet(BuildContext ctx, bool isDark, String email) {
+    final controller = TextEditingController();
+    bool matched = false;
+    return Padding(
+      padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+      child: Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SafeArea(child: StatefulBuilder(
+          builder: (ctx, setSheetState) => Column(mainAxisSize: MainAxisSize.min, children: [
+            const SizedBox(height: 8),
+            Container(width: 36, height: 4, decoration: BoxDecoration(
+              color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            Text('최종 확인', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+              color: isDark ? Colors.white : Colors.black87)),
+            const SizedBox(height: 8),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Text('탈퇴를 진행하려면 이메일을 정확히 입력하세요.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor, height: 1.5))),
+            const SizedBox(height: 4),
+            Text(email, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
+            const SizedBox(height: 12),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: TextField(
+                controller: controller,
+                autofocus: true,
+                style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                decoration: InputDecoration(
+                  hintText: '이메일 입력',
+                  hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                  filled: true,
+                  fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                ),
+                onChanged: (v) => setSheetState(() => matched = v.trim() == email),
+              )),
+            const SizedBox(height: 16),
+            Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
+              Expanded(child: TextButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+              )),
+              const SizedBox(width: 10),
+              Expanded(child: ElevatedButton(
+                onPressed: matched ? () => Navigator.pop(ctx, true) : null,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+                child: const Text('탈퇴'),
+              )),
+            ])),
+            const SizedBox(height: 12),
+          ]),
+        )),
+      ),
+    );
+  }
+
+  Widget _confirmSheet(BuildContext ctx, bool isDark, String title, String content, String confirmLabel) {
+    return Container(
+      margin: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        const SizedBox(height: 8),
+        Container(width: 36, height: 4, decoration: BoxDecoration(
+          color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+        const SizedBox(height: 16),
+        Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+          color: isDark ? Colors.white : Colors.black87)),
+        const SizedBox(height: 8),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Text(content, textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor, height: 1.5))),
+        const SizedBox(height: 20),
+        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
+          Expanded(child: TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          )),
+          const SizedBox(width: 10),
+          Expanded(child: ElevatedButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+            child: Text(confirmLabel),
+          )),
+        ])),
+        const SizedBox(height: 12),
+      ])),
     );
   }
 }

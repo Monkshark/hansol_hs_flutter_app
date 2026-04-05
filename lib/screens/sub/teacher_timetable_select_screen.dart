@@ -53,7 +53,6 @@ class _TeacherTimetableSelectScreenState
     await _loadSaved();
 
     for (int grade = 1; grade <= 3; grade++) {
-      // 과목 그룹
       final subjects =
           await TimetableDataApi.getAllSubjectCombinations(grade: grade);
       final groups = <String, List<Subject>>{};
@@ -62,7 +61,6 @@ class _TeacherTimetableSelectScreenState
       }
       _gradeSubjectGroups[grade] = groups;
 
-      // 스케줄 맵
       final now = DateTime.now();
       final monday = now.subtract(Duration(days: now.weekday - 1));
       final friday = monday.add(const Duration(days: 4));

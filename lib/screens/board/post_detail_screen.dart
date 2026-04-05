@@ -416,6 +416,46 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
+  Future<bool?> _showConfirmSheet(String title, String content, String confirmLabel) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return showModalBottomSheet<bool>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 36, height: 4, decoration: BoxDecoration(
+            color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 16),
+          Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+            color: isDark ? Colors.white : Colors.black87)),
+          const SizedBox(height: 8),
+          Text(content, style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor)),
+          const SizedBox(height: 20),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
+            Expanded(child: TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+              child: Text(confirmLabel),
+            )),
+          ])),
+          const SizedBox(height: 12),
+        ])),
+      ),
+    );
+  }
+
   void _showFullImage(BuildContext context, String url) {
     Navigator.push(context, MaterialPageRoute(
       builder: (_) => Scaffold(
@@ -514,63 +554,48 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _reportPost() async {
     if (!AuthService.isLoggedIn) return;
 
-    final reason = await showDialog<String>(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    String? selected;
+    final reason = await showModalBottomSheet<String>(
       context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        String? selected;
-        return StatefulBuilder(
-          builder: (ctx, setDialogState) => Dialog(
-            backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('신고 사유 선택', style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700,
-                    color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-                  const SizedBox(height: 16),
-                  ...['욕설/비방', '음란물', '광고/스팸', '개인정보 노출', '기타'].map((r) =>
-                    RadioListTile<String>(
-                      value: r,
-                      groupValue: selected,
-                      title: Text(r, style: TextStyle(fontSize: 14,
-                        color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-                      activeColor: AppColors.theme.primaryColor,
-                      onChanged: (v) => setDialogState(() => selected = v),
-                      dense: true,
-                      contentPadding: EdgeInsets.zero,
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(child: TextButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                      )),
-                      const SizedBox(width: 10),
-                      Expanded(child: ElevatedButton(
-                        onPressed: selected != null ? () => Navigator.pop(ctx, selected) : null,
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        child: const Text('신고'),
-                      )),
-                    ],
-                  ),
-                ],
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSheetState) => Container(
+          margin: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E2028) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+            const SizedBox(height: 8),
+            Container(width: 36, height: 4, decoration: BoxDecoration(
+              color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+            const SizedBox(height: 16),
+            Text('신고 사유 선택', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+              color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+            const SizedBox(height: 12),
+            ...['욕설/비방', '음란물', '광고/스팸', '개인정보 노출', '기타'].map((r) =>
+              RadioListTile<String>(
+                value: r, groupValue: selected,
+                title: Text(r, style: TextStyle(fontSize: 14, color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                activeColor: AppColors.theme.primaryColor,
+                onChanged: (v) => setSheetState(() => selected = v),
+                dense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16),
               ),
             ),
-          ),
-        );
-      },
+            Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 12), child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: selected != null ? () => Navigator.pop(ctx, selected) : null,
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0,
+                  padding: const EdgeInsets.symmetric(vertical: 12)),
+                child: const Text('신고'),
+              ),
+            )),
+          ])),
+        ),
+      ),
     );
 
     if (reason == null) return;
@@ -850,7 +875,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       }
     }
 
-    // 시간순 정렬
     int getTs(QueryDocumentSnapshot d) {
       final data = d.data() as Map<String, dynamic>;
       final ts = data['createdAt'];
@@ -891,7 +915,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
     final isPostAuthor = c['authorUid'] == _currentPostAuthorUid;
 
-    // 익명 번호 적용
     if (c['isAnonymous'] == true && c['authorUid'] != null) {
       final uid = c['authorUid'] as String;
       if (uid == _currentPostAuthorUid) {
@@ -921,54 +944,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Future<void> _confirmDeleteComment(String commentId) async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('댓글 삭제', style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w700,
-                  color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-                const SizedBox(height: 12),
-                Text('댓글을 삭제하시겠습니까?', style: TextStyle(
-                  fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        child: const Text('삭제'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    final confirm = await _showConfirmSheet('댓글 삭제', '댓글을 삭제하시겠습니까?', '삭제');
 
     if (confirm == true) {
       await _postRef.collection('comments').doc(commentId).delete();
@@ -1030,54 +1006,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Future<void> _deletePost() async {
-    final confirm = await showDialog<bool>(
-      context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('게시글 삭제', style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w700,
-                  color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-                const SizedBox(height: 12),
-                Text('정말 삭제하시겠습니까?', style: TextStyle(
-                  fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        child: const Text('삭제'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
+    final confirm = await _showConfirmSheet('게시글 삭제', '정말 삭제하시겠습니까?', '삭제');
 
     if (confirm == true) {
       // 관리자 삭제 로그

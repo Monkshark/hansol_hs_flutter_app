@@ -183,6 +183,7 @@ final _darkTheme = ThemeData(
   ),
 );
 
+/// 앱 루트 위젯 (테마 모드 전환 및 MaterialApp 구성)
 class HansolHighSchool extends StatefulWidget {
   const HansolHighSchool({Key? key}) : super(key: key);
 
@@ -246,6 +247,7 @@ class _HansolHighSchoolState extends State<HansolHighSchool> {
   }
 }
 
+/// 메인 화면 (급식/홈/일정 3탭 하단 네비게이션 + 온보딩·로그인 체크)
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 

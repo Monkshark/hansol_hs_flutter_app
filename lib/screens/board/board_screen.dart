@@ -213,7 +213,6 @@ class _BoardScreenState extends State<BoardScreen> {
                   }).toList();
                 }
 
-                // Separate pinned and non-pinned posts
                 final pinned = docs.where((doc) => doc.data()['isPinned'] == true).toList();
                 final nonPinned = docs.where((doc) => doc.data()['isPinned'] != true).toList();
 
@@ -320,6 +319,7 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 }
 
+/// 게시글 요약 카드 위젯 (카테고리, 제목, 댓글 수, 좋아요 등 표시)
 class PostCard extends StatelessWidget {
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
   final VoidCallback onTap;

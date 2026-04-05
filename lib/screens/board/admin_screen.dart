@@ -40,7 +40,6 @@ class _AdminScreenState extends State<AdminScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
         children: [
-          // 사용자 관리
           _AdminSection(title: '사용자 관리', icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
             _AdminTile(title: '승인 대기', icon: Icons.hourglass_top, color: Colors.orange, initiallyExpanded: true,
               cardColor: cardColor, child: _UsersTab(filter: 'pending')),
@@ -53,7 +52,6 @@ class _AdminScreenState extends State<AdminScreen> {
           ]),
           const SizedBox(height: 16),
 
-          // 게시판 관리
           _AdminSection(title: '게시판 관리', icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
             _AdminTile(title: '신고', icon: Icons.flag_outlined, color: Colors.red, initiallyExpanded: true,
               cardColor: cardColor, child: _ReportsTab()),
@@ -63,7 +61,6 @@ class _AdminScreenState extends State<AdminScreen> {
           ]),
           const SizedBox(height: 16),
 
-          // 건의사항
           _AdminSection(title: '건의사항', icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
             _AdminTile(title: '학생회 건의', icon: Icons.school_outlined, color: const Color(0xFF4CAF50), initiallyExpanded: true,
               cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
@@ -73,7 +70,6 @@ class _AdminScreenState extends State<AdminScreen> {
           ]),
           const SizedBox(height: 16),
 
-          // 긴급 공지
           _AdminSection(title: '긴급 공지', icon: Icons.warning_amber_rounded, color: Colors.red, cardColor: cardColor, children: [
             _PopupNoticeManager(cardColor: cardColor),
           ]),
@@ -841,7 +837,6 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 활성화 토글
           Row(
             children: [
               Text('팝업 활성화', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
@@ -855,7 +850,6 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
           ),
           const SizedBox(height: 12),
 
-          // 타입 선택
           Row(
             children: _types.map((t) {
               final selected = _type == t;
@@ -881,7 +875,6 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
           ),
           const SizedBox(height: 12),
 
-          // 제목
           TextField(
             controller: _titleController,
             style: TextStyle(color: textColor),
@@ -893,7 +886,6 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
           ),
           const SizedBox(height: 8),
 
-          // 내용
           TextField(
             controller: _contentController,
             maxLines: 4,
@@ -906,7 +898,6 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
           ),
           const SizedBox(height: 12),
 
-          // 날짜
           Row(
             children: [
               Expanded(child: GestureDetector(
@@ -938,7 +929,6 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
           ),
           const SizedBox(height: 8),
 
-          // 닫기 가능
           Row(
             children: [
               Text('"오늘 안 보기" 허용', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),

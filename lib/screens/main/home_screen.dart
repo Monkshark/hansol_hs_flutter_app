@@ -471,13 +471,11 @@ class _RecentPosts extends StatelessWidget {
         final pinnedDocs = snapshot.data![0].docs;
         final recentDocs = snapshot.data![1].docs;
 
-        // Take most recent pinned post (by pinnedAt)
         QueryDocumentSnapshot<Map<String, dynamic>>? pinnedPost;
         if (pinnedDocs.isNotEmpty) {
           pinnedPost = pinnedDocs.first;
         }
 
-        // Take up to 2 non-pinned recent posts (exclude pinned ones)
         final pinnedIds = pinnedDocs.map((d) => d.id).toSet();
         final nonPinned = recentDocs.where((d) => !pinnedIds.contains(d.id)).take(2).toList();
 

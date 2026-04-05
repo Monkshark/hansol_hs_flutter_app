@@ -79,7 +79,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                 fontSize: 18, fontWeight: FontWeight.w700, color: textColor)),
               const SizedBox(height: 16),
 
-              // 내용
               TextField(
                 controller: contentController,
                 style: TextStyle(color: textColor),
@@ -96,7 +95,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
               ),
               const SizedBox(height: 12),
 
-              // 날짜 선택
               Row(
                 children: [
                   Expanded(child: _datePicker('시작일', _startDate, (d) => setState(() {
@@ -120,7 +118,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                 ),
               const SizedBox(height: 16),
 
-              // 색상
               Text('색상', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
               const SizedBox(height: 8),
               Row(
@@ -165,7 +162,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
               ),
               const SizedBox(height: 20),
 
-              // 버튼
               Row(
                 children: [
                   Expanded(
@@ -371,6 +367,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
   }
 }
 
+/// 원형 색상환 + 중앙 밝기 그라데이션을 그리는 커스텀 페인터
 class _CircleColorPainter extends CustomPainter {
   final double selectedHue;
   final double lightness;

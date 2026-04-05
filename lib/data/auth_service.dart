@@ -72,6 +72,7 @@ class UserProfile {
   }
 
   bool get needsProfileUpdate {
+    if (userType != 'student' && userType != 'teacher') return false;
     if (lastProfileUpdate.isEmpty) return true;
     final now = DateTime.now();
     final currentYear = now.year.toString();
@@ -118,6 +119,10 @@ class UserProfile {
   );
 }
 
+/// Firebase 인증 서비스 (Google/Apple/카카오/GitHub 로그인)
+///
+/// - 다중 소셜 로그인 및 로그아웃 처리
+/// - Firestore 사용자 프로필 CRUD 및 권한 체크
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();

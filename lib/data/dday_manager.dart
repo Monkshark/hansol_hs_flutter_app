@@ -32,6 +32,7 @@ class DDay {
   }
 }
 
+/// D-day 목록 저장/조회 및 핀 된 D-day 관리
 class DDayManager {
   static const _key = 'dday_list';
 

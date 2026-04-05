@@ -118,7 +118,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 style: TextStyle(fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
               const Spacer(flex: 3),
 
-              // Google — 흰 배경, 회색 테두리, 컬러 로고
               _loginButton(
                 label: 'Google로 계속하기',
                 svgAsset: 'assets/icons/google.svg',
@@ -130,7 +129,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 10),
 
-              // Apple (iOS only) — 검정 배경, 흰 로고
               if (Platform.isIOS) ...[
                 _loginButton(
                   label: 'Apple로 계속하기',
@@ -143,7 +141,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 10),
               ],
 
-              // Kakao
               _loginButton(
                 label: '카카오로 계속하기',
                 svgAsset: 'assets/icons/kakao.svg',
@@ -156,7 +153,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
               const SizedBox(height: 10),
 
-              // GitHub — 다크 배경, 흰 로고
               _loginButton(
                 label: 'GitHub로 계속하기',
                 svgAsset: 'assets/icons/github.svg',

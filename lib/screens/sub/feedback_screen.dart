@@ -7,7 +7,6 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// 건의사항 & 버그 제보 / 학생회 건의사항 공용 화면
 /// 건의사항 작성 화면 (앱 건의/버그 + 학생회 건의)
 ///
 /// - 텍스트(1000자) + 사진 첨부(최대 3장, 640px 압축)
@@ -165,7 +164,6 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             ),
             const SizedBox(height: 16),
 
-            // 이미지 첨부
             Text('사진 첨부 (최대 3장)', style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
             const SizedBox(height: 8),

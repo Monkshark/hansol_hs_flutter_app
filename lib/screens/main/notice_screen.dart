@@ -285,7 +285,6 @@ class _NoticeScreenState extends State<NoticeScreen> {
     final startStr = schedule.date;
     final endStr = schedule.endDate!;
 
-    // 원본 삭제
     await db.deleteSchedule(schedule);
 
     // 제외일 앞쪽 (start ~ 제외일-1)

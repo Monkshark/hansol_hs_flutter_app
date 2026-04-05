@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// 스켈레톤 로딩 위젯
+/// 스켈레톤 로딩용 단색 박스 위젯
 class SkeletonBox extends StatelessWidget {
   final double width;
   final double height;
@@ -28,6 +28,7 @@ class SkeletonBox extends StatelessWidget {
   }
 }
 
+/// Shimmer 애니메이션을 적용하는 래퍼 위젯
 class SkeletonShimmer extends StatelessWidget {
   final Widget child;
 

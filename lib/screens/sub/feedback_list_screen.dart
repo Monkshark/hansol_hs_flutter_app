@@ -6,7 +6,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
 /// 건의사항 목록 조회 화면 (관리자 전용)
-/// 건의사항 목록 조회 화면 (관리자 전용)
 ///
 /// - 상태별 뱃지 (대기중/확인됨/해결됨)
 /// - 탭하면 바텀시트 상세 (이미지 포함, 상태 변경 버튼)
@@ -127,7 +126,6 @@ class FeedbackListScreen extends StatelessWidget {
   Future<void> _deleteFeedback(BuildContext context, DocumentSnapshot<Map<String, dynamic>> doc) async {
     final data = doc.data()!;
     final profile = await AuthService.getCachedProfile();
-    // 삭제 로그
     await FirebaseFirestore.instance.collection('admin_logs').add({
       'action': 'delete_feedback',
       'adminUid': AuthService.currentUser?.uid ?? '',
@@ -205,7 +203,6 @@ class FeedbackListScreen extends StatelessWidget {
                       )),
                     ],
                     const SizedBox(height: 20),
-                    // 상태 변경 버튼
                     Row(
                       children: [
                         if (status != 'reviewed')

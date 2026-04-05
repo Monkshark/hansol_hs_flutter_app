@@ -165,15 +165,33 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
                 _label('신분'),
                 const SizedBox(height: 8),
-                Wrap(
-                  spacing: 8,
-                  children: [
-                    _typeChip('student', '재학생'),
-                    _typeChip('graduate', '졸업생'),
-                    _typeChip('teacher', '교사'),
-                    _typeChip('parent', '학부모'),
-                  ],
-                ),
+                if (widget.isUpdate)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: AppColors.theme.primaryColor.withAlpha(20),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(Icons.lock_outline, size: 14, color: AppColors.theme.primaryColor),
+                        const SizedBox(width: 6),
+                        Text(_userTypeLabel(_userType),
+                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
+                      ],
+                    ),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    children: [
+                      _typeChip('student', '재학생'),
+                      _typeChip('graduate', '졸업생'),
+                      _typeChip('teacher', '교사'),
+                      _typeChip('parent', '학부모'),
+                    ],
+                  ),
                 const SizedBox(height: 20),
 
                 _label('이름'),
@@ -295,6 +313,16 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       ),
     );
+  }
+
+  String _userTypeLabel(String type) {
+    switch (type) {
+      case 'student': return '재학생';
+      case 'graduate': return '졸업생';
+      case 'teacher': return '교사';
+      case 'parent': return '학부모';
+      default: return type;
+    }
   }
 
   Widget _typeChip(String type, String label) {

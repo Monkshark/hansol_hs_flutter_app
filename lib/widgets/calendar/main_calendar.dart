@@ -125,7 +125,6 @@ class _MainCalendarState extends State<MainCalendar> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // 헤더
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
@@ -146,7 +145,6 @@ class _MainCalendarState extends State<MainCalendar> {
               ],
             ),
           ),
-          // 요일 헤더
           Table(
             children: [
               TableRow(
@@ -157,7 +155,6 @@ class _MainCalendarState extends State<MainCalendar> {
               ),
             ],
           ),
-          // 캘린더 페이지
           LayoutBuilder(
             builder: (context, constraints) {
               final totalPages = _monthDiff(_firstDay, _lastDay) + 1;
@@ -329,6 +326,7 @@ class _MainCalendarState extends State<MainCalendar> {
   }
 }
 
+/// 학사일정 연속 바의 주 단위 분할 정보를 담는 내부 모델
 class _Bar {
   final String name;
   final int row, sc, ec;
@@ -336,6 +334,7 @@ class _Bar {
   _Bar({required this.name, required this.row, required this.sc, required this.ec, required this.isS, required this.isE});
 }
 
+/// 개인일정 연속 바의 주 단위 분할 정보를 담는 내부 모델
 class _PBar {
   final String name;
   final int row, sc, ec, color;
@@ -343,6 +342,7 @@ class _PBar {
   _PBar({required this.name, required this.row, required this.sc, required this.ec, required this.isS, required this.isE, required this.color});
 }
 
+/// 개인 연속일정의 날짜 범위와 색상 정보를 담는 데이터 모델
 class PersonalEventBar {
   final String name;
   final String startDate; // "2026-04-20"

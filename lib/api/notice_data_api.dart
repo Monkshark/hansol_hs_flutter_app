@@ -9,11 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'nies_api_keys.dart';
 
-/// NEIS 학사일정 API 연동
-///
-/// - 날짜 범위별 학사일정 조회
-/// - 예정 이벤트 조회 지원
-/// - 12시간 캐시 적용
+/// 다가오는 학사 이벤트 데이터 모델
 class UpcomingEvent {
   final String name;
   final DateTime date;
@@ -22,6 +18,10 @@ class UpcomingEvent {
   UpcomingEvent({required this.name, required this.date, required this.dDay});
 }
 
+/// NEIS 학사일정 API 연동
+///
+/// - 날짜 범위별 학사일정 조회 및 예정 이벤트 조회
+/// - 12시간 캐시 적용
 class NoticeDataApi {
   static const _tag = 'NoticeDataApi';
 
