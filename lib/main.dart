@@ -133,7 +133,7 @@ Future<void> _requestNotificationPermission() async {
 final _lightTheme = ThemeData(
   brightness: Brightness.light,
   primaryColor: const Color(0xFF3F72AF),
-  scaffoldBackgroundColor: Colors.white,
+  scaffoldBackgroundColor: const Color(0xFFF2F3F5),
   cardColor: Colors.white,
   dividerColor: const Color(0xFFE5E5EA),
   appBarTheme: const AppBarTheme(
@@ -143,7 +143,7 @@ final _lightTheme = ThemeData(
     surfaceTintColor: Colors.transparent,
   ),
   navigationBarTheme: NavigationBarThemeData(
-    backgroundColor: Colors.white,
+    backgroundColor: const Color(0xFFF2F3F5),
     indicatorColor: const Color(0xFF3F72AF).withAlpha(30),
     surfaceTintColor: Colors.transparent,
   ),
