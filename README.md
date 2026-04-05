@@ -215,7 +215,18 @@ graph TD
 - 시스템 다크/라이트 모드 자동 대응
 - **자정 자동 갱신** (AlarmManager + Dart 백그라운드 콜백)
 - 앱 실행 시 자동 갱신, **Firestore 읽기 0** (캐시 데이터 활용)
-- **iOS 위젯 (SwiftUI + WidgetKit)**: 급식 (Medium), 시간표 (Medium), 통합 (Large) 3종, App Groups를 통한 데이터 공유, 다크모드 자동 대응
+</details>
+
+<details>
+<summary><b>홈 화면 위젯 (iOS)</b></summary>
+
+- **급식 위젯 (Medium)**: 오늘의 조식/중식/석식
+- **시간표 위젯 (Medium)**: 오늘의 시간표, 현재 교시 강조
+- **급식+시간표 통합 위젯 (Large)**: 급식과 시간표를 한 화면에
+- **SwiftUI + WidgetKit** 네이티브 구현
+- App Groups를 통한 Flutter ↔ 위젯 데이터 공유
+- 시스템 다크/라이트 모드 자동 대응
+- 1시간 주기 Timeline 갱신
 </details>
 
 <details>
