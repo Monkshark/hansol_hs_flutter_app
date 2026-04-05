@@ -80,21 +80,45 @@ class _AdminScreenState extends State<AdminScreen> {
   }
 }
 
-class _ReportsTab extends StatelessWidget {
+class _ReportsTab extends StatefulWidget {
+  @override
+  State<_ReportsTab> createState() => _ReportsTabState();
+}
+
+class _ReportsTabState extends State<_ReportsTab> {
+  late Future<QuerySnapshot<Map<String, dynamic>>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _fetch();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> _fetch() =>
+      FirebaseFirestore.instance.collection('reports').orderBy('createdAt', descending: true).get();
+
+  void _refresh() => setState(() => _future = _fetch());
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('reports')
-          .orderBy('createdAt', descending: true)
-          .snapshots(),
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: _future,
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
-          return Center(child: Text('신고가 없습니다',
-            style: TextStyle(color: AppColors.theme.darkGreyColor)));
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: Text('신고가 없습니다',
+              style: TextStyle(color: AppColors.theme.darkGreyColor))),
+          );
         }
 
         return ListView.separated(
@@ -154,6 +178,7 @@ class _ReportsTab extends StatelessWidget {
                             await FirebaseFirestore.instance.collection('posts').doc(postId).delete();
                           } catch (_) {}
                           await docs[index].reference.delete();
+                          _refresh();
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
@@ -166,7 +191,7 @@ class _ReportsTab extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       GestureDetector(
-                        onTap: () => docs[index].reference.delete(),
+                        onTap: () { docs[index].reference.delete(); _refresh(); },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
@@ -188,9 +213,27 @@ class _ReportsTab extends StatelessWidget {
   }
 }
 
-class _UsersTab extends StatelessWidget {
+class _UsersTab extends StatefulWidget {
   final String filter;
   const _UsersTab({required this.filter});
+
+  @override
+  State<_UsersTab> createState() => _UsersTabState();
+}
+
+class _UsersTabState extends State<_UsersTab> {
+  late Future<QuerySnapshot<Map<String, dynamic>>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _fetch();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> _fetch() =>
+      FirebaseFirestore.instance.collection('users').get();
+
+  void _refresh() => setState(() => _future = _fetch());
 
   Future<void> _logAdminAction(String action, String targetUid, String targetName) async {
     await FirebaseFirestore.instance.collection('admin_logs').add({
@@ -227,16 +270,22 @@ class _UsersTab extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('users').snapshots(),
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: _future,
       builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final allDocs = snapshot.data?.docs ?? [];
         final docs = allDocs.where((d) {
           final data = d.data();
           final approved = data['approved'] == true;
           final suspended = _isSuspended(data);
 
-          switch (filter) {
+          switch (widget.filter) {
             case 'pending': return !approved;
             case 'approved':
               if (!approved) return false;
@@ -247,7 +296,7 @@ class _UsersTab extends StatelessWidget {
           }
         }).toList();
 
-        if (filter == 'approved') {
+        if (widget.filter == 'approved') {
           docs.sort((a, b) {
             final roleOrder = {'admin': 0, 'manager': 1, 'user': 2};
             final ra = roleOrder[a.data()['role'] ?? 'user'] ?? 2;
@@ -263,8 +312,11 @@ class _UsersTab extends StatelessWidget {
         };
 
         if (docs.isEmpty) {
-          return Center(child: Text(emptyMsg[filter] ?? '',
-            style: TextStyle(color: AppColors.theme.darkGreyColor)));
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: Text(emptyMsg[widget.filter] ?? '',
+              style: TextStyle(color: AppColors.theme.darkGreyColor))),
+          );
         }
 
         return FutureBuilder<UserProfile?>(
@@ -336,7 +388,7 @@ class _UsersTab extends StatelessWidget {
                                 ),
                                 Text('$studentId · ${grade}학년 ${classNum}반',
                                   style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
-                                if (filter == 'suspended') ...[
+                                if (widget.filter == 'suspended') ...[
                                   const SizedBox(height: 4),
                                   Text('남은 기간: ${_suspendRemaining(data['suspendedUntil'] as Timestamp)}',
                                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.orange)),
@@ -350,24 +402,27 @@ class _UsersTab extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          if (filter == 'pending') ...[
+                          if (widget.filter == 'pending') ...[
                             _actionBtn('승인', AppColors.theme.primaryColor, () async {
                               await docs[index].reference.update({'approved': true});
                               await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다.');
                               await _logAdminAction('승인', uid, name);
+                              _refresh();
                             }),
                             const SizedBox(width: 6),
                             _actionBtn('거절', Colors.red, () async {
                               await _sendAccountNotification(uid, '가입 거절', '가입이 거절되었습니다.');
                               await docs[index].reference.delete();
                               await _logAdminAction('거절', uid, name);
+                              _refresh();
                             }),
                           ],
-                          if (filter == 'approved') ...[
+                          if (widget.filter == 'approved') ...[
                             if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
                               _actionBtn('Admin 해제', AppColors.theme.darkGreyColor, () async {
                                 await docs[index].reference.update({'role': 'user'});
                                 AuthService.clearProfileCache();
+                                _refresh();
                               }),
                             if (isAdmin && role != 'admin') ...[
                               _actionBtn(
@@ -377,12 +432,14 @@ class _UsersTab extends StatelessWidget {
                                   final newRole = role == 'manager' ? 'user' : 'manager';
                                   await docs[index].reference.update({'role': newRole});
                                   await _logAdminAction('역할 변경: $newRole', uid, name);
+                                  _refresh();
                                 },
                               ),
                               const SizedBox(width: 6),
                               _actionBtn('Admin', Colors.red, () async {
                                 await docs[index].reference.update({'role': 'admin'});
                                 await _logAdminAction('역할 변경: admin', uid, name);
+                                _refresh();
                               }),
                             ],
                             if (uid != AuthService.currentUser?.uid && role == 'user') ...[
@@ -394,6 +451,7 @@ class _UsersTab extends StatelessWidget {
                                   await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
                                   await _sendAccountNotification(uid, '계정 정지', '${_formatDuration(hours)} 동안 계정이 정지되었습니다.');
                                   await _logAdminAction('정지', uid, name);
+                                  _refresh();
                                 }
                               }),
                               const SizedBox(width: 6),
@@ -405,15 +463,17 @@ class _UsersTab extends StatelessWidget {
                                   await _sendAccountNotification(uid, '계정 삭제', '관리자에 의해 계정이 삭제되었습니다.');
                                   await docs[index].reference.delete();
                                   await _logAdminAction('삭제', uid, name);
+                                  _refresh();
                                 }
                               }),
                             ],
                           ],
-                          if (filter == 'suspended') ...[
+                          if (widget.filter == 'suspended') ...[
                             _actionBtn('정지 해제', AppColors.theme.primaryColor, () async {
                               await docs[index].reference.update({'suspendedUntil': null});
                               await _sendAccountNotification(uid, '정지 해제', '계정 정지가 해제되었습니다.');
                               await _logAdminAction('정지 해제', uid, name);
+                              _refresh();
                             }),
                           ],
                         ],
@@ -567,21 +627,37 @@ class _UsersTab extends StatelessWidget {
   }
 }
 
-class _DeleteLogsTab extends StatelessWidget {
+class _DeleteLogsTab extends StatefulWidget {
   const _DeleteLogsTab();
+
+  @override
+  State<_DeleteLogsTab> createState() => _DeleteLogsTabState();
+}
+
+class _DeleteLogsTabState extends State<_DeleteLogsTab> {
+  late Future<QuerySnapshot<Map<String, dynamic>>> _future;
+
+  @override
+  void initState() {
+    super.initState();
+    _future = _fetch();
+  }
+
+  Future<QuerySnapshot<Map<String, dynamic>>> _fetch() =>
+      FirebaseFirestore.instance
+          .collection('admin_logs')
+          .where('action', whereIn: ['delete_post', 'delete_feedback'])
+          .orderBy('createdAt', descending: true)
+          .limit(50)
+          .get();
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
-    return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('admin_logs')
-          .where('action', whereIn: ['delete_post', 'delete_feedback'])
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .snapshots(),
+    return FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+      future: _future,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Padding(
@@ -715,7 +791,7 @@ class _AdminSection extends StatelessWidget {
   }
 }
 
-class _AdminTile extends StatelessWidget {
+class _AdminTile extends StatefulWidget {
   final String title;
   final IconData icon;
   final Color color;
@@ -733,6 +809,19 @@ class _AdminTile extends StatelessWidget {
   });
 
   @override
+  State<_AdminTile> createState() => _AdminTileState();
+}
+
+class _AdminTileState extends State<_AdminTile> {
+  late bool _expanded;
+
+  @override
+  void initState() {
+    super.initState();
+    _expanded = widget.initiallyExpanded;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(12),
@@ -740,17 +829,18 @@ class _AdminTile extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         child: ExpansionTile(
-          key: ValueKey<String>('admin_tile_$title'),
-          initiallyExpanded: initiallyExpanded,
-          collapsedBackgroundColor: cardColor,
-          backgroundColor: cardColor,
+          key: ValueKey<String>('admin_tile_${widget.title}'),
+          initiallyExpanded: widget.initiallyExpanded,
+          onExpansionChanged: (expanded) => setState(() => _expanded = expanded),
+          collapsedBackgroundColor: widget.cardColor,
+          backgroundColor: widget.cardColor,
           tilePadding: const EdgeInsets.symmetric(horizontal: 16),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          leading: Icon(icon, size: 20, color: color),
-          title: Text(title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
+          leading: Icon(widget.icon, size: 20, color: widget.color),
+          title: Text(widget.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
             color: Theme.of(context).textTheme.bodyLarge?.color)),
-          children: [child],
+          children: [if (_expanded) widget.child],
         ),
       ),
     );
