@@ -17,7 +17,7 @@
 
 
     <application
-        android:label="hansol_high_school"
+        android:label="한솔고등학교"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
@@ -68,6 +68,44 @@
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED"/>
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="com.htc.intent.action.QUICKBOOT_POWERON"/>
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".MealWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/meal_widget_info" />
+        </receiver>
+
+        <receiver android:name=".TimetableWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/timetable_widget_info" />
+        </receiver>
+
+        <receiver android:name=".CombinedWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/combined_widget_info" />
+        </receiver>
+
+        <receiver android:name=".WidgetUpdateReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.monkshark.hansol_high_school.WIDGET_MIDNIGHT_UPDATE" />
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 

@@ -8,6 +8,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
 import 'dart:math' as math;
 import 'dart:convert';
 
@@ -549,7 +550,18 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 class _TimetableResult {
   final List<List<String>> grid;
   final Map<String, List<String>> conflicts;
-  _TimetableResult({required this.grid, required this.conflicts});
+  _TimetableResult({required this.grid, required this.conflicts}) {
+    _saveGridAndUpdateWidget(grid);
+  }
+
+  static Future<void> _saveGridAndUpdateWidget(List<List<String>> grid) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final encoded = grid.map((row) => row.join(',')).toList();
+      await prefs.setStringList('widget_timetable_grid', encoded);
+      await WidgetService.updateTimetableWidget();
+    } catch (_) {}
+  }
 }
 
 class _ConflictDialog extends StatelessWidget {
