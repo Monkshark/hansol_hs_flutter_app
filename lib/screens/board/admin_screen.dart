@@ -200,6 +200,7 @@ class _UsersTab extends StatelessWidget {
       'adminUid': AuthService.currentUser?.uid ?? '',
       'adminName': AuthService.cachedProfile?.displayName ?? '',
       'createdAt': FieldValue.serverTimestamp(),
+      'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
     });
   }
 
@@ -577,20 +578,26 @@ class _DeleteLogsTab extends StatelessWidget {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: FirebaseFirestore.instance
           .collection('admin_logs')
-          .where('action', isEqualTo: 'delete_post')
+          .where('action', whereIn: ['delete_post', 'delete_feedback'])
           .orderBy('createdAt', descending: true)
           .limit(50)
           .snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 24),
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
-          return Center(
-            child: Text('삭제 로그가 없습니다',
-                style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: Center(
+              child: Text('삭제 로그가 없습니다',
+                  style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            ),
           );
         }
 
@@ -602,9 +609,17 @@ class _DeleteLogsTab extends StatelessWidget {
           separatorBuilder: (_, __) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final data = docs[index].data();
+            final action = data['action'] ?? '';
             final adminName = data['adminName'] ?? '관리자';
-            final postTitle = data['postTitle'] ?? '제목 없음';
-            final postAuthorName = data['postAuthorName'] ?? '알 수 없음';
+            final isFeedback = action == 'delete_feedback';
+            final title = isFeedback
+                ? (data['feedbackContent'] ?? '내용 없음')
+                : (data['postTitle'] ?? '제목 없음');
+            final authorName = isFeedback
+                ? (data['feedbackAuthorName'] ?? '알 수 없음')
+                : (data['postAuthorName'] ?? '알 수 없음');
+            final label = isFeedback ? '건의 삭제' : '게시글 삭제';
+            final labelColor = isFeedback ? Colors.orange : Colors.red;
             final createdAt = data['createdAt'] as Timestamp?;
             final timeStr = createdAt != null
                 ? '${createdAt.toDate().month}/${createdAt.toDate().day} ${createdAt.toDate().hour}:${createdAt.toDate().minute.toString().padLeft(2, '0')}'
@@ -624,22 +639,22 @@ class _DeleteLogsTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: Colors.red.withAlpha(25),
+                          color: labelColor.withAlpha(25),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text('삭제', style: TextStyle(
-                            fontSize: 11, fontWeight: FontWeight.w700, color: Colors.red)),
+                        child: Text(label, style: TextStyle(
+                            fontSize: 11, fontWeight: FontWeight.w700, color: labelColor)),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
-                        child: Text(postTitle, style: TextStyle(
+                        child: Text(title, style: TextStyle(
                             fontSize: 14, fontWeight: FontWeight.w600, color: textColor),
                           maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text('작성자: $postAuthorName', style: TextStyle(
+                  Text('작성자: $authorName', style: TextStyle(
                       fontSize: 12, color: AppColors.theme.darkGreyColor)),
                   const SizedBox(height: 2),
                   Row(
@@ -725,7 +740,7 @@ class _AdminTile extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         child: ExpansionTile(
-          key: PageStorageKey<String>(title),
+          key: ValueKey<String>('admin_tile_$title'),
           initiallyExpanded: initiallyExpanded,
           collapsedBackgroundColor: cardColor,
           backgroundColor: cardColor,
@@ -775,6 +790,7 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
     final doc = await FirebaseFirestore.instance.collection('app_config').doc('popup').get();
     if (doc.exists) {
       final d = doc.data()!;
+      if (!mounted) return;
       setState(() {
         _active = d['active'] ?? false;
         _type = d['type'] ?? 'notice';
@@ -785,6 +801,7 @@ class _PopupNoticeManagerState extends State<_PopupNoticeManager> {
         _dismissible = d['dismissible'] ?? true;
       });
     }
+    if (!mounted) return;
     setState(() => _loading = false);
   }
 
