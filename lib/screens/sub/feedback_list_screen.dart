@@ -134,6 +134,7 @@ class FeedbackListScreen extends StatelessWidget {
       'feedbackContent': (data['content'] ?? '').toString().substring(0, (data['content'] ?? '').toString().length.clamp(0, 100)),
       'feedbackAuthorName': data['authorName'] ?? '',
       'createdAt': FieldValue.serverTimestamp(),
+      'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
     });
     await doc.reference.delete();
     if (context.mounted) {

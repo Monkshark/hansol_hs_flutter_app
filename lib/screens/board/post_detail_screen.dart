@@ -1024,6 +1024,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           'postAuthorUid': postData['authorUid'] ?? '',
           'postAuthorName': postData['authorName'] ?? '',
           'createdAt': FieldValue.serverTimestamp(),
+          'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
         });
       }
 
