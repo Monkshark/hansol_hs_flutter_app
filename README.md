@@ -131,7 +131,7 @@ graph TD
 - **D-day** 관리 + 홈 화면 핀 고정
 </details>
 
-<details open>
+<details>
 <summary><b>게시판</b></summary>
 
 - **6개 카테고리**: 자유 / 질문 / 정보공유 / 분실물 / 학생회 / 동아리
