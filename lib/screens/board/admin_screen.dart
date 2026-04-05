@@ -725,6 +725,7 @@ class _AdminTile extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeInOut,
         child: ExpansionTile(
+          key: PageStorageKey<String>(title),
           initiallyExpanded: initiallyExpanded,
           collapsedBackgroundColor: cardColor,
           backgroundColor: cardColor,
