@@ -440,6 +440,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
             Expanded(child: TextButton(
               onPressed: () => Navigator.pop(ctx, false),
+              style: TextButton.styleFrom(
+                backgroundColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFF0F0F0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
               child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
             )),
             const SizedBox(width: 10),
