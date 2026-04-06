@@ -200,11 +200,12 @@ class _SettingScreenState extends State<SettingScreen> {
               const SizedBox(height: 24),
               _buildSectionTitle('학교 정보'),
               _buildGroupedCard([
-                _buildSettingRow(
-                  '학년 반 설정',
-                  trailing: GestureDetector(
-                    onTap: () => _selectGradeAndClass(),
-                    child: Text(
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => _selectGradeAndClass(),
+                  child: _buildSettingRow(
+                    '학년 반 설정',
+                    trailing: Text(
                       '$grade학년 $classNum반',
                       style: TextStyle(
                         fontSize: 16,
@@ -215,31 +216,23 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
                 _buildDivider(),
-                _buildSettingRow(
-                  '선택과목 시간표',
-                  trailing: IconButton(
-                    onPressed: grade == 1
-                        ? null
-                        : () {
-                            if (!SettingData().isGradeSet) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('학년/반을 먼저 설정해주세요')),
-                              );
-                              return;
-                            }
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (_) => const TimetableSelectScreen(),
-                              ),
-                            );
-                          },
-                    icon: Icon(
-                      Icons.arrow_forward_ios,
-                      size: 16,
-                      color: grade == 1
-                          ? AppColors.theme.darkGreyColor
-                          : AppColors.theme.primaryColor,
-                    ),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: grade == 1 ? null : () {
+                    if (!SettingData().isGradeSet) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('학년/반을 먼저 설정해주세요')),
+                      );
+                      return;
+                    }
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const TimetableSelectScreen()),
+                    );
+                  },
+                  child: _buildSettingRow(
+                    '선택과목 시간표',
+                    trailing: Icon(Icons.chevron_right, color: grade == 1
+                        ? AppColors.theme.darkGreyColor : AppColors.theme.primaryColor),
                   ),
                 ),
               ]),
@@ -263,6 +256,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSectionTitle('알림'),
               _buildGroupedCard([
                 GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const NotificationSettingScreen())),
                   child: _buildSettingRow(
@@ -276,6 +270,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 _buildSectionTitle('건의사항'),
                 _buildGroupedCard([
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const FeedbackScreen(type: 'app'))),
                     child: _buildSettingRow(
@@ -285,6 +280,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                   _buildDivider(),
                   GestureDetector(
+                    behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const FeedbackScreen(type: 'council'))),
                     child: _buildSettingRow(
@@ -298,6 +294,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildSectionTitle('기타'),
               _buildGroupedCard([
                 GestureDetector(
+                  behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const _PrivacyPolicyScreen())),
                   child: _buildSettingRow(

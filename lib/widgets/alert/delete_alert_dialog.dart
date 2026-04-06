@@ -41,10 +41,10 @@ class DeleteAlertDialog extends StatelessWidget {
                   child: TextButton(
                     onPressed: () => Navigator.of(context).pop(false),
                     style: TextButton.styleFrom(
+                      backgroundColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFF0F0F0),
                       padding: const EdgeInsets.symmetric(vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
-                        side: BorderSide(color: AppColors.theme.darkGreyColor),
                       ),
                     ),
                     child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),

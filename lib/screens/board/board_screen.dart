@@ -352,6 +352,7 @@ class PostCard extends StatelessWidget {
     final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.all(16),
