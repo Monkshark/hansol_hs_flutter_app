@@ -246,7 +246,9 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
           return Dialog(
             backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Padding(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
+              child: Padding(
               padding: const EdgeInsets.all(20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -256,8 +258,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     color: Theme.of(ctx).textTheme.bodyLarge?.color,
                   )),
                   const SizedBox(height: 16),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.5),
+                  Flexible(
                     child: SingleChildScrollView(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -321,6 +322,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   ]),
                 ],
               ),
+            ),
             ),
           );
         });
