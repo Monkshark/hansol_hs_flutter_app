@@ -18,6 +18,7 @@ class _GradeScreenState extends State<GradeScreen> {
   int _tabIndex = 0;
   late Future<List<Exam>> _examsFuture;
   Map<String, double> _goals = {};
+  final PageController _pageController = PageController();
 
   @override
   void initState() {
@@ -120,6 +121,12 @@ class _GradeScreenState extends State<GradeScreen> {
   Future<void> _loadGoals() async {
     final goals = await GradeManager.loadGoals();
     if (mounted) setState(() => _goals = goals);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   void _reload() {
@@ -478,8 +485,8 @@ class _GradeScreenState extends State<GradeScreen> {
               padding: const EdgeInsets.all(4),
               child: Row(
                 children: [
-                  _buildTab('내신', 0, isDark),
-                  _buildTab('모의고사', 1, isDark),
+                  _buildTab('수시', 0, isDark),
+                  _buildTab('정시', 1, isDark),
                 ],
               ),
             ),
@@ -495,55 +502,70 @@ class _GradeScreenState extends State<GradeScreen> {
                 }
 
                 final allExams = snapshot.data ?? [];
-                final exams = _filterExams(allExams);
 
-                if (exams.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.assignment_outlined, size: 48, color: AppColors.theme.darkGreyColor),
-                        const SizedBox(height: 12),
-                        Text(
-                          '시험을 추가하세요',
-                          style: TextStyle(color: AppColors.theme.darkGreyColor),
-                        ),
-                      ],
-                    ),
-                  );
-                }
+                return PageView(
+                  controller: _pageController,
+                  onPageChanged: (i) => setState(() => _tabIndex = i),
+                  children: [
+                    _buildExamList(allExams, 0, context, isDark, cardColor, textColor),
+                    _buildExamList(allExams, 1, context, isDark, cardColor, textColor),
+                  ],
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-                return ListView.separated(
-                  padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).padding.bottom + 80),
-                  itemCount: exams.length + (exams.length >= 2 ? 1 : 0),
-                  separatorBuilder: (_, __) => const SizedBox(height: 8),
-                  itemBuilder: (context, index) {
-                    if (exams.length >= 2 && index == 0) {
-                      return GradeChart(
-                        exams: exams,
-                        goals: _goals,
-                        maxRank: _tabIndex == 0 ? 5 : 9,
-                        onGoalsChanged: (newGoals) async {
-                          await GradeManager.saveGoals(newGoals);
-                          _loadGoals();
-                        },
-                      );
-                    }
-                    final realIndex = exams.length >= 2 ? index - 1 : index;
-                    final exam = exams[realIndex];
-                    final avgRank = _averageRank(exam);
+  Widget _buildExamList(List<Exam> allExams, int tabIdx, BuildContext context, bool isDark, Color cardColor, Color? textColor) {
+    final exams = allExams.where((e) {
+      if (tabIdx == 0) return e.type == 'midterm' || e.type == 'final';
+      return e.type == 'mock' || e.type == 'private_mock';
+    }).toList();
 
-                    return GestureDetector(
-                      onTap: () async {
-                        final result = await Navigator.push<bool>(
-                          context,
-                          MaterialPageRoute(builder: (_) => GradeInputScreen(exam: exam)),
-                        );
-                        if (result == true) _reload();
-                      },
-                      onLongPress: () => _deleteExam(exam),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
+    if (exams.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.assignment_outlined, size: 48, color: AppColors.theme.darkGreyColor),
+            const SizedBox(height: 12),
+            Text('시험을 추가하세요', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          ],
+        ),
+      );
+    }
+
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(20, 8, 20, MediaQuery.of(context).padding.bottom + 80),
+      itemCount: exams.length + (exams.length >= 2 ? 1 : 0),
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        if (exams.length >= 2 && index == 0) {
+          return GradeChart(
+            exams: exams,
+            goals: _goals,
+            maxRank: tabIdx == 0 ? 5 : 9,
+          );
+        }
+        final realIndex = exams.length >= 2 ? index - 1 : index;
+        final exam = exams[realIndex];
+        final avgRank = _averageRank(exam);
+
+        return GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () async {
+            final result = await Navigator.push<bool>(
+              context,
+              MaterialPageRoute(builder: (_) => GradeInputScreen(exam: exam)),
+            );
+            if (result == true) _reload();
+          },
+          onLongPress: () => _deleteExam(exam),
+          child: Container(
+            padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: cardColor,
                           borderRadius: BorderRadius.circular(14),
@@ -680,19 +702,16 @@ class _GradeScreenState extends State<GradeScreen> {
                     );
                   },
                 );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   Widget _buildTab(String label, int index, bool isDark) {
     final selected = _tabIndex == index;
     return Expanded(
       child: GestureDetector(
-        onTap: () => setState(() => _tabIndex = index),
+        onTap: () {
+          setState(() => _tabIndex = index);
+          _pageController.animateToPage(index, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
+        },
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           padding: const EdgeInsets.symmetric(vertical: 10),
