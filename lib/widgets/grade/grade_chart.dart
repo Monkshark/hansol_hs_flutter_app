@@ -103,19 +103,24 @@ class _GradeChartState extends State<GradeChart> {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
+              if (_isMockExams) ...[
+                _buildModeChip('백���위', _chartMode == 2, isDark, () {
+                  if (_chartMode != 2) setState(() => _chartMode = 2);
+                }),
+                const SizedBox(width: 6),
+                _buildModeChip('표���점수', _chartMode == 1, isDark, () {
+                  if (_chartMode != 1) setState(() => _chartMode = 1);
+                }),
+                const SizedBox(width: 6),
+              ] else ...[
+                _buildModeChip('원점수', _chartMode == 1, isDark, () {
+                  if (_chartMode != 1) setState(() => _chartMode = 1);
+                }),
+                const SizedBox(width: 6),
+              ],
               _buildModeChip('등급', _chartMode == 0, isDark, () {
                 if (_chartMode != 0) setState(() => _chartMode = 0);
               }),
-              const SizedBox(width: 6),
-              _buildModeChip(_isMockExams ? '표준점수' : '원점수', _chartMode == 1, isDark, () {
-                if (_chartMode != 1) setState(() => _chartMode = 1);
-              }),
-              if (_isMockExams) ...[
-                const SizedBox(width: 6),
-                _buildModeChip('백분위', _chartMode == 2, isDark, () {
-                  if (_chartMode != 2) setState(() => _chartMode = 2);
-                }),
-              ],
             ],
           ),
         ),
