@@ -13,9 +13,9 @@ import '../../data/grade_manager.dart';
 /// - 과목별 필터 칩, 목표 등급 점선, 범례 포함
 class GradeChart extends StatefulWidget {
   final List<Exam> exams;
-  final Map<String, int> goals;
+  final Map<String, double> goals;
   final int maxRank;
-  final ValueChanged<Map<String, int>>? onGoalsChanged;
+  final ValueChanged<Map<String, double>>? onGoalsChanged;
 
   const GradeChart({
     super.key,
@@ -32,6 +32,7 @@ class GradeChart extends StatefulWidget {
 class _GradeChartState extends State<GradeChart> {
   late Set<String> _allSubjects;
   late Set<String> _visibleSubjects;
+  bool _showScore = false;
 
   @override
   void initState() {
@@ -51,12 +52,17 @@ class _GradeChartState extends State<GradeChart> {
     _allSubjects = <String>{};
     for (final exam in widget.exams) {
       for (final score in exam.scores) {
-        if (score.rank != null) {
+        if (score.rank != null || score.rawScore != null || score.standardScore != null) {
           _allSubjects.add(score.subject);
         }
       }
     }
     _visibleSubjects = Set<String>.from(_allSubjects);
+  }
+
+  /// 현재 시험 리스트가 모의고사인지 판별
+  bool get _isMockExams {
+    return widget.exams.any((e) => e.type == 'mock' || e.type == 'private_mock');
   }
 
   /// 시험 이름 축약
@@ -91,6 +97,23 @@ class _GradeChartState extends State<GradeChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // 등급/점수 토글
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Row(
+            children: [
+              _buildModeChip('등급', !_showScore, isDark, () {
+                if (_showScore) setState(() => _showScore = false);
+              }),
+              const SizedBox(width: 6),
+              _buildModeChip('점수', _showScore, isDark, () {
+                if (!_showScore) setState(() => _showScore = true);
+              }),
+            ],
+          ),
+        ),
+        const SizedBox(height: 6),
+
         // 과목 필터 칩
         if (_allSubjects.isNotEmpty)
           SizedBox(
@@ -138,84 +161,9 @@ class _GradeChartState extends State<GradeChart> {
         const SizedBox(height: 8),
 
         // 차트 영역
-        SizedBox(
-          height: 250,
-          child: examsWithRanks.isEmpty
-              ? Center(
-                  child: Text(
-                    '데이터가 없습니다',
-                    style: TextStyle(
-                      color: isDark ? Colors.white54 : Colors.black45,
-                      fontSize: 14,
-                    ),
-                  ),
-                )
-              : LayoutBuilder(
-                  builder: (context, constraints) {
-                    final examLabels = examsWithRanks.map(_abbreviate).toList();
-
-                    // 시험이 많으면 스크롤
-                    const minExamSpacing = 80.0;
-                    const leftPad = 36.0;
-                    const rightPad = 20.0;
-                    final chartAreaWidth = constraints.maxWidth - leftPad - rightPad;
-                    final neededWidth = max(
-                      chartAreaWidth,
-                      (examsWithRanks.length - 1) * minExamSpacing + 0.0,
-                    );
-                    final totalWidth = neededWidth + leftPad + rightPad;
-
-                    // 과목별 데이터 수집: subject -> List<(examIndex, rank)>
-                    final subjectData = <String, List<_DataPoint>>{};
-                    for (final subject in _visibleSubjects) {
-                      final points = <_DataPoint>[];
-                      for (var i = 0; i < examsWithRanks.length; i++) {
-                        final exam = examsWithRanks[i];
-                        final matches = exam.scores.where((s) => s.subject == subject);
-                        final score = matches.isEmpty ? null : matches.first;
-                        if (score?.rank != null) {
-                          points.add(_DataPoint(i, score!.rank!));
-                        }
-                      }
-                      if (points.isNotEmpty) {
-                        subjectData[subject] = points;
-                      }
-                    }
-
-                    // 목표 등급 (보이는 과목만)
-                    final visibleGoals = <String, int>{};
-                    for (final entry in widget.goals.entries) {
-                      if (_visibleSubjects.contains(entry.key)) {
-                        visibleGoals[entry.key] = entry.value;
-                      }
-                    }
-
-                    return SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: SizedBox(
-                        width: totalWidth,
-                        height: 250,
-                        child: CustomPaint(
-                          painter: _GradeChartPainter(
-                            examLabels: examLabels,
-                            examCount: examsWithRanks.length,
-                            subjectData: subjectData,
-                            goals: visibleGoals,
-                            isDark: isDark,
-                            textColor: isDark ? Colors.white70 : Colors.black87,
-                            gridColor: isDark
-                                ? Colors.white.withValues(alpha: 0.1)
-                                : Colors.black.withValues(alpha: 0.08),
-                            leftPadding: leftPad,
-                            rightPadding: rightPad,
-                            maxRank: widget.maxRank,
-                          ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-        ),
+        _showScore
+            ? _buildScoreChart(sortedExams, isDark)
+            : _buildRankChart(examsWithRanks, isDark),
 
         // 범례
         if (_visibleSubjects.isNotEmpty && examsWithRanks.isNotEmpty)
@@ -251,16 +199,230 @@ class _GradeChartState extends State<GradeChart> {
             ),
           ),
 
-        // 목표 등급 조절 UI
-        if (widget.onGoalsChanged != null && _visibleSubjects.isNotEmpty)
+        // 목표 등급 조절 UI (등급 모드에서만)
+        if (!_showScore && widget.onGoalsChanged != null && _visibleSubjects.isNotEmpty)
           _buildGoalControls(isDark),
       ],
     );
   }
 
+  Widget _buildModeChip(String label, bool selected, bool isDark, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+        decoration: BoxDecoration(
+          color: selected
+              ? (isDark ? Colors.white.withValues(alpha: 0.15) : Colors.black.withValues(alpha: 0.08))
+              : Colors.transparent,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected
+                ? (isDark ? Colors.white38 : Colors.black26)
+                : (isDark ? Colors.white12 : Colors.black12),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
+            color: selected
+                ? (isDark ? Colors.white : Colors.black87)
+                : (isDark ? Colors.white54 : Colors.black45),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildRankChart(List<Exam> examsWithRanks, bool isDark) {
+    return SizedBox(
+      height: 250,
+      child: examsWithRanks.isEmpty
+          ? Center(
+              child: Text(
+                '데이터가 없습니다',
+                style: TextStyle(
+                  color: isDark ? Colors.white54 : Colors.black45,
+                  fontSize: 14,
+                ),
+              ),
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final examLabels = examsWithRanks.map(_abbreviate).toList();
+
+                const minExamSpacing = 80.0;
+                const leftPad = 36.0;
+                const rightPad = 20.0;
+                final chartAreaWidth = constraints.maxWidth - leftPad - rightPad;
+                final neededWidth = max(
+                  chartAreaWidth,
+                  (examsWithRanks.length - 1) * minExamSpacing + 0.0,
+                );
+                final totalWidth = neededWidth + leftPad + rightPad;
+
+                final subjectData = <String, List<_DataPoint>>{};
+                for (final subject in _visibleSubjects) {
+                  final points = <_DataPoint>[];
+                  for (var i = 0; i < examsWithRanks.length; i++) {
+                    final exam = examsWithRanks[i];
+                    final matches = exam.scores.where((s) => s.subject == subject);
+                    final score = matches.isEmpty ? null : matches.first;
+                    if (score?.rank != null) {
+                      points.add(_DataPoint(i, score!.rank!));
+                    }
+                  }
+                  if (points.isNotEmpty) {
+                    subjectData[subject] = points;
+                  }
+                }
+
+                final visibleGoals = <String, double>{};
+                for (final entry in widget.goals.entries) {
+                  if (_visibleSubjects.contains(entry.key)) {
+                    visibleGoals[entry.key] = entry.value;
+                  }
+                }
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: totalWidth,
+                    height: 250,
+                    child: CustomPaint(
+                      painter: _GradeChartPainter(
+                        examLabels: examLabels,
+                        examCount: examsWithRanks.length,
+                        subjectData: subjectData,
+                        goals: visibleGoals,
+                        isDark: isDark,
+                        textColor: isDark ? Colors.white70 : Colors.black87,
+                        gridColor: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.08),
+                        leftPadding: leftPad,
+                        rightPadding: rightPad,
+                        maxRank: widget.maxRank,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
+  Widget _buildScoreChart(List<Exam> sortedExams, bool isDark) {
+    final isMock = _isMockExams;
+
+    // 점수 데이터가 있는 시험만 필터
+    final examsWithScores = sortedExams.where((e) {
+      return e.scores.any((s) {
+        final hasScore = isMock ? s.standardScore != null : s.rawScore != null;
+        return hasScore && _visibleSubjects.contains(s.subject);
+      });
+    }).toList();
+
+    return SizedBox(
+      height: 250,
+      child: examsWithScores.isEmpty
+          ? Center(
+              child: Text(
+                '점수 데이터가 없습니다',
+                style: TextStyle(
+                  color: isDark ? Colors.white54 : Colors.black45,
+                  fontSize: 14,
+                ),
+              ),
+            )
+          : LayoutBuilder(
+              builder: (context, constraints) {
+                final examLabels = examsWithScores.map(_abbreviate).toList();
+
+                const minExamSpacing = 80.0;
+                const leftPad = 44.0;
+                const rightPad = 20.0;
+                final chartAreaWidth = constraints.maxWidth - leftPad - rightPad;
+                final neededWidth = max(
+                  chartAreaWidth,
+                  (examsWithScores.length - 1) * minExamSpacing + 0.0,
+                );
+                final totalWidth = neededWidth + leftPad + rightPad;
+
+                // 과목별 점수 데이터 수집
+                final subjectData = <String, List<_ScoreDataPoint>>{};
+                for (final subject in _visibleSubjects) {
+                  final points = <_ScoreDataPoint>[];
+                  for (var i = 0; i < examsWithScores.length; i++) {
+                    final exam = examsWithScores[i];
+                    final matches = exam.scores.where((s) => s.subject == subject);
+                    final score = matches.isEmpty ? null : matches.first;
+                    if (score != null) {
+                      final value = isMock ? score.standardScore : score.rawScore?.toDouble();
+                      if (value != null) {
+                        points.add(_ScoreDataPoint(i, value));
+                      }
+                    }
+                  }
+                  if (points.isNotEmpty) {
+                    subjectData[subject] = points;
+                  }
+                }
+
+                // min/max 자동 계산
+                double minScore = double.infinity;
+                double maxScore = double.negativeInfinity;
+                for (final points in subjectData.values) {
+                  for (final p in points) {
+                    if (p.score < minScore) minScore = p.score;
+                    if (p.score > maxScore) maxScore = p.score;
+                  }
+                }
+                if (minScore == double.infinity) {
+                  minScore = 0;
+                  maxScore = 100;
+                }
+                // 여유 마진
+                final range = maxScore - minScore;
+                final margin = range < 10 ? 5.0 : range * 0.15;
+                minScore = (minScore - margin).floorToDouble();
+                maxScore = (maxScore + margin).ceilToDouble();
+                if (minScore < 0) minScore = 0;
+                if (!isMock && maxScore > 100) maxScore = 100;
+
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: SizedBox(
+                    width: totalWidth,
+                    height: 250,
+                    child: CustomPaint(
+                      painter: _ScoreChartPainter(
+                        examLabels: examLabels,
+                        examCount: examsWithScores.length,
+                        subjectData: subjectData,
+                        isDark: isDark,
+                        textColor: isDark ? Colors.white70 : Colors.black87,
+                        gridColor: isDark
+                            ? Colors.white.withValues(alpha: 0.1)
+                            : Colors.black.withValues(alpha: 0.08),
+                        leftPadding: leftPad,
+                        rightPadding: rightPad,
+                        minScore: minScore,
+                        maxScore: maxScore,
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+    );
+  }
+
   Widget _buildGoalControls(bool isDark) {
     // 보이는 과목 중 목표가 설정된 과목만
-    final goalsToShow = <String, int>{};
+    final goalsToShow = <String, double>{};
     for (final subject in _visibleSubjects) {
       if (widget.goals.containsKey(subject)) {
         goalsToShow[subject] = widget.goals[subject]!;
@@ -299,7 +461,7 @@ class _GradeChartState extends State<GradeChart> {
                 maxRank: widget.maxRank,
                 isDark: isDark,
                 onChanged: (newRank) {
-                  final updated = Map<String, int>.from(widget.goals);
+                  final updated = Map<String, double>.from(widget.goals);
                   updated[subject] = newRank;
                   widget.onGoalsChanged?.call(updated);
                 },
@@ -314,11 +476,11 @@ class _GradeChartState extends State<GradeChart> {
 
 class _GoalChip extends StatelessWidget {
   final String subject;
-  final int rank;
+  final double rank;
   final Color color;
   final int maxRank;
   final bool isDark;
-  final ValueChanged<int> onChanged;
+  final ValueChanged<double> onChanged;
 
   const _GoalChip({
     required this.subject,
@@ -333,7 +495,7 @@ class _GoalChip extends StatelessWidget {
   Widget build(BuildContext context) {
     final bgColor = isDark ? Colors.grey[850]! : Colors.grey[100]!;
     final textColor = isDark ? Colors.white70 : Colors.black87;
-    final canUp = rank > 1;
+    final canUp = rank > 1.0;
     final canDown = rank < maxRank;
 
     return Container(
@@ -352,19 +514,19 @@ class _GoalChip extends StatelessWidget {
           ),
           const SizedBox(width: 5),
           Text(
-            '$subject 목표: $rank등급',
+            '$subject ${rank.toStringAsFixed(1)}',
             style: TextStyle(fontSize: 11, color: textColor),
           ),
           const SizedBox(width: 4),
           _miniButton(
             icon: Icons.arrow_drop_up,
             enabled: canUp,
-            onTap: canUp ? () => onChanged(rank - 1) : null,
+            onTap: canUp ? () => onChanged(((rank - 0.1) * 10).round() / 10) : null,
           ),
           _miniButton(
             icon: Icons.arrow_drop_down,
             enabled: canDown,
-            onTap: canDown ? () => onChanged(rank + 1) : null,
+            onTap: canDown ? () => onChanged(((rank + 0.1) * 10).round() / 10) : null,
           ),
         ],
       ),
@@ -404,7 +566,7 @@ class _GradeChartPainter extends CustomPainter {
   final List<String> examLabels;
   final int examCount;
   final Map<String, List<_DataPoint>> subjectData;
-  final Map<String, int> goals;
+  final Map<String, double> goals;
   final bool isDark;
   final Color textColor;
   final Color gridColor;
@@ -482,7 +644,7 @@ class _GradeChartPainter extends CustomPainter {
       canvas.drawParagraph(paragraph, Offset(x - 35, chartBottom + 6));
     }
 
-    double rankToY(int rank) => chartTop + (rank - 1) / (maxRank - 1) * chartHeight;
+    double rankToY(num rank) => chartTop + (rank - 1) / (maxRank - 1) * chartHeight;
     double indexToX(int index) => examCount == 1
         ? chartLeft + chartWidth / 2
         : chartLeft + index / (examCount - 1) * chartWidth;
@@ -606,5 +768,192 @@ class _GradeChartPainter extends CustomPainter {
         oldDelegate.subjectData != subjectData ||
         oldDelegate.goals != goals ||
         oldDelegate.isDark != isDark;
+  }
+}
+
+class _ScoreDataPoint {
+  final int examIndex;
+  final double score;
+  const _ScoreDataPoint(this.examIndex, this.score);
+}
+
+class _ScoreChartPainter extends CustomPainter {
+  final List<String> examLabels;
+  final int examCount;
+  final Map<String, List<_ScoreDataPoint>> subjectData;
+  final bool isDark;
+  final Color textColor;
+  final Color gridColor;
+  final double leftPadding;
+  final double rightPadding;
+  final double minScore;
+  final double maxScore;
+
+  _ScoreChartPainter({
+    required this.examLabels,
+    required this.examCount,
+    required this.subjectData,
+    required this.isDark,
+    required this.textColor,
+    required this.gridColor,
+    required this.leftPadding,
+    required this.rightPadding,
+    required this.minScore,
+    required this.maxScore,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    const topPad = 12.0;
+    const bottomPad = 32.0;
+    final chartLeft = leftPadding;
+    final chartRight = size.width - rightPadding;
+    const chartTop = topPad;
+    final chartBottom = size.height - bottomPad;
+    final chartHeight = chartBottom - chartTop;
+    final chartWidth = chartRight - chartLeft;
+
+    final gridPaint = Paint()
+      ..color = gridColor
+      ..strokeWidth = 0.5;
+
+    final textStyle = ui.TextStyle(
+      color: textColor,
+      fontSize: 11,
+    );
+
+    // Y축 그리드 라인 수 결정 (4~6개)
+    final scoreRange = maxScore - minScore;
+    final rawStep = scoreRange / 5;
+    // 깔끔한 간격으로 반올림
+    final step = rawStep <= 5
+        ? 5.0
+        : rawStep <= 10
+            ? 10.0
+            : rawStep <= 20
+                ? 20.0
+                : (rawStep / 10).ceil() * 10.0;
+
+    final firstTick = (minScore / step).ceil() * step;
+
+    for (var tick = firstTick; tick <= maxScore; tick += step) {
+      final y = _scoreToY(tick, chartTop, chartHeight);
+      canvas.drawLine(Offset(chartLeft, y), Offset(chartRight, y), gridPaint);
+
+      final label = tick == tick.roundToDouble() ? '${tick.round()}' : tick.toStringAsFixed(1);
+      final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+        textAlign: TextAlign.right,
+        fontSize: 11,
+      ))
+        ..pushStyle(textStyle)
+        ..addText(label);
+      final paragraph = builder.build()
+        ..layout(const ui.ParagraphConstraints(width: 34));
+      canvas.drawParagraph(paragraph, Offset(chartLeft - 38, y - 7));
+    }
+
+    // X축 레이블
+    for (var i = 0; i < examCount; i++) {
+      final x = examCount == 1
+          ? chartLeft + chartWidth / 2
+          : chartLeft + i / (examCount - 1) * chartWidth;
+
+      final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+        textAlign: TextAlign.center,
+        fontSize: 10,
+        maxLines: 1,
+        ellipsis: '..',
+      ))
+        ..pushStyle(ui.TextStyle(color: textColor, fontSize: 10))
+        ..addText(examLabels[i]);
+      final paragraph = builder.build()
+        ..layout(const ui.ParagraphConstraints(width: 70));
+      canvas.drawParagraph(paragraph, Offset(x - 35, chartBottom + 6));
+    }
+
+    double indexToX(int index) => examCount == 1
+        ? chartLeft + chartWidth / 2
+        : chartLeft + index / (examCount - 1) * chartWidth;
+
+    // 과목별 라인 + 데이터 포인트
+    for (final entry in subjectData.entries) {
+      final subject = entry.key;
+      final points = entry.value;
+      final color = Color(GradeManager.getSubjectColor(subject));
+
+      if (points.isEmpty) continue;
+
+      final linePaint = Paint()
+        ..color = color
+        ..strokeWidth = 2.0
+        ..style = PaintingStyle.stroke
+        ..strokeCap = StrokeCap.round
+        ..strokeJoin = StrokeJoin.round;
+
+      final dotPaint = Paint()
+        ..color = color
+        ..style = PaintingStyle.fill;
+
+      final dotBorderPaint = Paint()
+        ..color = isDark ? Colors.black : Colors.white
+        ..style = PaintingStyle.fill;
+
+      // 선 그리기
+      if (points.length > 1) {
+        final path = Path();
+        for (var i = 0; i < points.length; i++) {
+          final x = indexToX(points[i].examIndex);
+          final y = _scoreToY(points[i].score, chartTop, chartHeight);
+          if (i == 0) {
+            path.moveTo(x, y);
+          } else {
+            path.lineTo(x, y);
+          }
+        }
+        canvas.drawPath(path, linePaint);
+      }
+
+      // 점 + 점수 텍스트
+      for (final p in points) {
+        final x = indexToX(p.examIndex);
+        final y = _scoreToY(p.score, chartTop, chartHeight);
+
+        canvas.drawCircle(Offset(x, y), 5.5, dotBorderPaint);
+        canvas.drawCircle(Offset(x, y), 4, dotPaint);
+
+        // 점수 표시
+        final scoreLabel = p.score == p.score.roundToDouble()
+            ? '${p.score.round()}'
+            : p.score.toStringAsFixed(1);
+        final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+          textAlign: TextAlign.center,
+          fontSize: 9,
+        ))
+          ..pushStyle(ui.TextStyle(
+            color: isDark ? Colors.white : Colors.black87,
+            fontSize: 9,
+            fontWeight: ui.FontWeight.bold,
+          ))
+          ..addText(scoreLabel);
+        final paragraph = builder.build()
+          ..layout(const ui.ParagraphConstraints(width: 30));
+        canvas.drawParagraph(paragraph, Offset(x - 15, y - 18));
+      }
+    }
+  }
+
+  /// 점수 -> Y좌표 (높은 점수가 위쪽)
+  double _scoreToY(double score, double chartTop, double chartHeight) {
+    final ratio = (score - minScore) / (maxScore - minScore);
+    return chartTop + (1.0 - ratio) * chartHeight;
+  }
+
+  @override
+  bool shouldRepaint(covariant _ScoreChartPainter oldDelegate) {
+    return oldDelegate.examCount != examCount ||
+        oldDelegate.subjectData != subjectData ||
+        oldDelegate.isDark != isDark ||
+        oldDelegate.minScore != minScore ||
+        oldDelegate.maxScore != maxScore;
   }
 }

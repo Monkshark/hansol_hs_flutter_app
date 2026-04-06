@@ -185,14 +185,15 @@ class GradeManager {
   }
 
   // 과목별 목표 등급
-  static Future<Map<String, int>> loadGoals() async {
+  static Future<Map<String, double>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString(_goalsKey);
     if (json == null) return {};
-    return Map<String, int>.from(jsonDecode(json));
+    final raw = jsonDecode(json) as Map<String, dynamic>;
+    return raw.map((k, v) => MapEntry(k, (v as num).toDouble()));
   }
 
-  static Future<void> saveGoals(Map<String, int> goals) async {
+  static Future<void> saveGoals(Map<String, double> goals) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_goalsKey, jsonEncode(goals));
   }
