@@ -32,7 +32,8 @@ class GradeChart extends StatefulWidget {
 class _GradeChartState extends State<GradeChart> {
   late Set<String> _allSubjects;
   late Set<String> _visibleSubjects;
-  bool _showScore = false;
+  // 0=등급, 1=점수(내신:원점수, 모의:표준점수), 2=백분위(모의만)
+  int _chartMode = 0;
 
   @override
   void initState() {
@@ -97,18 +98,24 @@ class _GradeChartState extends State<GradeChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 등급/점수 토글
+        // 차트 모드 토글
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
             children: [
-              _buildModeChip('등급', !_showScore, isDark, () {
-                if (_showScore) setState(() => _showScore = false);
+              _buildModeChip('등급', _chartMode == 0, isDark, () {
+                if (_chartMode != 0) setState(() => _chartMode = 0);
               }),
               const SizedBox(width: 6),
-              _buildModeChip('점수', _showScore, isDark, () {
-                if (!_showScore) setState(() => _showScore = true);
+              _buildModeChip(_isMockExams ? '표준점수' : '원점수', _chartMode == 1, isDark, () {
+                if (_chartMode != 1) setState(() => _chartMode = 1);
               }),
+              if (_isMockExams) ...[
+                const SizedBox(width: 6),
+                _buildModeChip('백분위', _chartMode == 2, isDark, () {
+                  if (_chartMode != 2) setState(() => _chartMode = 2);
+                }),
+              ],
             ],
           ),
         ),
@@ -161,9 +168,10 @@ class _GradeChartState extends State<GradeChart> {
         const SizedBox(height: 8),
 
         // 차트 영역
-        _showScore
-            ? _buildScoreChart(sortedExams, isDark)
-            : _buildRankChart(examsWithRanks, isDark),
+        if (_chartMode == 0)
+          _buildRankChart(examsWithRanks, isDark)
+        else
+          _buildScoreChart(sortedExams, isDark),
 
         // 범례
         if (_visibleSubjects.isNotEmpty && examsWithRanks.isNotEmpty)
@@ -200,7 +208,7 @@ class _GradeChartState extends State<GradeChart> {
           ),
 
         // 목표 등급 조절 UI (등급 모드에서만)
-        if (!_showScore && widget.onGoalsChanged != null && _visibleSubjects.isNotEmpty)
+        if (_chartMode == 0 && widget.onGoalsChanged != null && _visibleSubjects.isNotEmpty)
           _buildGoalControls(isDark),
       ],
     );
@@ -317,10 +325,13 @@ class _GradeChartState extends State<GradeChart> {
   Widget _buildScoreChart(List<Exam> sortedExams, bool isDark) {
     final isMock = _isMockExams;
 
+    final usePercentile = _chartMode == 2 && isMock;
+
     // 점수 데이터가 있는 시험만 필터
     final examsWithScores = sortedExams.where((e) {
       return e.scores.any((s) {
-        final hasScore = isMock ? s.standardScore != null : s.rawScore != null;
+        final hasScore = usePercentile ? s.percentile != null
+            : (isMock ? s.standardScore != null : s.rawScore != null);
         return hasScore && _visibleSubjects.contains(s.subject);
       });
     }).toList();
@@ -360,7 +371,8 @@ class _GradeChartState extends State<GradeChart> {
                     final matches = exam.scores.where((s) => s.subject == subject);
                     final score = matches.isEmpty ? null : matches.first;
                     if (score != null) {
-                      final value = isMock ? score.standardScore : score.rawScore?.toDouble();
+                      final value = usePercentile ? score.percentile
+                          : (isMock ? score.standardScore : score.rawScore?.toDouble());
                       if (value != null) {
                         points.add(_ScoreDataPoint(i, value));
                       }
