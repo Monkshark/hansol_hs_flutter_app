@@ -13,6 +13,7 @@ import 'package:hansol_high_school/screens/board/notification_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart';
 import 'package:hansol_high_school/screens/sub/timetable_view_screen.dart';
+import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -237,6 +238,46 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 Text('시간표', style: TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
                                 Text('이번 주 시간표를 확인하세요', style: TextStyle(
+                                  fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                              ],
+                            ),
+                          ),
+                          Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const GradeScreen()),
+                    ),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 40, height: 40,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFE53935).withAlpha(25),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.trending_up, color: Color(0xFFE53935), size: 22),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('성적 관리', style: TextStyle(
+                                  fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                Text('내신/모의고사 성적을 기록하세요', style: TextStyle(
                                   fontSize: 12, color: AppColors.theme.darkGreyColor)),
                               ],
                             ),
