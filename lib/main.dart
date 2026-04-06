@@ -108,6 +108,7 @@ ThemeMode _indexToThemeMode(int index) {
 
 void _logCrashToFirestore(FlutterErrorDetails details) {
   try {
+    if (!AuthService.isLoggedIn) return;
     FirebaseFirestore.instance.collection('crash_logs').add({
       'error': details.exceptionAsString().substring(0, details.exceptionAsString().length.clamp(0, 500)),
       'stack': details.stack?.toString().substring(0, details.stack.toString().length.clamp(0, 1000)) ?? '',

@@ -22,8 +22,99 @@ class _GradeScreenState extends State<GradeScreen> {
   @override
   void initState() {
     super.initState();
-    _examsFuture = GradeManager.loadExams();
+    _examsFuture = _initExams();
     _loadGoals();
+  }
+
+  Future<List<Exam>> _initExams() async {
+    var exams = await GradeManager.loadExams();
+    if (exams.isEmpty) {
+      await _seedTestData();
+      exams = await GradeManager.loadExams();
+    }
+    return exams;
+  }
+
+  Future<void> _seedTestData() async {
+    final testExams = [
+      Exam(
+        id: 'test_1', type: 'midterm', year: 2025, semester: 1, grade: 1,
+        createdAt: DateTime(2025, 4, 20),
+        scores: [
+          SubjectScore(subject: '국어', rawScore: 82, average: 68.5, rank: 3, achievement: 'B'),
+          SubjectScore(subject: '수학', rawScore: 90, average: 61.2, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '영어', rawScore: 88, average: 72.1, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '한국사', rawScore: 75, average: 65.0, rank: 3, achievement: 'B'),
+          SubjectScore(subject: '생명과학', rawScore: 78, average: 60.3, rank: 3, achievement: 'B'),
+          SubjectScore(subject: '세계지리', rawScore: 85, average: 70.0, rank: 2, achievement: 'A'),
+        ],
+      ),
+      Exam(
+        id: 'test_2', type: 'final', year: 2025, semester: 1, grade: 1,
+        createdAt: DateTime(2025, 7, 10),
+        scores: [
+          SubjectScore(subject: '국어', rawScore: 78, average: 70.2, rank: 3, achievement: 'B'),
+          SubjectScore(subject: '수학', rawScore: 95, average: 63.0, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '영어', rawScore: 91, average: 74.5, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '한국사', rawScore: 80, average: 66.0, rank: 2, achievement: 'B'),
+          SubjectScore(subject: '생명과학', rawScore: 85, average: 62.0, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '세계지리', rawScore: 88, average: 72.5, rank: 2, achievement: 'A'),
+        ],
+      ),
+      Exam(
+        id: 'test_3', type: 'midterm', year: 2025, semester: 2, grade: 1,
+        createdAt: DateTime(2025, 10, 15),
+        scores: [
+          SubjectScore(subject: '국어', rawScore: 85, average: 69.0, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '수학', rawScore: 88, average: 60.5, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '영어', rawScore: 93, average: 73.0, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '한국사', rawScore: 82, average: 67.5, rank: 2, achievement: 'B'),
+          SubjectScore(subject: '생명과학', rawScore: 90, average: 63.0, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '세계지리', rawScore: 82, average: 71.0, rank: 2, achievement: 'A'),
+        ],
+      ),
+      Exam(
+        id: 'test_4', type: 'mock', year: 2025, semester: 1, grade: 1, mockLabel: '6월',
+        createdAt: DateTime(2025, 6, 5),
+        scores: [
+          SubjectScore(subject: '국어', standardScore: 128, percentile: 89.0, rank: 2),
+          SubjectScore(subject: '수학', standardScore: 135, percentile: 93.0, rank: 2),
+          SubjectScore(subject: '영어', rank: 2),
+          SubjectScore(subject: '한국사', rank: 3),
+          SubjectScore(subject: '생명과학', standardScore: 62, percentile: 85.0, rank: 3),
+          SubjectScore(subject: '지구과학', standardScore: 58, percentile: 78.0, rank: 3),
+        ],
+      ),
+      Exam(
+        id: 'test_5', type: 'mock', year: 2025, semester: 2, grade: 1, mockLabel: '9월',
+        createdAt: DateTime(2025, 9, 3),
+        scores: [
+          SubjectScore(subject: '국어', standardScore: 132, percentile: 91.0, rank: 2),
+          SubjectScore(subject: '수학', standardScore: 140, percentile: 96.0, rank: 1),
+          SubjectScore(subject: '영어', rank: 1),
+          SubjectScore(subject: '한국사', rank: 2),
+          SubjectScore(subject: '생명과학', standardScore: 65, percentile: 88.0, rank: 2),
+          SubjectScore(subject: '지구과학', standardScore: 63, percentile: 84.0, rank: 2),
+        ],
+      ),
+      Exam(
+        id: 'test_6', type: 'private_mock', year: 2025, semester: 2, grade: 1, mockLabel: '메가스터디 3회',
+        createdAt: DateTime(2025, 11, 10),
+        scores: [
+          SubjectScore(subject: '국어', standardScore: 130, percentile: 90.0, rank: 2),
+          SubjectScore(subject: '수학', standardScore: 138, percentile: 95.0, rank: 1),
+          SubjectScore(subject: '영어', rank: 1),
+          SubjectScore(subject: '생명과학', standardScore: 68, percentile: 91.0, rank: 2),
+          SubjectScore(subject: '지구과학', standardScore: 60, percentile: 80.0, rank: 3),
+        ],
+      ),
+    ];
+
+    await GradeManager.saveExams(testExams);
+    await GradeManager.saveGoals({
+      '국어': 1, '수학': 1, '영어': 1, '한국사': 2,
+      '생명과학': 1, '세계지리': 1, '지구과학': 2,
+    });
   }
 
   Future<void> _loadGoals() async {
@@ -118,6 +209,207 @@ class _GradeScreenState extends State<GradeScreen> {
     }
   }
 
+  void _showGoalSheet(BuildContext context) async {
+    final allExams = await _examsFuture;
+    final filtered = _filterExams(allExams);
+    final maxRank = _tabIndex == 0 ? 5 : 9;
+
+    // Collect unique subjects in order of first appearance
+    final subjects = <String>[];
+    for (final exam in filtered) {
+      for (final score in exam.scores) {
+        if (!subjects.contains(score.subject)) subjects.add(score.subject);
+      }
+    }
+
+    if (subjects.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('시험 데이터가 없습니다')),
+        );
+      }
+      return;
+    }
+
+    // Local copy of goals for editing
+    final tempGoals = Map<String, int>.from(_goals);
+
+    if (!mounted) return;
+    await showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        final isDark = Theme.of(ctx).brightness == Brightness.dark;
+        final sheetColor = isDark ? const Color(0xFF1E2028) : Colors.white;
+        final textColor = Theme.of(ctx).textTheme.bodyLarge?.color;
+
+        return StatefulBuilder(
+          builder: (ctx, setSheetState) {
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(ctx).size.height * 0.7,
+              ),
+              decoration: BoxDecoration(
+                color: sheetColor,
+                borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Handle bar
+                  Container(
+                    margin: const EdgeInsets.only(top: 12),
+                    width: 40,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.white24 : Colors.black12,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  // Title
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                    child: Text(
+                      '과목별 목표 등급',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                        color: textColor,
+                      ),
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  // Subject list
+                  Flexible(
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                      itemCount: subjects.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 8),
+                      itemBuilder: (_, i) {
+                        final subject = subjects[i];
+                        final color = Color(GradeManager.getSubjectColor(subject));
+                        final currentGoal = tempGoals[subject];
+
+                        return Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: color,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                subject,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w500,
+                                  color: textColor,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<int?>(
+                                  value: currentGoal,
+                                  hint: Text(
+                                    '미설정',
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: AppColors.theme.darkGreyColor,
+                                    ),
+                                  ),
+                                  isDense: true,
+                                  dropdownColor: sheetColor,
+                                  style: TextStyle(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.w600,
+                                    color: textColor,
+                                  ),
+                                  items: [
+                                    DropdownMenuItem<int?>(
+                                      value: null,
+                                      child: Text(
+                                        '미설정',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          color: AppColors.theme.darkGreyColor,
+                                        ),
+                                      ),
+                                    ),
+                                    ...List.generate(maxRank, (r) {
+                                      final rank = r + 1;
+                                      return DropdownMenuItem<int?>(
+                                        value: rank,
+                                        child: Text('$rank등급'),
+                                      );
+                                    }),
+                                  ],
+                                  onChanged: (val) {
+                                    setSheetState(() {
+                                      if (val == null) {
+                                        tempGoals.remove(subject);
+                                      } else {
+                                        tempGoals[subject] = val;
+                                      }
+                                    });
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                  const Divider(height: 1),
+                  // Save button
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(ctx).padding.bottom + 12),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await GradeManager.saveGoals(tempGoals);
+                          if (mounted) {
+                            Navigator.pop(ctx);
+                            _loadGoals();
+                            _reload();
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.theme.primaryColor,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          elevation: 0,
+                        ),
+                        child: const Text(
+                          '저장',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -132,6 +424,13 @@ class _GradeScreenState extends State<GradeScreen> {
         title: const Text('성적 관리'),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.flag_outlined),
+            tooltip: '목표 설정',
+            onPressed: () => _showGoalSheet(context),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -229,7 +528,15 @@ class _GradeScreenState extends State<GradeScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
                     if (exams.length >= 2 && index == 0) {
-                      return GradeChart(exams: exams, goals: _goals);
+                      return GradeChart(
+                        exams: exams,
+                        goals: _goals,
+                        maxRank: _tabIndex == 0 ? 5 : 9,
+                        onGoalsChanged: (newGoals) async {
+                          await GradeManager.saveGoals(newGoals);
+                          _loadGoals();
+                        },
+                      );
                     }
                     final realIndex = exams.length >= 2 ? index - 1 : index;
                     final exam = exams[realIndex];
@@ -332,6 +639,40 @@ class _GradeScreenState extends State<GradeScreen> {
                                       ],
                                     ],
                                   ),
+                                  if (exam.type == 'midterm' || exam.type == 'final') ...[
+                                    const SizedBox(height: 6),
+                                    Wrap(
+                                      spacing: 4,
+                                      runSpacing: 4,
+                                      children: exam.scores
+                                          .where((s) => s.achievement != null)
+                                          .map((s) {
+                                        const achievementColors = <String, MaterialColor>{
+                                          'A': Colors.green,
+                                          'B': Colors.blue,
+                                          'C': Colors.orange,
+                                          'D': Colors.red,
+                                          'E': Colors.grey,
+                                        };
+                                        final color = achievementColors[s.achievement] ?? Colors.grey;
+                                        return Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                          decoration: BoxDecoration(
+                                            color: color.withAlpha(isDark ? 40 : 25),
+                                            borderRadius: BorderRadius.circular(4),
+                                          ),
+                                          child: Text(
+                                            '${s.subject} ${s.achievement}',
+                                            style: TextStyle(
+                                              fontSize: 11,
+                                              fontWeight: FontWeight.w600,
+                                              color: isDark ? color.shade300 : color.shade700,
+                                            ),
+                                          ),
+                                        );
+                                      }).toList(),
+                                    ),
+                                  ],
                                 ],
                               ),
                             ),

@@ -14,6 +14,7 @@ class SubjectScore {
   final double? percentile;
   final double? standardScore;
   final double? average;
+  final String? achievement; // 성취도 A~E (내신 5등급제 병기)
 
   SubjectScore({
     required this.subject,
@@ -22,6 +23,7 @@ class SubjectScore {
     this.percentile,
     this.standardScore,
     this.average,
+    this.achievement,
   });
 
   Map<String, dynamic> toJson() => {
@@ -31,6 +33,7 @@ class SubjectScore {
     if (percentile != null) 'percentile': percentile,
     if (standardScore != null) 'standardScore': standardScore,
     if (average != null) 'average': average,
+    if (achievement != null) 'achievement': achievement,
   };
 
   factory SubjectScore.fromJson(Map<String, dynamic> json) => SubjectScore(
@@ -40,7 +43,12 @@ class SubjectScore {
     percentile: json['percentile'] != null ? (json['percentile'] as num).toDouble() : null,
     standardScore: json['standardScore'] != null ? (json['standardScore'] as num).toDouble() : null,
     average: json['average'] != null ? (json['average'] as num).toDouble() : null,
+    achievement: json['achievement'],
   );
+
+  // 내신 등급 비율 (5등급제)
+  static const rankCutoffs = {1: '상위 10%', 2: '상위 34%', 3: '상위 66%', 4: '상위 90%', 5: '하위 10%'};
+  static const achievements = ['A', 'B', 'C', 'D', 'E'];
 }
 
 class Exam {
