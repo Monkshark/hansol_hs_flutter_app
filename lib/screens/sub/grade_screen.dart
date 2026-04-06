@@ -46,8 +46,8 @@ class _GradeScreenState extends State<GradeScreen> {
           SubjectScore(subject: '수학', rawScore: 90, average: 61.2, rank: 1, achievement: 'A'),
           SubjectScore(subject: '영어', rawScore: 88, average: 72.1, rank: 2, achievement: 'A'),
           SubjectScore(subject: '한국사', rawScore: 75, average: 65.0, rank: 3, achievement: 'B'),
-          SubjectScore(subject: '생명과학', rawScore: 78, average: 60.3, rank: 3, achievement: 'B'),
-          SubjectScore(subject: '세계지리', rawScore: 85, average: 70.0, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '통합과학', rawScore: 78, average: 60.3, rank: 3, achievement: 'B'),
+          SubjectScore(subject: '통합사회', rawScore: 85, average: 70.0, rank: 2, achievement: 'A'),
         ],
       ),
       Exam(
@@ -58,8 +58,8 @@ class _GradeScreenState extends State<GradeScreen> {
           SubjectScore(subject: '수학', rawScore: 95, average: 63.0, rank: 1, achievement: 'A'),
           SubjectScore(subject: '영어', rawScore: 91, average: 74.5, rank: 1, achievement: 'A'),
           SubjectScore(subject: '한국사', rawScore: 80, average: 66.0, rank: 2, achievement: 'B'),
-          SubjectScore(subject: '생명과학', rawScore: 85, average: 62.0, rank: 2, achievement: 'A'),
-          SubjectScore(subject: '세계지리', rawScore: 88, average: 72.5, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '통합과학', rawScore: 85, average: 62.0, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '통합사회', rawScore: 88, average: 72.5, rank: 2, achievement: 'A'),
         ],
       ),
       Exam(
@@ -70,8 +70,8 @@ class _GradeScreenState extends State<GradeScreen> {
           SubjectScore(subject: '수학', rawScore: 88, average: 60.5, rank: 1, achievement: 'A'),
           SubjectScore(subject: '영어', rawScore: 93, average: 73.0, rank: 1, achievement: 'A'),
           SubjectScore(subject: '한국사', rawScore: 82, average: 67.5, rank: 2, achievement: 'B'),
-          SubjectScore(subject: '생명과학', rawScore: 90, average: 63.0, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '세계지리', rawScore: 82, average: 71.0, rank: 2, achievement: 'A'),
+          SubjectScore(subject: '통합과학', rawScore: 90, average: 63.0, rank: 1, achievement: 'A'),
+          SubjectScore(subject: '통합사회', rawScore: 82, average: 71.0, rank: 2, achievement: 'A'),
         ],
       ),
       Exam(
@@ -82,8 +82,8 @@ class _GradeScreenState extends State<GradeScreen> {
           SubjectScore(subject: '수학', standardScore: 135, percentile: 93.0, rank: 2),
           SubjectScore(subject: '영어', rank: 2),
           SubjectScore(subject: '한국사', rank: 3),
-          SubjectScore(subject: '생명과학', standardScore: 62, percentile: 85.0, rank: 3),
-          SubjectScore(subject: '지구과학', standardScore: 58, percentile: 78.0, rank: 3),
+          SubjectScore(subject: '통합사회', standardScore: 62, percentile: 85.0, rank: 3),
+          SubjectScore(subject: '통합과학', standardScore: 58, percentile: 78.0, rank: 3),
         ],
       ),
       Exam(
@@ -94,8 +94,8 @@ class _GradeScreenState extends State<GradeScreen> {
           SubjectScore(subject: '수학', standardScore: 140, percentile: 96.0, rank: 1),
           SubjectScore(subject: '영어', rank: 1),
           SubjectScore(subject: '한국사', rank: 2),
-          SubjectScore(subject: '생명과학', standardScore: 65, percentile: 88.0, rank: 2),
-          SubjectScore(subject: '지구과학', standardScore: 63, percentile: 84.0, rank: 2),
+          SubjectScore(subject: '통합사회', standardScore: 65, percentile: 88.0, rank: 2),
+          SubjectScore(subject: '통합과학', standardScore: 63, percentile: 84.0, rank: 2),
         ],
       ),
       Exam(
@@ -105,8 +105,8 @@ class _GradeScreenState extends State<GradeScreen> {
           SubjectScore(subject: '국어', standardScore: 130, percentile: 90.0, rank: 2),
           SubjectScore(subject: '수학', standardScore: 138, percentile: 95.0, rank: 1),
           SubjectScore(subject: '영어', rank: 1),
-          SubjectScore(subject: '생명과학', standardScore: 68, percentile: 91.0, rank: 2),
-          SubjectScore(subject: '지구과학', standardScore: 60, percentile: 80.0, rank: 3),
+          SubjectScore(subject: '통합사회', standardScore: 68, percentile: 91.0, rank: 2),
+          SubjectScore(subject: '통합과학', standardScore: 60, percentile: 80.0, rank: 3),
         ],
       ),
     ];
@@ -114,7 +114,7 @@ class _GradeScreenState extends State<GradeScreen> {
     await GradeManager.saveExams(testExams);
     await GradeManager.saveGoals({
       '국어': 1.5, '수학': 1.0, '영어': 1.0, '한국사': 2.0,
-      '생명과학': 1.5, '세계지리': 1.5, '지구과학': 2.5,
+      '통합사회': 1.5, '통합과학': 2.0,
     });
   }
 
