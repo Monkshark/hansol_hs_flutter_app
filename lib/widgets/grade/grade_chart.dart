@@ -8,17 +8,21 @@ import '../../data/grade_manager.dart';
 /// 성적 추이 그래프 위젯
 ///
 /// - 시험별 과목 등급을 꺾은선 그래프로 표시
-/// - Y축: 등급 (1~9, 위가 1등급)
+/// - Y축: 등급 (내신 1~5, 모의 1~9, 위가 1등급)
 /// - X축: 시험 이름 (시간순)
 /// - 과목별 필터 칩, 목표 등급 점선, 범례 포함
 class GradeChart extends StatefulWidget {
   final List<Exam> exams;
   final Map<String, int> goals;
+  final int maxRank;
+  final ValueChanged<Map<String, int>>? onGoalsChanged;
 
   const GradeChart({
     super.key,
     required this.exams,
     this.goals = const {},
+    this.maxRank = 9,
+    this.onGoalsChanged,
   });
 
   @override
@@ -204,6 +208,7 @@ class _GradeChartState extends State<GradeChart> {
                                 : Colors.black.withValues(alpha: 0.08),
                             leftPadding: leftPad,
                             rightPadding: rightPad,
+                            maxRank: widget.maxRank,
                           ),
                         ),
                       ),
@@ -245,7 +250,146 @@ class _GradeChartState extends State<GradeChart> {
               }).toList(),
             ),
           ),
+
+        // 목표 등급 조절 UI
+        if (widget.onGoalsChanged != null && _visibleSubjects.isNotEmpty)
+          _buildGoalControls(isDark),
       ],
+    );
+  }
+
+  Widget _buildGoalControls(bool isDark) {
+    // 보이는 과목 중 목표가 설정된 과목만
+    final goalsToShow = <String, int>{};
+    for (final subject in _visibleSubjects) {
+      if (widget.goals.containsKey(subject)) {
+        goalsToShow[subject] = widget.goals[subject]!;
+      }
+    }
+    if (goalsToShow.isEmpty) return const SizedBox.shrink();
+
+    final subTextColor = isDark ? Colors.white54 : Colors.black45;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 4),
+          Text(
+            '목표 등급',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: subTextColor,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Wrap(
+            spacing: 10,
+            runSpacing: 6,
+            children: goalsToShow.entries.map((entry) {
+              final subject = entry.key;
+              final rank = entry.value;
+              final color = Color(GradeManager.getSubjectColor(subject));
+              return _GoalChip(
+                subject: subject,
+                rank: rank,
+                color: color,
+                maxRank: widget.maxRank,
+                isDark: isDark,
+                onChanged: (newRank) {
+                  final updated = Map<String, int>.from(widget.goals);
+                  updated[subject] = newRank;
+                  widget.onGoalsChanged?.call(updated);
+                },
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _GoalChip extends StatelessWidget {
+  final String subject;
+  final int rank;
+  final Color color;
+  final int maxRank;
+  final bool isDark;
+  final ValueChanged<int> onChanged;
+
+  const _GoalChip({
+    required this.subject,
+    required this.rank,
+    required this.color,
+    required this.maxRank,
+    required this.isDark,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final bgColor = isDark ? Colors.grey[850]! : Colors.grey[100]!;
+    final textColor = isDark ? Colors.white70 : Colors.black87;
+    final canUp = rank > 1;
+    final canDown = rank < maxRank;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      decoration: BoxDecoration(
+        color: bgColor,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 8,
+            height: 8,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+          ),
+          const SizedBox(width: 5),
+          Text(
+            '$subject 목표: $rank등급',
+            style: TextStyle(fontSize: 11, color: textColor),
+          ),
+          const SizedBox(width: 4),
+          _miniButton(
+            icon: Icons.arrow_drop_up,
+            enabled: canUp,
+            onTap: canUp ? () => onChanged(rank - 1) : null,
+          ),
+          _miniButton(
+            icon: Icons.arrow_drop_down,
+            enabled: canDown,
+            onTap: canDown ? () => onChanged(rank + 1) : null,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _miniButton({
+    required IconData icon,
+    required bool enabled,
+    VoidCallback? onTap,
+  }) {
+    final activeColor = isDark ? Colors.white70 : Colors.black87;
+    final disabledColor = isDark ? Colors.white24 : Colors.black26;
+
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 1),
+        child: Icon(
+          icon,
+          size: 22,
+          color: enabled ? activeColor : disabledColor,
+        ),
+      ),
     );
   }
 }
@@ -267,6 +411,8 @@ class _GradeChartPainter extends CustomPainter {
   final double leftPadding;
   final double rightPadding;
 
+  final int maxRank;
+
   _GradeChartPainter({
     required this.examLabels,
     required this.examCount,
@@ -277,6 +423,7 @@ class _GradeChartPainter extends CustomPainter {
     required this.gridColor,
     required this.leftPadding,
     required this.rightPadding,
+    this.maxRank = 9,
   });
 
   @override
@@ -301,8 +448,8 @@ class _GradeChartPainter extends CustomPainter {
     );
 
     // Y축 그리드 + 레이블
-    for (var rank = 1; rank <= 9; rank++) {
-      final y = chartTop + (rank - 1) / 8 * chartHeight;
+    for (var rank = 1; rank <= maxRank; rank++) {
+      final y = chartTop + (rank - 1) / (maxRank - 1) * chartHeight;
       canvas.drawLine(Offset(chartLeft, y), Offset(chartRight, y), gridPaint);
 
       final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
@@ -335,7 +482,7 @@ class _GradeChartPainter extends CustomPainter {
       canvas.drawParagraph(paragraph, Offset(x - 35, chartBottom + 6));
     }
 
-    double rankToY(int rank) => chartTop + (rank - 1) / 8 * chartHeight;
+    double rankToY(int rank) => chartTop + (rank - 1) / (maxRank - 1) * chartHeight;
     double indexToX(int index) => examCount == 1
         ? chartLeft + chartWidth / 2
         : chartLeft + index / (examCount - 1) * chartWidth;

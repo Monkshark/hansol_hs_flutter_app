@@ -64,6 +64,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
         rankCtrl: TextEditingController(text: s.rank?.toString() ?? ''),
         standardScoreCtrl: TextEditingController(text: s.standardScore?.toString() ?? ''),
         percentileCtrl: TextEditingController(text: s.percentile?.toString() ?? ''),
+        achievement: s.achievement,
       ));
     }
   }
@@ -425,6 +426,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
         rank: int.tryParse(s.rankCtrl.text),
         standardScore: double.tryParse(s.standardScoreCtrl.text),
         percentile: double.tryParse(s.percentileCtrl.text),
+        achievement: s.achievement,
       );
     }).toList();
 
@@ -496,14 +498,12 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   ),
                   onSelected: (v) {
                     if (!v) return;
+                    final old = !_isEdit ? List.of(_subjects) : <_SubjectEntry>[];
                     setState(() {
                       _type = e.key;
-                      // 유형 변경 시 과목 초기화
-                      if (!_isEdit) {
-                        for (final s in _subjects) s.dispose();
-                        _subjects.clear();
-                      }
+                      if (!_isEdit) _subjects.clear();
                     });
+                    for (final s in old) s.dispose();
                   },
                 );
               }).toList(),
@@ -624,6 +624,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(flex: 2, child: Text('원점수', style: _headerStyle, textAlign: TextAlign.center)),
                     Expanded(flex: 2, child: Text('평균', style: _headerStyle, textAlign: TextAlign.center)),
                     Expanded(flex: 2, child: Text('등급', style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text('성취도', style: _headerStyle, textAlign: TextAlign.center)),
                   ],
                   if (_isMock) ...[
                     Expanded(flex: 2, child: Text('표준', style: _headerStyle, textAlign: TextAlign.center)),
@@ -660,7 +661,18 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       if (!_isMock) ...[
                         Expanded(flex: 2, child: _scoreField(s.rawScoreCtrl, fieldFill, isInt: true)),
                         Expanded(flex: 2, child: _scoreField(s.averageCtrl, fieldFill)),
-                        Expanded(flex: 2, child: _scoreField(s.rankCtrl, fieldFill, isInt: true)),
+                        Expanded(flex: 2, child: _miniDropdown<int>(
+                          value: int.tryParse(s.rankCtrl.text),
+                          items: [1, 2, 3, 4, 5],
+                          onChanged: (v) => setState(() => s.rankCtrl.text = v?.toString() ?? ''),
+                          fillColor: fieldFill,
+                        )),
+                        Expanded(flex: 2, child: _miniDropdown<String>(
+                          value: s.achievement,
+                          items: SubjectScore.achievements,
+                          onChanged: (v) => setState(() => s.achievement = v),
+                          fillColor: fieldFill,
+                        )),
                       ],
                       if (_isMock) ...[
                         Expanded(flex: 2, child: _scoreField(s.standardScoreCtrl, fieldFill)),
@@ -673,10 +685,11 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                           icon: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
                           padding: EdgeInsets.zero,
                           constraints: const BoxConstraints(),
-                          onPressed: () => setState(() {
-                            _subjects[idx].dispose();
-                            _subjects.removeAt(idx);
-                          }),
+                          onPressed: () {
+                            final old = _subjects[idx];
+                            setState(() => _subjects.removeAt(idx));
+                            old.dispose();
+                          },
                         ),
                       ),
                     ],
@@ -756,6 +769,34 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     );
   }
 
+  Widget _miniDropdown<T>({required T? value, required List<T> items, required ValueChanged<T?> onChanged, required Color fillColor}) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 3),
+      child: Container(
+        height: 36,
+        decoration: BoxDecoration(
+          color: fillColor,
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: DropdownButtonHideUnderline(
+          child: DropdownButton<T>(
+            value: items.contains(value) ? value : null,
+            isExpanded: true,
+            isDense: true,
+            alignment: Alignment.center,
+            hint: Text('-', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor), textAlign: TextAlign.center),
+            items: items.map((e) => DropdownMenuItem<T>(
+              value: e,
+              alignment: Alignment.center,
+              child: Text('$e', style: const TextStyle(fontSize: 13)),
+            )).toList(),
+            onChanged: onChanged,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _scoreField(TextEditingController ctrl, Color fillColor, {bool isInt = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 3),
@@ -790,6 +831,7 @@ class _SubjectEntry {
   final TextEditingController rankCtrl;
   final TextEditingController standardScoreCtrl;
   final TextEditingController percentileCtrl;
+  String? achievement; // 성취도 A~E
 
   _SubjectEntry({
     required this.name,
@@ -798,6 +840,7 @@ class _SubjectEntry {
     TextEditingController? rankCtrl,
     TextEditingController? standardScoreCtrl,
     TextEditingController? percentileCtrl,
+    this.achievement,
   })  : rawScoreCtrl = rawScoreCtrl ?? TextEditingController(),
         averageCtrl = averageCtrl ?? TextEditingController(),
         rankCtrl = rankCtrl ?? TextEditingController(),
