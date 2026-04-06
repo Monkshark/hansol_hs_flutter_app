@@ -16,6 +16,7 @@ class GradeChart extends StatefulWidget {
   final Map<String, double> goals;
   final int maxRank;
   final ValueChanged<Map<String, double>>? onGoalsChanged;
+  final bool isJeongsi;
 
   const GradeChart({
     super.key,
@@ -23,6 +24,7 @@ class GradeChart extends StatefulWidget {
     this.goals = const {},
     this.maxRank = 9,
     this.onGoalsChanged,
+    this.isJeongsi = false,
   });
 
   @override
@@ -33,11 +35,12 @@ class _GradeChartState extends State<GradeChart> {
   late Set<String> _allSubjects;
   late Set<String> _visibleSubjects;
   // 0=등급, 1=점수(내신:원점수, 모의:표준점수), 2=백분위(모의만)
-  int _chartMode = 0;
+  late int _chartMode;
 
   @override
   void initState() {
     super.initState();
+    _initChartMode();
     _initSubjects();
   }
 
@@ -47,6 +50,10 @@ class _GradeChartState extends State<GradeChart> {
     if (oldWidget.exams != widget.exams) {
       _initSubjects();
     }
+  }
+
+  void _initChartMode() {
+    _chartMode = _isMockExams ? 2 : 1;
   }
 
   void _initSubjects() {
@@ -104,11 +111,11 @@ class _GradeChartState extends State<GradeChart> {
           child: Row(
             children: [
               if (_isMockExams) ...[
-                _buildModeChip('백���위', _chartMode == 2, isDark, () {
+                _buildModeChip('${String.fromCharCodes([48177, 48516, 50948])}', _chartMode == 2, isDark, () {
                   if (_chartMode != 2) setState(() => _chartMode = 2);
                 }),
                 const SizedBox(width: 6),
-                _buildModeChip('표���점수', _chartMode == 1, isDark, () {
+                _buildModeChip('${String.fromCharCodes([54364, 51456, 51216, 49688])}', _chartMode == 1, isDark, () {
                   if (_chartMode != 1) setState(() => _chartMode = 1);
                 }),
                 const SizedBox(width: 6),
@@ -295,7 +302,11 @@ class _GradeChartState extends State<GradeChart> {
                 final visibleGoals = <String, double>{};
                 for (final entry in widget.goals.entries) {
                   if (_visibleSubjects.contains(entry.key)) {
-                    visibleGoals[entry.key] = entry.value;
+                    if (widget.isJeongsi) {
+                      visibleGoals[entry.key] = GradeManager.percentileToRank(entry.value).toDouble();
+                    } else {
+                      visibleGoals[entry.key] = entry.value;
+                    }
                   }
                 }
 
@@ -491,6 +502,7 @@ class _GradeChartState extends State<GradeChart> {
   }
 }
 
+/// 목표 등급 조절 칩 (과목별 +/- 버튼 포함)
 class _GoalChip extends StatelessWidget {
   final String subject;
   final double rank;
@@ -573,12 +585,14 @@ class _GoalChip extends StatelessWidget {
   }
 }
 
+/// 등급 차트용 데이터 포인트 (시험 인덱스 + 등급)
 class _DataPoint {
   final int examIndex;
   final int rank;
   const _DataPoint(this.examIndex, this.rank);
 }
 
+/// 등급 꺾은선 그래프 CustomPainter (Y축: 등급, X축: 시험)
 class _GradeChartPainter extends CustomPainter {
   final List<String> examLabels;
   final int examCount;
@@ -788,12 +802,14 @@ class _GradeChartPainter extends CustomPainter {
   }
 }
 
+/// 점수 차트용 데이터 포인트 (시험 인덱스 + 점수)
 class _ScoreDataPoint {
   final int examIndex;
   final double score;
   const _ScoreDataPoint(this.examIndex, this.score);
 }
 
+/// 점수(원점수/표준점수/백분위) 꺾은선 그래프 CustomPainter
 class _ScoreChartPainter extends CustomPainter {
   final List<String> examLabels;
   final int examCount;

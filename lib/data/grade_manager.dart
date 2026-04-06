@@ -2,11 +2,10 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 성적 관리 (로컬 전용)
+/// 과목별 점수 데이터 모델
 ///
-/// - 모의고사/내신 성적 CRUD
-/// - 과목별 목표 등급 관리
-/// - SharedPreferences JSON 저장 (서버 저장 안 함)
+/// 내신(원점수/평균/등급/성취도)과 모의고사(백분위/표준점수/등급)를
+/// 하나의 구조체로 통합 관리한다.
 class SubjectScore {
   final String subject;
   final int? rawScore;
@@ -46,11 +45,12 @@ class SubjectScore {
     achievement: json['achievement'],
   );
 
-  // 내신 등급 비율 (5등급제)
+  /// 내신 등급 비율 (5등급제)
   static const rankCutoffs = {1: '상위 10%', 2: '상위 34%', 3: '상위 66%', 4: '상위 90%', 5: '하위 10%'};
   static const achievements = ['A', 'B', 'C', 'D', 'E'];
 }
 
+/// 시험 데이터 모델 (중간/기말/모의/사설모의)
 class Exam {
   final String id;
   final String type;        // 'midterm', 'final', 'mock', 'private_mock'
@@ -105,18 +105,37 @@ class Exam {
   );
 }
 
+/// 성적 관리 (로컬 전용)
+///
+/// - 모의고사/내신 성적 CRUD
+/// - 과목별 목표 등급 관리
+/// - SharedPreferences JSON 저장 (서버 저장 안 함)
 class GradeManager {
   static const _examsKey = 'grade_exams';
   static const _goalsKey = 'grade_goals';
+  static const _goalsJeongsiKey = 'grade_goals_jeongsi';
 
-  // 2022 개정 교육과정 수능 과목 (2028학년도~)
+  /// 수능 등급컷 (백분위 → 등급)
+  static int percentileToRank(double percentile) {
+    if (percentile >= 96) return 1;
+    if (percentile >= 89) return 2;
+    if (percentile >= 77) return 3;
+    if (percentile >= 60) return 4;
+    if (percentile >= 40) return 5;
+    if (percentile >= 23) return 6;
+    if (percentile >= 11) return 7;
+    if (percentile >= 4) return 8;
+    return 9;
+  }
+
+  /// 2022 개정 교육과정 수능 과목 (2028학년도~)
   static const mockSubjects = {
     '공통': ['국어', '수학', '영어', '한국사', '통합사회', '통합과학'],
     '직업탐구': ['성공적인 직업생활'],
     '제2외국어/한문 (택 1)': ['독일어', '프랑스어', '스페인어', '중국어', '일본어', '러시아어', '아랍어', '베트남어', '한문'],
   };
 
-  // 과목별 고정 색상
+  /// 과목별 고정 색상
   static const subjectColors = <String, int>{
     '국어': 0xFFE53935,
     '수학': 0xFF1E88E5,
@@ -175,7 +194,7 @@ class GradeManager {
     await saveExams(exams);
   }
 
-  // 과목별 목표 등급
+  /// 과목별 목표 등급
   static Future<Map<String, double>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString(_goalsKey);
@@ -187,5 +206,19 @@ class GradeManager {
   static Future<void> saveGoals(Map<String, double> goals) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_goalsKey, jsonEncode(goals));
+  }
+
+  /// 정시 목표 (백분위 기준, 정수)
+  static Future<Map<String, double>> loadJeongsiGoals() async {
+    final prefs = await SharedPreferences.getInstance();
+    final json = prefs.getString(_goalsJeongsiKey);
+    if (json == null) return {};
+    final raw = jsonDecode(json) as Map<String, dynamic>;
+    return raw.map((k, v) => MapEntry(k, (v as num).toDouble()));
+  }
+
+  static Future<void> saveJeongsiGoals(Map<String, double> goals) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_goalsJeongsiKey, jsonEncode(goals));
   }
 }
