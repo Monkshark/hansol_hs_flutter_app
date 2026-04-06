@@ -338,6 +338,10 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       builder: (ctx) {
         final isDark = Theme.of(ctx).brightness == Brightness.dark;
         return Dialog(
+          insetPadding: EdgeInsets.only(
+            left: 40, right: 40, top: 40,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 40,
+          ),
           backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           child: Padding(
@@ -390,7 +394,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
         );
       },
     );
-    ctrl.dispose();
 
     if (name != null && name.isNotEmpty) {
       if (_subjects.any((s) => s.name == name)) {
