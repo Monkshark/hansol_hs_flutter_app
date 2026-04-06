@@ -23,6 +23,9 @@ service cloud.firestore {
       match /subjects/{doc} {
         allow read, write: if request.auth != null && request.auth.uid == userId;
       }
+      match /sync/{doc} {
+        allow read, write: if request.auth != null && request.auth.uid == userId;
+      }
       match /notifications/{notifId} {
         allow read, update, delete: if request.auth != null && request.auth.uid == userId;
         allow create: if request.auth != null;

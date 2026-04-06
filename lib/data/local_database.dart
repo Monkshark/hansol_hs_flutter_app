@@ -1,6 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
 import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,6 +13,7 @@ import 'package:sqflite/sqflite.dart';
 ///
 /// - 개인 일정 CRUD (생성/조회/수정/삭제)
 /// - SharedPreferences에서 sqflite로 마이그레이션 지원
+/// - Firestore 동기화 (로그인 시 자동 불러오기)
 class LocalDataBase {
   Database? _db;
 
@@ -70,7 +74,9 @@ class LocalDataBase {
 
   Future<int> insertSchedule(Schedule schedule) async {
     final db = await database;
-    return db.insert('schedules', schedule.toMap());
+    final id = await db.insert('schedules', schedule.toMap());
+    syncToFirestore();
+    return id;
   }
 
   Future<void> deleteSchedule(Schedule schedule) async {
@@ -83,6 +89,7 @@ class LocalDataBase {
         whereArgs: [schedule.startTime, schedule.endTime, schedule.content, schedule.date],
       );
     }
+    syncToFirestore();
   }
 
   Stream<List<Schedule>> watchSchedules(DateTime date) async* {
@@ -92,7 +99,6 @@ class LocalDataBase {
         '${date.month.toString().padLeft(2, '0')}-'
         '${date.day.toString().padLeft(2, '0')}';
 
-    // 하루 일정 + 연속 일정 (date <= 선택일 <= endDate)
     final results = await db.query(
       'schedules',
       where: "date LIKE ? OR (endDate IS NOT NULL AND date <= ? AND endDate >= ?)",
@@ -123,5 +129,59 @@ class LocalDataBase {
     }
 
     return results;
+  }
+
+  Future<List<Schedule>> _getAllSchedules() async {
+    final db = await database;
+    final rows = await db.query('schedules', orderBy: 'date ASC, startTime ASC');
+    return rows.map((row) => Schedule.fromMap(row)).toList();
+  }
+
+  Future<void> syncToFirestore() async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final all = await _getAllSchedules();
+      final uid = AuthService.currentUser!.uid;
+      await FirebaseFirestore.instance
+          .collection('users').doc(uid)
+          .collection('sync').doc('schedules')
+          .set({
+        'items': all.map((s) => s.toMap()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      log('LocalDataBase: Firestore sync error: $e');
+    }
+  }
+
+  Future<void> loadFromFirestore() async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final db = await database;
+      final existing = await db.query('schedules');
+      if (existing.isNotEmpty) return;
+
+      final uid = AuthService.currentUser!.uid;
+      final doc = await FirebaseFirestore.instance
+          .collection('users').doc(uid)
+          .collection('sync').doc('schedules')
+          .get();
+
+      if (doc.exists && doc.data() != null) {
+        final list = doc.data()!['items'] as List<dynamic>?;
+        if (list != null && list.isNotEmpty) {
+          final batch = db.batch();
+          for (var item in list) {
+            final map = Map<String, dynamic>.from(item);
+            map.remove('id');
+            batch.insert('schedules', map);
+          }
+          await batch.commit(noResult: true);
+          log('LocalDataBase: loaded ${list.length} schedules from Firestore');
+        }
+      }
+    } catch (e) {
+      log('LocalDataBase: Firestore load error: $e');
+    }
   }
 }
