@@ -10,6 +10,7 @@ import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 글 상세 화면 (PostDetailScreen)
@@ -503,6 +504,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final items = <_ActionItem>[];
+    items.add(_ActionItem(Icons.share_outlined, '공유', () {
+      final title = data['title'] ?? '';
+      final content = data['content'] ?? '';
+      Share.share('$title\n\n$content');
+    }));
     if (isAuthor) {
       items.add(_ActionItem(Icons.edit_outlined, '수정', () => _editPost(data)));
       items.add(_ActionItem(Icons.delete_outline, '삭제', _deletePost, isDestructive: true));
