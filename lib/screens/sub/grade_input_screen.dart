@@ -635,8 +635,8 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(flex: 2, child: Text('성취도', style: _headerStyle, textAlign: TextAlign.center)),
                   ],
                   if (_isMock) ...[
-                    Expanded(flex: 2, child: Text('표준', style: _headerStyle, textAlign: TextAlign.center)),
                     Expanded(flex: 2, child: Text('백분위', style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text('표준', style: _headerStyle, textAlign: TextAlign.center)),
                     Expanded(flex: 2, child: Text('등급', style: _headerStyle, textAlign: TextAlign.center)),
                   ],
                   const SizedBox(width: 32), // delete button
@@ -683,8 +683,8 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         )),
                       ],
                       if (_isMock) ...[
-                        Expanded(flex: 2, child: _scoreField(s.standardScoreCtrl, fieldFill)),
                         Expanded(flex: 2, child: _scoreField(s.percentileCtrl, fieldFill)),
+                        Expanded(flex: 2, child: _scoreField(s.standardScoreCtrl, fieldFill)),
                         Expanded(flex: 2, child: _scoreField(s.rankCtrl, fieldFill, isInt: true)),
                       ],
                       SizedBox(
