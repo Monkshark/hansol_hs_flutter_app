@@ -8,8 +8,9 @@ import 'package:uuid/uuid.dart';
 /// 시험 추가/수정 화면
 class GradeInputScreen extends StatefulWidget {
   final Exam? exam;
+  final bool isMock;
 
-  const GradeInputScreen({Key? key, this.exam}) : super(key: key);
+  const GradeInputScreen({Key? key, this.exam, this.isMock = false}) : super(key: key);
 
   @override
   State<GradeInputScreen> createState() => _GradeInputScreenState();
@@ -27,7 +28,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   bool get _isEdit => widget.exam != null;
   bool get _isMock => _type == 'mock' || _type == 'private_mock';
 
-  String _type = 'midterm';
+  late String _type;
   late int _year;
   int _semester = 1;
   int _grade = 1;
@@ -37,10 +38,15 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   final List<_SubjectEntry> _subjects = [];
   bool _saving = false;
 
+  Map<String, String> get _availableTypes => widget.isMock
+      ? {'mock': '모의고사', 'private_mock': '사설모의'}
+      : {'midterm': '중간고사', 'final': '기말고사'};
+
   @override
   void initState() {
     super.initState();
     _year = DateTime.now().year;
+    _type = widget.isMock ? 'mock' : 'midterm';
     if (_isEdit) {
       _prefill(widget.exam!);
     }
@@ -486,7 +492,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             Wrap(
               spacing: 8,
               runSpacing: 6,
-              children: _typeLabels.entries.map((e) {
+              children: _availableTypes.entries.map((e) {
                 final selected = _type == e.key;
                 return ChoiceChip(
                   label: Text(e.value),
