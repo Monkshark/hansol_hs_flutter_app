@@ -18,109 +18,20 @@ class _GradeScreenState extends State<GradeScreen> {
   int _tabIndex = 0;
   late Future<List<Exam>> _examsFuture;
   Map<String, double> _goals = {};
+  Map<String, double> _jeongsiGoals = {};
   final PageController _pageController = PageController();
 
   @override
   void initState() {
     super.initState();
-    _examsFuture = _initExams();
+    _examsFuture = GradeManager.loadExams();
     _loadGoals();
-  }
-
-  Future<List<Exam>> _initExams() async {
-    var exams = await GradeManager.loadExams();
-    if (exams.isEmpty) {
-      await _seedTestData();
-      exams = await GradeManager.loadExams();
-    }
-    return exams;
-  }
-
-  Future<void> _seedTestData() async {
-    final testExams = [
-      Exam(
-        id: 'test_1', type: 'midterm', year: 2025, semester: 1, grade: 1,
-        createdAt: DateTime(2025, 4, 20),
-        scores: [
-          SubjectScore(subject: '국어', rawScore: 82, average: 68.5, rank: 3, achievement: 'B'),
-          SubjectScore(subject: '수학', rawScore: 90, average: 61.2, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '영어', rawScore: 88, average: 72.1, rank: 2, achievement: 'A'),
-          SubjectScore(subject: '한국사', rawScore: 75, average: 65.0, rank: 3, achievement: 'B'),
-          SubjectScore(subject: '통합과학', rawScore: 78, average: 60.3, rank: 3, achievement: 'B'),
-          SubjectScore(subject: '통합사회', rawScore: 85, average: 70.0, rank: 2, achievement: 'A'),
-        ],
-      ),
-      Exam(
-        id: 'test_2', type: 'final', year: 2025, semester: 1, grade: 1,
-        createdAt: DateTime(2025, 7, 10),
-        scores: [
-          SubjectScore(subject: '국어', rawScore: 78, average: 70.2, rank: 3, achievement: 'B'),
-          SubjectScore(subject: '수학', rawScore: 95, average: 63.0, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '영어', rawScore: 91, average: 74.5, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '한국사', rawScore: 80, average: 66.0, rank: 2, achievement: 'B'),
-          SubjectScore(subject: '통합과학', rawScore: 85, average: 62.0, rank: 2, achievement: 'A'),
-          SubjectScore(subject: '통합사회', rawScore: 88, average: 72.5, rank: 2, achievement: 'A'),
-        ],
-      ),
-      Exam(
-        id: 'test_3', type: 'midterm', year: 2025, semester: 2, grade: 1,
-        createdAt: DateTime(2025, 10, 15),
-        scores: [
-          SubjectScore(subject: '국어', rawScore: 85, average: 69.0, rank: 2, achievement: 'A'),
-          SubjectScore(subject: '수학', rawScore: 88, average: 60.5, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '영어', rawScore: 93, average: 73.0, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '한국사', rawScore: 82, average: 67.5, rank: 2, achievement: 'B'),
-          SubjectScore(subject: '통합과학', rawScore: 90, average: 63.0, rank: 1, achievement: 'A'),
-          SubjectScore(subject: '통합사회', rawScore: 82, average: 71.0, rank: 2, achievement: 'A'),
-        ],
-      ),
-      Exam(
-        id: 'test_4', type: 'mock', year: 2025, semester: 1, grade: 1, mockLabel: '6월',
-        createdAt: DateTime(2025, 6, 5),
-        scores: [
-          SubjectScore(subject: '국어', standardScore: 128, percentile: 89.0, rank: 2),
-          SubjectScore(subject: '수학', standardScore: 135, percentile: 93.0, rank: 2),
-          SubjectScore(subject: '영어', rank: 2),
-          SubjectScore(subject: '한국사', rank: 3),
-          SubjectScore(subject: '통합사회', standardScore: 62, percentile: 85.0, rank: 3),
-          SubjectScore(subject: '통합과학', standardScore: 58, percentile: 78.0, rank: 3),
-        ],
-      ),
-      Exam(
-        id: 'test_5', type: 'mock', year: 2025, semester: 2, grade: 1, mockLabel: '9월',
-        createdAt: DateTime(2025, 9, 3),
-        scores: [
-          SubjectScore(subject: '국어', standardScore: 132, percentile: 91.0, rank: 2),
-          SubjectScore(subject: '수학', standardScore: 140, percentile: 96.0, rank: 1),
-          SubjectScore(subject: '영어', rank: 1),
-          SubjectScore(subject: '한국사', rank: 2),
-          SubjectScore(subject: '통합사회', standardScore: 65, percentile: 88.0, rank: 2),
-          SubjectScore(subject: '통합과학', standardScore: 63, percentile: 84.0, rank: 2),
-        ],
-      ),
-      Exam(
-        id: 'test_6', type: 'private_mock', year: 2025, semester: 2, grade: 1, mockLabel: '메가스터디 3회',
-        createdAt: DateTime(2025, 11, 10),
-        scores: [
-          SubjectScore(subject: '국어', standardScore: 130, percentile: 90.0, rank: 2),
-          SubjectScore(subject: '수학', standardScore: 138, percentile: 95.0, rank: 1),
-          SubjectScore(subject: '영어', rank: 1),
-          SubjectScore(subject: '통합사회', standardScore: 68, percentile: 91.0, rank: 2),
-          SubjectScore(subject: '통합과학', standardScore: 60, percentile: 80.0, rank: 3),
-        ],
-      ),
-    ];
-
-    await GradeManager.saveExams(testExams);
-    await GradeManager.saveGoals({
-      '국어': 1.5, '수학': 1.0, '영어': 1.0, '한국사': 2.0,
-      '통합사회': 1.5, '통합과학': 2.0,
-    });
   }
 
   Future<void> _loadGoals() async {
     final goals = await GradeManager.loadGoals();
-    if (mounted) setState(() => _goals = goals);
+    final jGoals = await GradeManager.loadJeongsiGoals();
+    if (mounted) setState(() { _goals = goals; _jeongsiGoals = jGoals; });
   }
 
   @override
@@ -150,64 +61,47 @@ class _GradeScreenState extends State<GradeScreen> {
   }
 
   Future<void> _deleteExam(Exam exam) async {
-    final confirmed = await showDialog<bool>(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final confirmed = await showModalBottomSheet<bool>(
       context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return Dialog(
-          backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  '시험 삭제',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Theme.of(ctx).textTheme.bodyLarge?.color,
-                  ),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  '${exam.displayName}을(를) 삭제하시겠습니까?',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.theme.darkGreyColor,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => Navigator.pop(ctx, false),
-                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: () => Navigator.pop(ctx, true),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          elevation: 0,
-                        ),
-                        child: const Text('삭제'),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const SizedBox(height: 8),
+          Container(width: 36, height: 4, decoration: BoxDecoration(
+            color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+          const SizedBox(height: 16),
+          Text('시험 삭제', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+            color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+          const SizedBox(height: 8),
+          Text('${exam.displayName}을(를) 삭제하시겠습니까?',
+            style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor)),
+          const SizedBox(height: 20),
+          Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
+            Expanded(child: TextButton(
+              onPressed: () => Navigator.pop(ctx, false),
+              style: TextButton.styleFrom(
+                backgroundColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFF0F0F0),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+              child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            )),
+            const SizedBox(width: 10),
+            Expanded(child: ElevatedButton(
+              onPressed: () => Navigator.pop(ctx, true),
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+              child: const Text('삭제'),
+            )),
+          ])),
+          const SizedBox(height: 12),
+        ])),
+      ),
     );
 
     if (confirmed == true) {
@@ -219,13 +113,17 @@ class _GradeScreenState extends State<GradeScreen> {
   void _showGoalSheet(BuildContext context) async {
     final allExams = await _examsFuture;
     final filtered = _filterExams(allExams);
-    final maxRank = _tabIndex == 0 ? 5 : 9;
+    final isJeongsi = _tabIndex == 1;
 
     // Collect unique subjects in order of first appearance
+    const absoluteGradeSubjects = {'영어', '한국사'};
     final subjects = <String>[];
     for (final exam in filtered) {
       for (final score in exam.scores) {
-        if (!subjects.contains(score.subject)) subjects.add(score.subject);
+        if (!subjects.contains(score.subject)) {
+          if (isJeongsi && absoluteGradeSubjects.contains(score.subject)) continue;
+          subjects.add(score.subject);
+        }
       }
     }
 
@@ -239,7 +137,7 @@ class _GradeScreenState extends State<GradeScreen> {
     }
 
     // Local copy of goals for editing
-    final tempGoals = Map<String, double>.from(_goals);
+    final tempGoals = Map<String, double>.from(isJeongsi ? _jeongsiGoals : _goals);
 
     if (!mounted) return;
     await showModalBottomSheet(
@@ -278,7 +176,7 @@ class _GradeScreenState extends State<GradeScreen> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                     child: Text(
-                      '과목별 목표 등급',
+                      isJeongsi ? '과목별 목표 백분위' : '과목별 목표 등급',
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -320,42 +218,84 @@ class _GradeScreenState extends State<GradeScreen> {
                                 ),
                               ),
                             ),
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                GestureDetector(
-                                  onTap: () => setSheetState(() {
-                                    if (currentGoal == null) {
-                                      tempGoals[subject] = maxRank.toDouble();
-                                    } else if (currentGoal > 1.0) {
-                                      tempGoals[subject] = ((currentGoal - 0.1) * 10).round() / 10;
-                                    }
-                                  }),
-                                  child: Icon(Icons.remove_circle_outline, size: 22,
-                                    color: currentGoal != null && currentGoal > 1.0
-                                        ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
-                                ),
-                                Container(
-                                  width: 52,
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    currentGoal != null ? currentGoal.toStringAsFixed(1) : '-',
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
-                                      color: currentGoal != null ? textColor : AppColors.theme.darkGreyColor),
+                            if (isJeongsi)
+                              // 정시: 백분위 1씩 조절 또는 직접 입력
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => setSheetState(() {
+                                      if (currentGoal == null) {
+                                        tempGoals[subject] = 90;
+                                      } else if (currentGoal > 0) {
+                                        tempGoals[subject] = (currentGoal - 1).clamp(0, 100);
+                                      }
+                                    }),
+                                    child: Icon(Icons.remove_circle_outline, size: 22,
+                                      color: currentGoal != null && currentGoal > 0
+                                          ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
                                   ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => setSheetState(() {
-                                    if (currentGoal == null) {
-                                      tempGoals[subject] = 1.0;
-                                    } else if (currentGoal < maxRank) {
-                                      tempGoals[subject] = ((currentGoal + 0.1) * 10).round() / 10;
-                                    }
-                                  }),
-                                  child: Icon(Icons.add_circle_outline, size: 22,
-                                    color: currentGoal != null && currentGoal < maxRank
-                                        ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
-                                ),
+                                  GestureDetector(
+                                    onTap: () async {
+                                      final ctrl = TextEditingController(text: currentGoal?.toInt().toString() ?? '');
+                                      final val = await showModalBottomSheet<double>(
+                                        context: ctx,
+                                        isScrollControlled: true,
+                                        backgroundColor: Colors.transparent,
+                                        builder: (c) => Padding(
+                                          padding: EdgeInsets.only(bottom: MediaQuery.of(c).viewInsets.bottom),
+                                          child: Container(
+                                            margin: const EdgeInsets.all(12),
+                                            padding: const EdgeInsets.all(20),
+                                            decoration: BoxDecoration(
+                                              color: sheetColor, borderRadius: BorderRadius.circular(16)),
+                                            child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                                              Text('$subject 목표 백분위', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textColor)),
+                                              const SizedBox(height: 12),
+                                              TextField(
+                                                controller: ctrl, autofocus: true, keyboardType: TextInputType.number,
+                                                textAlign: TextAlign.center,
+                                                decoration: InputDecoration(
+                                                  hintText: '0~100', filled: true,
+                                                  fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                                ),
+                                                onSubmitted: (t) { final v = double.tryParse(t); if (v != null) Navigator.pop(c, v.clamp(0, 100)); },
+                                              ),
+                                              const SizedBox(height: 12),
+                                              ElevatedButton(
+                                                onPressed: () { final v = double.tryParse(ctrl.text); if (v != null) Navigator.pop(c, v.clamp(0, 100)); },
+                                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.theme.primaryColor, foregroundColor: Colors.white,
+                                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0, minimumSize: const Size(double.infinity, 44)),
+                                                child: const Text('확인'),
+                                              ),
+                                            ])),
+                                          ),
+                                        ),
+                                      );
+                                      if (val != null) setSheetState(() => tempGoals[subject] = val);
+                                    },
+                                    child: Container(
+                                      width: 60, alignment: Alignment.center,
+                                      child: Text(
+                                        currentGoal != null ? '${currentGoal.toInt()}%' : '-',
+                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                                          color: currentGoal != null ? textColor : AppColors.theme.darkGreyColor),
+                                      ),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => setSheetState(() {
+                                      if (currentGoal == null) {
+                                        tempGoals[subject] = 90;
+                                      } else if (currentGoal < 100) {
+                                        tempGoals[subject] = (currentGoal + 1).clamp(0, 100);
+                                      }
+                                    }),
+                                    child: Icon(Icons.add_circle_outline, size: 22,
+                                      color: currentGoal != null && currentGoal < 100
+                                          ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
+                                  ),
                                 if (currentGoal != null) ...[
                                   const SizedBox(width: 4),
                                   GestureDetector(
@@ -364,7 +304,53 @@ class _GradeScreenState extends State<GradeScreen> {
                                   ),
                                 ],
                               ],
-                            ),
+                            )
+                            else
+                              // 수시: 등급 0.1씩 조절
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  GestureDetector(
+                                    onTap: () => setSheetState(() {
+                                      if (currentGoal == null) {
+                                        tempGoals[subject] = 5.0;
+                                      } else if (currentGoal > 1.0) {
+                                        tempGoals[subject] = ((currentGoal - 0.1) * 10).round() / 10;
+                                      }
+                                    }),
+                                    child: Icon(Icons.remove_circle_outline, size: 22,
+                                      color: currentGoal != null && currentGoal > 1.0
+                                          ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
+                                  ),
+                                  Container(
+                                    width: 52, alignment: Alignment.center,
+                                    child: Text(
+                                      currentGoal != null ? currentGoal.toStringAsFixed(1) : '-',
+                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                                        color: currentGoal != null ? textColor : AppColors.theme.darkGreyColor),
+                                    ),
+                                  ),
+                                  GestureDetector(
+                                    onTap: () => setSheetState(() {
+                                      if (currentGoal == null) {
+                                        tempGoals[subject] = 1.0;
+                                      } else if (currentGoal < 5.0) {
+                                        tempGoals[subject] = ((currentGoal + 0.1) * 10).round() / 10;
+                                      }
+                                    }),
+                                    child: Icon(Icons.add_circle_outline, size: 22,
+                                      color: currentGoal != null && currentGoal < 5.0
+                                          ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
+                                  ),
+                                  if (currentGoal != null) ...[
+                                    const SizedBox(width: 4),
+                                    GestureDetector(
+                                      onTap: () => setSheetState(() => tempGoals.remove(subject)),
+                                      child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                                    ),
+                                  ],
+                                ],
+                              ),
                           ],
                         );
                       },
@@ -378,7 +364,11 @@ class _GradeScreenState extends State<GradeScreen> {
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () async {
-                          await GradeManager.saveGoals(tempGoals);
+                          if (isJeongsi) {
+                            await GradeManager.saveJeongsiGoals(tempGoals);
+                          } else {
+                            await GradeManager.saveGoals(tempGoals);
+                          }
                           if (mounted) {
                             Navigator.pop(ctx);
                             _loadGoals();
@@ -474,21 +464,50 @@ class _GradeScreenState extends State<GradeScreen> {
             ),
           ),
 
-          // Tab toggle
+          // Tab toggle with sliding indicator
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-            child: Container(
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              padding: const EdgeInsets.all(4),
-              child: Row(
-                children: [
-                  _buildTab('수시', 0, isDark),
-                  _buildTab('정시', 1, isDark),
-                ],
-              ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final tabWidth = (constraints.maxWidth - 8) / 2;
+                return Container(
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(4),
+                  child: Stack(
+                    children: [
+                      AnimatedPositioned(
+                        duration: const Duration(milliseconds: 200),
+                        curve: Curves.easeInOut,
+                        left: _tabIndex * tabWidth,
+                        top: 0, bottom: 0,
+                        width: tabWidth,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withAlpha(isDark ? 40 : 15),
+                                blurRadius: 4,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Row(
+                        children: [
+                          _buildTab('수시', 0, isDark),
+                          _buildTab('정시', 1, isDark),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
           ),
 
@@ -505,6 +524,7 @@ class _GradeScreenState extends State<GradeScreen> {
 
                 return PageView(
                   controller: _pageController,
+                  physics: const BouncingScrollPhysics(),
                   onPageChanged: (i) => setState(() => _tabIndex = i),
                   children: [
                     _buildExamList(allExams, 0, context, isDark, cardColor, textColor),
@@ -546,8 +566,9 @@ class _GradeScreenState extends State<GradeScreen> {
         if (exams.length >= 2 && index == 0) {
           return GradeChart(
             exams: exams,
-            goals: _goals,
+            goals: tabIdx == 0 ? _goals : _jeongsiGoals,
             maxRank: tabIdx == 0 ? 5 : 9,
+            isJeongsi: tabIdx == 1,
           );
         }
         final realIndex = exams.length >= 2 ? index - 1 : index;
@@ -712,36 +733,24 @@ class _GradeScreenState extends State<GradeScreen> {
           setState(() => _tabIndex = index);
           _pageController.animateToPage(index, duration: const Duration(milliseconds: 200), curve: Curves.easeInOut);
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: selected
-                ? (isDark ? const Color(0xFF1E2028) : Colors.white)
-                : Colors.transparent,
+            color: Colors.transparent,
             borderRadius: BorderRadius.circular(10),
-            boxShadow: selected
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withAlpha(isDark ? 40 : 15),
-                      blurRadius: 4,
-                      offset: const Offset(0, 1),
-                    ),
-                  ]
-                : null,
           ),
-          child: Center(
-            child: Text(
-              label,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-                color: selected
-                    ? AppColors.theme.primaryColor
-                    : AppColors.theme.darkGreyColor,
-              ),
+          // 기존 boxShadow 제거 — AnimatedPositioned 인디케이터가 대신 처리
+          child: Center(child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+              color: selected
+                  ? (isDark ? Colors.white : Colors.black87)
+                  : (isDark ? Colors.white54 : Colors.black45),
             ),
-          ),
+            child: Text(label),
+          )),
         ),
       ),
     );

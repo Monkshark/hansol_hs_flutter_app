@@ -84,7 +84,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     super.dispose();
   }
 
-  // ── 시간표에서 과목 불러오기 ──
+  /// 시간표에서 과목 불러오기
   Future<void> _loadFromTimetable() async {
     final prefs = await SharedPreferences.getInstance();
     final gridData = prefs.getStringList('widget_timetable_grid');
@@ -128,7 +128,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
   }
 
-  // ── 모의고사 과목 선택 ──
+  /// 모의고사 과목 선택
   Future<void> _loadMockSubjects() async {
     final existing = _subjects.map((s) => s.name).toSet();
     final available = <String>[];
@@ -156,7 +156,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
   }
 
-  // ── 과목 선택 다이얼로그 (내신용) ──
+  /// 과목 선택 다이얼로그 (내신용)
   Future<List<String>?> _showSubjectPicker(List<String> available, String title) async {
     final checked = <String, bool>{for (final s in available) s: false};
     return showDialog<List<String>>(
@@ -229,7 +229,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     );
   }
 
-  // ── 모의고사 과목 선택 (카테고리별) ──
+  /// 모의고사 과목 선택 (카테고리별)
   Future<List<String>?> _showMockSubjectPicker(Set<String> existing) async {
     final checked = <String, bool>{};
     for (final list in GradeManager.mockSubjects.values) {
@@ -330,27 +330,32 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     );
   }
 
-  // ── 수동 과목 추가 ──
+  /// 수동 과목 추가
   Future<void> _addManualSubject() async {
     final ctrl = TextEditingController();
-    final name = await showDialog<String>(
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final name = await showModalBottomSheet<String>(
       context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return Dialog(
-          insetPadding: EdgeInsets.only(
-            left: 40, right: 40, top: 40,
-            bottom: MediaQuery.of(ctx).viewInsets.bottom + 40,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+        child: Container(
+          margin: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E2028) : Colors.white,
+            borderRadius: BorderRadius.circular(16),
           ),
-          backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-          child: Padding(
-            padding: const EdgeInsets.all(20),
+          child: SafeArea(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
+                Container(width: 36, height: 4, decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+                const SizedBox(height: 16),
                 Text('과목 추가', style: TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.w700,
+                  fontSize: 17, fontWeight: FontWeight.w700,
                   color: Theme.of(ctx).textTheme.bodyLarge?.color,
                 )),
                 const SizedBox(height: 16),
@@ -366,6 +371,9 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       borderSide: BorderSide.none,
                     ),
                   ),
+                  onSubmitted: (t) {
+                    if (t.trim().isNotEmpty) Navigator.pop(ctx, t.trim());
+                  },
                 ),
                 const SizedBox(height: 16),
                 Row(children: [
@@ -391,8 +399,8 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
 
     if (name != null && name.isNotEmpty) {
@@ -408,7 +416,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
   }
 
-  // ── 저장 ──
+  /// 시험 저장
   Future<void> _save() async {
     if (_subjects.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -461,7 +469,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     if (mounted) Navigator.pop(context, true);
   }
 
-  // ── UI ──
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -726,8 +733,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       ),
     );
   }
-
-  // ── Helper widgets ──
 
   TextStyle get _headerStyle => TextStyle(
     fontSize: 11,
