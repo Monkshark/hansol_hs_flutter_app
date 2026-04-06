@@ -59,7 +59,7 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
               widget.onDaySelected(selectedDay);
             },
             calendarFormat: CalendarFormat.week,
-            startingDayOfWeek: StartingDayOfWeek.monday,
+            startingDayOfWeek: StartingDayOfWeek.sunday,
             rowHeight: 48,
             daysOfWeekHeight: 24,
             calendarStyle: CalendarStyle(

@@ -69,7 +69,45 @@ class _WritePostScreenState extends State<WritePostScreen> {
     _titleController = TextEditingController(text: widget.initialTitle ?? '');
     _contentController = TextEditingController(text: widget.initialContent ?? '');
     _eventContentController = TextEditingController();
-    if (_isEdit) _loadExistingData();
+    if (_isEdit) {
+      _loadExistingData();
+    } else {
+      _loadDraft();
+    }
+  }
+
+  Future<void> _loadDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    final title = prefs.getString('draft_title');
+    final content = prefs.getString('draft_content');
+    final category = prefs.getString('draft_category');
+    if (title == null && content == null) return;
+    if (!mounted) return;
+    setState(() {
+      if (title != null && _titleController.text.isEmpty) _titleController.text = title;
+      if (content != null && _contentController.text.isEmpty) _contentController.text = content;
+      if (category != null) _category = category;
+    });
+  }
+
+  Future<void> _saveDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    final title = _titleController.text.trim();
+    final content = _contentController.text.trim();
+    if (title.isEmpty && content.isEmpty) {
+      await _clearDraft();
+      return;
+    }
+    await prefs.setString('draft_title', title);
+    await prefs.setString('draft_content', content);
+    await prefs.setString('draft_category', _category);
+  }
+
+  Future<void> _clearDraft() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('draft_title');
+    await prefs.remove('draft_content');
+    await prefs.remove('draft_category');
   }
 
   Future<void> _loadExistingData() async {
@@ -124,7 +162,53 @@ class _WritePostScreenState extends State<WritePostScreen> {
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     final fillColor = isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5);
 
-    return Scaffold(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) async {
+        if (didPop) return;
+        final title = _titleController.text.trim();
+        final content = _contentController.text.trim();
+        if (!_isEdit && (title.isNotEmpty || content.isNotEmpty)) {
+          final action = await showModalBottomSheet<String>(
+            context: context,
+            backgroundColor: Colors.transparent,
+            builder: (ctx) => Container(
+              margin: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+                const SizedBox(height: 8),
+                Container(width: 36, height: 4, decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+                const SizedBox(height: 16),
+                Text('작성 중인 글이 있습니다', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
+                const SizedBox(height: 20),
+                Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
+                  Expanded(child: TextButton(
+                    onPressed: () => Navigator.pop(ctx, 'discard'),
+                    child: Text('삭제', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                  )),
+                  const SizedBox(width: 10),
+                  Expanded(child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx, 'save'),
+                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.theme.primaryColor, foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
+                    child: const Text('임시저장'),
+                  )),
+                ])),
+                const SizedBox(height: 12),
+              ])),
+            ),
+          );
+          if (action == 'save') await _saveDraft();
+          if (action == 'discard') await _clearDraft();
+          if (action == null) return;
+        }
+        if (mounted) Navigator.of(context).pop();
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -133,6 +217,18 @@ class _WritePostScreenState extends State<WritePostScreen> {
         centerTitle: true,
         elevation: 0,
         actions: [
+          if (!_isEdit)
+            IconButton(
+              onPressed: _saving ? null : () async {
+                await _saveDraft();
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('임시저장되었습니다')));
+                }
+              },
+              icon: Icon(Icons.save_outlined, color: AppColors.theme.darkGreyColor, size: 24),
+              tooltip: '임시저장',
+            ),
           IconButton(
             onPressed: _saving ? null : _onSubmit,
             icon: Icon(
@@ -342,6 +438,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
           ],
         ),
       ),
+    ),
     );
   }
 
@@ -549,9 +646,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
               ),
             ),
           ),
+          ],
         ],
-      ],
-    );
+      );
   }
 
   Future<void> _pickImages() async {
@@ -845,6 +942,23 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
     final displayName = _isAnonymous ? '익명' : profile.displayName;
 
+    if (_isPinned) {
+      final pinnedSnap = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('isPinned', isEqualTo: true)
+          .get();
+      if (pinnedSnap.docs.length >= 3 && mounted) {
+        final result = await _showPinnedLimitSheet(pinnedSnap.docs);
+        if (result == null) {
+          setState(() => _saving = false);
+          return;
+        }
+        if (result == 'cancel') {
+          _isPinned = false;
+        }
+      }
+    }
+
     final postData = <String, dynamic>{
       'title': title,
       'content': content,
@@ -912,12 +1026,94 @@ class _WritePostScreenState extends State<WritePostScreen> {
       }
     }
 
-    // Save last post time for rate limiting
     if (!_isEdit) {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('last_post_time', DateTime.now().millisecondsSinceEpoch);
+      await _clearDraft();
     }
 
     if (mounted) Navigator.pop(context, true);
+  }
+
+  Future<String?> _showPinnedLimitSheet(List<QueryDocumentSnapshot<Map<String, dynamic>>> pinnedDocs) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+
+    return showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      isScrollControlled: true,
+      builder: (ctx) => Container(
+        margin: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const SizedBox(height: 8),
+              Container(width: 36, height: 4, decoration: BoxDecoration(
+                color: isDark ? Colors.grey[600] : Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              )),
+              const SizedBox(height: 16),
+              Text('공지가 이미 3개입니다', style: TextStyle(
+                fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
+              const SizedBox(height: 8),
+              Text('기존 공지를 해제하거나, 이 글을 일반 글로 등록하세요.',
+                style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
+                textAlign: TextAlign.center),
+              const SizedBox(height: 16),
+              ...pinnedDocs.map((doc) {
+                final data = doc.data();
+                final title = data['title'] ?? '제목 없음';
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                  child: GestureDetector(
+                    onTap: () async {
+                      await doc.reference.update({'isPinned': false});
+                      if (ctx.mounted) Navigator.pop(ctx, 'unpinned');
+                    },
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(child: Text(title, style: TextStyle(
+                            fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
+                            maxLines: 1, overflow: TextOverflow.ellipsis)),
+                          const SizedBox(width: 8),
+                          Text('해제', style: TextStyle(
+                            fontSize: 13, fontWeight: FontWeight.w600, color: Colors.red)),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+              }),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: TextButton(
+                    onPressed: () => Navigator.pop(ctx, 'cancel'),
+                    child: Text('공지 없이 등록', style: TextStyle(
+                      color: AppColors.theme.darkGreyColor, fontWeight: FontWeight.w600)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
