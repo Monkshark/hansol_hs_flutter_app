@@ -81,7 +81,7 @@ void main() {
 
       expect(
         UserProfile(uid: '', name: '홍길동', studentId: '', grade: 0, classNum: 0, email: '', userType: 'graduate', graduationYear: 2025).displayName,
-        '졸업(2025) 홍길동',
+        '졸업생 홍길동',
       );
 
       expect(
@@ -124,6 +124,125 @@ void main() {
 
       final empty = UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '');
       expect(empty.needsProfileUpdate, true);
+    });
+
+    test('needsProfileUpdate returns false for graduate', () {
+      final graduate = UserProfile(
+        uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'graduate', lastProfileUpdate: '',
+      );
+      expect(graduate.needsProfileUpdate, false);
+    });
+
+    test('needsProfileUpdate returns false for parent', () {
+      final parent = UserProfile(
+        uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'parent', lastProfileUpdate: '',
+      );
+      expect(parent.needsProfileUpdate, false);
+    });
+
+    test('needsProfileUpdate returns true for teacher with empty lastProfileUpdate', () {
+      final teacher = UserProfile(
+        uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'teacher', lastProfileUpdate: '',
+      );
+      expect(teacher.needsProfileUpdate, true);
+    });
+
+    test('needsProfileUpdate returns false for student with current year', () {
+      final currentYear = DateTime.now().year.toString();
+      final student = UserProfile(
+        uid: '', name: '', studentId: '10101', grade: 1, classNum: 1, email: '',
+        userType: 'student', lastProfileUpdate: currentYear,
+      );
+      expect(student.needsProfileUpdate, false);
+    });
+
+    test('isSuspended returns false when suspendedUntil is null', () {
+      final profile = UserProfile(
+        uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '',
+      );
+      expect(profile.isSuspended, false);
+    });
+
+    test('isSuspended returns true when suspendedUntil is in the future', () {
+      final profile = UserProfile(
+        uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '',
+        suspendedUntil: DateTime.now().add(const Duration(days: 7)),
+      );
+      expect(profile.isSuspended, true);
+    });
+
+    test('isSuspended returns false when suspendedUntil is in the past', () {
+      final profile = UserProfile(
+        uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '',
+        suspendedUntil: DateTime.now().subtract(const Duration(days: 1)),
+      );
+      expect(profile.isSuspended, false);
+    });
+
+    test('displayName for student with studentId', () {
+      final profile = UserProfile(
+        uid: '', name: '김철수', studentId: '10305', grade: 1, classNum: 3, email: '',
+        userType: 'student',
+      );
+      expect(profile.displayName, '10305 김철수');
+    });
+
+    test('displayName for student without studentId', () {
+      final profile = UserProfile(
+        uid: '', name: '김철수', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'student',
+      );
+      expect(profile.displayName, '김철수');
+    });
+
+    test('displayName for graduate', () {
+      final profile = UserProfile(
+        uid: '', name: '이영희', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'graduate', graduationYear: 2025,
+      );
+      expect(profile.displayName, '졸업생 이영희');
+    });
+
+    test('displayName for teacher', () {
+      final profile = UserProfile(
+        uid: '', name: '박선생', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'teacher',
+      );
+      expect(profile.displayName, '교사 박선생');
+    });
+
+    test('displayName for parent', () {
+      final profile = UserProfile(
+        uid: '', name: '최학부모', studentId: '', grade: 0, classNum: 0, email: '',
+        userType: 'parent',
+      );
+      expect(profile.displayName, '학부모 최학부모');
+    });
+
+    test('isStudent/isGraduate/isTeacher/isParent flags', () {
+      expect(UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '', userType: 'student').isStudent, true);
+      expect(UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '', userType: 'student').isGraduate, false);
+      expect(UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '', userType: 'graduate').isGraduate, true);
+      expect(UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '', userType: 'teacher').isTeacher, true);
+      expect(UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '', userType: 'parent').isParent, true);
+    });
+
+    test('profilePhotoUrl is preserved through fromMap', () {
+      final map = {
+        'uid': 'u1',
+        'name': 'test',
+        'profilePhotoUrl': 'https://example.com/photo.jpg',
+      };
+      final profile = UserProfile.fromMap(map);
+      expect(profile.profilePhotoUrl, 'https://example.com/photo.jpg');
+    });
+
+    test('profilePhotoUrl defaults to null', () {
+      final profile = UserProfile.fromMap({});
+      expect(profile.profilePhotoUrl, isNull);
     });
   });
 }
