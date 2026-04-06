@@ -434,7 +434,7 @@ class _GradeScreenState extends State<GradeScreen> {
         onPressed: () async {
           final result = await Navigator.push<bool>(
             context,
-            MaterialPageRoute(builder: (_) => const GradeInputScreen()),
+            MaterialPageRoute(builder: (_) => GradeInputScreen(isMock: _tabIndex == 1)),
           );
           if (result == true) _reload();
         },
