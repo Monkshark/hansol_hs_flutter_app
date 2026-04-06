@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'dart:developer';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// D-day CRUD 및 SharedPreferences JSON 저장
@@ -6,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// - D-day 항목 생성/조회/수정/삭제
 /// - 핀 된 D-day 조회 지원
 /// - SharedPreferences에 JSON 형태로 저장
+/// - Firestore 동기화 (로그인 시 자동 불러오기)
 class DDay {
   final String title;
   final DateTime date;
@@ -39,7 +43,12 @@ class DDayManager {
   static Future<List<DDay>> loadAll() async {
     final prefs = await SharedPreferences.getInstance();
     final json = prefs.getString(_key);
-    if (json == null) return [];
+    if (json == null || json.isEmpty) {
+      if (AuthService.isLoggedIn) {
+        return _loadFromFirestore(prefs);
+      }
+      return [];
+    }
     final list = jsonDecode(json) as List<dynamic>;
     return list.map((e) => DDay.fromJson(e)).toList();
   }
@@ -47,6 +56,7 @@ class DDayManager {
   static Future<void> saveAll(List<DDay> list) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, jsonEncode(list.map((e) => e.toJson()).toList()));
+    _syncToFirestore(list);
   }
 
   static Future<DDay?> getPinned() async {
@@ -55,5 +65,43 @@ class DDayManager {
     if (pinned.isEmpty) return null;
     pinned.sort((a, b) => a.dDay.compareTo(b.dDay));
     return pinned.first;
+  }
+
+  static Future<List<DDay>> _loadFromFirestore(SharedPreferences prefs) async {
+    try {
+      final uid = AuthService.currentUser!.uid;
+      final doc = await FirebaseFirestore.instance
+          .collection('users').doc(uid)
+          .collection('sync').doc('ddays')
+          .get();
+      if (doc.exists && doc.data() != null) {
+        final list = doc.data()!['items'] as List<dynamic>?;
+        if (list != null && list.isNotEmpty) {
+          final ddays = list.map((e) => DDay.fromJson(Map<String, dynamic>.from(e))).toList();
+          await prefs.setString(_key, jsonEncode(ddays.map((e) => e.toJson()).toList()));
+          log('DDayManager: loaded ${ddays.length} D-days from Firestore');
+          return ddays;
+        }
+      }
+    } catch (e) {
+      log('DDayManager: Firestore load error: $e');
+    }
+    return [];
+  }
+
+  static Future<void> _syncToFirestore(List<DDay> list) async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await FirebaseFirestore.instance
+          .collection('users').doc(uid)
+          .collection('sync').doc('ddays')
+          .set({
+        'items': list.map((e) => e.toJson()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      log('DDayManager: Firestore sync error: $e');
+    }
   }
 }

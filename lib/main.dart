@@ -288,6 +288,9 @@ class _MainScreenState extends State<MainScreen> {
       if (!AuthService.isLoggedIn && mounted) {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       }
+      if (AuthService.isLoggedIn) {
+        unawaited(GetIt.I<LocalDataBase>().loadFromFirestore());
+      }
       if (mounted) UpdateChecker.check(context);
       if (mounted) PopupNotice.check(context);
     });
