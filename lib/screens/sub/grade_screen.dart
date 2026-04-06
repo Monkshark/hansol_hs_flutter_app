@@ -17,7 +17,7 @@ class _GradeScreenState extends State<GradeScreen> {
   /// 0 = 내신, 1 = 모의고사
   int _tabIndex = 0;
   late Future<List<Exam>> _examsFuture;
-  Map<String, int> _goals = {};
+  Map<String, double> _goals = {};
 
   @override
   void initState() {
@@ -112,8 +112,8 @@ class _GradeScreenState extends State<GradeScreen> {
 
     await GradeManager.saveExams(testExams);
     await GradeManager.saveGoals({
-      '국어': 1, '수학': 1, '영어': 1, '한국사': 2,
-      '생명과학': 1, '세계지리': 1, '지구과학': 2,
+      '국어': 1.5, '수학': 1.0, '영어': 1.0, '한국사': 2.0,
+      '생명과학': 1.5, '세계지리': 1.5, '지구과학': 2.5,
     });
   }
 
@@ -232,7 +232,7 @@ class _GradeScreenState extends State<GradeScreen> {
     }
 
     // Local copy of goals for editing
-    final tempGoals = Map<String, int>.from(_goals);
+    final tempGoals = Map<String, double>.from(_goals);
 
     if (!mounted) return;
     await showModalBottomSheet(
@@ -313,59 +313,50 @@ class _GradeScreenState extends State<GradeScreen> {
                                 ),
                               ),
                             ),
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: DropdownButtonHideUnderline(
-                                child: DropdownButton<int?>(
-                                  value: currentGoal,
-                                  hint: Text(
-                                    '미설정',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: AppColors.theme.darkGreyColor,
-                                    ),
-                                  ),
-                                  isDense: true,
-                                  dropdownColor: sheetColor,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: textColor,
-                                  ),
-                                  items: [
-                                    DropdownMenuItem<int?>(
-                                      value: null,
-                                      child: Text(
-                                        '미설정',
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: AppColors.theme.darkGreyColor,
-                                        ),
-                                      ),
-                                    ),
-                                    ...List.generate(maxRank, (r) {
-                                      final rank = r + 1;
-                                      return DropdownMenuItem<int?>(
-                                        value: rank,
-                                        child: Text('$rank등급'),
-                                      );
-                                    }),
-                                  ],
-                                  onChanged: (val) {
-                                    setSheetState(() {
-                                      if (val == null) {
-                                        tempGoals.remove(subject);
-                                      } else {
-                                        tempGoals[subject] = val;
-                                      }
-                                    });
-                                  },
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                GestureDetector(
+                                  onTap: () => setSheetState(() {
+                                    if (currentGoal == null) {
+                                      tempGoals[subject] = maxRank.toDouble();
+                                    } else if (currentGoal > 1.0) {
+                                      tempGoals[subject] = ((currentGoal - 0.1) * 10).round() / 10;
+                                    }
+                                  }),
+                                  child: Icon(Icons.remove_circle_outline, size: 22,
+                                    color: currentGoal != null && currentGoal > 1.0
+                                        ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
                                 ),
-                              ),
+                                Container(
+                                  width: 52,
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    currentGoal != null ? currentGoal.toStringAsFixed(1) : '-',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                                      color: currentGoal != null ? textColor : AppColors.theme.darkGreyColor),
+                                  ),
+                                ),
+                                GestureDetector(
+                                  onTap: () => setSheetState(() {
+                                    if (currentGoal == null) {
+                                      tempGoals[subject] = 1.0;
+                                    } else if (currentGoal < maxRank) {
+                                      tempGoals[subject] = ((currentGoal + 0.1) * 10).round() / 10;
+                                    }
+                                  }),
+                                  child: Icon(Icons.add_circle_outline, size: 22,
+                                    color: currentGoal != null && currentGoal < maxRank
+                                        ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
+                                ),
+                                if (currentGoal != null) ...[
+                                  const SizedBox(width: 4),
+                                  GestureDetector(
+                                    onTap: () => setSheetState(() => tempGoals.remove(subject)),
+                                    child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                                  ),
+                                ],
+                              ],
                             ),
                           ],
                         );
