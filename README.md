@@ -439,3 +439,4 @@ erDiagram
 **해결:** `home_widget` 패키지로 Dart → SharedPreferences → Java 브릿지 구성. 시간표는 앱 내 `timetable_view_screen`에서 완성된 그리드를 저장하고 위젯이 읽기만 수행. 자정 갱신은 `AlarmManager` → `HomeWidgetBackgroundIntent`로 Dart 엔진을 백그라운드 실행하여 API 직접 호출
 </details>
 
+
