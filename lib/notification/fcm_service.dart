@@ -3,8 +3,12 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/main.dart' show rootNavigatorKey;
+import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
+import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
 
 /// FCM(Firebase Cloud Messaging) 서비스
 /// - FCM 초기화 및 알림 권한 요청
@@ -100,6 +104,8 @@ class FcmService {
     final notification = message.notification;
     if (notification == null) return;
 
+    final payload = _encodePayload(message.data);
+
     _localNotifications.show(
       notification.hashCode,
       notification.title,
@@ -112,12 +118,86 @@ class FcmService {
           icon: '@mipmap/ic_launcher',
         ),
       ),
-      payload: message.data['postId'],
+      payload: payload,
     );
   }
 
   static void _onMessageOpenedApp(RemoteMessage message) {
     log('FcmService: opened from notification, data=${message.data}');
+    _handleDeepLink(message.data);
+  }
+
+  /// 푸시 알림 data payload 기반 딥링크 라우팅
+  /// - type=comment / new_post → 게시글 상세
+  /// - type=chat → 채팅방 (chat 문서에서 상대 정보 로드)
+  /// - type=account → 무시 (앱만 열림)
+  static Future<void> _handleDeepLink(Map<String, dynamic> data) async {
+    final navigator = rootNavigatorKey.currentState;
+    if (navigator == null) return;
+
+    final type = data['type']?.toString();
+    try {
+      switch (type) {
+        case 'comment':
+        case 'new_post':
+          final postId = data['postId']?.toString();
+          if (postId == null || postId.isEmpty) return;
+          navigator.push(MaterialPageRoute(
+            builder: (_) => PostDetailScreen(postId: postId),
+          ));
+          break;
+        case 'chat':
+          final chatId = data['chatId']?.toString();
+          if (chatId == null || chatId.isEmpty) return;
+          final myUid = FirebaseAuth.instance.currentUser?.uid;
+          if (myUid == null) return;
+          final doc = await FirebaseFirestore.instance
+              .collection('chats').doc(chatId).get();
+          if (!doc.exists) return;
+          final chatData = doc.data();
+          if (chatData == null) return;
+          final participants = List<String>.from(chatData['participants'] ?? []);
+          final otherUid = participants.firstWhere(
+            (uid) => uid != myUid,
+            orElse: () => '',
+          );
+          if (otherUid.isEmpty) return;
+          final userDoc = await FirebaseFirestore.instance
+              .collection('users').doc(otherUid).get();
+          final otherName = userDoc.data()?['name']?.toString() ?? '대화상대';
+          navigator.push(MaterialPageRoute(
+            builder: (_) => ChatRoomScreen(
+              chatId: chatId, otherUid: otherUid, otherName: otherName,
+            ),
+          ));
+          break;
+      }
+    } catch (e) {
+      log('FcmService: deep link error: $e');
+    }
+  }
+
+  /// 포그라운드 로컬 알림용 payload 인코딩 (key=value;key=value)
+  static String _encodePayload(Map<String, dynamic> data) {
+    return data.entries.map((e) => '${e.key}=${e.value}').join(';');
+  }
+
+  /// 로컬 알림 payload → Map 디코딩
+  static Map<String, dynamic> decodePayload(String payload) {
+    final map = <String, dynamic>{};
+    for (final pair in payload.split(';')) {
+      final idx = pair.indexOf('=');
+      if (idx > 0) {
+        map[pair.substring(0, idx)] = pair.substring(idx + 1);
+      }
+    }
+    return map;
+  }
+
+  /// 로컬 알림(포그라운드) 탭 시 호출
+  static void handleLocalNotificationTap(String? payload) {
+    if (payload == null || payload.isEmpty) return;
+    _handleDeepLink(decodePayload(payload));
   }
 
   static Future<void> onUserLogin() async {

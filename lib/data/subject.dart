@@ -1,34 +1,25 @@
-/// 과목 데이터 모델
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+part 'subject.freezed.dart';
+part 'subject.g.dart';
+
+/// 과목 데이터 모델 (freezed)
 ///
 /// - 과목명, 반 번호, 카테고리(선택), 원본 여부 포함
-/// - JSON 직렬화/역직렬화 지원 (toJson/fromJson)
-/// - 동등성 비교 연산자 구현
-class Subject {
-  final String subjectName;
-  final int subjectClass;
-  final String? category;
-  final bool isOriginal;
+/// - JSON 직렬화/역직렬화는 json_serializable이 자동 생성
+/// - 동등성 비교는 subjectName/subjectClass 기준 (커스텀 ==)
+@freezed
+class Subject with _$Subject {
+  const Subject._();
 
-  Subject({
-    required this.subjectName,
-    required this.subjectClass,
-    this.category,
-    this.isOriginal = false,
-  });
+  const factory Subject({
+    required String subjectName,
+    required int subjectClass,
+    String? category,
+    @Default(false) bool isOriginal,
+  }) = _Subject;
 
-  Map<String, dynamic> toJson() => {
-        'subjectName': subjectName,
-        'subjectClass': subjectClass,
-        if (category != null) 'category': category,
-        'isOriginal': isOriginal,
-      };
-
-  factory Subject.fromJson(Map<String, dynamic> json) => Subject(
-        subjectName: json['subjectName'],
-        subjectClass: json['subjectClass'],
-        category: json['category'],
-        isOriginal: json['isOriginal'] ?? false,
-      );
+  factory Subject.fromJson(Map<String, dynamic> json) => _$SubjectFromJson(json);
 
   @override
   bool operator ==(Object other) =>

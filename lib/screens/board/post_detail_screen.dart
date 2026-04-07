@@ -36,6 +36,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   final _commentController = TextEditingController();
   bool _sending = false;
   bool _commentAnonymous = false;
+  int _refreshTick = 0;
 
   String? _replyToCommentId;
   String? _replyToName;
@@ -47,6 +48,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   void dispose() {
     _commentController.dispose();
     super.dispose();
+  }
+
+  Future<void> _refresh() async {
+    try {
+      await _postRef.get(const GetOptions(source: Source.server));
+      await _postRef
+          .collection('comments')
+          .get(const GetOptions(source: Source.server));
+    } catch (_) {}
+    if (mounted) setState(() => _refreshTick++);
   }
 
   @override
@@ -169,7 +180,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     ? pollVoters[AuthService.currentUser!.uid]
                     : null;
 
-                return ListView(
+                return RefreshIndicator(
+                  onRefresh: _refresh,
+                  color: AppColors.theme.primaryColor,
+                  child: ListView(
+                  key: ValueKey('post_list_$_refreshTick'),
+                  physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                   children: [
                     Align(
@@ -329,6 +345,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       },
                     ),
                   ],
+                  ),
                 );
               },
             ),
@@ -649,8 +666,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final data = snap.data();
     if (data == null) return;
     final updates = <String, dynamic>{};
-    // int(더미)이면 Map으로 변환하되 값은 유지하지 않음 (첫 투표 시 리셋 불가피)
-    // null이면 빈 Map으로 초기화
     if (data['likes'] == null) updates['likes'] = {};
     if (data['dislikes'] == null) updates['dislikes'] = {};
     if (data['likes'] is int) updates['likes'] = {};
@@ -755,7 +770,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       return;
     }
 
-    // Rate limiting: 10 seconds between comments
     final prefs = await SharedPreferences.getInstance();
     final lastCommentTime = prefs.getInt('last_comment_time') ?? 0;
     final now = DateTime.now().millisecondsSinceEpoch;
@@ -780,14 +794,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (anonymous) {
       final myUid = AuthService.currentUser!.uid;
 
-      // Check if post author
       final postSnap = await _postRef.get();
       final postAuthorUid = postSnap.data()?['authorUid'];
 
       if (myUid == postAuthorUid) {
         displayName = '익명(글쓴이)';
       } else {
-        // Use transaction for atomic anonymous number assignment
         displayName = await FirebaseFirestore.instance.runTransaction<String>((transaction) async {
           final postDoc = await transaction.get(_postRef);
           final data = postDoc.data() ?? {};
@@ -809,6 +821,26 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       }
     }
 
+    final mentionPattern = RegExp(r'@([\w가-힣]+)');
+    final mentionNames = mentionPattern
+        .allMatches(text)
+        .map((m) => m.group(1))
+        .whereType<String>()
+        .toSet();
+    final mentionedUids = <String>{};
+    if (mentionNames.isNotEmpty) {
+      final commentsSnap = await _postRef.collection('comments').get();
+      for (final doc in commentsSnap.docs) {
+        final d = doc.data();
+        final n = d['authorName']?.toString();
+        final u = d['authorUid']?.toString();
+        if (n != null && u != null && mentionNames.contains(n)) {
+          mentionedUids.add(u);
+        }
+      }
+      mentionedUids.remove(AuthService.currentUser!.uid);
+    }
+
     final commentData = <String, dynamic>{
       'content': text,
       'authorUid': AuthService.currentUser!.uid,
@@ -816,6 +848,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       'authorRealName': profile.displayName,
       'isAnonymous': anonymous,
       'createdAt': FieldValue.serverTimestamp(),
+      if (mentionedUids.isNotEmpty) 'mentions': mentionedUids.toList(),
     };
 
     if (_replyToCommentId != null) {
@@ -823,8 +856,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       commentData['replyTo'] = _replyToCommentId;
       commentData['replyToName'] = _replyToName;
     }
-
-    await _postRef.collection('comments').add(commentData);
+    final newRef = await _postRef.collection('comments').add(commentData);
     await _postRef.update({'commentCount': FieldValue.increment(1)});
 
     final postSnap = await _postRef.get();
@@ -863,23 +895,41 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
+
+      for (final mentionedUid in mentionedUids) {
+        if (mentionedUid == postAuthorUid) continue;
+        await FirebaseFirestore.instance
+            .collection('users').doc(mentionedUid).collection('notifications').add({
+          'type': 'mention',
+          'postId': widget.postId,
+          'postTitle': postTitle,
+          'senderName': displayName,
+          'content': text,
+          'read': false,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      }
     }
 
-    // Save last comment time for rate limiting
     await prefs.setInt('last_comment_time', DateTime.now().millisecondsSinceEpoch);
 
-    if (mounted) setState(() {
-      _sending = false;
-      _replyToCommentId = null;
-      _replyToName = null;
-    });
+    if (mounted) {
+      setState(() {
+        _sending = false;
+        _replyToCommentId = null;
+        _replyToName = null;
+      });
+      await _refresh();
+    }
   }
 
   List<Widget> _buildThreadedComments(List<QueryDocumentSnapshot> comments) {
     final parents = <QueryDocumentSnapshot>[];
     final childrenMap = <String, List<QueryDocumentSnapshot>>{};
+    final byId = <String, QueryDocumentSnapshot>{};
 
     for (var doc in comments) {
+      byId[doc.id] = doc;
       final data = doc.data() as Map<String, dynamic>;
       final parentRef = data['parentId'] as String? ?? data['replyTo'] as String?;
       if (parentRef == null) {
@@ -901,20 +951,26 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final widgets = <Widget>[];
     final handled = <String>{};
 
-    for (var parent in parents) {
-      widgets.add(_buildCommentWidget(parent, indent: false));
-      handled.add(parent.id);
-      for (var child in childrenMap[parent.id] ?? []) {
+    void addDescendants(String parentId) {
+      for (var child in childrenMap[parentId] ?? []) {
+        if (handled.contains(child.id)) continue;
         widgets.add(_buildCommentWidget(child, indent: true));
         handled.add(child.id);
+        addDescendants(child.id);
       }
     }
 
-    // 부모가 삭제된 고아 대댓글
+    for (var parent in parents) {
+      widgets.add(_buildCommentWidget(parent, indent: false));
+      handled.add(parent.id);
+      addDescendants(parent.id);
+    }
+
     for (var doc in comments) {
-      if (!handled.contains(doc.id)) {
-        widgets.add(_buildCommentWidget(doc, indent: true));
-      }
+      if (handled.contains(doc.id)) continue;
+      widgets.add(_buildCommentWidget(doc, indent: true));
+      handled.add(doc.id);
+      addDescendants(doc.id);
     }
 
     return widgets;
@@ -924,6 +980,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Map<String, dynamic> _anonymousMapping = {};
 
   Widget _buildCommentWidget(QueryDocumentSnapshot doc, {required bool indent}) {
+    final String docId = doc.id;
     final c = Map<String, dynamic>.from(doc.data() as Map<String, dynamic>);
     final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
     final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
@@ -937,23 +994,38 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         c['authorName'] = '익명${_anonymousMapping[uid]}';
       }
     }
+    final String resolvedName = (c['authorName'] ?? '익명') as String;
 
     return Padding(
       padding: EdgeInsets.only(left: indent ? 32 : 0),
       child: PostCommentItem(
-        key: ValueKey(doc.id),
+        key: ValueKey(docId),
         data: c,
         isAuthor: canDelete,
         isReply: indent,
         isPostAuthor: isPostAuthor,
-        onDelete: () => _confirmDeleteComment(doc.id),
-        onReply: () {
-          setState(() {
-            _replyToCommentId = doc.id;
-            _replyToName = c['authorName'] ?? '익명';
-          });
-        },
+        onDelete: () => _confirmDeleteComment(docId),
+        onReply: () => _onReplyTap(docId, resolvedName),
       ),
+    );
+  }
+
+  /// 답글 버튼 클릭 시: 부모 댓글 ID/이름 저장 + 본문 앞에 @닉네임 자동 삽입
+  void _onReplyTap(String parentId, String parentName) {
+    setState(() {
+      _replyToCommentId = parentId;
+      _replyToName = parentName;
+    });
+    final mentionPrefix = '@$parentName ';
+    final current = _commentController.text;
+    if (current.startsWith(mentionPrefix)) return;
+    final existingMention = RegExp(r'^@\S+\s').firstMatch(current);
+    final rest = existingMention != null
+        ? current.substring(existingMention.end)
+        : current;
+    _commentController.text = '$mentionPrefix$rest';
+    _commentController.selection = TextSelection.fromPosition(
+      TextPosition(offset: _commentController.text.length),
     );
   }
 
@@ -1023,7 +1095,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final confirm = await _showConfirmSheet('게시글 삭제', '정말 삭제하시겠습니까?', '삭제');
 
     if (confirm == true) {
-      // 관리자 삭제 로그
       final uid = AuthService.currentUser?.uid;
       final postSnap = await _postRef.get();
       final postData = postSnap.data();

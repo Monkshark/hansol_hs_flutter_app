@@ -21,7 +21,10 @@ dependencies:
 
   # 상태관리 및 서비스
   flutter_riverpod: ^2.5.1
+  riverpod_annotation: ^2.3.5
   get_it: ^8.0.3
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
 
   # Firebase
   firebase_core: ^3.3.0
@@ -55,6 +58,8 @@ dependencies:
   package_info_plus: ^8.0.0
   cached_network_image: ^3.3.1
   firebase_crashlytics: ^4.3.10
+  firebase_performance: ^0.10.0+8
+  firebase_app_check: ^0.3.1+5
   shimmer: ^3.0.0
   flutter_svg: ^2.2.4
   home_widget: ^0.7.0
@@ -62,8 +67,18 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_lints: ^4.0.0
   build_runner: ^2.4.7
+  freezed: ^2.5.7
+  json_serializable: ^6.8.0
+  riverpod_generator: ^2.4.0
+  custom_lint: ^0.7.3
+  riverpod_lint: ^2.6.1
+
+dependency_overrides:
+  analyzer_plugin: ^0.13.0
 
 flutter:
   uses-material-design: true

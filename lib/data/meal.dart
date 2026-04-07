@@ -1,54 +1,39 @@
-/// 급식 데이터 모델
-///
-/// - 메뉴, 날짜, 식사유형(조식/중식/석식), 칼로리 정보 포함
-/// - JSON 직렬화/역직렬화 지원 (toJson/fromJson)
-/// - 캐시 저장 및 API 응답 파싱에 사용
-class Meal {
-  final String? meal;
-  final DateTime date;
-  final int mealType;
-  final String kcal;
-  final String ntrInfo; // 영양정보 (탄수화물, 단백질, 지방 등)
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-  Meal({
-    required this.meal,
-    required this.date,
-    required this.mealType,
-    required this.kcal,
-    this.ntrInfo = '',
-  });
+part 'meal.freezed.dart';
+part 'meal.g.dart';
+
+/// 급식 데이터 모델 (freezed)
+///
+/// - 메뉴, 날짜, 식사유형(조식/중식/석식), 칼로리, 영양정보 포함
+/// - JSON 직렬화/역직렬화는 json_serializable이 자동 생성
+@freezed
+class Meal with _$Meal {
+  const Meal._();
+
+  const factory Meal({
+    required String? meal,
+    required DateTime date,
+    required int mealType,
+    required String kcal,
+    @Default('') String ntrInfo,
+  }) = _Meal;
+
+  factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
 
   @override
-  String toString() {
-    return meal ?? '';
-  }
-
-  Map<String, dynamic> toJson() => {
-        'meal': meal,
-        'date': date.toIso8601String(),
-        'mealType': mealType,
-        'kcal': kcal,
-        'ntrInfo': ntrInfo,
-      };
-
-  factory Meal.fromJson(Map<String, dynamic> json) => Meal(
-        meal: json['meal'],
-        date: DateTime.parse(json['date']),
-        mealType: json['mealType'],
-        kcal: json['kcal'],
-        ntrInfo: json['ntrInfo'] ?? '',
-      );
+  String toString() => meal ?? '';
 
   String getMealType() {
     switch (mealType) {
       case 1:
-        return "조식";
+        return '조식';
       case 2:
-        return "중식";
+        return '중식';
       case 3:
-        return "석식";
+        return '석식';
       default:
-        return "중식";
+        return '중식';
     }
   }
 }

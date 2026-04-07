@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+part 'theme_provider.g.dart';
 
 /// 테마 모드 관리 (라이트/다크/시스템)
 ///
-/// SettingData의 themeModeIndex와 동기화. Riverpod 2.x Notifier 패턴.
-class ThemeNotifier extends Notifier<ThemeMode> {
+/// SettingData의 themeModeIndex와 동기화. riverpod_generator 기반.
+@Riverpod(keepAlive: true)
+class Theme extends _$Theme {
   @override
   ThemeMode build() => _indexToMode(SettingData().themeModeIndex);
 
@@ -25,5 +28,3 @@ class ThemeNotifier extends Notifier<ThemeMode> {
     state = _indexToMode(index);
   }
 }
-
-final themeProvider = NotifierProvider<ThemeNotifier, ThemeMode>(ThemeNotifier.new);

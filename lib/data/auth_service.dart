@@ -307,4 +307,19 @@ class AuthService {
     _cachedProfile = null;
     _cacheTime = null;
   }
+
+  /// ID 토큰을 강제 갱신해 최신 custom claims (role/approved) 을 가져옴.
+  /// Cloud Function `onUserUpdated` 가 setCustomUserClaims 호출 후
+  /// 클라이언트에서 호출해야 변경된 권한이 즉시 반영된다.
+  static Future<Map<String, dynamic>?> refreshCustomClaims() async {
+    final user = currentUser;
+    if (user == null) return null;
+    try {
+      final result = await user.getIdTokenResult(true);
+      return result.claims;
+    } catch (e) {
+      log('AuthService: refreshCustomClaims error: $e');
+      return null;
+    }
+  }
 }

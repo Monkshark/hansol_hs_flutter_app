@@ -3,10 +3,16 @@ const { onRequest } = require("firebase-functions/v2/https");
 const { onSchedule } = require("firebase-functions/v2/scheduler");
 const { initializeApp } = require("firebase-admin/app");
 const { getAuth } = require("firebase-admin/auth");
-const { getFirestore } = require("firebase-admin/firestore");
+const { getFirestore, FieldValue } = require("firebase-admin/firestore");
 const { getMessaging } = require("firebase-admin/messaging");
+const { z } = require("zod");
 
 initializeApp();
+
+// ── Zod schemas ────────────────────────────────────────────────────
+const KakaoAuthSchema = z.object({
+  token: z.string().min(10).max(2000),
+});
 
 async function logError(functionName, error, extra = {}) {
   try {
@@ -24,8 +30,13 @@ async function logError(functionName, error, extra = {}) {
 exports.kakaoCustomAuth = onRequest(async (req, res) => {
   if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
 
-  const { token } = req.body;
-  if (!token) { res.status(400).json({ error: "token required" }); return; }
+  // zod 입력 검증
+  const parsed = KakaoAuthSchema.safeParse(req.body);
+  if (!parsed.success) {
+    res.status(400).json({ error: "Invalid request body", details: parsed.error.flatten() });
+    return;
+  }
+  const { token } = parsed.data;
 
   try {
     const kakaoRes = await fetch("https://kapi.kakao.com/v2/user/me", {
@@ -128,6 +139,21 @@ exports.onCommentCreated = onDocumentCreated(
       }
     }
 
+    // 멘션된 사용자들에게 푸시 알림
+    if (Array.isArray(comment.mentions)) {
+      for (const mentionedUid of comment.mentions) {
+        if (mentionedUid === comment.authorUid || notifiedUids.has(mentionedUid)) continue;
+        const userDoc = await getFirestore().doc(`users/${mentionedUid}`).get();
+        if (!userDoc.exists) continue;
+        const userData = userDoc.data();
+        if (userData.notiMention === false) continue;
+        await sendPush(userData.fcmToken, "멘션 알림", `${name}님이 회원님을 언급했습니다: ${content}`, {
+          type: "comment", postId, _targetUid: mentionedUid,
+        });
+        notifiedUids.add(mentionedUid);
+      }
+    }
+
     // 대댓글: 부모 댓글 작성자에게도 알림
     if (comment.parentId) {
       const parentDoc = await getFirestore().doc(`posts/${postId}/comments/${comment.parentId}`).get();
@@ -189,6 +215,28 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
   const before = event.data.before.data();
   const after = event.data.after.data();
   const userId = event.params.userId;
+
+  // role 변경 시 Firebase Auth Custom Claims 동기화
+  // 클라이언트는 다음 ID 토큰 갱신 시 새 role을 받음 (forceRefresh)
+  if (before.role !== after.role) {
+    try {
+      await getAuth().setCustomUserClaims(userId, {
+        role: after.role || "user",
+        approved: after.approved === true,
+      });
+    } catch (e) {
+      await logError("onUserUpdated.setCustomClaims", e, { userId });
+    }
+  } else if (before.approved !== after.approved) {
+    try {
+      await getAuth().setCustomUserClaims(userId, {
+        role: after.role || "user",
+        approved: after.approved === true,
+      });
+    } catch (e) {
+      await logError("onUserUpdated.setCustomClaims", e, { userId });
+    }
+  }
 
   if (after.notiAccount === false) return;
 
@@ -261,7 +309,9 @@ exports.onChatMessageCreated = onDocumentCreated(
     try {
     const message = event.data.data();
     const chatId = event.params.chatId;
-    if (!message.senderUid || !message.content) return;
+    // 사진 메시지는 content가 비어있을 수 있음 → imageUrl 있으면 통과
+    if (!message.senderUid) return;
+    if (!message.content && !message.imageUrl) return;
     const chatDoc = await getFirestore().doc(`chats/${chatId}`).get();
     if (!chatDoc.exists) return;
     const chat = chatDoc.data();
@@ -271,12 +321,70 @@ exports.onChatMessageCreated = onDocumentCreated(
     if (!recipientDoc.exists) return;
     const recipientData = recipientDoc.data();
     if (recipientData.notiChat === false) return;
+    const body = message.imageUrl
+      ? "[사진]"
+      : (message.content || "").substring(0, 100);
     await sendPush(recipientData.fcmToken, message.senderName || "알 수 없음",
-      (message.content || "").substring(0, 100),
+      body,
       { type: "chat", chatId, _targetUid: recipientUid });
     } catch (e) { await logError("onChatMessageCreated", e, { chatId: event.params.chatId }); }
   }
 );
+
+// 기존 사용자에게 일괄로 custom claims 적용 (1회성 마이그레이션)
+// 호출: POST /backfillCustomClaims  (admin SDK 호출이므로 인증 필요 — 임시 토큰)
+exports.backfillCustomClaims = onRequest(async (req, res) => {
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
+  // 매우 단순한 secret 헤더 검증 (실배포 전 환경변수로 교체)
+  if (req.get("x-admin-secret") !== process.env.BACKFILL_SECRET) {
+    res.status(403).json({ error: "Forbidden" });
+    return;
+  }
+  try {
+    const snap = await getFirestore().collection("users").get();
+    let updated = 0, failed = 0;
+    for (const doc of snap.docs) {
+      const data = doc.data();
+      try {
+        await getAuth().setCustomUserClaims(doc.id, {
+          role: data.role || "user",
+          approved: data.approved === true,
+        });
+        updated++;
+      } catch (_) { failed++; }
+    }
+    res.json({ updated, failed, total: snap.size });
+  } catch (error) {
+    await logError("backfillCustomClaims", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// 신고 rate limit: 5분 내 3건 초과 시 새 신고 자동 삭제 + 로그
+exports.onReportCreated = onDocumentCreated("reports/{reportId}", async (event) => {
+  try {
+    const report = event.data.data();
+    const reporterUid = report.reporterUid;
+    if (!reporterUid) return;
+
+    const db = getFirestore();
+    const cutoff = new Date(Date.now() - 5 * 60 * 1000);
+    const recent = await db.collection("reports")
+      .where("reporterUid", "==", reporterUid)
+      .where("createdAt", ">=", cutoff)
+      .get();
+
+    if (recent.size > 3) {
+      await event.data.ref.delete();
+      await logError("onReportCreated.rateLimit", new Error("Report rate limit exceeded"), {
+        reporterUid,
+        recentCount: recent.size,
+      });
+    }
+  } catch (e) {
+    await logError("onReportCreated", e, { reportId: event.params.reportId });
+  }
+});
 
 // 매시간 정지 만료된 유저 확인 → suspendedUntil 삭제 → onUserUpdated 트리거 → 정지 해제 알림
 exports.checkSuspensionExpiry = onSchedule("every 1 hours", async () => {

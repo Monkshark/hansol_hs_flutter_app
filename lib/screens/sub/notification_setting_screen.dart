@@ -30,6 +30,7 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
   // 푸시 알림 (Firestore)
   bool _notiComment = true;
   bool _notiReply = true;
+  bool _notiMention = true;
   bool _notiNewPost = true;
   bool _notiChat = true;
   bool _notiAccount = true;
@@ -81,6 +82,7 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
         setState(() {
           _notiComment = data['notiComment'] ?? true;
           _notiReply = data['notiReply'] ?? true;
+          _notiMention = data['notiMention'] ?? true;
           _notiNewPost = data['notiNewPost'] ?? true;
           _notiChat = data['notiChat'] ?? true;
           _notiAccount = data['notiAccount'] ?? true;
@@ -165,6 +167,11 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
                       _pushRow('대댓글 알림', '내 댓글에 답글이 달리면 알림', _notiReply, (v) {
                         setState(() => _notiReply = v);
                         _savePushSetting('notiReply', v);
+                      }),
+                      _divider(),
+                      _pushRow('멘션 알림', '댓글에서 누군가 나를 @로 언급하면 알림', _notiMention, (v) {
+                        setState(() => _notiMention = v);
+                        _savePushSetting('notiMention', v);
                       }),
                       _divider(),
                       _pushRow('새 글 알림', '게시판에 새 글이 올라오면 알림', _notiNewPost, (v) {
