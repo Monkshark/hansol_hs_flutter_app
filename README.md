@@ -4,9 +4,10 @@
 [![Firestore Rules Tests](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml/badge.svg)](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-131%20unit%20%2B%2034%20rules-success)
+![Tests](https://img.shields.io/badge/tests-146%20unit%20%2B%2034%20rules-success)
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
+[![Riverpod Graph](https://img.shields.io/badge/Riverpod%20Graph-인터랙티브-6c5ce7?logo=d3.js&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
 > 세종시 한솔고등학교 학생·교사·졸업생·학부모를 위한 통합 학교 플랫폼
 
@@ -26,8 +27,8 @@ Flutter 기반 모바일 앱 + Next.js 관리자 대시보드로 구성된 풀�
 |:--:|:--:|:--:|:--:|
 | ![상세](screenshots/post_detail.png) | ![글쓰기](screenshots/write_post.png) | ![채팅목록](screenshots/chat_list.png) | ![채팅방](screenshots/chat_room.png) |
 
-| 인기글 (좋아요순 + 썸네일) | 검색 (최근 검색어) | 검색 결과 (n-gram) | 이미지 뷰어 (PageView + Hero) |
-|:--:|:--:|:--:|:--:|
+|              인기글 (좋아요순)               | 검색 (최근 검색어) | 검색 결과 (n-gram) |          이미지 뷰어 (PageView + Hero)           |
+|:-------------------------------------:|:--:|:--:|:-------------------------------------------:|
 | ![인기글](screenshots/board_popular.png) | ![검색](screenshots/board_search.png) | ![검색결과](screenshots/board_search_results.png) | ![이미지뷰어](screenshots/post_image_viewer.gif) |
 
 | 시간표 | 설정 | 내 계정 | 알림 설정 |
@@ -114,7 +115,7 @@ graph TD
 
 ### Riverpod Provider 의존성 그래프
 
-`riverpod_graph` CLI로 자동 생성. 인터랙티브 버전은 [`docs/riverpod_graph.html`](docs/riverpod_graph.html) 참조.
+`riverpod_graph` CLI로 정적 분석 후 자동 생성. 아래는 mermaid 요약본이고, **🔗 [인터랙티브 풀버전 (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)** 에서 D3.js 기반 zoom/drag 그래프로 모든 노드 탐색 가능.
 
 ```mermaid
 graph LR
