@@ -38,6 +38,7 @@ class _BoardScreenState extends State<BoardScreen> {
   Timer? _searchDebounce;
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final ScrollController _categoryScrollController = ScrollController();
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _allDocs = [];
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _searchResults = [];
   DocumentSnapshot? _lastDoc;
@@ -60,7 +61,26 @@ class _BoardScreenState extends State<BoardScreen> {
     _searchDebounce?.cancel();
     _searchController.dispose();
     _scrollController.dispose();
+    _categoryScrollController.dispose();
     super.dispose();
+  }
+
+  /// 선택된 카테고리 chip을 가로 스크롤 영역 가운데로 이동
+  void _scrollCategoryIntoView() {
+    if (!_categoryScrollController.hasClients) return;
+    // chip 평균 폭 70px (text + padding) + separator 8 가정
+    const chipWidth = 78.0;
+    final viewportWidth = _categoryScrollController.position.viewportDimension;
+    final target = (_selectedIndex * chipWidth) - (viewportWidth / 2) + (chipWidth / 2);
+    final clamped = target.clamp(
+      _categoryScrollController.position.minScrollExtent,
+      _categoryScrollController.position.maxScrollExtent,
+    );
+    _categoryScrollController.animateTo(
+      clamped,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeOut,
+    );
   }
 
   Future<void> _loadSearchHistory() async {
@@ -203,9 +223,20 @@ class _BoardScreenState extends State<BoardScreen> {
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
     return GestureDetector(
+      // 좌우 swipe → 카테고리 좌우 전환 (검색 모드일 땐 비활성)
       onHorizontalDragEnd: (details) {
-        if (details.primaryVelocity != null && details.primaryVelocity! > 300) {
-          Navigator.of(context).pop();
+        if (_isSearching) return;
+        final v = details.primaryVelocity ?? 0;
+        if (v > 300 && _selectedIndex > 0) {
+          // 오른쪽 swipe → 이전 카테고리
+          setState(() => _selectedIndex--);
+          _scrollCategoryIntoView();
+          _loadPosts();
+        } else if (v < -300 && _selectedIndex < _categories.length - 1) {
+          // 왼쪽 swipe → 다음 카테고리
+          setState(() => _selectedIndex++);
+          _scrollCategoryIntoView();
+          _loadPosts();
         }
       },
       child: Scaffold(
@@ -267,6 +298,7 @@ class _BoardScreenState extends State<BoardScreen> {
             SizedBox(
               height: 40,
               child: ListView.separated(
+                controller: _categoryScrollController,
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 itemCount: _categories.length,
@@ -276,6 +308,7 @@ class _BoardScreenState extends State<BoardScreen> {
                   return GestureDetector(
                     onTap: () {
                       setState(() => _selectedIndex = index);
+                      _scrollCategoryIntoView();
                       _loadPosts();
                     },
                     child: Container(
