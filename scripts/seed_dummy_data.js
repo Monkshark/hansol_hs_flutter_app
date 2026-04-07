@@ -112,6 +112,18 @@ async function seed() {
     return map;
   }
 
+  // uid → 표시 이름 매핑 (관리자 view에서 익명 글의 실명 노출용)
+  // userType별 prefix는 비익명 authorName 패턴과 동일하게 생성
+  function fullNameOf(u) {
+    if (u.userType === 'student') return `${u.studentId} ${u.name}`;
+    if (u.userType === 'teacher') return `교사 ${u.name}`;
+    if (u.userType === 'graduate') return `졸업생 ${u.name}`;
+    if (u.userType === 'parent') return `학부모 ${u.name}`;
+    return u.name;
+  }
+  const userFullName = {};
+  for (const u of users) userFullName[u.uid] = fullNameOf(u);
+
   const postIds = [];
   for (let i = 0; i < posts.length; i++) {
     const p = posts[i];
@@ -131,6 +143,8 @@ async function seed() {
       // n-gram search 인덱스 (Phase 3.3)
       searchTokens: tokenize2gram(p.title, p.content),
       imageUrls,
+      // 익명 글: 관리자 view에서 "익명 (학번 이름)"으로 표시되도록 작성자 실명 부여
+      ...(p.isAnonymous ? { authorRealName: userFullName[p.authorUid] || p.authorUid } : {}),
       ...(p.pollVoters !== undefined ? { pollVoters } : {}),
       likedBy: [], dislikedBy: [], bookmarkedBy: i < 5 ? [REAL_UID, "demo_user1"] : [],
       createdAt: ago(i * 90 + 10),
@@ -251,6 +265,8 @@ async function seed() {
     const data = {
       authorUid: c.authorUid, authorName, content: c.content, isAnonymous: c.isAnonymous,
       createdAt: ago(Math.floor(Math.random() * 500) + 10),
+      // 익명 댓글: 관리자 view에서 "익명N (학번 이름)" 표시되도록
+      ...(c.isAnonymous ? { authorRealName: userFullName[c.authorUid] || c.authorUid } : {}),
     };
     if (c.parentKey && commentIdMap[c.parentKey]) {
       data.parentId = commentIdMap[c.parentKey];

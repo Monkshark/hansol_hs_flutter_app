@@ -149,9 +149,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 final isAnon = post['isAnonymous'] == true;
                 final isManagerView = AuthService.cachedProfile?.isManager ?? false;
                 final realName = post['authorRealName'] as String?;
+                final rawAuthorName = (post['authorName'] ?? '익명') as String;
                 final authorName = (isAnon && isManagerView && realName != null)
-                    ? '익명 ($realName)'
-                    : (post['authorName'] ?? '익명');
+                    ? '$rawAuthorName ($realName)'
+                    : rawAuthorName;
                 final category = post['category'] ?? '';
                 final createdAt = post['createdAt'] as Timestamp?;
                 final timeStr = createdAt != null

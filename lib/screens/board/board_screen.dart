@@ -575,9 +575,10 @@ class PostCard extends StatelessWidget {
     final isAnon = data['isAnonymous'] == true;
     final isManagerView = AuthService.cachedProfile?.isManager ?? false;
     final realName = data['authorRealName'] as String?;
+    final rawAuthorName = (data['authorName'] ?? '익명') as String;
     final authorName = (isAnon && isManagerView && realName != null)
-        ? '익명 ($realName)'
-        : (data['authorName'] ?? '익명');
+        ? '$rawAuthorName ($realName)'
+        : rawAuthorName;
     final category = data['category'] ?? '';
     final commentCount = data['commentCount'] ?? 0;
     final rawLikes = data['likes'];
