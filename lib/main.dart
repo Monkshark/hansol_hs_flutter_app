@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:get_it/get_it.dart';
@@ -96,6 +98,16 @@ Future<void> main() async {
     await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
   } catch (e) {
     log('Performance enable failed: $e', name: 'main');
+  }
+
+  // Firebase Analytics: 사용자 이벤트/화면 추적
+  // 디버그 빌드는 disable, 릴리스만 collection on
+  try {
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
+      const bool.fromEnvironment('dart.vm.product'),
+    );
+  } catch (e) {
+    log('Analytics enable failed: $e', name: 'main');
   }
 
   FlutterError.onError = (details) {
@@ -276,6 +288,7 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
     final mode = ref.watch(themeProvider);
     return MaterialApp(
       navigatorKey: rootNavigatorKey,
+      navigatorObservers: [AnalyticsService.observer],
       debugShowCheckedModeBanner: false,
       theme: _lightTheme,
       darkTheme: _darkTheme,

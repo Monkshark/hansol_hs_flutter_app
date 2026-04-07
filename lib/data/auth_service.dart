@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:math' as math;
@@ -5,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:http/http.dart' as http;
 
@@ -143,6 +145,10 @@ class AuthService {
       );
 
       final result = await _auth.signInWithCredential(credential);
+      if (result.user != null) {
+        unawaited(AnalyticsService.logLogin('google'));
+        unawaited(AnalyticsService.setUserId(result.user!.uid));
+      }
       return result.user;
     } catch (e) {
       log('AuthService: Google sign in error: $e');
@@ -176,6 +182,10 @@ class AuthService {
         );
       }
 
+      if (result.user != null) {
+        unawaited(AnalyticsService.logLogin('apple'));
+        unawaited(AnalyticsService.setUserId(result.user!.uid));
+      }
       return result.user;
     } catch (e) {
       log('AuthService: Apple sign in error: $e');
@@ -198,6 +208,10 @@ class AuthService {
 
       final customToken = jsonDecode(response.body)['firebaseToken'] as String;
       final result = await _auth.signInWithCustomToken(customToken);
+      if (result.user != null) {
+        unawaited(AnalyticsService.logLogin('kakao'));
+        unawaited(AnalyticsService.setUserId(result.user!.uid));
+      }
       return result.user;
     } catch (e) {
       log('AuthService: Kakao sign in error: $e');
@@ -209,6 +223,10 @@ class AuthService {
     try {
       final githubProvider = GithubAuthProvider();
       final result = await _auth.signInWithProvider(githubProvider);
+      if (result.user != null) {
+        unawaited(AnalyticsService.logLogin('github'));
+        unawaited(AnalyticsService.setUserId(result.user!.uid));
+      }
       return result.user;
     } catch (e) {
       log('AuthService: GitHub sign in error: $e');
@@ -229,6 +247,8 @@ class AuthService {
   }
 
   static Future<void> signOut() async {
+    unawaited(AnalyticsService.logLogout());
+    unawaited(AnalyticsService.setUserId(null));
     await _googleSignIn.signOut();
     await _auth.signOut();
   }

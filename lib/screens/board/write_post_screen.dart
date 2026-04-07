@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -5,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_event_form_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_image_section.dart';
@@ -763,6 +765,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
         final urls = await _uploadImages(docRef.id);
         await docRef.update({'imageUrls': urls});
       }
+      unawaited(AnalyticsService.logPostCreate(boardType: _category, isAnonymous: _isAnonymous));
     }
 
     if (!_isEdit) {
