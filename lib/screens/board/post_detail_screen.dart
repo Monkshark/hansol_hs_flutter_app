@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -11,6 +10,7 @@ import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/widgets/event_attach_card.dart';
 import 'package:hansol_high_school/screens/board/widgets/poll_card.dart';
 import 'package:hansol_high_school/screens/board/widgets/post_comment_item.dart';
+import 'package:hansol_high_school/screens/board/widgets/post_image_gallery.dart';
 import 'package:hansol_high_school/screens/board/widgets/vote_button.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
@@ -214,30 +214,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                     if (post['imageUrls'] != null && (post['imageUrls'] as List).isNotEmpty) ...[
                       const SizedBox(height: 16),
-                      ...(post['imageUrls'] as List).map((url) => Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
-                        child: GestureDetector(
-                          onTap: () => _showFullImage(context, url as String),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: CachedNetworkImage(
-                              imageUrl: url as String,
-                              width: double.infinity,
-                              fit: BoxFit.fitWidth,
-                              placeholder: (context, url) => Container(
-                                height: 200,
-                                alignment: Alignment.center,
-                                child: CircularProgressIndicator(),
-                              ),
-                              errorWidget: (context, url, error) => Container(
-                                height: 200,
-                                alignment: Alignment.center,
-                                child: Icon(Icons.broken_image, color: Colors.grey),
-                              ),
-                            ),
-                          ),
-                        ),
-                      )),
+                      PostImageGallery(
+                        imageUrls: (post['imageUrls'] as List).cast<String>(),
+                        heroTagPrefix: 'post-${widget.postId}',
+                      ),
                     ],
 
                     if (hasPoll) ...[
@@ -483,30 +463,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
     );
   }
-
-  void _showFullImage(BuildContext context, String url) {
-    Navigator.push(context, MaterialPageRoute(
-      builder: (_) => Scaffold(
-        backgroundColor: Colors.black,
-        appBar: AppBar(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          elevation: 0,
-        ),
-        body: Center(
-          child: InteractiveViewer(
-            child: CachedNetworkImage(
-              imageUrl: url,
-              fit: BoxFit.contain,
-              placeholder: (context, url) => const Center(child: CircularProgressIndicator()),
-              errorWidget: (context, url, error) => const Center(child: Icon(Icons.broken_image, color: Colors.grey, size: 48)),
-            ),
-          ),
-        ),
-      ),
-    ));
-  }
-
 
   Future<void> _toggleBookmark(bool isCurrentlyBookmarked) async {
     final uid = AuthService.currentUser?.uid;
