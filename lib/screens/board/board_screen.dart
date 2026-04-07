@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -349,7 +350,11 @@ class PostCard extends StatelessWidget {
     final dislikeCount = data['dislikeCount'] is int
         ? data['dislikeCount'] as int
         : (rawDislikes is int ? rawDislikes : (rawDislikes is Map ? rawDislikes.length : 0));
-    final hasImages = data['imageUrls'] != null && (data['imageUrls'] as List).isNotEmpty;
+    final imageUrls = (data['imageUrls'] is List)
+        ? (data['imageUrls'] as List).cast<String>()
+        : const <String>[];
+    final hasImages = imageUrls.isNotEmpty;
+    final firstImage = hasImages ? imageUrls.first : null;
     final hasPoll = data['pollOptions'] != null && (data['pollOptions'] as List).isNotEmpty;
     final createdAt = data['createdAt'] as Timestamp?;
     final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
@@ -410,13 +415,65 @@ class PostCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 8),
-            Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor),
-              maxLines: 1, overflow: TextOverflow.ellipsis),
-            if (content.isNotEmpty) ...[
-              const SizedBox(height: 4),
-              Text(content, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor, height: 1.3),
-                maxLines: 1, overflow: TextOverflow.ellipsis),
-            ],
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor),
+                        maxLines: 1, overflow: TextOverflow.ellipsis),
+                      if (content.isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(content, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor, height: 1.3),
+                          maxLines: 2, overflow: TextOverflow.ellipsis),
+                      ],
+                    ],
+                  ),
+                ),
+                if (firstImage != null) ...[
+                  const SizedBox(width: 12),
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: SizedBox(
+                      width: 56,
+                      height: 56,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          CachedNetworkImage(
+                            imageUrl: firstImage,
+                            fit: BoxFit.cover,
+                            placeholder: (_, __) => Container(
+                              color: isDark ? const Color(0xFF252830) : const Color(0xFFEAEAEA),
+                            ),
+                            errorWidget: (_, __, ___) => Container(
+                              color: isDark ? const Color(0xFF252830) : const Color(0xFFEAEAEA),
+                              child: const Icon(Icons.broken_image, size: 18, color: Colors.grey),
+                            ),
+                          ),
+                          if (imageUrls.length > 1)
+                            Positioned(
+                              right: 2,
+                              bottom: 2,
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+                                decoration: BoxDecoration(
+                                  color: Colors.black54,
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text('+${imageUrls.length - 1}',
+                                  style: const TextStyle(color: Colors.white, fontSize: 9, fontWeight: FontWeight.w600)),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
             const SizedBox(height: 8),
             Row(
               children: [

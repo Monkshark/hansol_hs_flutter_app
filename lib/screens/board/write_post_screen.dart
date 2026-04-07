@@ -495,14 +495,21 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
   Future<File?> _compressImage(File file) async {
     final dir = await getTemporaryDirectory();
-    final targetPath = p.join(dir.path, 'compressed_${DateTime.now().millisecondsSinceEpoch}_${p.basename(file.path)}');
+    // 항상 .jpg 확장자로 강제 (HEIC 등 호환성 문제 회피)
+    final targetPath = p.join(
+      dir.path,
+      'compressed_${DateTime.now().millisecondsSinceEpoch}_${p.basenameWithoutExtension(file.path)}.jpg',
+    );
 
+    // minWidth만 지정하여 종횡비 유지 (minHeight 지정 시 portrait 사진이 왜곡됨)
+    // keepExif: false → GPS/카메라 정보 제거 (개인정보 보호)
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
-      minWidth: 640,
-      minHeight: 640,
+      minWidth: 1080,
       quality: 80,
+      format: CompressFormat.jpeg,
+      keepExif: false,
     );
 
     return result != null ? File(result.path) : null;
