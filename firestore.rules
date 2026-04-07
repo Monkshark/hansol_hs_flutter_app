@@ -25,17 +25,17 @@ service cloud.firestore {
     // posts 인터랙션 필드 (작성자 외에 변경 가능)
     function isInteractionUpdate() {
       return changedKeys().hasOnly(
-        ['likes', 'dislikes', 'pollVoters', 'commentCount', 'anonymousMapping', 'anonymousCount', 'bookmarkedBy']
+        ['likes', 'dislikes', 'likeCount', 'dislikeCount', 'pollVoters', 'commentCount', 'anonymousMapping', 'anonymousCount', 'bookmarkedBy']
       );
     }
 
-    // 좋아요/싫어요 카운터 증감 검증 (-1 ~ +1)
+    // 카운터 증감 검증 (-1 ~ +1, 기존 필드 없을 시 0으로 간주)
     function validCounterDelta(field) {
       return !(field in changedKeys()) || (
         request.resource.data[field] is int &&
         request.resource.data[field] >= 0 &&
-        request.resource.data[field] - resource.data[field] >= -1 &&
-        request.resource.data[field] - resource.data[field] <= 1
+        request.resource.data[field] - resource.data.get(field, 0) >= -1 &&
+        request.resource.data[field] - resource.data.get(field, 0) <= 1
       );
     }
 
@@ -83,8 +83,8 @@ service cloud.firestore {
         request.auth.uid == resource.data.authorUid ||
         (
           isInteractionUpdate() &&
-          validCounterDelta('likes') &&
-          validCounterDelta('dislikes') &&
+          validCounterDelta('likeCount') &&
+          validCounterDelta('dislikeCount') &&
           validCounterDelta('commentCount')
         )
       );

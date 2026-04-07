@@ -668,10 +668,17 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final data = snap.data();
     if (data == null) return;
     final updates = <String, dynamic>{};
-    if (data['likes'] == null) updates['likes'] = {};
-    if (data['dislikes'] == null) updates['dislikes'] = {};
-    if (data['likes'] is int) updates['likes'] = {};
-    if (data['dislikes'] is int) updates['dislikes'] = {};
+    if (data['likes'] == null || data['likes'] is int) updates['likes'] = {};
+    if (data['dislikes'] == null || data['dislikes'] is int) updates['dislikes'] = {};
+    // 비정규화 카운터: 인기글 정렬용
+    if (data['likeCount'] is! int) {
+      final raw = data['likes'];
+      updates['likeCount'] = raw is Map ? raw.length : 0;
+    }
+    if (data['dislikeCount'] is! int) {
+      final raw = data['dislikes'];
+      updates['dislikeCount'] = raw is Map ? raw.length : 0;
+    }
     if (updates.isNotEmpty) await _postRef.update(updates);
   }
 
@@ -683,10 +690,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     await _ensureLikesMap();
     final uid = AuthService.currentUser!.uid;
     if (hasLiked) {
-      await _postRef.update({'likes.$uid': FieldValue.delete()});
+      await _postRef.update({
+        'likes.$uid': FieldValue.delete(),
+        'likeCount': FieldValue.increment(-1),
+      });
     } else {
-      final updates = <String, dynamic>{'likes.$uid': true};
-      if (hasDisliked) updates['dislikes.$uid'] = FieldValue.delete();
+      final updates = <String, dynamic>{
+        'likes.$uid': true,
+        'likeCount': FieldValue.increment(1),
+      };
+      if (hasDisliked) {
+        updates['dislikes.$uid'] = FieldValue.delete();
+        updates['dislikeCount'] = FieldValue.increment(-1);
+      }
       await _postRef.update(updates);
     }
   }
@@ -699,10 +715,19 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     await _ensureLikesMap();
     final uid = AuthService.currentUser!.uid;
     if (hasDisliked) {
-      await _postRef.update({'dislikes.$uid': FieldValue.delete()});
+      await _postRef.update({
+        'dislikes.$uid': FieldValue.delete(),
+        'dislikeCount': FieldValue.increment(-1),
+      });
     } else {
-      final updates = <String, dynamic>{'dislikes.$uid': true};
-      if (hasLiked) updates['likes.$uid'] = FieldValue.delete();
+      final updates = <String, dynamic>{
+        'dislikes.$uid': true,
+        'dislikeCount': FieldValue.increment(1),
+      };
+      if (hasLiked) {
+        updates['likes.$uid'] = FieldValue.delete();
+        updates['likeCount'] = FieldValue.increment(-1);
+      }
       await _postRef.update(updates);
     }
   }
