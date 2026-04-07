@@ -78,6 +78,7 @@ dev_dependencies:
   riverpod_generator: ^2.4.0
   custom_lint: ^0.7.3
   riverpod_lint: ^2.6.1
+  fake_cloud_firestore: ^3.1.0
 
 dependency_overrides:
   analyzer_plugin: ^0.13.0
