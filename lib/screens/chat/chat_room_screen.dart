@@ -1,7 +1,14 @@
+import 'dart:io';
+
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 /// 1:1 채팅방 화면
 ///
@@ -28,6 +35,7 @@ class ChatRoomScreen extends StatefulWidget {
 class _ChatRoomScreenState extends State<ChatRoomScreen> {
   final _controller = TextEditingController();
   final _scrollController = ScrollController();
+  bool _uploadingImage = false;
 
   @override
   void initState() {
@@ -179,6 +187,25 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     await chatRef.update({'lastMessage': '삭제된 메시지입니다.'});
   }
 
+  void _showImageViewer(String url) {
+    Navigator.of(context).push(MaterialPageRoute(
+      fullscreenDialog: true,
+      builder: (_) => Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          foregroundColor: Colors.white,
+          elevation: 0,
+        ),
+        body: Center(
+          child: InteractiveViewer(
+            child: CachedNetworkImage(imageUrl: url, fit: BoxFit.contain),
+          ),
+        ),
+      ),
+    ));
+  }
+
   Future<void> _sendMessage() async {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
@@ -196,6 +223,58 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       'lastMessage': text, 'lastMessageAt': FieldValue.serverTimestamp(),
       'unreadCount.${widget.otherUid}': FieldValue.increment(1),
     });
+  }
+
+  /// 갤러리에서 사진 1장 선택 → 압축 → Storage 업로드 → 메시지 전송
+  Future<void> _sendImage() async {
+    if (_uploadingImage) return;
+    final picker = ImagePicker();
+    final picked = await picker.pickImage(source: ImageSource.gallery, imageQuality: 85);
+    if (picked == null) return;
+
+    final uid = AuthService.currentUser?.uid;
+    if (uid == null) return;
+
+    setState(() => _uploadingImage = true);
+    try {
+      // 압축 (긴 변 1280px, 품질 80)
+      final tempDir = await getTemporaryDirectory();
+      final targetPath =
+          '${tempDir.path}/chat_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final compressed = await FlutterImageCompress.compressAndGetFile(
+        picked.path, targetPath,
+        quality: 80, minWidth: 1280, minHeight: 1280,
+      );
+      final fileToUpload = compressed != null ? File(compressed.path) : File(picked.path);
+
+      // 업로드
+      final ref = FirebaseStorage.instance.ref(
+        'chats/${widget.chatId}/${DateTime.now().millisecondsSinceEpoch}_$uid.jpg',
+      );
+      await ref.putFile(fileToUpload);
+      final url = await ref.getDownloadURL();
+
+      // Firestore 메시지
+      final profile = await AuthService.getCachedProfile();
+      final name = profile?.displayName ?? '';
+      final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
+      await chatRef.collection('messages').add({
+        'content': '', 'imageUrl': url, 'senderUid': uid, 'senderName': name,
+        'createdAt': FieldValue.serverTimestamp(), 'deletedFor': [],
+      });
+      await chatRef.update({
+        'lastMessage': '[사진]', 'lastMessageAt': FieldValue.serverTimestamp(),
+        'unreadCount.${widget.otherUid}': FieldValue.increment(1),
+      });
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('이미지 전송에 실패했습니다')),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _uploadingImage = false);
+    }
   }
 
   @override
@@ -255,6 +334,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
                         final isMe = data['senderUid'] == uid;
                         final content = data['content'] ?? '';
+                        final imageUrl = data['imageUrl']?.toString();
+                        final hasImage = imageUrl != null && imageUrl.isNotEmpty;
                         final isDeleted = data['deleted'] == true;
                         final createdAt = data['createdAt'] as Timestamp?;
                         final timeStr = createdAt != null
@@ -276,22 +357,52 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                   ]),
                                   const SizedBox(width: 6),
                                 ],
-                                Container(
-                                  constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: isDeleted
-                                        ? (isDark ? const Color(0xFF1A1C22) : const Color(0xFFE8E8E8))
-                                        : isMe ? AppColors.theme.primaryColor
-                                            : (isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0)),
+                                if (hasImage && !isDeleted)
+                                  ClipRRect(
                                     borderRadius: BorderRadius.only(
-                                      topLeft: const Radius.circular(16), topRight: const Radius.circular(16),
-                                      bottomLeft: Radius.circular(isMe ? 16 : 4), bottomRight: Radius.circular(isMe ? 4 : 16)),
+                                      topLeft: const Radius.circular(16),
+                                      topRight: const Radius.circular(16),
+                                      bottomLeft: Radius.circular(isMe ? 16 : 4),
+                                      bottomRight: Radius.circular(isMe ? 4 : 16),
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () => _showImageViewer(imageUrl),
+                                      child: CachedNetworkImage(
+                                        imageUrl: imageUrl,
+                                        width: MediaQuery.of(context).size.width * 0.55,
+                                        fit: BoxFit.cover,
+                                        placeholder: (_, __) => Container(
+                                          width: MediaQuery.of(context).size.width * 0.55,
+                                          height: 180,
+                                          color: isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0),
+                                          child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                                        ),
+                                        errorWidget: (_, __, ___) => Container(
+                                          width: MediaQuery.of(context).size.width * 0.55,
+                                          height: 100,
+                                          color: isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0),
+                                          child: const Icon(Icons.broken_image),
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                else
+                                  Container(
+                                    constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
+                                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: isDeleted
+                                          ? (isDark ? const Color(0xFF1A1C22) : const Color(0xFFE8E8E8))
+                                          : isMe ? AppColors.theme.primaryColor
+                                              : (isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0)),
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: const Radius.circular(16), topRight: const Radius.circular(16),
+                                        bottomLeft: Radius.circular(isMe ? 16 : 4), bottomRight: Radius.circular(isMe ? 4 : 16)),
+                                    ),
+                                    child: Text(content, style: TextStyle(fontSize: 14,
+                                      fontStyle: isDeleted ? FontStyle.italic : FontStyle.normal,
+                                      color: isDeleted ? AppColors.theme.darkGreyColor : isMe ? Colors.white : textColor)),
                                   ),
-                                  child: Text(content, style: TextStyle(fontSize: 14,
-                                    fontStyle: isDeleted ? FontStyle.italic : FontStyle.normal,
-                                    color: isDeleted ? AppColors.theme.darkGreyColor : isMe ? Colors.white : textColor)),
-                                ),
                                 if (!isMe) ...[
                                   const SizedBox(width: 6),
                                   Text(timeStr, style: TextStyle(fontSize: 10, color: AppColors.theme.darkGreyColor)),
@@ -313,6 +424,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               color: isDark ? const Color(0xFF1E2028) : Colors.white,
               border: Border(top: BorderSide(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA)))),
             child: Row(children: [
+              IconButton(
+                onPressed: _uploadingImage ? null : _sendImage,
+                icon: _uploadingImage
+                    ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
+                    : Icon(Icons.image_outlined, color: AppColors.theme.primaryColor),
+                tooltip: '사진 보내기',
+              ),
               Expanded(child: TextField(
                 controller: _controller,
                 style: TextStyle(fontSize: 14, color: textColor),

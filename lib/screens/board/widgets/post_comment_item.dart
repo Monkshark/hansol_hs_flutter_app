@@ -39,7 +39,6 @@ class PostCommentItem extends StatelessWidget {
         ? '익명 ($realName)'
         : (data['authorName'] ?? '익명');
     final content = data['content'] ?? '';
-    final replyToName = data['replyToName'] as String?;
     final createdAt = data['createdAt'] as Timestamp?;
     final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
 
@@ -92,15 +91,44 @@ class PostCommentItem extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            if (replyToName != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text('@$replyToName', style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
-              ),
-            Text(content, style: TextStyle(fontSize: 14, color: textColor, height: 1.4)),
+            _buildMentionText(content, textColor),
           ],
         ),
+      ),
+    );
+  }
+
+  /// 댓글 본문 텍스트에서 `@nickname` 패턴을 primary color로 강조
+  /// (한글/영문/숫자/언더바 + 익명숫자 형식 지원, 공백/마침표 등에서 종료)
+  Widget _buildMentionText(String content, Color? textColor) {
+    final pattern = RegExp(r'@([\w가-힣]+)');
+    final matches = pattern.allMatches(content);
+    if (matches.isEmpty) {
+      return Text(content,
+          style: TextStyle(fontSize: 14, color: textColor, height: 1.4));
+    }
+    final spans = <TextSpan>[];
+    int last = 0;
+    for (final m in matches) {
+      if (m.start > last) {
+        spans.add(TextSpan(text: content.substring(last, m.start)));
+      }
+      spans.add(TextSpan(
+        text: m.group(0),
+        style: TextStyle(
+          color: AppColors.theme.primaryColor,
+          fontWeight: FontWeight.w600,
+        ),
+      ));
+      last = m.end;
+    }
+    if (last < content.length) {
+      spans.add(TextSpan(text: content.substring(last)));
+    }
+    return RichText(
+      text: TextSpan(
+        style: TextStyle(fontSize: 14, color: textColor, height: 1.4),
+        children: spans,
       ),
     );
   }

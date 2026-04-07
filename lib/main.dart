@@ -1,8 +1,10 @@
 import 'dart:async';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:flutter/material.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:get_it/get_it.dart';
@@ -47,12 +49,15 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSd
 /// - 앱 리프레시 및 업데이트 체크 지원
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 final ValueNotifier<int> appRefreshNotifier = ValueNotifier(0);
+final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final StreamController<String?> notificationStream =
     StreamController<String?>.broadcast();
 
 void onNotificationTap(NotificationResponse notificationResponse) {
   notificationStream.add(notificationResponse.payload);
+  // FCM 포그라운드 로컬 알림 탭 → 딥링크 라우팅
+  FcmService.handleLocalNotificationTap(notificationResponse.payload);
 }
 
 Future<void> main() async {
@@ -62,11 +67,35 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
   try {
-    await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    // google-services.json 자동 초기화와 중복 호출되는 경우 무시
+    if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+    }
   } catch (e, st) {
     // Firebase 초기화 실패는 치명적이지만 앱 자체는 실행되어야 하므로
     // 디버그 로그 + 앞으로의 Crashlytics 호출은 무시되도록 둠
     log('Firebase init failed: $e\n$st', name: 'main');
+  }
+
+  // Firebase App Check: Android만 Play Integrity로 enforce
+  // (iOS는 Apple Developer 계정 등록 후 appAttest로 전환 예정)
+  // 개발 빌드는 debug provider 사용. 콘솔에서 enforce 활성화 필요.
+  try {
+    await FirebaseAppCheck.instance.activate(
+      androidProvider: const bool.fromEnvironment('dart.vm.product')
+          ? AndroidProvider.playIntegrity
+          : AndroidProvider.debug,
+      appleProvider: AppleProvider.debug,
+    );
+  } catch (e) {
+    log('AppCheck activate failed: $e', name: 'main');
+  }
+
+  // Firebase Performance Monitoring (자동 HTTP/네트워크 트레이스)
+  try {
+    await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
+  } catch (e) {
+    log('Performance enable failed: $e', name: 'main');
   }
 
   FlutterError.onError = (details) {
@@ -246,6 +275,7 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
   Widget build(BuildContext context) {
     final mode = ref.watch(themeProvider);
     return MaterialApp(
+      navigatorKey: rootNavigatorKey,
       debugShowCheckedModeBanner: false,
       theme: _lightTheme,
       darkTheme: _darkTheme,
