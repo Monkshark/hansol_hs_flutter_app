@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'dart:developer';
+import 'package:hansol_high_school/data/secure_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// 과목별 점수 데이터 모델
@@ -160,8 +160,14 @@ class GradeManager {
   }
 
   static Future<List<Exam>> loadExams() async {
+    // SharedPreferences → SecureStorage 일회성 마이그레이션
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_examsKey);
+    await SecureStorageService.migrateFromPlain(
+      key: SecureStorageService.keyGradeExams,
+      oldValue: prefs.getString(_examsKey),
+      onMigrated: () async => prefs.remove(_examsKey),
+    );
+    final json = await SecureStorageService.read(SecureStorageService.keyGradeExams);
     if (json == null) return [];
     final list = jsonDecode(json) as List<dynamic>;
     return list.map((e) => Exam.fromJson(e)).toList()
@@ -169,8 +175,10 @@ class GradeManager {
   }
 
   static Future<void> saveExams(List<Exam> exams) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_examsKey, jsonEncode(exams.map((e) => e.toJson()).toList()));
+    await SecureStorageService.write(
+      SecureStorageService.keyGradeExams,
+      jsonEncode(exams.map((e) => e.toJson()).toList()),
+    );
   }
 
   static Future<void> addExam(Exam exam) async {
@@ -197,28 +205,36 @@ class GradeManager {
   /// 과목별 목표 등급
   static Future<Map<String, double>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_goalsKey);
+    await SecureStorageService.migrateFromPlain(
+      key: SecureStorageService.keyGradeGoals,
+      oldValue: prefs.getString(_goalsKey),
+      onMigrated: () async => prefs.remove(_goalsKey),
+    );
+    final json = await SecureStorageService.read(SecureStorageService.keyGradeGoals);
     if (json == null) return {};
     final raw = jsonDecode(json) as Map<String, dynamic>;
     return raw.map((k, v) => MapEntry(k, (v as num).toDouble()));
   }
 
   static Future<void> saveGoals(Map<String, double> goals) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_goalsKey, jsonEncode(goals));
+    await SecureStorageService.write(SecureStorageService.keyGradeGoals, jsonEncode(goals));
   }
 
   /// 정시 목표 (백분위 기준, 정수)
   static Future<Map<String, double>> loadJeongsiGoals() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_goalsJeongsiKey);
+    await SecureStorageService.migrateFromPlain(
+      key: SecureStorageService.keyGradeJeongsiGoals,
+      oldValue: prefs.getString(_goalsJeongsiKey),
+      onMigrated: () async => prefs.remove(_goalsJeongsiKey),
+    );
+    final json = await SecureStorageService.read(SecureStorageService.keyGradeJeongsiGoals);
     if (json == null) return {};
     final raw = jsonDecode(json) as Map<String, dynamic>;
     return raw.map((k, v) => MapEntry(k, (v as num).toDouble()));
   }
 
   static Future<void> saveJeongsiGoals(Map<String, double> goals) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_goalsJeongsiKey, jsonEncode(goals));
+    await SecureStorageService.write(SecureStorageService.keyGradeJeongsiGoals, jsonEncode(goals));
   }
 }

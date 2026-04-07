@@ -2,9 +2,15 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'helpers/secure_storage_mock.dart';
+
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final secureStore = setupSecureStorageMock();
+
   setUp(() async {
     SharedPreferences.setMockInitialValues({});
+    secureStore.clear();
   });
 
   group('GradeManager.percentileToRank', () {
