@@ -39,6 +39,7 @@ class _BoardScreenState extends State<BoardScreen> {
   final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   final ScrollController _categoryScrollController = ScrollController();
+  late final PageController _pageController = PageController(initialPage: _selectedIndex);
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _allDocs = [];
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _searchResults = [];
   DocumentSnapshot? _lastDoc;
@@ -62,6 +63,7 @@ class _BoardScreenState extends State<BoardScreen> {
     _searchController.dispose();
     _scrollController.dispose();
     _categoryScrollController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -173,33 +175,48 @@ class _BoardScreenState extends State<BoardScreen> {
 
   Query<Map<String, dynamic>> _baseQuery() {
     Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('posts');
-    if (_selectedCategory == '인기글') {
-      // 인기글: likeCount > 0 (인덱스 prefix 매칭 + 좋아요 0개 글 제외)
-      q = q
-          .where('likeCount', isGreaterThan: 0)
-          .orderBy('likeCount', descending: true)
-          .orderBy('createdAt', descending: true);
-    } else {
-      q = q.orderBy('createdAt', descending: true);
-      if (_selectedCategory != '전체') {
-        q = q.where('category', isEqualTo: _selectedCategory);
-      }
+    // 인기글은 client-side에서 likeCount/likes로 정렬·필터 (legacy 게시글에 likeCount 필드가
+    // 없을 수 있어서 server-side where 필터를 쓰면 누락됨)
+    q = q.orderBy('createdAt', descending: true);
+    if (_selectedCategory != '전체' && _selectedCategory != '인기글') {
+      q = q.where('category', isEqualTo: _selectedCategory);
     }
     return q;
+  }
+
+  /// likeCount(int) 우선, 없으면 likes Map size로 fallback
+  int _docLikeCount(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
+    final d = doc.data();
+    if (d['likeCount'] is int) return d['likeCount'] as int;
+    final raw = d['likes'];
+    if (raw is Map) return raw.length;
+    if (raw is int) return raw;
+    return 0;
   }
 
   Future<void> _loadPosts() async {
     setState(() { _initialLoading = true; _allDocs = []; _lastDoc = null; _hasMore = true; });
 
-    final snap = await _baseQuery().limit(_pageSize).get();
-    if (mounted) {
-      setState(() {
-        _allDocs = snap.docs;
-        _lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
-        _hasMore = snap.docs.length == _pageSize;
-        _initialLoading = false;
-      });
+    // 인기글은 createdAt desc로 더 많이 가져온 뒤 client-side filter+sort
+    final isPopular = _selectedCategory == '인기글';
+    final fetchLimit = isPopular ? 100 : _pageSize;
+
+    final snap = await _baseQuery().limit(fetchLimit).get();
+    if (!mounted) return;
+
+    var docs = snap.docs;
+    if (isPopular) {
+      docs = docs.where((d) => _docLikeCount(d) > 0).toList()
+        ..sort((a, b) => _docLikeCount(b).compareTo(_docLikeCount(a)));
     }
+
+    setState(() {
+      _allDocs = docs;
+      _lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
+      // 인기글은 client-side 정렬이라 page 추가 시 정렬이 깨지므로 페이지네이션 비활성
+      _hasMore = !isPopular && snap.docs.length == _pageSize;
+      _initialLoading = false;
+    });
   }
 
   Future<void> _loadMorePosts() async {
@@ -222,24 +239,7 @@ class _BoardScreenState extends State<BoardScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
 
-    return GestureDetector(
-      // 좌우 swipe → 카테고리 좌우 전환 (검색 모드일 땐 비활성)
-      onHorizontalDragEnd: (details) {
-        if (_isSearching) return;
-        final v = details.primaryVelocity ?? 0;
-        if (v > 300 && _selectedIndex > 0) {
-          // 오른쪽 swipe → 이전 카테고리
-          setState(() => _selectedIndex--);
-          _scrollCategoryIntoView();
-          _loadPosts();
-        } else if (v < -300 && _selectedIndex < _categories.length - 1) {
-          // 왼쪽 swipe → 다음 카테고리
-          setState(() => _selectedIndex++);
-          _scrollCategoryIntoView();
-          _loadPosts();
-        }
-      },
-      child: Scaffold(
+    return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -307,9 +307,12 @@ class _BoardScreenState extends State<BoardScreen> {
                   final selected = _selectedIndex == index;
                   return GestureDetector(
                     onTap: () {
-                      setState(() => _selectedIndex = index);
-                      _scrollCategoryIntoView();
-                      _loadPosts();
+                      if (_selectedIndex == index) return;
+                      _pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 280),
+                        curve: Curves.easeOut,
+                      );
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -336,82 +339,91 @@ class _BoardScreenState extends State<BoardScreen> {
             const SizedBox(height: 8),
           ],
           Expanded(
-            child: Builder(
-              builder: (context) {
-                if (_isSearching) {
-                  return _buildSearchBody(context);
-                }
-
-                if (_initialLoading) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs);
-
-                final pinned = docs.where((doc) => doc.data()['isPinned'] == true).toList();
-                final nonPinned = docs.where((doc) => doc.data()['isPinned'] != true).toList();
-
-                pinned.sort((a, b) {
-                  final aTime = a.data()['pinnedAt'] as Timestamp?;
-                  final bTime = b.data()['pinnedAt'] as Timestamp?;
-                  if (aTime == null && bTime == null) return 0;
-                  if (aTime == null) return 1;
-                  if (bTime == null) return -1;
-                  return bTime.compareTo(aTime);
-                });
-
-                docs = [...pinned, ...nonPinned];
-
-                if (docs.isEmpty) {
-                  return Center(
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.article_outlined,
-                          size: 40, color: AppColors.theme.darkGreyColor),
-                        const SizedBox(height: 8),
-                        Text('게시글이 없습니다',
-                          style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                      ],
-                    ),
-                  );
-                }
-
-                return RefreshIndicator(
-                  onRefresh: _loadPosts,
-                  child: ListView.separated(
-                    controller: _scrollController,
-                    padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 80),
-                    itemCount: docs.length + (_loadingMore ? 1 : 0),
-                    separatorBuilder: (_, __) => const SizedBox(height: 8),
-                    itemBuilder: (context, index) {
-                      if (index == docs.length) {
-                        return const Padding(
-                          padding: EdgeInsets.all(16),
-                          child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-                        );
-                      }
-                      return PostCard(
-                        doc: docs[index],
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => PostDetailScreen(postId: docs[index].id),
-                            ),
-                          );
-                          if (mounted) _loadPosts();
-                        },
-                      );
+            child: _isSearching
+                ? _buildSearchBody(context)
+                : PageView.builder(
+                    controller: _pageController,
+                    itemCount: _categories.length,
+                    onPageChanged: (i) {
+                      setState(() => _selectedIndex = i);
+                      _scrollCategoryIntoView();
+                      _loadPosts();
                     },
+                    itemBuilder: (context, index) => _buildCategoryBody(context, index),
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
-    ),
+    );
+  }
+
+  /// PageView 각 페이지 body. 현재 선택된 카테고리 page만 실제 데이터 렌더링,
+  /// 인접 page는 동일 데이터를 임시로 보여주어 swipe 중 빈 화면 방지 (onPageChanged 후 reload).
+  Widget _buildCategoryBody(BuildContext context, int pageIndex) {
+    if (_initialLoading && pageIndex == _selectedIndex) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs);
+
+    final pinned = docs.where((doc) => doc.data()['isPinned'] == true).toList();
+    final nonPinned = docs.where((doc) => doc.data()['isPinned'] != true).toList();
+
+    pinned.sort((a, b) {
+      final aTime = a.data()['pinnedAt'] as Timestamp?;
+      final bTime = b.data()['pinnedAt'] as Timestamp?;
+      if (aTime == null && bTime == null) return 0;
+      if (aTime == null) return 1;
+      if (bTime == null) return -1;
+      return bTime.compareTo(aTime);
+    });
+
+    docs = [...pinned, ...nonPinned];
+
+    if (docs.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.article_outlined,
+                size: 40, color: AppColors.theme.darkGreyColor),
+            const SizedBox(height: 8),
+            Text('게시글이 없습니다',
+                style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          ],
+        ),
+      );
+    }
+
+    final isCurrent = pageIndex == _selectedIndex;
+    return RefreshIndicator(
+      onRefresh: _loadPosts,
+      child: ListView.separated(
+        controller: isCurrent ? _scrollController : null,
+        padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 80),
+        itemCount: docs.length + (_loadingMore && isCurrent ? 1 : 0),
+        separatorBuilder: (_, __) => const SizedBox(height: 8),
+        itemBuilder: (context, index) {
+          if (index == docs.length) {
+            return const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+            );
+          }
+          return PostCard(
+            doc: docs[index],
+            onTap: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PostDetailScreen(postId: docs[index].id),
+                ),
+              );
+              if (mounted) _loadPosts();
+            },
+          );
+        },
+      ),
     );
   }
 
