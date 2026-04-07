@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
@@ -312,6 +313,13 @@ class AuthService {
   static UserProfile? get cachedProfile => _cachedProfile;
   static UserProfile? _cachedProfile;
   static DateTime? _cacheTime;
+
+  /// 테스트 전용: cachedProfile을 직접 주입 (예: golden test에서 manager view 검증)
+  @visibleForTesting
+  static void setCachedProfileForTest(UserProfile? profile) {
+    _cachedProfile = profile;
+    _cacheTime = profile == null ? null : DateTime.now();
+  }
 
   static Future<UserProfile?> getCachedProfile() async {
     if (_cachedProfile != null && _cacheTime != null &&
