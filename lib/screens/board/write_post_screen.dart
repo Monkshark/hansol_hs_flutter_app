@@ -6,9 +6,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/write_event_form_section.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/write_image_section.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/write_poll_form_section.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -317,7 +319,19 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
             if (_images.isNotEmpty || !_isEdit) ...[
               const SizedBox(height: 16),
-              _buildImageSection(fillColor),
+              WriteImageSection(
+                images: _images,
+                fillColor: fillColor,
+                onPick: _pickImages,
+                onRemove: (index) => setState(() => _images.removeAt(index)),
+                onReorder: (oldIndex, newIndex) {
+                  setState(() {
+                    if (newIndex > oldIndex) newIndex--;
+                    final item = _images.removeAt(oldIndex);
+                    _images.insert(newIndex, item);
+                  });
+                },
+              ),
             ],
 
             if (_category == '정보공유') ...[
@@ -347,7 +361,17 @@ class _WritePostScreenState extends State<WritePostScreen> {
               ),
               if (_attachEvent) ...[
                 const SizedBox(height: 12),
-                _buildEventForm(isDark, textColor, fillColor),
+                WriteEventFormSection(
+                  eventContentController: _eventContentController,
+                  eventDate: _eventDate,
+                  eventStartTime: _eventStartTime,
+                  eventEndTime: _eventEndTime,
+                  onPickDate: _pickDate,
+                  onPickTime: _pickTime,
+                  isDark: isDark,
+                  textColor: textColor,
+                  fillColor: fillColor,
+                ),
               ],
             ],
 
@@ -377,7 +401,17 @@ class _WritePostScreenState extends State<WritePostScreen> {
             ),
             if (_attachPoll) ...[
               const SizedBox(height: 12),
-              _buildPollForm(isDark, textColor, fillColor),
+              WritePollFormSection(
+                pollControllers: _pollControllers,
+                isDark: isDark,
+                textColor: textColor,
+                fillColor: fillColor,
+                onAddOption: () => setState(() => _pollControllers.add(TextEditingController())),
+                onRemoveOption: (i) => setState(() {
+                  _pollControllers[i].dispose();
+                  _pollControllers.removeAt(i);
+                }),
+              ),
             ],
 
             const SizedBox(height: 16),
@@ -442,215 +476,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
     );
   }
 
-  Widget _buildEventForm(bool isDark, Color? textColor, Color fillColor) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2028) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.theme.tertiaryColor.withAlpha(60)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            controller: _eventContentController,
-            style: TextStyle(fontSize: 14, color: textColor),
-            decoration: InputDecoration(
-              hintText: '일정 내용 (예: 중간고사, 체육대회)',
-              hintStyle: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
-              filled: true,
-              fillColor: fillColor,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
-              ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-            ),
-          ),
-          const SizedBox(height: 10),
-          GestureDetector(
-            onTap: _pickDate,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: fillColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.calendar_today, size: 16, color: AppColors.theme.darkGreyColor),
-                  const SizedBox(width: 8),
-                  Text(
-                    _eventDate != null
-                        ? DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(_eventDate!)
-                        : '날짜를 선택하세요',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: _eventDate != null ? textColor : AppColors.theme.darkGreyColor,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => _pickTime(true),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: fillColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.access_time, size: 16, color: AppColors.theme.darkGreyColor),
-                        const SizedBox(width: 8),
-                        Text(
-                          _eventStartTime != null ? _eventStartTime!.format(context) : '시작 (선택)',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: _eventStartTime != null ? textColor : AppColors.theme.darkGreyColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text('~', style: TextStyle(color: AppColors.theme.darkGreyColor)),
-              ),
-              Expanded(
-                child: GestureDetector(
-                  onTap: () => _pickTime(false),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-                    decoration: BoxDecoration(
-                      color: fillColor,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Row(
-                      children: [
-                        Icon(Icons.access_time, size: 16, color: AppColors.theme.darkGreyColor),
-                        const SizedBox(width: 8),
-                        Text(
-                          _eventEndTime != null ? _eventEndTime!.format(context) : '종료 (선택)',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: _eventEndTime != null ? textColor : AppColors.theme.darkGreyColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildImageSection(Color fillColor) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (_images.isNotEmpty)
-          SizedBox(
-            height: 100,
-            child: ReorderableListView.builder(
-              scrollDirection: Axis.horizontal,
-              itemCount: _images.length,
-              onReorder: (oldIndex, newIndex) {
-                setState(() {
-                  if (newIndex > oldIndex) newIndex--;
-                  final item = _images.removeAt(oldIndex);
-                  _images.insert(newIndex, item);
-                });
-              },
-              proxyDecorator: (child, index, animation) => Material(
-                color: Colors.transparent,
-                elevation: 4,
-                borderRadius: BorderRadius.circular(10),
-                child: child,
-              ),
-              itemBuilder: (context, index) {
-                return Padding(
-                  key: ValueKey(_images[index].path),
-                  padding: EdgeInsets.only(right: index < _images.length - 1 ? 8 : 0),
-                  child: Stack(
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.file(_images[index], width: 100, height: 100, fit: BoxFit.cover),
-                      ),
-                      Positioned(
-                        top: 4, right: 4,
-                        child: GestureDetector(
-                          onTap: () => setState(() => _images.removeAt(index)),
-                          child: Container(
-                            width: 22, height: 22,
-                            decoration: const BoxDecoration(
-                              color: Colors.black54,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.close, size: 14, color: Colors.white),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: 4, left: 4,
-                        child: Container(
-                          width: 20, height: 20,
-                          decoration: BoxDecoration(
-                            color: Colors.black54,
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Center(child: Text('${index + 1}',
-                            style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.w700))),
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        if (_images.length < 5) ...[
-          if (_images.isNotEmpty) const SizedBox(height: 8),
-          GestureDetector(
-            onTap: _pickImages,
-            child: Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              decoration: BoxDecoration(
-                color: fillColor,
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.theme.darkGreyColor),
-                  const SizedBox(width: 6),
-                  Text('사진 추가 (${_images.length}/5)',
-                    style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
-                ],
-              ),
-            ),
-          ),
-          ],
-        ],
-      );
-  }
-
   Future<void> _pickImages() async {
     final picker = ImagePicker();
     final remaining = 5 - _images.length;
@@ -693,92 +518,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
     }
 
     return urls;
-  }
-
-  Widget _buildPollForm(bool isDark, Color? textColor, Color fillColor) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2028) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.theme.secondaryColor.withAlpha(60)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          ...List.generate(_pollControllers.length, (i) {
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: Row(
-                children: [
-                  Container(
-                    width: 24, height: 24,
-                    decoration: BoxDecoration(
-                      color: AppColors.theme.secondaryColor.withAlpha(20),
-                      borderRadius: BorderRadius.circular(6),
-                    ),
-                    child: Center(child: Text(
-                      '${i + 1}',
-                      style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.theme.secondaryColor),
-                    )),
-                  ),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: TextField(
-                      controller: _pollControllers[i],
-                      style: TextStyle(fontSize: 14, color: textColor),
-                      decoration: InputDecoration(
-                        hintText: '선택지 ${i + 1}',
-                        hintStyle: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
-                        filled: true,
-                        fillColor: fillColor,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
-                        ),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                      ),
-                    ),
-                  ),
-                  if (i >= 2)
-                    GestureDetector(
-                      onTap: () => setState(() {
-                        _pollControllers[i].dispose();
-                        _pollControllers.removeAt(i);
-                      }),
-                      child: Padding(
-                        padding: const EdgeInsets.only(left: 6),
-                        child: Icon(Icons.close, size: 18, color: AppColors.theme.darkGreyColor),
-                      ),
-                    ),
-                ],
-              ),
-            );
-          }),
-          if (_pollControllers.length < 6)
-            GestureDetector(
-              onTap: () => setState(() => _pollControllers.add(TextEditingController())),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-                decoration: BoxDecoration(
-                  color: fillColor,
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.add, size: 16, color: AppColors.theme.secondaryColor),
-                    const SizedBox(width: 4),
-                    Text('선택지 추가', style: TextStyle(
-                      fontSize: 13, color: AppColors.theme.secondaryColor, fontWeight: FontWeight.w600)),
-                  ],
-                ),
-              ),
-            ),
-        ],
-      ),
-    );
   }
 
   Future<void> _pickDate() async {

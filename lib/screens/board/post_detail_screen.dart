@@ -6,6 +6,10 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
+import 'package:hansol_high_school/screens/board/widgets/event_attach_card.dart';
+import 'package:hansol_high_school/screens/board/widgets/poll_card.dart';
+import 'package:hansol_high_school/screens/board/widgets/post_comment_item.dart';
+import 'package:hansol_high_school/screens/board/widgets/vote_button.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -220,7 +224,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                     if (hasPoll) ...[
                       const SizedBox(height: 20),
-                      _PollCard(
+                      PollCard(
                         options: pollOptions,
                         voters: pollVoters,
                         myVote: myVote as int?,
@@ -230,7 +234,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
                     if (hasEvent) ...[
                       const SizedBox(height: 20),
-                      _EventAttachCard(
+                      EventAttachCard(
                         eventDate: eventDate!,
                         eventContent: eventContent,
                         startTime: eventStartTime,
@@ -243,7 +247,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        _VoteButton(
+                        VoteButton(
                           icon: Icons.thumb_up_outlined,
                           activeIcon: Icons.thumb_up,
                           count: likesCount,
@@ -252,7 +256,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           onTap: () => _toggleLike(hasLiked, hasDisliked),
                         ),
                         const SizedBox(width: 20),
-                        _VoteButton(
+                        VoteButton(
                           icon: Icons.thumb_down_outlined,
                           activeIcon: Icons.thumb_down,
                           count: dislikesCount,
@@ -936,7 +940,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     return Padding(
       padding: EdgeInsets.only(left: indent ? 32 : 0),
-      child: _CommentItem(
+      child: PostCommentItem(
         key: ValueKey(doc.id),
         data: c,
         isAuthor: canDelete,
@@ -1066,370 +1070,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         const SnackBar(content: Text('해결됨으로 표시되었습니다')),
       );
     }
-  }
-}
-
-class _EventAttachCard extends StatelessWidget {
-  final DateTime eventDate;
-  final String eventContent;
-  final int startTime;
-  final int endTime;
-  final VoidCallback onAdd;
-
-  const _EventAttachCard({
-    required this.eventDate,
-    required this.eventContent,
-    required this.startTime,
-    required this.endTime,
-    required this.onAdd,
-  });
-
-  String _formatTime(int minutes) {
-    if (minutes < 0) return '';
-    final h = minutes ~/ 60;
-    final m = minutes % 60;
-    final period = h < 12 ? '오전' : '오후';
-    final hour = h == 0 ? 12 : (h > 12 ? h - 12 : h);
-    return '$period $hour:${m.toString().padLeft(2, '0')}';
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final hasTime = startTime >= 0 && endTime >= 0;
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F6F8),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.theme.tertiaryColor.withAlpha(60)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.event, size: 18, color: AppColors.theme.tertiaryColor),
-              const SizedBox(width: 6),
-              Text('일정 공유', style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.theme.tertiaryColor)),
-            ],
-          ),
-          const SizedBox(height: 10),
-          Text(eventContent, style: TextStyle(
-            fontSize: 15, fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.bodyLarge?.color)),
-          const SizedBox(height: 4),
-          Text(
-            DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(eventDate) +
-                (hasTime ? '  ${_formatTime(startTime)} - ${_formatTime(endTime)}' : ''),
-            style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton.icon(
-              onPressed: onAdd,
-              icon: const Icon(Icons.add, size: 18),
-              label: const Text('내 일정에 추가'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.theme.tertiaryColor,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 10),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _VoteButton extends StatelessWidget {
-  final IconData icon;
-  final IconData activeIcon;
-  final int count;
-  final bool isActive;
-  final Color activeColor;
-  final VoidCallback onTap;
-
-  const _VoteButton({
-    required this.icon,
-    required this.activeIcon,
-    required this.count,
-    required this.isActive,
-    required this.activeColor,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-        decoration: BoxDecoration(
-          color: isActive ? activeColor.withAlpha(20) : Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(
-            color: isActive ? activeColor : AppColors.theme.darkGreyColor.withAlpha(80),
-          ),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              isActive ? activeIcon : icon,
-              size: 20,
-              color: isActive ? activeColor : AppColors.theme.darkGreyColor,
-            ),
-            const SizedBox(width: 6),
-            Text(
-              '$count',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: isActive ? activeColor : AppColors.theme.darkGreyColor,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _PollCard extends StatelessWidget {
-  final List<String> options;
-  final Map<String, dynamic> voters;
-  final int? myVote;
-  final Function(int) onVote;
-
-  const _PollCard({
-    required this.options,
-    required this.voters,
-    required this.myVote,
-    required this.onVote,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-    final totalVotes = voters.length;
-    final hasVoted = myVote != null;
-
-    final voteCounts = List.filled(options.length, 0);
-    for (var v in voters.values) {
-      final idx = v as int;
-      if (idx >= 0 && idx < options.length) voteCounts[idx]++;
-    }
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F6F8),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.theme.secondaryColor.withAlpha(60)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.poll, size: 18, color: AppColors.theme.secondaryColor),
-              const SizedBox(width: 6),
-              Text('투표', style: TextStyle(
-                fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.theme.secondaryColor)),
-              const Spacer(),
-              Text('$totalVotes명 참여', style: TextStyle(
-                fontSize: 12, color: AppColors.theme.darkGreyColor)),
-            ],
-          ),
-          const SizedBox(height: 12),
-          ...List.generate(options.length, (i) {
-            final count = voteCounts[i];
-            final ratio = totalVotes > 0 ? count / totalVotes : 0.0;
-            final isMyChoice = myVote == i;
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: GestureDetector(
-                onTap: hasVoted ? null : () => onVote(i),
-                child: Container(
-                  clipBehavior: Clip.antiAlias,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(10),
-                    border: Border.all(
-                      color: isMyChoice
-                          ? AppColors.theme.secondaryColor
-                          : (isDark ? const Color(0xFF3A3D45) : const Color(0xFFE0E0E0)),
-                      width: isMyChoice ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Stack(
-                    children: [
-                      if (hasVoted)
-                        FractionallySizedBox(
-                          widthFactor: ratio,
-                          child: Container(
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: isMyChoice
-                                  ? AppColors.theme.secondaryColor.withAlpha(30)
-                                  : AppColors.theme.darkGreyColor.withAlpha(15),
-                              borderRadius: BorderRadius.circular(9),
-                            ),
-                          ),
-                        ),
-                      Container(
-                        height: 44,
-                        padding: const EdgeInsets.symmetric(horizontal: 14),
-                        child: Row(
-                          children: [
-                            if (!hasVoted)
-                              Container(
-                                width: 18, height: 18,
-                                margin: const EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  border: Border.all(color: AppColors.theme.darkGreyColor),
-                                ),
-                              )
-                            else if (isMyChoice)
-                              Container(
-                                width: 18, height: 18,
-                                margin: const EdgeInsets.only(right: 10),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: AppColors.theme.secondaryColor,
-                                ),
-                                child: const Icon(Icons.check, size: 12, color: Colors.white),
-                              ),
-                            Expanded(
-                              child: Text(options[i], style: TextStyle(
-                                fontSize: 14,
-                                fontWeight: isMyChoice ? FontWeight.w600 : FontWeight.w400,
-                                color: textColor,
-                              )),
-                            ),
-                            if (hasVoted)
-                              Text('${(ratio * 100).round()}%', style: TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: isMyChoice ? AppColors.theme.secondaryColor : AppColors.theme.darkGreyColor,
-                              )),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          }),
-        ],
-      ),
-    );
-  }
-}
-
-class _CommentItem extends StatelessWidget {
-  final Map<String, dynamic> data;
-  final bool isAuthor;
-  final bool isReply;
-  final bool isPostAuthor;
-  final VoidCallback onDelete;
-  final VoidCallback onReply;
-
-  const _CommentItem({super.key, required this.data, required this.isAuthor, this.isReply = false, this.isPostAuthor = false, required this.onDelete, required this.onReply});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-    final isAnon = data['isAnonymous'] == true;
-    final isManagerView = AuthService.cachedProfile?.isManager ?? false;
-    final realName = data['authorRealName'] as String?;
-    final name = (isAnon && isManagerView && realName != null)
-        ? '익명 ($realName)'
-        : (data['authorName'] ?? '익명');
-    final content = data['content'] ?? '';
-    final replyToName = data['replyToName'] as String?;
-    final createdAt = data['createdAt'] as Timestamp?;
-    final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: isReply ? 6 : 12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isPostAuthor
-              ? (isDark ? const Color(0xFF1E2840) : const Color(0xFFEBF0FF))
-              : (isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5)),
-          borderRadius: BorderRadius.circular(12),
-          border: isReply ? Border(
-            left: BorderSide(color: AppColors.theme.primaryColor.withAlpha(100), width: 2),
-          ) : null,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(name, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: textColor)),
-                if (isPostAuthor) ...[
-                  const SizedBox(width: 4),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1),
-                    decoration: BoxDecoration(
-                      color: AppColors.theme.primaryColor.withAlpha(20),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text('글쓴이', style: TextStyle(
-                      fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.theme.primaryColor)),
-                  ),
-                ],
-                const SizedBox(width: 8),
-                Text(timeStr, style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor)),
-                const Spacer(),
-                GestureDetector(
-                  onTap: onReply,
-                  child: Padding(
-                    padding: const EdgeInsets.only(right: 8),
-                    child: Icon(Icons.reply, size: 16, color: AppColors.theme.darkGreyColor),
-                  ),
-                ),
-                if (isAuthor)
-                  GestureDetector(
-                    onTap: onDelete,
-                    child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            if (replyToName != null)
-              Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Text('@$replyToName', style: TextStyle(
-                  fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
-              ),
-            Text(content, style: TextStyle(fontSize: 14, color: textColor, height: 1.4)),
-          ],
-        ),
-      ),
-    );
-  }
-
-  String _formatTime(DateTime dt) {
-    final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return '방금';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    if (diff.inDays < 7) return '${diff.inDays}일 전';
-    return DateFormat('M/d').format(dt);
   }
 }
 

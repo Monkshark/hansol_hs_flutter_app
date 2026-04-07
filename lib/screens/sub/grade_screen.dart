@@ -1,49 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
+import 'package:hansol_high_school/providers/grade_provider.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/grade_input_screen.dart';
 import 'package:hansol_high_school/widgets/grade/grade_chart.dart';
 import 'package:intl/intl.dart';
 
-/// 성적 관리 화면
-class GradeScreen extends StatefulWidget {
+/// 성적 관리 화면 (Riverpod ConsumerStatefulWidget)
+///
+/// - 시험 목록: `examsProvider` (AsyncNotifier)
+/// - 수시 목표: `goalsProvider`
+/// - 정시 목표: `jeongsiGoalsProvider`
+/// - 모든 데이터는 `ref.watch`로 자동 재구독되며,
+///   추가/수정/삭제 시 Notifier 메서드를 호출해 상태가 자동 갱신된다.
+class GradeScreen extends ConsumerStatefulWidget {
   const GradeScreen({Key? key}) : super(key: key);
 
   @override
-  State<GradeScreen> createState() => _GradeScreenState();
+  ConsumerState<GradeScreen> createState() => _GradeScreenState();
 }
 
-class _GradeScreenState extends State<GradeScreen> {
-  /// 0 = 내신, 1 = 모의고사
+class _GradeScreenState extends ConsumerState<GradeScreen> {
+  /// 0 = 수시, 1 = 정시
   int _tabIndex = 0;
-  late Future<List<Exam>> _examsFuture;
-  Map<String, double> _goals = {};
-  Map<String, double> _jeongsiGoals = {};
   final PageController _pageController = PageController();
-
-  @override
-  void initState() {
-    super.initState();
-    _examsFuture = GradeManager.loadExams();
-    _loadGoals();
-  }
-
-  Future<void> _loadGoals() async {
-    final goals = await GradeManager.loadGoals();
-    final jGoals = await GradeManager.loadJeongsiGoals();
-    if (mounted) setState(() { _goals = goals; _jeongsiGoals = jGoals; });
-  }
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
-  }
-
-  void _reload() {
-    setState(() {
-      _examsFuture = GradeManager.loadExams();
-    });
   }
 
   List<Exam> _filterExams(List<Exam> exams) {
@@ -105,15 +91,16 @@ class _GradeScreenState extends State<GradeScreen> {
     );
 
     if (confirmed == true) {
-      await GradeManager.deleteExam(exam.id);
-      _reload();
+      await ref.read(examsProvider.notifier).delete(exam.id);
     }
   }
 
   void _showGoalSheet(BuildContext context) async {
-    final allExams = await _examsFuture;
+    final allExams = ref.read(examsProvider).valueOrNull ?? [];
     final filtered = _filterExams(allExams);
     final isJeongsi = _tabIndex == 1;
+    final currentGoals = ref.read(goalsProvider).valueOrNull ?? {};
+    final currentJGoals = ref.read(jeongsiGoalsProvider).valueOrNull ?? {};
 
     // Collect unique subjects in order of first appearance
     const absoluteGradeSubjects = {'영어', '한국사'};
@@ -137,7 +124,7 @@ class _GradeScreenState extends State<GradeScreen> {
     }
 
     // Local copy of goals for editing
-    final tempGoals = Map<String, double>.from(isJeongsi ? _jeongsiGoals : _goals);
+    final tempGoals = Map<String, double>.from(isJeongsi ? currentJGoals : currentGoals);
 
     if (!mounted) return;
     await showModalBottomSheet(
@@ -365,15 +352,11 @@ class _GradeScreenState extends State<GradeScreen> {
                       child: ElevatedButton(
                         onPressed: () async {
                           if (isJeongsi) {
-                            await GradeManager.saveJeongsiGoals(tempGoals);
+                            await ref.read(jeongsiGoalsProvider.notifier).save(tempGoals);
                           } else {
-                            await GradeManager.saveGoals(tempGoals);
+                            await ref.read(goalsProvider.notifier).save(tempGoals);
                           }
-                          if (mounted) {
-                            Navigator.pop(ctx);
-                            _loadGoals();
-                            _reload();
-                          }
+                          if (mounted) Navigator.pop(ctx);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.theme.primaryColor,
@@ -426,7 +409,7 @@ class _GradeScreenState extends State<GradeScreen> {
             context,
             MaterialPageRoute(builder: (_) => GradeInputScreen(isMock: _tabIndex == 1)),
           );
-          if (result == true) _reload();
+          if (result == true) ref.invalidate(examsProvider);
         },
         backgroundColor: AppColors.theme.primaryColor,
         child: const Icon(Icons.add, color: Colors.white),
@@ -511,28 +494,21 @@ class _GradeScreenState extends State<GradeScreen> {
             ),
           ),
 
-          // Exam list
+          // Exam list — Riverpod AsyncValue 패턴
           Expanded(
-            child: FutureBuilder<List<Exam>>(
-              future: _examsFuture,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
-
-                final allExams = snapshot.data ?? [];
-
-                return PageView(
-                  controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
-                  onPageChanged: (i) => setState(() => _tabIndex = i),
-                  children: [
-                    _buildExamList(allExams, 0, context, isDark, cardColor, textColor),
-                    _buildExamList(allExams, 1, context, isDark, cardColor, textColor),
-                  ],
-                );
-              },
-            ),
+            child: ref.watch(examsProvider).when(
+                  loading: () => const Center(child: CircularProgressIndicator()),
+                  error: (e, _) => Center(child: Text('불러오기 실패: $e')),
+                  data: (allExams) => PageView(
+                    controller: _pageController,
+                    physics: const BouncingScrollPhysics(),
+                    onPageChanged: (i) => setState(() => _tabIndex = i),
+                    children: [
+                      _buildExamList(allExams, 0, context, isDark, cardColor, textColor),
+                      _buildExamList(allExams, 1, context, isDark, cardColor, textColor),
+                    ],
+                  ),
+                ),
           ),
         ],
       ),
@@ -544,6 +520,9 @@ class _GradeScreenState extends State<GradeScreen> {
       if (tabIdx == 0) return e.type == 'midterm' || e.type == 'final';
       return e.type == 'mock' || e.type == 'private_mock';
     }).toList();
+    final goals = tabIdx == 0
+        ? (ref.watch(goalsProvider).valueOrNull ?? const {})
+        : (ref.watch(jeongsiGoalsProvider).valueOrNull ?? const {});
 
     if (exams.isEmpty) {
       return Center(
@@ -566,7 +545,7 @@ class _GradeScreenState extends State<GradeScreen> {
         if (exams.length >= 2 && index == 0) {
           return GradeChart(
             exams: exams,
-            goals: tabIdx == 0 ? _goals : _jeongsiGoals,
+            goals: goals,
             maxRank: tabIdx == 0 ? 5 : 9,
             isJeongsi: tabIdx == 1,
           );
@@ -582,7 +561,7 @@ class _GradeScreenState extends State<GradeScreen> {
               context,
               MaterialPageRoute(builder: (_) => GradeInputScreen(exam: exam)),
             );
-            if (result == true) _reload();
+            if (result == true) ref.invalidate(examsProvider);
           },
           onLongPress: () => _deleteExam(exam),
           child: Container(

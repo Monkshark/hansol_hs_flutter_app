@@ -9,6 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/device.dart';
 import 'package:hansol_high_school/data/local_database.dart';
+import 'package:hansol_high_school/data/service_locator.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
@@ -32,6 +33,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hansol_high_school/providers/theme_provider.dart';
 import 'package:hansol_high_school/api/kakao_keys.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
@@ -61,7 +63,11 @@ Future<void> main() async {
   ]);
   try {
     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  } catch (_) {}
+  } catch (e, st) {
+    // Firebase 초기화 실패는 치명적이지만 앱 자체는 실행되어야 하므로
+    // 디버그 로그 + 앞으로의 Crashlytics 호출은 무시되도록 둠
+    log('Firebase init failed: $e\n$st', name: 'main');
+  }
 
   FlutterError.onError = (details) {
     try { FirebaseCrashlytics.instance.recordFlutterFatalError(details); } catch (_) {}
@@ -82,9 +88,7 @@ Future<void> main() async {
   unawaited(_preloadSubjects(2));
   unawaited(_preloadSubjects(3));
 
-  final localDb = LocalDataBase();
-  GetIt.I.registerSingleton<LocalDataBase>(localDb);
-  await localDb.migrateFromPrefs();
+  await setupServiceLocator();
   await DailyMealNotification().initializeNotifications();
   await DailyMealNotification().scheduleDailyNotifications();
 
@@ -191,20 +195,22 @@ final _darkTheme = ThemeData(
 );
 
 /// 앱 루트 위젯 (테마 모드 전환 및 MaterialApp 구성)
-class HansolHighSchool extends StatefulWidget {
+///
+/// `ConsumerStatefulWidget`으로 Riverpod `themeProvider`를 구독한다.
+/// 기존의 전역 `ValueNotifier<ThemeMode> themeNotifier`도 호환성을 위해
+/// 유지되며, 양쪽이 동기화된다 (점진적 마이그레이션).
+class HansolHighSchool extends ConsumerStatefulWidget {
   const HansolHighSchool({Key? key}) : super(key: key);
 
   @override
-  State<HansolHighSchool> createState() => _HansolHighSchoolState();
+  ConsumerState<HansolHighSchool> createState() => _HansolHighSchoolState();
 }
 
-class _HansolHighSchoolState extends State<HansolHighSchool> {
-  ThemeMode _mode = themeNotifier.value;
-
+class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
   @override
   void initState() {
     super.initState();
-    final isDark = _resolveIsDark(_mode);
+    final isDark = _resolveIsDark(themeNotifier.value);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
     AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
     themeNotifier.addListener(_onThemeChanged);
@@ -223,7 +229,11 @@ class _HansolHighSchoolState extends State<HansolHighSchool> {
     final isDark = _resolveIsDark(newMode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
     AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
-    setState(() => _mode = newMode);
+    // Riverpod 상태와 동기화
+    final idx = newMode == ThemeMode.dark
+        ? 1
+        : (newMode == ThemeMode.system ? 2 : 0);
+    ref.read(themeProvider.notifier).setMode(idx);
   }
 
   @override
@@ -234,11 +244,12 @@ class _HansolHighSchoolState extends State<HansolHighSchool> {
 
   @override
   Widget build(BuildContext context) {
+    final mode = ref.watch(themeProvider);
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: _lightTheme,
       darkTheme: _darkTheme,
-      themeMode: _mode,
+      themeMode: mode,
       locale: const Locale('ko', 'KR'),
       supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
       localizationsDelegates: const [

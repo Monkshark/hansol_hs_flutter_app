@@ -6,9 +6,18 @@ on:
   pull_request:
     branches: [master]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  analyze-and-test:
+    name: Analyze + Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v4
@@ -17,8 +26,10 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
+          cache: true
 
       - name: Create dummy secret files
+        shell: bash
         run: |
           cat > lib/api/nies_api_keys.dart << 'DART'
           class niesApiKeys {
@@ -48,8 +59,89 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed . || echo "::warning::Formatting issues found (non-fatal)"
+        continue-on-error: true
+
       - name: Analyze
         run: flutter analyze --no-fatal-infos --no-fatal-warnings
 
-      - name: Test
-        run: flutter test --no-pub || true
+      - name: Run tests with coverage
+        run: flutter test --coverage --reporter=expanded
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage/lcov.info
+          flags: unittests
+          name: hansol-flutter-coverage
+          fail_ci_if_error: false
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-${{ matrix.os }}
+          path: coverage/lcov.info
+          retention-days: 14
+
+  build-android:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+    needs: analyze-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Create dummy secret files
+        shell: bash
+        run: |
+          cat > lib/api/nies_api_keys.dart << 'DART'
+          class niesApiKeys {
+            static const _NIES_API_KEY = 'dummy';
+            static const _ATPT_OFCDC_SC_CODE = 'dummy';
+            static const _SD_SCHUL_CODE = 'dummy';
+            static String get NIES_API_KEY => _NIES_API_KEY;
+            static String get ATPT_OFCDC_SC_CODE => _ATPT_OFCDC_SC_CODE;
+            static String get SD_SCHUL_CODE => _SD_SCHUL_CODE;
+          }
+          DART
+          cat > lib/firebase_options.dart << 'DART'
+          import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
+          import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
+          class DefaultFirebaseOptions {
+            static FirebaseOptions get currentPlatform => const FirebaseOptions(
+              apiKey: 'dummy', appId: 'dummy', messagingSenderId: 'dummy', projectId: 'dummy',
+            );
+          }
+          DART
+          cat > lib/api/kakao_keys.dart << 'DART'
+          class KakaoKeys {
+            static const nativeAppKey = 'dummy';
+          }
+          DART
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build debug APK
+        run: flutter build apk --debug --target-platform android-arm64
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 7
