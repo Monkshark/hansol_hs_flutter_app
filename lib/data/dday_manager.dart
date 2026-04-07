@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/secure_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 /// D-day CRUD 및 SharedPreferences JSON 저장
@@ -42,10 +43,16 @@ class DDayManager {
 
   static Future<List<DDay>> loadAll() async {
     final prefs = await SharedPreferences.getInstance();
-    final json = prefs.getString(_key);
+    // SharedPreferences → SecureStorage 일회성 마이그레이션
+    await SecureStorageService.migrateFromPlain(
+      key: SecureStorageService.keyDdays,
+      oldValue: prefs.getString(_key),
+      onMigrated: () async => prefs.remove(_key),
+    );
+    final json = await SecureStorageService.read(SecureStorageService.keyDdays);
     if (json == null || json.isEmpty) {
       if (AuthService.isLoggedIn) {
-        return _loadFromFirestore(prefs);
+        return _loadFromFirestore();
       }
       return [];
     }
@@ -54,8 +61,10 @@ class DDayManager {
   }
 
   static Future<void> saveAll(List<DDay> list) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_key, jsonEncode(list.map((e) => e.toJson()).toList()));
+    await SecureStorageService.write(
+      SecureStorageService.keyDdays,
+      jsonEncode(list.map((e) => e.toJson()).toList()),
+    );
     _syncToFirestore(list);
   }
 
@@ -67,7 +76,7 @@ class DDayManager {
     return pinned.first;
   }
 
-  static Future<List<DDay>> _loadFromFirestore(SharedPreferences prefs) async {
+  static Future<List<DDay>> _loadFromFirestore() async {
     try {
       final uid = AuthService.currentUser!.uid;
       final doc = await FirebaseFirestore.instance
@@ -78,7 +87,10 @@ class DDayManager {
         final list = doc.data()!['items'] as List<dynamic>?;
         if (list != null && list.isNotEmpty) {
           final ddays = list.map((e) => DDay.fromJson(Map<String, dynamic>.from(e))).toList();
-          await prefs.setString(_key, jsonEncode(ddays.map((e) => e.toJson()).toList()));
+          await SecureStorageService.write(
+            SecureStorageService.keyDdays,
+            jsonEncode(ddays.map((e) => e.toJson()).toList()),
+          );
           log('DDayManager: loaded ${ddays.length} D-days from Firestore');
           return ddays;
         }

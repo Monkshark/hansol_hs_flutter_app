@@ -9,11 +9,16 @@ import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'helpers/secure_storage_mock.dart';
+
 /// GradeScreen 위젯 테스트
 ///
 /// `ProviderScope.overrides`로 mock 데이터 주입.
 /// `examsProvider`/`goalsProvider`를 override하여 비동기 의존성 제거.
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+  final secureStore = setupSecureStorageMock();
+
   setUpAll(() {
     AnimatedAppColors.instance.setDark(false, animate: false);
     AnimatedAppColors.instance.tick(0);
@@ -21,6 +26,7 @@ void main() {
 
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    secureStore.clear();
   });
 
   Widget wrap(Widget child, {List<Override> overrides = const []}) {
