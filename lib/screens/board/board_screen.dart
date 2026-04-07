@@ -1,7 +1,11 @@
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/search_history_service.dart';
+import 'package:hansol_high_school/data/search_tokens.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/my_posts_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
@@ -25,11 +29,17 @@ class BoardScreen extends StatefulWidget {
 class _BoardScreenState extends State<BoardScreen> {
   static const _categories = ['전체', '인기글', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   static const _pageSize = 20;
+  static const _searchLimit = 50;
   int _selectedIndex = 0;
   String _searchQuery = '';
   bool _isSearching = false;
+  bool _searchLoading = false;
+  List<String> _searchHistory = [];
+  Timer? _searchDebounce;
+  final TextEditingController _searchController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   List<QueryDocumentSnapshot<Map<String, dynamic>>> _allDocs = [];
+  List<QueryDocumentSnapshot<Map<String, dynamic>>> _searchResults = [];
   DocumentSnapshot? _lastDoc;
   bool _hasMore = true;
   bool _loadingMore = false;
@@ -41,13 +51,98 @@ class _BoardScreenState extends State<BoardScreen> {
   void initState() {
     super.initState();
     _loadPosts();
+    _loadSearchHistory();
     _scrollController.addListener(_onScroll);
   }
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
+    _searchController.dispose();
     _scrollController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSearchHistory() async {
+    final h = await SearchHistoryService.load();
+    if (mounted) setState(() => _searchHistory = h);
+  }
+
+  void _onSearchChanged(String v) {
+    final q = v.trim();
+    setState(() => _searchQuery = q);
+    _searchDebounce?.cancel();
+    if (q.isEmpty) {
+      setState(() {
+        _searchResults = [];
+        _searchLoading = false;
+      });
+      return;
+    }
+    _searchDebounce = Timer(const Duration(milliseconds: 350), () => _runSearch(q));
+  }
+
+  Future<void> _runSearch(String query) async {
+    final tokens = SearchTokens.forQuery(query);
+    if (tokens.isEmpty) {
+      setState(() => _searchResults = []);
+      return;
+    }
+    setState(() => _searchLoading = true);
+    try {
+      // array-contains-any: 매칭 토큰 중 1개라도 포함된 글 fetch
+      // (orderBy 없이 fetch 후 client sort → composite index 불필요)
+      final snap = await FirebaseFirestore.instance
+          .collection('posts')
+          .where('searchTokens', arrayContainsAny: tokens)
+          .limit(_searchLimit)
+          .get();
+
+      // 클라이언트 사이드 추가 필터: 원본 query substring 매칭으로 false positive 제거
+      final lowerQuery = query.toLowerCase();
+      final filtered = snap.docs.where((doc) {
+        final d = doc.data();
+        final title = (d['title'] ?? '').toString().toLowerCase();
+        final content = (d['content'] ?? '').toString().toLowerCase();
+        return title.contains(lowerQuery) || content.contains(lowerQuery);
+      }).toList();
+
+      // createdAt desc 정렬
+      filtered.sort((a, b) {
+        final at = a.data()['createdAt'] as Timestamp?;
+        final bt = b.data()['createdAt'] as Timestamp?;
+        if (at == null && bt == null) return 0;
+        if (at == null) return 1;
+        if (bt == null) return -1;
+        return bt.compareTo(at);
+      });
+
+      if (mounted) {
+        setState(() {
+          _searchResults = filtered;
+          _searchLoading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _searchLoading = false);
+    }
+  }
+
+  Future<void> _commitSearchHistory(String query) async {
+    final q = query.trim();
+    if (q.isEmpty) return;
+    await SearchHistoryService.add(q);
+    await _loadSearchHistory();
+  }
+
+  Future<void> _removeHistory(String query) async {
+    await SearchHistoryService.remove(query);
+    await _loadSearchHistory();
+  }
+
+  Future<void> _clearAllHistory() async {
+    await SearchHistoryService.clear();
+    await _loadSearchHistory();
   }
 
   void _onScroll() {
@@ -121,13 +216,19 @@ class _BoardScreenState extends State<BoardScreen> {
         title: _isSearching
             ? TextField(
                 autofocus: true,
+                controller: _searchController,
                 style: TextStyle(fontSize: 15, color: textColor),
                 decoration: InputDecoration(
-                  hintText: '검색...',
+                  hintText: '제목/본문 검색...',
                   hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                   border: InputBorder.none,
                 ),
-                onChanged: (v) => setState(() => _searchQuery = v.trim().toLowerCase()),
+                textInputAction: TextInputAction.search,
+                onChanged: _onSearchChanged,
+                onSubmitted: (v) {
+                  _commitSearchHistory(v);
+                  _runSearch(v.trim());
+                },
               )
             : const Text('게시판'),
         centerTitle: !_isSearching,
@@ -137,7 +238,12 @@ class _BoardScreenState extends State<BoardScreen> {
             icon: Icon(_isSearching ? Icons.close : Icons.search),
             onPressed: () => setState(() {
               _isSearching = !_isSearching;
-              if (!_isSearching) _searchQuery = '';
+              if (!_isSearching) {
+                _searchQuery = '';
+                _searchController.clear();
+                _searchResults = [];
+                _searchDebounce?.cancel();
+              }
             }),
           ),
           if (!_isSearching && AuthService.isLoggedIn)
@@ -157,60 +263,57 @@ class _BoardScreenState extends State<BoardScreen> {
       ),
       body: Column(
         children: [
-          SizedBox(
-            height: 40,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              itemCount: _categories.length,
-              separatorBuilder: (_, __) => const SizedBox(width: 8),
-              itemBuilder: (context, index) {
-                final selected = _selectedIndex == index;
-                return GestureDetector(
-                  onTap: () {
-                    setState(() => _selectedIndex = index);
-                    _loadPosts();
-                  },
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: selected
-                          ? AppColors.theme.primaryColor
-                          : (isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0)),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      _categories[index],
-                      style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: selected ? Colors.white : AppColors.theme.darkGreyColor,
+          if (!_isSearching) ...[
+            SizedBox(
+              height: 40,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: _categories.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 8),
+                itemBuilder: (context, index) {
+                  final selected = _selectedIndex == index;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() => _selectedIndex = index);
+                      _loadPosts();
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: selected
+                            ? AppColors.theme.primaryColor
+                            : (isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0)),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(
+                        _categories[index],
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: selected ? Colors.white : AppColors.theme.darkGreyColor,
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
+          ],
           Expanded(
             child: Builder(
               builder: (context) {
+                if (_isSearching) {
+                  return _buildSearchBody(context);
+                }
+
                 if (_initialLoading) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs);
-
-                if (_searchQuery.isNotEmpty) {
-                  docs = docs.where((doc) {
-                    final data = doc.data();
-                    final title = (data['title'] ?? '').toString().toLowerCase();
-                    final content = (data['content'] ?? '').toString().toLowerCase();
-                    return title.contains(_searchQuery) || content.contains(_searchQuery);
-                  }).toList();
-                }
 
                 final pinned = docs.where((doc) => doc.data()['isPinned'] == true).toList();
                 final nonPinned = docs.where((doc) => doc.data()['isPinned'] != true).toList();
@@ -231,10 +334,10 @@ class _BoardScreenState extends State<BoardScreen> {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Icon(_searchQuery.isNotEmpty ? Icons.search_off : Icons.article_outlined,
+                        Icon(Icons.article_outlined,
                           size: 40, color: AppColors.theme.darkGreyColor),
                         const SizedBox(height: 8),
-                        Text(_searchQuery.isNotEmpty ? '검색 결과가 없습니다' : '게시글이 없습니다',
+                        Text('게시글이 없습니다',
                           style: TextStyle(color: AppColors.theme.darkGreyColor)),
                       ],
                     ),
@@ -276,6 +379,97 @@ class _BoardScreenState extends State<BoardScreen> {
         ],
       ),
     ),
+    );
+  }
+
+  Widget _buildSearchBody(BuildContext context) {
+    // 검색어 비어있음 → 최근 검색어
+    if (_searchQuery.isEmpty) {
+      if (_searchHistory.isEmpty) {
+        return Center(
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Icon(Icons.history, size: 40, color: AppColors.theme.darkGreyColor),
+            const SizedBox(height: 8),
+            Text('검색어를 입력하세요',
+                style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          ]),
+        );
+      }
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Text('최근 검색어',
+                    style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.theme.darkGreyColor)),
+                const Spacer(),
+                TextButton(
+                  onPressed: _clearAllHistory,
+                  child: Text('전체 삭제',
+                      style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                ),
+              ],
+            ),
+            Wrap(
+              spacing: 6,
+              runSpacing: 4,
+              children: _searchHistory
+                  .map((q) => InputChip(
+                        label: Text(q, style: const TextStyle(fontSize: 12)),
+                        onPressed: () {
+                          _searchController.text = q;
+                          _searchController.selection = TextSelection.fromPosition(
+                              TextPosition(offset: q.length));
+                          _onSearchChanged(q);
+                        },
+                        onDeleted: () => _removeHistory(q),
+                      ))
+                  .toList(),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_searchLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_searchResults.isEmpty) {
+      return Center(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Icon(Icons.search_off, size: 40, color: AppColors.theme.darkGreyColor),
+          const SizedBox(height: 8),
+          Text('검색 결과가 없습니다',
+              style: TextStyle(color: AppColors.theme.darkGreyColor)),
+        ]),
+      );
+    }
+
+    return ListView.separated(
+      padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 80),
+      itemCount: _searchResults.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        return PostCard(
+          doc: _searchResults[index],
+          onTap: () async {
+            _commitSearchHistory(_searchQuery);
+            await Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => PostDetailScreen(postId: _searchResults[index].id),
+              ),
+            );
+            if (mounted) _runSearch(_searchQuery);
+          },
+        );
+      },
     );
   }
 

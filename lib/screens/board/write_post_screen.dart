@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/search_tokens.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_event_form_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_image_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_poll_form_section.dart';
@@ -716,6 +717,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
       'authorRealName': profile.displayName,
       'isAnonymous': _isAnonymous,
       'isPinned': _isPinned,
+      // 검색 인덱스: 제목+본문 2-gram (Firestore array-contains-any 매칭용)
+      'searchTokens': SearchTokens.forDocument(title, content),
     };
 
     if (_isPinned) {
