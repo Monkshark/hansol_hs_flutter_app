@@ -35,9 +35,11 @@ class PostCommentItem extends StatelessWidget {
     final isAnon = data['isAnonymous'] == true;
     final isManagerView = AuthService.cachedProfile?.isManager ?? false;
     final realName = data['authorRealName'] as String?;
+    final rawName = (data['authorName'] ?? '익명') as String;
+    // 익명이면 per-post 익명N(또는 익명(글쓴이)) 번호 + manager view에선 실명 append
     final name = (isAnon && isManagerView && realName != null)
-        ? '익명 ($realName)'
-        : (data['authorName'] ?? '익명');
+        ? '$rawName ($realName)'
+        : rawName;
     final content = data['content'] ?? '';
     final createdAt = data['createdAt'] as Timestamp?;
     final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
