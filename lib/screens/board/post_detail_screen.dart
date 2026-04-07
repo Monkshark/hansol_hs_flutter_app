@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
@@ -858,6 +860,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
     final newRef = await _postRef.collection('comments').add(commentData);
     await _postRef.update({'commentCount': FieldValue.increment(1)});
+    unawaited(AnalyticsService.logCommentCreate(
+      postId: widget.postId,
+      isReply: _replyToCommentId != null,
+    ));
 
     final postSnap = await _postRef.get();
     final postData = postSnap.data();
