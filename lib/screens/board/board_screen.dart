@@ -22,7 +22,7 @@ class BoardScreen extends StatefulWidget {
 }
 
 class _BoardScreenState extends State<BoardScreen> {
-  static const _categories = ['전체', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+  static const _categories = ['전체', '인기글', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   static const _pageSize = 20;
   int _selectedIndex = 0;
   String _searchQuery = '';
@@ -55,19 +55,27 @@ class _BoardScreenState extends State<BoardScreen> {
     }
   }
 
+  Query<Map<String, dynamic>> _baseQuery() {
+    Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('posts');
+    if (_selectedCategory == '인기글') {
+      // 인기글: likeCount > 0 (인덱스 prefix 매칭 + 좋아요 0개 글 제외)
+      q = q
+          .where('likeCount', isGreaterThan: 0)
+          .orderBy('likeCount', descending: true)
+          .orderBy('createdAt', descending: true);
+    } else {
+      q = q.orderBy('createdAt', descending: true);
+      if (_selectedCategory != '전체') {
+        q = q.where('category', isEqualTo: _selectedCategory);
+      }
+    }
+    return q;
+  }
+
   Future<void> _loadPosts() async {
     setState(() { _initialLoading = true; _allDocs = []; _lastDoc = null; _hasMore = true; });
 
-    Query<Map<String, dynamic>> q = FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('createdAt', descending: true)
-        .limit(_pageSize);
-
-    if (_selectedCategory != '전체') {
-      q = q.where('category', isEqualTo: _selectedCategory);
-    }
-
-    final snap = await q.get();
+    final snap = await _baseQuery().limit(_pageSize).get();
     if (mounted) {
       setState(() {
         _allDocs = snap.docs;
@@ -82,17 +90,7 @@ class _BoardScreenState extends State<BoardScreen> {
     if (!_hasMore || _loadingMore || _lastDoc == null) return;
     setState(() => _loadingMore = true);
 
-    Query<Map<String, dynamic>> q = FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('createdAt', descending: true)
-        .startAfterDocument(_lastDoc!)
-        .limit(_pageSize);
-
-    if (_selectedCategory != '전체') {
-      q = q.where('category', isEqualTo: _selectedCategory);
-    }
-
-    final snap = await q.get();
+    final snap = await _baseQuery().startAfterDocument(_lastDoc!).limit(_pageSize).get();
     if (mounted) {
       setState(() {
         _allDocs.addAll(snap.docs);
@@ -344,8 +342,13 @@ class PostCard extends StatelessWidget {
     final commentCount = data['commentCount'] ?? 0;
     final rawLikes = data['likes'];
     final rawDislikes = data['dislikes'];
-    final likeCount = rawLikes is int ? rawLikes : (rawLikes is Map ? rawLikes.length : 0);
-    final dislikeCount = rawDislikes is int ? rawDislikes : (rawDislikes is Map ? rawDislikes.length : 0);
+    // 비정규화 카운터(likeCount/dislikeCount) 우선, 없으면 Map/int fallback
+    final likeCount = data['likeCount'] is int
+        ? data['likeCount'] as int
+        : (rawLikes is int ? rawLikes : (rawLikes is Map ? rawLikes.length : 0));
+    final dislikeCount = data['dislikeCount'] is int
+        ? data['dislikeCount'] as int
+        : (rawDislikes is int ? rawDislikes : (rawDislikes is Map ? rawDislikes.length : 0));
     final hasImages = data['imageUrls'] != null && (data['imageUrls'] as List).isNotEmpty;
     final hasPoll = data['pollOptions'] != null && (data['pollOptions'] as List).isNotEmpty;
     final createdAt = data['createdAt'] as Timestamp?;

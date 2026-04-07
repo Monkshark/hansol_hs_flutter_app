@@ -756,6 +756,10 @@ class _WritePostScreenState extends State<WritePostScreen> {
       postData['createdAt'] = FieldValue.serverTimestamp();
       postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
       postData['commentCount'] = 0;
+      postData['likeCount'] = 0;
+      postData['dislikeCount'] = 0;
+      postData['likes'] = <String, dynamic>{};
+      postData['dislikes'] = <String, dynamic>{};
       postData['imageUrls'] = <String>[];
       postData['anonymousCount'] = 0;
       postData['anonymousMapping'] = <String, dynamic>{};

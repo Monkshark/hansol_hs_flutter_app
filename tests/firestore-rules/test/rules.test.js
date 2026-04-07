@@ -181,7 +181,7 @@ describe('posts collection', () => {
     );
   });
 
-  it('남의 글 좋아요 +1은 허용 (interaction 필드)', async () => {
+  it('남의 글 좋아요 +1은 허용 (likes Map + likeCount counter)', async () => {
     await createUser('alice');
     await createUser('bob');
     await seed(async (db) => {
@@ -189,15 +189,19 @@ describe('posts collection', () => {
         authorUid: 'alice',
         title: 't',
         content: 'c',
-        likes: 0,
+        likes: {},
+        likeCount: 0,
       });
     });
     await assertSucceeds(
-      updateDoc(doc(authedDb('bob'), 'posts/p4'), { likes: 1 })
+      updateDoc(doc(authedDb('bob'), 'posts/p4'), {
+        'likes.bob': true,
+        likeCount: 1,
+      })
     );
   });
 
-  it('좋아요 +5처럼 큰 폭 증가는 거부 (counter delta 검증)', async () => {
+  it('likeCount +5처럼 큰 폭 증가는 거부 (counter delta 검증)', async () => {
     await createUser('alice');
     await createUser('bob');
     await seed(async (db) => {
@@ -205,11 +209,51 @@ describe('posts collection', () => {
         authorUid: 'alice',
         title: 't',
         content: 'c',
-        likes: 0,
+        likes: {},
+        likeCount: 0,
       });
     });
     await assertFails(
-      updateDoc(doc(authedDb('bob'), 'posts/p5'), { likes: 5 })
+      updateDoc(doc(authedDb('bob'), 'posts/p5'), {
+        'likes.bob': true,
+        likeCount: 5,
+      })
+    );
+  });
+
+  it('likeCount 음수는 거부', async () => {
+    await createUser('alice');
+    await createUser('bob');
+    await seed(async (db) => {
+      await setDoc(doc(db, 'posts/p5b'), {
+        authorUid: 'alice',
+        title: 't',
+        content: 'c',
+        likes: {},
+        likeCount: 0,
+      });
+    });
+    await assertFails(
+      updateDoc(doc(authedDb('bob'), 'posts/p5b'), { likeCount: -1 })
+    );
+  });
+
+  it('likeCount 필드 없는 기존 글에 +1 허용 (legacy 호환)', async () => {
+    await createUser('alice');
+    await createUser('bob');
+    await seed(async (db) => {
+      await setDoc(doc(db, 'posts/p5c'), {
+        authorUid: 'alice',
+        title: 't',
+        content: 'c',
+        likes: {},
+      });
+    });
+    await assertSucceeds(
+      updateDoc(doc(authedDb('bob'), 'posts/p5c'), {
+        'likes.bob': true,
+        likeCount: 1,
+      })
     );
   });
 
