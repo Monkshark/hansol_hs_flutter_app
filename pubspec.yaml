@@ -20,7 +20,7 @@ dependencies:
   io: ^1.0.4
 
   # 상태관리 및 서비스
-  provider: ^6.1.1
+  flutter_riverpod: ^2.5.1
   get_it: ^8.0.3
 
   # Firebase
@@ -54,7 +54,6 @@ dependencies:
   url_launcher: ^6.2.5
   package_info_plus: ^8.0.0
   cached_network_image: ^3.3.1
-  flutter_riverpod: ^2.5.1
   firebase_crashlytics: ^4.3.10
   shimmer: ^3.0.0
   flutter_svg: ^2.2.4

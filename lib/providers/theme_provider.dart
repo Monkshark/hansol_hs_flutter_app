@@ -4,16 +4,19 @@ import 'package:hansol_high_school/data/setting_data.dart';
 
 /// 테마 모드 관리 (라이트/다크/시스템)
 ///
-/// - SettingData의 themeModeIndex와 동기화
-/// - Riverpod StateNotifier로 앱 전체 테마 상태 관리
-class ThemeNotifier extends StateNotifier<ThemeMode> {
-  ThemeNotifier() : super(_indexToMode(SettingData().themeModeIndex));
+/// SettingData의 themeModeIndex와 동기화. Riverpod 2.x Notifier 패턴.
+class ThemeNotifier extends Notifier<ThemeMode> {
+  @override
+  ThemeMode build() => _indexToMode(SettingData().themeModeIndex);
 
   static ThemeMode _indexToMode(int index) {
     switch (index) {
-      case 1: return ThemeMode.dark;
-      case 2: return ThemeMode.system;
-      default: return ThemeMode.light;
+      case 1:
+        return ThemeMode.dark;
+      case 2:
+        return ThemeMode.system;
+      default:
+        return ThemeMode.light;
     }
   }
 
@@ -23,6 +26,4 @@ class ThemeNotifier extends StateNotifier<ThemeMode> {
   }
 }
 
-final themeProvider = StateNotifierProvider<ThemeNotifier, ThemeMode>((ref) {
-  return ThemeNotifier();
-});
+final themeProvider = NotifierProvider<ThemeNotifier, ThemeMode>(ThemeNotifier.new);
