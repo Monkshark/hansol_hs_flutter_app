@@ -9,6 +9,30 @@ const db = getFirestore();
 const now = Timestamp.now();
 const ago = (minutes) => Timestamp.fromDate(new Date(Date.now() - minutes * 60000));
 
+// Dart의 SearchTokens.forDocument와 동일한 2-gram 토크나이저 (검색 screenshot용)
+function tokenize2gram(title, content, maxTokens = 200) {
+  const text = `${title} ${content}`.toLowerCase();
+  // 0-9, a-z, 가-힣만 남김
+  const cleaned = text.replace(/[^0-9a-z\uAC00-\uD7A3]/g, '');
+  if (cleaned.length === 0) return [];
+  if (cleaned.length === 1) return [cleaned];
+  const tokens = new Set();
+  for (let i = 0; i < cleaned.length - 1 && tokens.size < maxTokens; i++) {
+    tokens.add(cleaned.substring(i, i + 2));
+  }
+  return Array.from(tokens);
+}
+
+// 이미지 있는 게시글 (post index → picsum URL 배열)
+// post detail에서 갤러리, 카드에서 썸네일 + N badge screenshot용
+const POST_IMAGES = {
+  0: ['https://picsum.photos/seed/post0a/800/600', 'https://picsum.photos/seed/post0b/800/600', 'https://picsum.photos/seed/post0c/800/600'],
+  3: ['https://picsum.photos/seed/post3a/800/600', 'https://picsum.photos/seed/post3b/800/600'],
+  7: ['https://picsum.photos/seed/post7a/800/600'],
+  12: ['https://picsum.photos/seed/post12a/800/600', 'https://picsum.photos/seed/post12b/800/600', 'https://picsum.photos/seed/post12c/800/600', 'https://picsum.photos/seed/post12d/800/600'],
+  17: ['https://picsum.photos/seed/post17a/800/600', 'https://picsum.photos/seed/post17b/800/600'],
+};
+
 // 실제 유저 (채팅용)
 const REAL_UID = "57WVXMVoV8OxBnRlrfx60Ffrqyq1";
 const REAL_NAME = "추희도";
@@ -96,10 +120,17 @@ async function seed() {
     // pollVoters를 Map으로
     const pollVoters = p.pollVoters && Array.isArray(p.pollVoters) ? {} : (p.pollVoters || {});
     const { likes, dislikes, pollVoters: _pv, ...rest } = p;
+    const imageUrls = POST_IMAGES[i] || [];
     const ref = await db.collection("posts").add({
       ...rest,
       likes: likesMap,
       dislikes: dislikesMap,
+      // 비정규화 카운터 (Phase 3.1)
+      likeCount: Object.keys(likesMap).length,
+      dislikeCount: Object.keys(dislikesMap).length,
+      // n-gram search 인덱스 (Phase 3.3)
+      searchTokens: tokenize2gram(p.title, p.content),
+      imageUrls,
       ...(p.pollVoters !== undefined ? { pollVoters } : {}),
       likedBy: [], dislikedBy: [], bookmarkedBy: i < 5 ? [REAL_UID, "demo_user1"] : [],
       createdAt: ago(i * 90 + 10),
