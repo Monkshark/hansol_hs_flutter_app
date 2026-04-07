@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Riverpod Graph</title>
+  <script src="https://unpkg.com/cytoscape@3.24.0/dist/cytoscape.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
+  <style>
+    html, body, #container {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#cy {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+#edge-info {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+  z-index: 10;
+  display: none;
+  max-width: 300px;
+  font-family: sans-serif;
+   overflow-wrap: break-word; /* Wrap long words */
+  word-break: break-word;    /* Force breaking if needed */
+  white-space: normal;       /* Allow text to wrap */
+}
+  </style>
+</head>
+
+<body>
+<div id="container">
+  <div id="cy"></div>
+  <div id="edge-info"></div>
+</div>
+  <script>
+    const graphData = [{"data":{"id":"themeProvider","label":"themeProvider"}},{"data":{"id":"_HansolHighSchoolState","label":"_HansolHighSchoolState"}},{"data":{"id":"_onTokenRefresh","label":"_onTokenRefresh"}},{"data":{"id":"FcmService","label":"FcmService"}},{"data":{"id":"_onForegroundMessage","label":"_onForegroundMessage"}},{"data":{"id":"_onMessageOpenedApp","label":"_onMessageOpenedApp"}},{"data":{"id":"authStateProvider","label":"authStateProvider"}},{"data":{"id":"UserProfileNotifier","label":"UserProfileNotifier"}},{"data":{"id":"isLoggedInProvider","label":"isLoggedInProvider"}},{"data":{"id":"userProfileProvider","label":"userProfileProvider"}},{"data":{"id":"isManagerProvider","label":"isManagerProvider"}},{"data":{"id":"isAdminProvider","label":"isAdminProvider"}},{"data":{"id":"isSuspendedProvider","label":"isSuspendedProvider"}},{"data":{"id":"examsProvider","label":"examsProvider"}},{"data":{"id":"examsByTypeProvider","label":"examsByTypeProvider"}},{"data":{"id":"_GradeScreenState","label":"_GradeScreenState"}},{"data":{"id":"goalsProvider","label":"goalsProvider"}},{"data":{"id":"jeongsiGoalsProvider","label":"jeongsiGoalsProvider"}},{"data":{"source":"_HansolHighSchoolState","target":"themeProvider","label":"read","trace":"lib\\main.dart:277"},"classes":"read"},{"data":{"source":"_HansolHighSchoolState","target":"themeProvider","label":"watch","trace":"lib\\main.dart:288"},"classes":"watch"},{"data":{"source":"FcmService","target":"_onTokenRefresh","label":"listen","trace":"lib\\notification\\fcm_service.dart:48"},"classes":"listen"},{"data":{"source":"FcmService","target":"_onForegroundMessage","label":"listen","trace":"lib\\notification\\fcm_service.dart:52"},"classes":"listen"},{"data":{"source":"FcmService","target":"_onMessageOpenedApp","label":"listen","trace":"lib\\notification\\fcm_service.dart:54"},"classes":"listen"},{"data":{"source":"UserProfileNotifier","target":"authStateProvider","label":"watch","trace":"lib\\providers\\auth_provider.dart:24"},"classes":"watch"},{"data":{"source":"isLoggedInProvider","target":"authStateProvider","label":"watch","trace":"lib\\providers\\auth_provider.dart:60"},"classes":"watch"},{"data":{"source":"isManagerProvider","target":"userProfileProvider","label":"watch","trace":"lib\\providers\\auth_provider.dart:65"},"classes":"watch"},{"data":{"source":"isAdminProvider","target":"userProfileProvider","label":"watch","trace":"lib\\providers\\auth_provider.dart:73"},"classes":"watch"},{"data":{"source":"isSuspendedProvider","target":"userProfileProvider","label":"watch","trace":"lib\\providers\\auth_provider.dart:81"},"classes":"watch"},{"data":{"source":"examsByTypeProvider","target":"examsProvider","label":"watch","trace":"lib\\providers\\grade_provider.dart:54"},"classes":"watch"},{"data":{"source":"_GradeScreenState","target":"examsProvider","label":"read","trace":"lib\\screens\\sub\\grade_screen.dart:94"},"classes":"read"},{"data":{"source":"_GradeScreenState","target":"examsProvider","label":"read","trace":"lib\\screens\\sub\\grade_screen.dart:99"},"classes":"read"},{"data":{"source":"_GradeScreenState","target":"goalsProvider","label":"read","trace":"lib\\screens\\sub\\grade_screen.dart:102"},"classes":"read"},{"data":{"source":"_GradeScreenState","target":"jeongsiGoalsProvider","label":"read","trace":"lib\\screens\\sub\\grade_screen.dart:103"},"classes":"read"},{"data":{"source":"_GradeScreenState","target":"jeongsiGoalsProvider","label":"read","trace":"lib\\screens\\sub\\grade_screen.dart:355"},"classes":"read"},{"data":{"source":"_GradeScreenState","target":"goalsProvider","label":"read","trace":"lib\\screens\\sub\\grade_screen.dart:357"},"classes":"read"},{"data":{"source":"_GradeScreenState","target":"examsProvider","label":"watch","trace":"lib\\screens\\sub\\grade_screen.dart:499"},"classes":"watch"},{"data":{"source":"_GradeScreenState","target":"goalsProvider","label":"watch","trace":"lib\\screens\\sub\\grade_screen.dart:524"},"classes":"watch"},{"data":{"source":"_GradeScreenState","target":"jeongsiGoalsProvider","label":"watch","trace":"lib\\screens\\sub\\grade_screen.dart:525"},"classes":"watch"}];
+
+    const cy = cytoscape({
+      container: document.getElementById('cy'),
+      elements: graphData,
+      layout: { name: 'breadthfirst' },
+      style: [
+        {
+          selector: 'node',
+          style: {
+            'shape': 'roundrectangle',
+            'label': 'data(label)',
+            'text-valign': 'center',
+            'padding': '10px',
+            'color': '#fff',
+            'background-color': '#007acc',
+            'width': 'label',
+            'height': 'label',
+          }
+        },
+    {
+  selector: 'edge',
+  style: {
+    'width': 2,
+    'target-arrow-shape': 'triangle',
+    'curve-style': 'bezier',
+  }
+},
+        {
+          selector: 'edge.watch',
+          style: {
+            'line-color': '#007acc',
+            'target-arrow-color': '#007acc',
+            'line-style': 'solid',
+          }
+        },
+        {
+          selector: 'edge.read',
+          style: {
+            'line-color': '#00b894',
+            'target-arrow-color': '#00b894',
+            'line-style': 'dashed',
+          }
+        },
+        {
+          selector: 'edge.listen',
+          style: {
+            'line-color': '#0D920F',
+            'target-arrow-color': '#0D920F',
+            'line-style': 'dotted',
+          }
+        },
+        {
+          selector: 'edge.highlighted',
+          style: {
+            'background-color': '#ff5e28',
+            'line-color': '#ff5e28',
+            'target-arrow-color': '#ff5e28',
+            'width': 2,
+            'z-index': 9999,
+            'transition-property': 'background-color, line-color, target-arrow-color',
+            'transition-duration': '300ms'
+          }
+        },
+        {
+          selector: 'edge.suppressed',
+          style: {
+            'line-color': '#ccc',
+            'target-arrow-color': '#ccc',
+
+            'width': 1,
+            'transition-property': 'background-color, line-color, target-arrow-color',
+            'transition-duration': '300ms'
+          }
+        },
+        {
+          selector: 'node.highlighted',
+          style: {
+            'background-color': '#ff5e28',
+            'line-color': '#ff5e28',
+            'target-arrow-color': '#ff5e28',
+            'z-index': 9999,
+            'transition-property': 'background-color, line-color, target-arrow-color',
+            'transition-duration': '300ms'
+          }
+        },
+        {
+          selector: 'node.suppressed',
+          style: {
+            'line-color': '#ccc',
+            'transition-property': 'background-color, line-color, target-arrow-color',
+            'transition-duration': '300ms'
+          }
+        }
+      ]
+    });
+
+    // Optional: highlight on click
+    cy.on('tap', 'edge', function (evt) {
+      const edge = evt.target;
+      cy.edges().addClass('suppressed');
+      edge.addClass('highlighted');
+      edge.removeClass('suppressed');
+
+      const type = edge.data('label') || '';
+      const source = edge.data('source');
+      const target = edge.data('target');
+      const trace = edge.data('trace') || '';
+const edgeInfoDiv = document.getElementById('edge-info');
+      edgeInfoDiv.innerHTML = `
+    <strong>Edge Selected</strong><br>
+    <strong>From:</strong> ${source}<br>
+    <strong>To:</strong> ${target}<br>
+    <strong>Type:</strong> ${type}<br>
+    <strong>Trace:</strong> <pre style="white-space:pre-wrap">${trace}</pre>
+  `;
+  edgeInfoDiv.style.display = 'block';
+    });
+
+    cy.on('select', 'node', function (evt) {
+      const node = evt.target;
+
+      // Clear previous highlights
+      cy.elements().removeClass('highlighted');
+      cy.elements().addClass('suppressed');
+      
+      node.connectedEdges().addClass('highlighted');
+      node.connectedEdges().removeClass('suppressed');
+
+      // Highlight the node, its connected edges, and neighboring nodes
+      const neighborhood = node.closedNeighborhood();
+      neighborhood.addClass('highlighted');
+    });
+
+    cy.on('unselect', 'node', function () {
+      cy.elements().removeClass('highlighted');
+      cy.elements().removeClass('suppressed');
+    });
+    cy.on('unselect', 'edge', function () {
+      cy.edges().removeClass('highlighted');
+      cy.edges().removeClass('suppressed');
+       const edgeInfoDiv = document.getElementById('edge-info');
+       edgeInfoDiv.style.display = 'none';
+    });
+
+  </script>
+</body>
+
+</html>
+ 

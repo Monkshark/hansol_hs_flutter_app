@@ -85,6 +85,46 @@ graph TD
     I -->|매시간 정지 만료 체크| D
 ```
 
+### Riverpod Provider 의존성 그래프
+
+`riverpod_graph` CLI로 자동 생성. 인터랙티브 버전은 [`docs/riverpod_graph.html`](docs/riverpod_graph.html) 참조.
+
+```mermaid
+graph LR
+    authState[authStateProvider]
+    userProfile[userProfileProvider<br/>UserProfileNotifier]
+    isLoggedIn[isLoggedInProvider]
+    isManager[isManagerProvider]
+    isAdmin[isAdminProvider]
+    isSuspended[isSuspendedProvider]
+    theme[themeProvider]
+    exams[examsProvider]
+    examsByType[examsByTypeProvider]
+    goals[goalsProvider]
+    jeongsiGoals[jeongsiGoalsProvider]
+
+    userProfile -->|watch| authState
+    isLoggedIn -->|watch| authState
+    isManager -->|watch| userProfile
+    isAdmin -->|watch| userProfile
+    isSuspended -->|watch| userProfile
+    examsByType -->|watch| exams
+
+    HansolApp[HansolHighSchool] -.watch.-> theme
+    GradeScreen[GradeScreen] -.watch.-> exams
+    GradeScreen -.watch.-> goals
+    GradeScreen -.watch.-> jeongsiGoals
+
+    classDef provider fill:#007acc,color:#fff,stroke:#005a9e
+    classDef consumer fill:#00b894,color:#fff,stroke:#008264
+    class authState,userProfile,isLoggedIn,isManager,isAdmin,isSuspended,theme,exams,examsByType,goals,jeongsiGoals provider
+    class HansolApp,GradeScreen consumer
+```
+
+- `authStateProvider`를 root로 하는 인증 상태 트리: 프로필 → 권한(manager/admin/suspended) 파생
+- `examsProvider` 기반으로 `examsByTypeProvider` (수시/정시 분류) 파생
+- 화면(`Consumer`)은 필요한 leaf provider만 watch → 불필요한 rebuild 방지
+
 ## 기술 스택
 
 | 분류 | 기술 |
