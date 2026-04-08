@@ -1,11 +1,41 @@
+import 'dart:async';
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
+
+/// 플랫폼 간 폰트 렌더링 차이(Windows ↔ Linux)를 흡수하기 위한 tolerance comparator.
+/// goldens는 Windows 로컬에서 생성되었고 CI는 Ubuntu라 anti-aliasing/font hinting
+/// 차이로 0.3% 정도의 픽셀 diff가 발생함. 실제 시각 차이는 사람 눈에 안 보임.
+class _ToleranceFileComparator extends LocalFileComparator {
+  _ToleranceFileComparator(super.testFile, {this.tolerance = 0.01});
+  final double tolerance;
+
+  @override
+  Future<bool> compare(Uint8List imageBytes, Uri golden) async {
+    final result = await GoldenFileComparator.compareLists(
+      imageBytes,
+      await getGoldenBytes(golden),
+    );
+    if (result.passed) return true;
+    if (result.diffPercent <= tolerance) {
+      debugPrint(
+        'Golden ${golden.path}: diff ${(result.diffPercent * 100).toStringAsFixed(2)}% '
+        '≤ tolerance ${(tolerance * 100).toStringAsFixed(0)}% → 통과',
+      );
+      return true;
+    }
+    final error = await generateFailureOutput(result, golden, basedir);
+    throw FlutterError(error);
+  }
+}
 
 /// PostCard golden 테스트
 ///
@@ -24,6 +54,13 @@ void main() {
     const channel = MethodChannel('plugins.flutter.io/path_provider');
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (call) async => '.');
+
+    // 플랫폼 폰트 렌더링 차이 흡수 (Windows로 생성된 goldens를 Linux CI에서 비교)
+    final prev = goldenFileComparator;
+    if (prev is LocalFileComparator) {
+      goldenFileComparator =
+          _ToleranceFileComparator(Uri.parse('${prev.basedir}test.dart'));
+    }
   });
 
   setUp(() async {
