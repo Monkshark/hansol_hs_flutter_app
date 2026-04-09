@@ -1,0 +1,43 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── 프로필 사진: 본인만 업로드/덮어쓰기, 누구나 읽기 ──
+    match /profile_photos/{fileName} {
+      allow read: if true;
+      allow write: if request.auth != null
+                   && request.resource.size < 2 * 1024 * 1024        // 2 MB
+                   && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── 게시글 이미지: 로그인 사용자 읽기, 작성자만 쓰기 ──
+    match /posts/{postId}/{fileName} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.size < 5 * 1024 * 1024       // 5 MB
+                    && request.resource.contentType.matches('image/.*');
+      allow delete: if request.auth != null;
+    }
+
+    // ── 채팅 이미지: 로그인 사용자만 읽기/쓰기 ──
+    match /chats/{chatId}/{fileName} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.size < 5 * 1024 * 1024       // 5 MB
+                    && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── 피드백 이미지: 로그인 사용자만 쓰기, 매니저만 읽기 ──
+    match /feedbacks/{type}/{fileName} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.size < 5 * 1024 * 1024       // 5 MB
+                    && request.resource.contentType.matches('image/.*');
+    }
+
+    // ── 기본 거부 ──
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
