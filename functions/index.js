@@ -396,3 +396,47 @@ exports.checkSuspensionExpiry = onSchedule("every 1 hours", async () => {
     await doc.ref.update({ suspendedUntil: null });
   }
 });
+
+// 매일 03:00 KST: 4년 지난 비공지 게시글 + 하위 댓글 + Storage 이미지 삭제
+exports.cleanupOldPosts = onSchedule("every day 18:00", async () => {
+  const db = getFirestore();
+  const { getStorage } = require("firebase-admin/storage");
+  const cutoff = new Date(Date.now() - 4 * 365.25 * 24 * 60 * 60 * 1000);
+
+  const snap = await db.collection("posts")
+    .where("createdAt", "<=", cutoff)
+    .limit(200)
+    .get();
+
+  let deleted = 0;
+  for (const postDoc of snap.docs) {
+    const data = postDoc.data();
+    if (data.isPinned === true) continue;
+
+    // 하위 댓글 삭제
+    const comments = await db.collection(`posts/${postDoc.id}/comments`).get();
+    const batch = db.batch();
+    comments.docs.forEach((c) => batch.delete(c.ref));
+    if (comments.docs.length > 0) await batch.commit();
+
+    // Storage 이미지 삭제
+    if (Array.isArray(data.imageUrls) && data.imageUrls.length > 0) {
+      try {
+        const bucket = getStorage().bucket();
+        await bucket.deleteFiles({ prefix: `posts/${postDoc.id}/` });
+      } catch (_) {}
+    }
+
+    await postDoc.ref.delete();
+    deleted++;
+  }
+
+  if (deleted > 0) {
+    await getFirestore().collection("function_logs").add({
+      function: "cleanupOldPosts",
+      deleted,
+      skippedPinned: snap.size - deleted,
+      createdAt: new Date(),
+    });
+  }
+});
