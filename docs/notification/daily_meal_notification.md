@@ -43,7 +43,7 @@ Future<void> initializeNotifications()
 Future<void> scheduleDailyNotifications()
 ```
 
-**설명**: SettingData 설정에 따라 평일(월~금) 반복 알림을 등록한다.
+**설명**: [SettingData](../data/setting_data.md) 설정에 따라 평일(월~금) 반복 알림을 등록한다.
 
 ```dart
 if (settings.isBreakfastNotificationOn) {

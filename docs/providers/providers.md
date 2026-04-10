@@ -154,7 +154,7 @@ class GradeClassNotifier extends Notifier<GradeClassState> {
 }
 ```
 
-동기 `Notifier`. SettingData 싱글톤과 양방향 동기화.
+동기 `Notifier`. [SettingData](../data/setting_data.md) 싱글톤과 양방향 동기화.
 
 #### 메서드
 

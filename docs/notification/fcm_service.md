@@ -73,7 +73,7 @@ FCM 토큰을 Firestore `users/{uid}` 문서의 `fcmToken` 필드에 저장. Clo
 static Future<void> _subscribeTopics()
 ```
 
-SettingData 설정에 따라 토픽을 구독한다:
+[SettingData](../data/setting_data.md) 설정에 따라 토픽을 구독한다:
 
 - `board_new_post`: 전체 게시판 알림
 - 카테고리별: `board_free`, `board_question`, `board_info`, `board_lost`, `board_council`, `board_club`

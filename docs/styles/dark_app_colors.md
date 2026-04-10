@@ -2,7 +2,7 @@
 
 > `lib/styles/dark_app_colors.dart` — 다크 테마 색상 구현체
 
-`AppColors` 추상 클래스를 구현. 싱글턴 패턴. 토스(Toss) 스타일 네이비 계열 배경색 사용.
+[`AppColors`](app_colors.md) 추상 클래스를 구현. 싱글턴 패턴. 토스(Toss) 스타일 네이비 계열 배경색 사용.
 
 ---
 

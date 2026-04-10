@@ -2,7 +2,7 @@
 
 > `lib/data/grade_manager.dart` — 성적 CRUD, 목표 관리, 등급 변환
 
-`SubjectScore`, `Exam` 모델과 `GradeManager` 클래스를 포함. 모든 메서드가 `static`. 데이터는 `SecureStorageService`에 JSON으로 암호화 저장 (서버 저장 안 함).
+`SubjectScore`, `Exam` 모델과 `GradeManager` 클래스를 포함. 모든 메서드가 `static`. 데이터는 [`SecureStorageService`](secure_storage_service.md)에 JSON으로 암호화 저장 (서버 저장 안 함).
 
 ---
 

@@ -37,8 +37,8 @@ if (!getIt.isRegistered<LocalDataBase>()) {
 ```
 
 - `isRegistered` 체크로 중복 등록 방지 (테스트에서 여러 번 호출해도 안전)
-- `AuthRepository`, `GradeRepository`는 `LazySignleton` (처음 접근 시 생성)
-- `LocalDataBase`는 즉시 생성 + 마이그레이션 실행
+- [`AuthRepository`](auth_repository.md), [`GradeRepository`](grade_repository.md)는 `LazySignleton` (처음 접근 시 생성)
+- [`LocalDataBase`](local_database.md)는 즉시 생성 + 마이그레이션 실행
 
 **호출 위치**: `main()` 함수에서 Firebase 초기화 후 호출.
 

@@ -2,7 +2,7 @@
 
 > `lib/styles/light_app_colors.dart` — 라이트 테마 색상 구현체
 
-`AppColors` 추상 클래스를 구현. 싱글턴 패턴. 블루 계열 primaryColor와 밝은 배경색 사용.
+[`AppColors`](app_colors.md) 추상 클래스를 구현. 싱글턴 패턴. 블루 계열 primaryColor와 밝은 배경색 사용.
 
 ---
 

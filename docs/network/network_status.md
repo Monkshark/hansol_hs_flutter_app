@@ -20,5 +20,5 @@ return results.isEmpty || results.contains(ConnectivityResult.none);
 ```
 
 - `results`가 비어있거나 `none`을 포함하면 오프라인
-- API 호출 전 오프라인 체크에 사용 (MealDataApi, TimetableDataApi, NoticeDataApi)
+- API 호출 전 오프라인 체크에 사용 ([MealDataApi](../api/meal_data_api.md), [TimetableDataApi](../api/timetable_data_api.md), [NoticeDataApi](../api/notice_data_api.md))
 - 오프라인이면 캐시 데이터 반환 또는 안내 메시지 표시
