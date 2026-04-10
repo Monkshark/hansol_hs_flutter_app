@@ -2,13 +2,13 @@
 
 > `lib/data/grade_repository.dart` — 성적 관리 Repository 인터페이스
 
-`GradeManager`의 정적 메서드를 인스턴스 메서드로 감싸 GetIt DI에 등록. 테스트에서 mock 주입 가능.
+[`GradeManager`](grade_manager.md)의 정적 메서드를 인스턴스 메서드로 감싸 GetIt DI에 등록. 테스트에서 mock 주입 가능.
 
 ---
 
 ## 설계 배경
 
-`AuthRepository`와 동일한 패턴:
+[`AuthRepository`](auth_repository.md)와 동일한 패턴:
 ```
 GradeManager (정적 메서드, SecureStorage 의존)
     ↑
@@ -87,4 +87,4 @@ await resetServiceLocator();
 GetIt.I.registerSingleton<GradeRepository>(MockGradeRepository());
 ```
 
-`MockGradeRepository`에서 인메모리 리스트로 시험 데이터를 관리하면 SecureStorage 없이 `ExamsNotifier` 테스트 가능.
+`MockGradeRepository`에서 인메모리 리스트로 시험 데이터를 관리하면 SecureStorage 없이 [`ExamsNotifier`](../providers/providers.md) 테스트 가능.

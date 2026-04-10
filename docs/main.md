@@ -38,7 +38,7 @@ Future<void> main() async
 
 5. **Kakao SDK** 초기화
 
-6. **SettingData** 초기화 (알림 권한은 온보딩 완료 시 요청)
+6. **[SettingData](data/setting_data.md)** 초기화 (알림 권한은 온보딩 완료 시 요청)
 
 7. **Timezone** 초기화 (`Asia/Seoul`)
 
@@ -50,7 +50,7 @@ Future<void> main() async
    unawaited(_preloadSubjects(3));
    ```
 
-10. **ServiceLocator** 설정 (GetIt DI)
+10. **[ServiceLocator](data/service_locator.md)** 설정 (GetIt DI)
 
 11. **로컬 급식 알림** 초기화 + 스케줄링
 
@@ -80,7 +80,7 @@ class HansolHighSchool extends ConsumerStatefulWidget
 
 **설명**: 앱의 루트 위젯. 테마 모드 전환과 MaterialApp 설정을 담당.
 
-1. `initState`에서 `AnimatedAppColors` 초기화 + `themeNotifier` 리스너 등록
+1. `initState`에서 [`AnimatedAppColors`](styles/app_colors.md) 초기화 + `themeNotifier` 리스너 등록
 2. `_resolveIsDark`: ThemeMode.system일 때 platformBrightness 확인
 3. `build`: `ref.watch(themeProvider)` → `MaterialApp` 테마 적용
 4. `localeNotifier` 기반 `ValueListenableBuilder<Locale?>` 로 즉시 언어 전환

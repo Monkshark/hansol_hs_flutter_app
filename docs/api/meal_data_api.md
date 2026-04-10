@@ -179,7 +179,7 @@ if (meal.meal == '급식 정보가 없습니다.') {
 static void _saveToCache(SharedPreferences prefs, String key, Meal meal)
 ```
 
-Meal JSON + 타임스탬프를 SharedPreferences에 저장.
+[Meal](../data/meal.md) JSON + 타임스탬프를 SharedPreferences에 저장.
 
 ---
 

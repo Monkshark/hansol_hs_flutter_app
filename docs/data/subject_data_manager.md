@@ -69,4 +69,4 @@ static Future<void> saveSelectedSubjects(int grade, List<Subject> selectedSubjec
 static Future<void> _saveLocal(SharedPreferences prefs, int grade, List<Subject> subjects)
 ```
 
-내부 헬퍼. Subject 리스트를 JSON 인코딩 후 SharedPreferences에 저장.
+내부 헬퍼. [Subject](subject.md) 리스트를 JSON 인코딩 후 SharedPreferences에 저장.

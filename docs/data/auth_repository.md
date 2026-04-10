@@ -2,7 +2,7 @@
 
 > `lib/data/auth_repository.dart` — 인증/프로필 Repository 인터페이스
 
-`AuthService`의 정적 메서드를 인스턴스 메서드로 감싸 GetIt DI에 등록. 테스트에서 mock 주입 가능.
+[`AuthService`](auth_service.md)의 정적 메서드를 인스턴스 메서드로 감싸 GetIt DI에 등록. 테스트에서 mock 주입 가능.
 
 ---
 

@@ -53,7 +53,7 @@ int get hashCode => subjectName.hashCode ^ subjectClass.hashCode;
 factory Subject.fromJson(Map<String, dynamic> json) => _$SubjectFromJson(json);
 ```
 
-`SubjectDataManager`에서 SharedPreferences/Firestore에 저장/복원할 때 사용.
+[`SubjectDataManager`](subject_data_manager.md)에서 SharedPreferences/Firestore에 저장/복원할 때 사용.
 
 ---
 
