@@ -1,5 +1,10 @@
 # API Reference - 목차
 
+> 화면(Screen)·위젯(Widget) 문서는 제외. 서비스·모델·API·알림 등 핵심 계층만 정리.
+
+## 앱 진입점
+- [main](main.md) — 앱 초기화, MainScreen, 전역 상태
+
 ## API 계층 (lib/api/)
 - [meal_data_api](api/meal_data_api.md) — NEIS 급식 API, 월간 프리페치, 24h/5min 캐시
 - [notice_data_api](api/notice_data_api.md) — NEIS 학사일정 API, 예정 이벤트, 12h 캐시
@@ -44,5 +49,4 @@
 ## 유틸
 - [widget_service](widgets/home_widget/widget_service.md) — 홈 화면 위젯 데이터 갱신
 - [chat_utils](screens/chat/chat_utils.md) — 1:1 채팅 시작 유틸리티
-- [main](main.md) — 앱 진입점, MainScreen
 - [network_status](network/network_status.md) — 네트워크 연결 상태
