@@ -2,7 +2,7 @@
 
 > `lib/data/dday_manager.dart` — D-day CRUD, Firestore 동기화
 
-`DDay` 모델과 `DDayManager` 클래스를 포함. 모든 메서드가 `static`.
+`DDay` 모델과 `DDayManager` 클래스를 포함. 모든 메서드가 `static`. 데이터는 [`SecureStorageService`](secure_storage_service.md)에 저장.
 
 ---
 

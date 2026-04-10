@@ -42,7 +42,7 @@ abstract class AuthRepository {
 }
 ```
 
-`AuthService`의 핵심 메서드만 인터페이스로 추출. 로그인 메서드(signInWithGoogle 등)는 UI에서만 직접 호출하므로 제외.
+[`AuthService`](auth_service.md)의 핵심 메서드만 인터페이스로 추출. 로그인 메서드(signInWithGoogle 등)는 UI에서만 직접 호출하므로 제외.
 
 ---
 
@@ -65,7 +65,7 @@ class FirebaseAuthRepository implements AuthRepository {
 }
 ```
 
-모든 메서드가 `AuthService`의 정적 메서드를 그대로 호출. `const` 생성자로 인스턴스 생성 비용 없음.
+모든 메서드가 [`AuthService`](auth_service.md)의 정적 메서드를 그대로 호출. `const` 생성자로 인스턴스 생성 비용 없음.
 
 ---
 

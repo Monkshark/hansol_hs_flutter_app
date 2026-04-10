@@ -57,7 +57,7 @@
 **저장 후 동작**:
 1. Firestore `users/{uid}`에 프로필 저장 (merge)
 2. 최초 가입이면 관리자에게 가입 알림 전송
-3. `AuthService.clearProfileCache()` 호출
+3. [`AuthService`](data/auth_service.md)`.clearProfileCache()` 호출
 4. `Navigator.pop(true)` 반환
 
 ---

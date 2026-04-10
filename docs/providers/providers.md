@@ -78,7 +78,7 @@ class ExamsNotifier extends AsyncNotifier<List<Exam>> {
 }
 ```
 
-모든 mutator는 `await future`로 초기 build 완료를 보장한 뒤 직접 state를 갱신 (`invalidateSelf` race condition 회피).
+모든 mutator는 `await future`로 초기 build 완료를 보장한 뒤 직접 state를 갱신 (`invalidateSelf` race condition 회피). 데이터 저장은 [`GradeManager`](../data/grade_manager.md) 정적 메서드에 위임.
 
 #### `add(exam)`
 

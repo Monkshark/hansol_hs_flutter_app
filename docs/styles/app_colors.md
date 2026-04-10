@@ -30,8 +30,8 @@ abstract class AppColors {
 | 접근자 | 설명 |
 |--------|------|
 | `AppColors.theme` | `AnimatedAppColors.instance` — 현재 보간된 색상 |
-| `AppColors.lightTheme` | `LightAppColors()` — 라이트 테마 고정 색상 |
-| `AppColors.darkTheme` | `DarkAppColors()` — 다크 테마 고정 색상 |
+| `AppColors.lightTheme` | [`LightAppColors`](light_app_colors.md)`()` — 라이트 테마 고정 색상 |
+| `AppColors.darkTheme` | [`DarkAppColors`](dark_app_colors.md)`()` — 다크 테마 고정 색상 |
 
 ---
 

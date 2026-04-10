@@ -118,7 +118,7 @@ class MainScreen extends StatefulWidget
 3. 온보딩 미완료 시 → `OnboardingScreen`
 4. 비로그인 시 → `LoginScreen`
 5. 로그인 상태면 Firestore에서 일정 복원: `GetIt.I<LocalDataBase>().loadFromFirestore()`
-6. `UpdateChecker.check()` + `PopupNotice.check()`
+6. [`UpdateChecker`](notification/update_checker.md)`.check()` + [`PopupNotice`](notification/popup_notice.md)`.check()`
 
 ### 네비게이션
 

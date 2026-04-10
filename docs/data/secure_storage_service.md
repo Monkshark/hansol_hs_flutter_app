@@ -93,7 +93,7 @@ await write(key, oldValue);      // 암호화 저장
 await onMigrated();              // 호출부가 SharedPreferences에서 삭제
 ```
 
-- `GradeManager.loadExams`, `DDayManager.loadAll` 등에서 첫 호출 시 자동 실행
+- [`GradeManager`](grade_manager.md)`.loadExams`, [`DDayManager`](dday_manager.md)`.loadAll` 등에서 첫 호출 시 자동 실행
 - 한 번 마이그레이션되면 다시 실행되지 않음 (idempotent)
 
 **반환값**: 옮겨진 경우 true, 아닌 경우 false

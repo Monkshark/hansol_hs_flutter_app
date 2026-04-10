@@ -2,7 +2,7 @@
 
 > `lib/notification/daily_meal_notification.dart` — 로컬 급식 알림 스케줄링
 
-인스턴스 메서드. 조식/중식/석식 평일 반복 알림을 `flutter_local_notifications` + `timezone`으로 스케줄링.
+인스턴스 메서드. 조식/중식/석식 평일 반복 알림을 `flutter_local_notifications` + `timezone`으로 스케줄링. [`MealDataApi`](../api/meal_data_api.md)에서 메뉴를 조회해 알림 본문에 포함.
 
 ---
 
