@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 
 /// 오프라인 상태 배너
 ///
@@ -42,13 +43,13 @@ class _OfflineBannerState extends State<OfflineBanner> {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 6),
       color: Colors.red,
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.wifi_off, size: 14, color: Colors.white),
-          SizedBox(width: 6),
-          Text('오프라인 상태입니다',
-            style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+          const Icon(Icons.wifi_off, size: 14, color: Colors.white),
+          const SizedBox(width: 6),
+          Text(AppLocalizations.of(context)!.offline_status,
+            style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
         ],
       ),
     );

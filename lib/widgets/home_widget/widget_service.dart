@@ -1,7 +1,9 @@
 import 'dart:developer';
+import 'dart:ui';
 
 import 'package:hansol_high_school/api/meal_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -24,6 +26,10 @@ class WidgetService {
     await HomeWidget.setAppGroupId(_appGroupId);
   }
 
+  static Future<AppLocalizations> _getLocalizations() async {
+    return await AppLocalizations.delegate.load(const Locale('ko'));
+  }
+
   /// 급식 + 시간표 위젯 데이터 모두 갱신
   static Future<void> updateAll() async {
     await Future.wait([
@@ -36,6 +42,7 @@ class WidgetService {
   static Future<void> updateMealWidget() async {
     try {
       final now = DateTime.now();
+      final l = await _getLocalizations();
       final dateStr = DateFormat('M월 d일 (E)', 'ko').format(now);
 
       final meals = await Future.wait([
@@ -44,9 +51,9 @@ class WidgetService {
         MealDataApi.getMeal(date: now, mealType: MealDataApi.DINNER, type: MealDataApi.MENU),
       ]);
 
-      final breakfast = _cleanMealText(meals[0]?.meal);
-      final lunch = _cleanMealText(meals[1]?.meal);
-      final dinner = _cleanMealText(meals[2]?.meal);
+      final breakfast = _cleanMealText(meals[0]?.meal, l);
+      final lunch = _cleanMealText(meals[1]?.meal, l);
+      final dinner = _cleanMealText(meals[2]?.meal, l);
 
       await HomeWidget.saveWidgetData<String>('meal_date', dateStr);
       await HomeWidget.saveWidgetData<String>('meal_breakfast', breakfast);
@@ -70,7 +77,8 @@ class WidgetService {
 
       if (grade == 0 || classNum == 0) {
         await HomeWidget.saveWidgetData<String>('timetable_data', '');
-        await HomeWidget.saveWidgetData<String>('timetable_date', '학년/반을 설정해주세요');
+        final l = await _getLocalizations();
+        await HomeWidget.saveWidgetData<String>('timetable_date', l.widget_timetableNotSet);
         await HomeWidget.updateWidget(androidName: 'TimetableWidgetProvider');
         return;
       }
@@ -106,11 +114,10 @@ class WidgetService {
     }
   }
 
-  static String _cleanMealText(String? text) {
-    if (text == null || text.isEmpty || text.contains('급식 정보가 없습니다') || text.contains('인터넷')) {
-      return '정보 없음';
+  static String _cleanMealText(String? text, AppLocalizations l) {
+    if (text == null || text.isEmpty) {
+      return l.widget_noMealInfo;
     }
-    // 알레르기 정보 번호 제거 (예: "치킨까스 (1.2.5.6)" → "치킨까스")
     return text.replaceAll(RegExp(r'\s*\([\d.]+\)'), '').replaceAll(RegExp(r'\s*<[\d.]+>'), '');
   }
 

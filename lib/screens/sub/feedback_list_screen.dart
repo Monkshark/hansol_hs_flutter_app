@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -15,7 +16,10 @@ class FeedbackListScreen extends StatelessWidget {
 
   const FeedbackListScreen({Key? key, required this.type, this.showAppBar = false}) : super(key: key);
 
-  String get _title => type == 'app' ? '앱 건의/버그 목록' : '학생회 건의사항 목록';
+  String _title(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return type == 'app' ? l.feedback_listTitle : l.feedback_listCouncilTitle;
+  }
   String get _collection => type == 'app' ? 'app_feedbacks' : 'council_feedbacks';
 
   @override
@@ -38,7 +42,7 @@ class FeedbackListScreen extends StatelessWidget {
           final docs = snapshot.data?.docs ?? [];
           if (docs.isEmpty) {
             return Center(
-              child: Text('건의사항이 없습니다',
+              child: Text(AppLocalizations.of(context)!.feedback_empty,
                 style: TextStyle(color: AppColors.theme.darkGreyColor)),
             );
           }
@@ -52,7 +56,7 @@ class FeedbackListScreen extends StatelessWidget {
             itemBuilder: (context, index) {
               final data = docs[index].data();
               final content = data['content'] ?? '';
-              final authorName = data['authorName'] ?? '알 수 없음';
+              final authorName = data['authorName'] ?? AppLocalizations.of(context)!.feedback_unknown;
               final createdAt = data['createdAt'] as Timestamp?;
               final status = data['status'] ?? 'pending';
               final imageUrls = List<String>.from(data['imageUrls'] ?? []);
@@ -94,7 +98,7 @@ class FeedbackListScreen extends StatelessWidget {
                           children: [
                             Icon(Icons.photo, size: 14, color: AppColors.theme.darkGreyColor),
                             const SizedBox(width: 4),
-                            Text('사진 ${imageUrls.length}장', style: TextStyle(
+                            Text(AppLocalizations.of(context)!.feedback_photoCount(imageUrls.length), style: TextStyle(
                               fontSize: 12, color: AppColors.theme.darkGreyColor)),
                           ],
                         ),
@@ -115,7 +119,7 @@ class FeedbackListScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: Text(_title),
+        title: Text(_title(context)),
         centerTitle: true,
         elevation: 0,
       ),
@@ -138,7 +142,7 @@ class FeedbackListScreen extends StatelessWidget {
     });
     await doc.reference.delete();
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('삭제되었습니다')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.feedback_deleted)));
     }
   }
 
@@ -219,7 +223,7 @@ class FeedbackListScreen extends StatelessWidget {
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                               ),
-                              child: const Text('확인됨'),
+                              child: Text(AppLocalizations.of(context)!.feedback_reviewed),
                             ),
                           ),
                         if (status != 'reviewed' && status != 'resolved')
@@ -238,7 +242,7 @@ class FeedbackListScreen extends StatelessWidget {
                                 padding: const EdgeInsets.symmetric(vertical: 12),
                                 elevation: 0,
                               ),
-                              child: const Text('해결됨'),
+                              child: Text(AppLocalizations.of(context)!.feedback_resolved),
                             ),
                           ),
                       ],
@@ -252,7 +256,7 @@ class FeedbackListScreen extends StatelessWidget {
                             Navigator.pop(ctx);
                             await _deleteFeedback(context, doc);
                           },
-                          child: const Text('삭제', style: TextStyle(color: Colors.red, fontSize: 13)),
+                          child: Text(AppLocalizations.of(context)!.feedback_delete, style: const TextStyle(color: Colors.red, fontSize: 13)),
                         ),
                       ),
                     ],
@@ -274,20 +278,21 @@ class _StatusBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     Color color;
     String label;
     switch (status) {
       case 'reviewed':
         color = Colors.orange;
-        label = '확인됨';
+        label = l.feedback_reviewed;
         break;
       case 'resolved':
         color = const Color(0xFF4CAF50);
-        label = '해결됨';
+        label = l.feedback_resolved;
         break;
       default:
         color = AppColors.theme.darkGreyColor;
-        label = '대기중';
+        label = l.feedback_pending;
     }
 
     return Container(

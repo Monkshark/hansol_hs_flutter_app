@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/api/meal_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
@@ -59,11 +60,16 @@ class DailyMealNotification {
     }
   }
 
+  Future<AppLocalizations> _getLocalizations() async {
+    return await AppLocalizations.delegate.load(const Locale('ko'));
+  }
+
   Future<void> scheduleDailyNotifications() async {
     if (!_isInitialized) await initializeNotifications();
     await cancelAllNotifications();
 
     final settings = SettingData();
+    final l = await _getLocalizations();
     const weekdays = [
       DateTime.monday,
       DateTime.tuesday,
@@ -75,7 +81,9 @@ class DailyMealNotification {
     if (settings.isBreakfastNotificationOn) {
       await _scheduleWeeklyNotification(
         id: 1,
-        mealLabel: '조식',
+        mealLabel: l.meal_breakfast,
+        notiTitle: l.noti_mealBreakfast,
+        l: l,
         time: _parseTimeOfDay(settings.breakfastTime),
         weekdays: weekdays,
       );
@@ -84,7 +92,9 @@ class DailyMealNotification {
     if (settings.isLunchNotificationOn) {
       await _scheduleWeeklyNotification(
         id: 2,
-        mealLabel: '중식',
+        mealLabel: l.meal_lunch,
+        notiTitle: l.noti_mealLunch,
+        l: l,
         time: _parseTimeOfDay(settings.lunchTime),
         weekdays: weekdays,
       );
@@ -93,17 +103,19 @@ class DailyMealNotification {
     if (settings.isDinnerNotificationOn) {
       await _scheduleWeeklyNotification(
         id: 3,
-        mealLabel: '석식',
+        mealLabel: l.meal_dinner,
+        notiTitle: l.noti_mealDinner,
+        l: l,
         time: _parseTimeOfDay(settings.dinnerTime),
         weekdays: weekdays,
       );
     }
 
-    log('DailyMealNotification: scheduled ${settings.isBreakfastNotificationOn ? "조식" : ""} ${settings.isLunchNotificationOn ? "중식" : ""} ${settings.isDinnerNotificationOn ? "석식" : ""}');
+    log('DailyMealNotification: scheduled ${settings.isBreakfastNotificationOn ? "breakfast" : ""} ${settings.isLunchNotificationOn ? "lunch" : ""} ${settings.isDinnerNotificationOn ? "dinner" : ""}');
   }
 
   String _cleanMenu(String? menu) {
-    if (menu == null || menu == '급식 정보가 없습니다.' || menu == '급식 정보가 없습니다') return '';
+    if (menu == null || menu.isEmpty) return '';
     return menu
         .split('\n')
         .map((e) => e.replaceAll(RegExp(r'\([0-9.,\s]+\)'), '').trim())
@@ -114,6 +126,8 @@ class DailyMealNotification {
   Future<void> _scheduleWeeklyNotification({
     required int id,
     required String mealLabel,
+    required String notiTitle,
+    required AppLocalizations l,
     required TimeOfDay time,
     required List<int> weekdays,
   }) async {
@@ -124,7 +138,7 @@ class DailyMealNotification {
       menuPreview = _cleanMenu(meal?.meal);
     } catch (_) {}
 
-    final body = menuPreview.isNotEmpty ? menuPreview : '오늘의 $mealLabel 메뉴를 확인하세요';
+    final body = menuPreview.isNotEmpty ? menuPreview : l.noti_mealConfirm(mealLabel);
 
     for (int weekday in weekdays) {
       final scheduledDate = _nextInstanceOfWeekday(time, weekday);
@@ -132,14 +146,14 @@ class DailyMealNotification {
 
       final androidDetails = AndroidNotificationDetails(
         'daily_meal_channel_id',
-        '급식 알림',
-        channelDescription: '급식 정보 알림을 제공합니다.',
+        l.noti_mealChannelName,
+        channelDescription: l.noti_mealChannelDesc,
         importance: Importance.high,
         priority: Priority.high,
         styleInformation: BigTextStyleInformation(
           body,
-          contentTitle: '🍽️ $mealLabel 알림',
-          summaryText: '한솔고등학교',
+          contentTitle: notiTitle,
+          summaryText: l.noti_schoolName,
         ),
         showWhen: true,
       );
@@ -150,7 +164,7 @@ class DailyMealNotification {
 
       await _localNotificationsPlugin.zonedSchedule(
         notificationId,
-        '🍽️ $mealLabel 알림',
+        notiTitle,
         body,
         scheduledDate,
         NotificationDetails(android: androidDetails, iOS: iosDetails),
@@ -166,26 +180,27 @@ class DailyMealNotification {
   Future<void> sendTestNotification() async {
     if (!_isInitialized) await initializeNotifications();
 
+    final l = await _getLocalizations();
     final scheduledDate = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
 
     final androidDetails = AndroidNotificationDetails(
       'daily_meal_channel_id',
-      '급식 알림',
-      channelDescription: '급식 정보 알림을 제공합니다.',
+      l.noti_mealChannelName,
+      channelDescription: l.noti_mealChannelDesc,
       importance: Importance.max,
       priority: Priority.high,
-      styleInformation: const BigTextStyleInformation(
-        '테스트 알림입니다.\n오늘의 중식 메뉴를 확인하세요!',
-        contentTitle: '🍽️ 중식 알림 (테스트)',
-        summaryText: '한솔고등학교',
+      styleInformation: BigTextStyleInformation(
+        l.noti_mealTestDetail,
+        contentTitle: l.noti_mealTestTitle,
+        summaryText: l.noti_schoolName,
       ),
       showWhen: true,
     );
 
     await _localNotificationsPlugin.zonedSchedule(
       999,
-      '🍽️ 중식 알림 (테스트)',
-      '5초 후 알림 테스트',
+      l.noti_mealTestTitle,
+      l.noti_mealTestBody,
       scheduledDate,
       NotificationDetails(android: androidDetails),
       androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,

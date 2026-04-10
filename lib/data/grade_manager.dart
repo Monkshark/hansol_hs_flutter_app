@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/data/secure_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -72,6 +73,7 @@ class Exam {
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
+  /// Korean display name (for backward compat)
   String get displayName {
     switch (type) {
       case 'midterm': return '$year ${semester}학기 중간고사';
@@ -79,6 +81,17 @@ class Exam {
       case 'mock': return '$year $mockLabel 모의고사';
       case 'private_mock': return '$year $mockLabel';
       default: return '$year 시험';
+    }
+  }
+
+  /// Localized display name (for UI)
+  String localizedDisplayName(AppLocalizations l) {
+    switch (type) {
+      case 'midterm': return '$year ${l.data_midterm(semester.toString())}';
+      case 'final': return '$year ${l.data_final(semester.toString())}';
+      case 'mock': return l.data_mock(year.toString(), mockLabel ?? '');
+      case 'private_mock': return l.data_privateMock(year.toString(), mockLabel ?? '');
+      default: return l.data_exam(year.toString());
     }
   }
 

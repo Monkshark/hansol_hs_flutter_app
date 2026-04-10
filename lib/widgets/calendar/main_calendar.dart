@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -118,7 +119,8 @@ class _MainCalendarState extends State<MainCalendar> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? const Color(0xFFEEEEEE) : const Color(0xFF1E1E1E);
     final subColor = isDark ? const Color(0xFF8B8F99) : const Color(0xFF999999);
-    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+    final l10n = AppLocalizations.of(context)!;
+    final weekdays = [l10n.calendar_weekdaySun, l10n.calendar_weekdayMon, l10n.calendar_weekdayTue, l10n.calendar_weekdayWed, l10n.calendar_weekdayThu, l10n.calendar_weekdayFri, l10n.calendar_weekdaySat];
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8),

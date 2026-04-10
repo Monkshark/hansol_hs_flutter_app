@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
@@ -20,7 +21,7 @@ class NotificationScreen extends StatelessWidget {
 
     if (uid == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('알림')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.notification_title)),
         body: const Center(child: Text('로그인이 필요합니다')),
       );
     }
@@ -34,13 +35,13 @@ class NotificationScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('알림'),
+        title: Text(AppLocalizations.of(context)!.notification_title),
         centerTitle: true,
         elevation: 0,
         actions: [
           TextButton(
             onPressed: () => _markAllRead(uid),
-            child: Text('모두 읽음', style: TextStyle(fontSize: 13, color: AppColors.theme.primaryColor)),
+            child: Text(AppLocalizations.of(context)!.notification_markAllRead, style: TextStyle(fontSize: 13, color: AppColors.theme.primaryColor)),
           ),
         ],
       ),
@@ -60,7 +61,7 @@ class NotificationScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.notifications_none, size: 40, color: AppColors.theme.darkGreyColor),
                   const SizedBox(height: 8),
-                  Text('알림이 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                  Text(AppLocalizations.of(context)!.notification_empty, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                 ],
               ),
             );
@@ -79,7 +80,7 @@ class NotificationScreen extends StatelessWidget {
               final postTitle = data['postTitle'] ?? '';
               final isRead = data['read'] == true;
               final createdAt = data['createdAt'] as Timestamp?;
-              final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
+              final timeStr = createdAt != null ? _formatTime(context, createdAt.toDate()) : '';
 
               final isAccount = type == 'account';
               final icon = type == 'comment'
@@ -88,10 +89,10 @@ class NotificationScreen extends StatelessWidget {
                       ? Icons.person_outline
                       : Icons.reply;
               final message = type == 'comment'
-                  ? '$senderName님이 댓글을 남겼습니다'
+                  ? AppLocalizations.of(context)!.notification_typeComment(senderName)
                   : isAccount
                       ? postTitle
-                      : '$senderName님이 답글을 남겼습니다';
+                      : AppLocalizations.of(context)!.notification_typeReply(senderName);
 
               return GestureDetector(
                 onTap: () {
@@ -169,12 +170,13 @@ class NotificationScreen extends StatelessWidget {
     }
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(BuildContext context, DateTime dt) {
+    final l = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return '방금';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    if (diff.inDays < 7) return '${diff.inDays}일 전';
+    if (diff.inMinutes < 1) return l.common_justNow;
+    if (diff.inMinutes < 60) return l.common_minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.common_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.common_daysAgo(diff.inDays);
     return '${dt.month}/${dt.day}';
   }
 }

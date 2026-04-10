@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/main.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -93,18 +94,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               const SizedBox(height: 12),
               ListTile(
                 leading: Icon(Icons.camera_alt, color: isDark ? Colors.white70 : Colors.black87),
-                title: Text('카메라', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+                title: Text(AppLocalizations.of(context)!.profileEdit_camera, style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
                 onTap: () => Navigator.pop(ctx, ImageSource.camera),
               ),
               ListTile(
                 leading: Icon(Icons.photo_library, color: isDark ? Colors.white70 : Colors.black87),
-                title: Text('갤러리', style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
+                title: Text(AppLocalizations.of(context)!.profileEdit_gallery, style: TextStyle(color: isDark ? Colors.white : Colors.black87)),
                 onTap: () => Navigator.pop(ctx, ImageSource.gallery),
               ),
               if (_profilePhotoUrl != null || _newPhoto != null)
                 ListTile(
                   leading: const Icon(Icons.delete_outline, color: Colors.redAccent),
-                  title: const Text('사진 삭제', style: TextStyle(color: Colors.redAccent)),
+                  title: Text(AppLocalizations.of(context)!.profileEdit_deletePhoto, style: const TextStyle(color: Colors.redAccent)),
                   onTap: () {
                     Navigator.pop(ctx);
                     _removePhoto();
@@ -160,12 +161,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('프로필 사진이 변경되었습니다')));
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoChangedSuccess)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('사진 변경에 실패했습니다')));
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoChangeFailed)));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -191,12 +192,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('프로필 사진이 삭제되었습니다')));
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoDeletedSuccess)));
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('삭제에 실패했습니다')));
+          SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoDeleteFailed)));
       }
     } finally {
       if (mounted) setState(() => _isSaving = false);
@@ -205,19 +206,22 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
   Future<void> _deleteAccount() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     final confirm1 = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _confirmSheet(ctx, isDark, '회원 탈퇴', '정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.', '확인'),
+      builder: (ctx) => _confirmSheet(ctx, isDark, l10n.profileEdit_deleteAccountTitle, l10n.profileEdit_deleteAccountConfirm, l10n.profileEdit_confirm),
     );
     if (confirm1 != true) return;
 
     final userEmail = AuthService.currentUser?.email ?? _email;
+    final confirmValue = userEmail.isNotEmpty ? userEmail : _name;
+    final confirmLabel = userEmail.isNotEmpty ? l10n.profileEdit_emailLabel : l10n.profileEdit_nameLabel;
     final confirm2 = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _emailConfirmSheet(ctx, isDark, userEmail),
+      builder: (ctx) => _deleteConfirmSheet(ctx, isDark, confirmValue, confirmLabel),
     );
     if (confirm2 != true) return;
 
@@ -247,14 +251,14 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             } else {
               if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('재인증이 필요합니다. 다시 로그인 후 시도해주세요.')));
+                  SnackBar(content: Text(l10n.profileEdit_reauthRequired)));
               }
               return;
             }
           } catch (_) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('재인증에 실패했습니다. 다시 로그인 후 시도해주세요.')));
+                SnackBar(content: Text(l10n.profileEdit_reauthFailed)));
             }
             return;
           }
@@ -271,18 +275,19 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       log('Account deletion error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('회원 탈퇴에 실패했습니다. 다시 시도해주세요.')),
+          SnackBar(content: Text(l10n.profileEdit_deleteAccountFailed)),
         );
       }
     }
   }
 
   String _userTypeLabel(String type) {
+    final l10n = AppLocalizations.of(context)!;
     switch (type) {
-      case 'student': return '재학생';
-      case 'graduate': return '졸업생';
-      case 'teacher': return '교사';
-      case 'parent': return '학부모';
+      case 'student': return l10n.profileSetup_student;
+      case 'graduate': return l10n.profileSetup_graduate;
+      case 'teacher': return l10n.profileSetup_teacher;
+      case 'parent': return l10n.profileSetup_parent;
       default: return type;
     }
   }
@@ -308,7 +313,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           foregroundColor: textColor, elevation: 0,
-          title: const Text('내 계정'), centerTitle: true,
+          title: Text(AppLocalizations.of(context)!.profileEdit_accountTitle), centerTitle: true,
         ),
         body: const Center(child: CircularProgressIndicator()),
       );
@@ -319,7 +324,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor, elevation: 0,
-        title: const Text('내 계정'), centerTitle: true,
+        title: Text(AppLocalizations.of(context)!.profileEdit_accountTitle), centerTitle: true,
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(20, 16, 20, MediaQuery.of(context).padding.bottom + 32),
@@ -389,16 +394,16 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               child: Column(
                 children: [
                   if (_userType == 'student') ...[
-                    _infoRow('학번', _studentId),
-                    if (_grade > 0) _infoRow('학년/반', '$_grade학년 $_classNum반'),
+                    _infoRow(AppLocalizations.of(context)!.profileEdit_studentId, _studentId),
+                    if (_grade > 0) _infoRow(AppLocalizations.of(context)!.profileEdit_gradeClass, AppLocalizations.of(context)!.profileSetup_gradeClass(_grade, _classNum)),
                   ],
                   if (_userType == 'graduate' && _graduationYear != null)
-                    _infoRow('졸업연도', '$_graduationYear년'),
+                    _infoRow(AppLocalizations.of(context)!.profileEdit_graduationYear, '$_graduationYear'),
                   if (_userType == 'teacher' && _teacherSubject != null && _teacherSubject!.isNotEmpty)
-                    _infoRow('담당과목', _teacherSubject!),
+                    _infoRow(AppLocalizations.of(context)!.profileEdit_teacherSubject, _teacherSubject!),
                   if (_email.isNotEmpty)
-                    _infoRow('이메일', _email),
-                  _infoRow('로그인', _providerLabel(_loginProvider)),
+                    _infoRow(AppLocalizations.of(context)!.profileEdit_emailLabel, _email),
+                  _infoRow(AppLocalizations.of(context)!.profileEdit_loginProvider, _providerLabel(_loginProvider)),
                 ],
               ),
             ),
@@ -407,7 +412,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
             GestureDetector(
               onTap: _deleteAccount,
-              child: Text('회원 탈퇴',
+              child: Text(AppLocalizations.of(context)!.profileEdit_deleteAccountTitle,
                 style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor,
                   decoration: TextDecoration.underline)),
             ),
@@ -436,7 +441,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _emailConfirmSheet(BuildContext ctx, bool isDark, String email) {
+  Widget _deleteConfirmSheet(BuildContext ctx, bool isDark, String confirmValue, String confirmLabel) {
     final controller = TextEditingController();
     bool matched = false;
     return Padding(
@@ -453,15 +458,15 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
             Container(width: 36, height: 4, decoration: BoxDecoration(
               color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
-            Text('최종 확인', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+            Text(AppLocalizations.of(context)!.profileEdit_finalConfirmTitle, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
               color: isDark ? Colors.white : Colors.black87)),
             const SizedBox(height: 8),
             Padding(padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Text('탈퇴를 진행하려면 이메일을 정확히 입력하세요.',
+              child: Text(AppLocalizations.of(context)!.profileEdit_finalConfirmMessage(confirmLabel),
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor, height: 1.5))),
             const SizedBox(height: 4),
-            Text(email, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
+            Text(confirmValue, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
             const SizedBox(height: 12),
             Padding(padding: const EdgeInsets.symmetric(horizontal: 16),
               child: TextField(
@@ -469,26 +474,26 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
                 autofocus: true,
                 style: TextStyle(color: isDark ? Colors.white : Colors.black87),
                 decoration: InputDecoration(
-                  hintText: '이메일 입력',
+                  hintText: AppLocalizations.of(context)!.profileEdit_inputPlaceholder(confirmLabel),
                   hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                   filled: true,
                   fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                 ),
-                onChanged: (v) => setSheetState(() => matched = v.trim() == email),
+                onChanged: (v) => setSheetState(() => matched = v.trim() == confirmValue),
               )),
             const SizedBox(height: 16),
             Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
               Expanded(child: TextButton(
                 onPressed: () => Navigator.pop(ctx, false),
-                child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
               )),
               const SizedBox(width: 10),
               Expanded(child: ElevatedButton(
                 onPressed: matched ? () => Navigator.pop(ctx, true) : null,
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-                child: const Text('탈퇴'),
+                child: Text(AppLocalizations.of(context)!.profileEdit_withdrawButton),
               )),
             ])),
             const SizedBox(height: 12),
@@ -520,7 +525,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
         Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
           Expanded(child: TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
           )),
           const SizedBox(width: 10),
           Expanded(child: ElevatedButton(

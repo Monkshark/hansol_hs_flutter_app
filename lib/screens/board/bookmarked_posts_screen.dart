@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
@@ -23,7 +24,7 @@ class BookmarkedPostsScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('저장한 글'),
+        title: Text(AppLocalizations.of(context)!.bookmarks_title),
         centerTitle: true,
         elevation: 0,
       ),
@@ -47,10 +48,10 @@ class BookmarkedPostsScreen extends StatelessWidget {
                         Icon(Icons.bookmark_border, size: 48,
                             color: AppColors.theme.darkGreyColor),
                         const SizedBox(height: 12),
-                        Text('저장한 글이 없습니다',
+                        Text(AppLocalizations.of(context)!.bookmarks_empty,
                             style: TextStyle(color: AppColors.theme.darkGreyColor)),
                         const SizedBox(height: 4),
-                        Text('게시글에서 북마크 아이콘을 눌러 저장하세요',
+                        Text(AppLocalizations.of(context)!.bookmarks_emptyHelper,
                             style: TextStyle(
                                 fontSize: 12,
                                 color: AppColors.theme.darkGreyColor)),

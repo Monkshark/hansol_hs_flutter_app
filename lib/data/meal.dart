@@ -24,16 +24,13 @@ class Meal with _$Meal {
   @override
   String toString() => meal ?? '';
 
-  String getMealType() {
+  /// Returns meal type key: 'breakfast', 'lunch', 'dinner'
+  String getMealTypeKey() {
     switch (mealType) {
-      case 1:
-        return '조식';
-      case 2:
-        return '중식';
-      case 3:
-        return '석식';
-      default:
-        return '중식';
+      case 1: return 'breakfast';
+      case 2: return 'lunch';
+      case 3: return 'dinner';
+      default: return 'lunch';
     }
   }
 }

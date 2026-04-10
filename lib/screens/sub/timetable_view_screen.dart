@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/screens/sub/teacher_timetable_select_screen.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -322,25 +323,25 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     VoidCallback onPressed;
 
     if (_isTeacher) {
-      title = '수업을 설정하면 시간표가 표시됩니다';
-      buttonLabel = '수업 설정'; buttonIcon = Icons.settings;
+      title = AppLocalizations.of(context)!.timetable_setTeachingMsg;
+      buttonLabel = AppLocalizations.of(context)!.timetable_setSetting; buttonIcon = Icons.settings;
       onPressed = () async {
         await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeacherTimetableSelectScreen()));
         _future = _buildTeacherTimetable(); setState(() {});
       };
     } else if (notSet) {
-      title = '학년/반을 먼저 설정해주세요';
-      buttonLabel = '학년/반 설정';
+      title = AppLocalizations.of(context)!.timetable_setGradeMsg;
+      buttonLabel = AppLocalizations.of(context)!.timetable_setGrade;
       buttonIcon = Icons.school;
       onPressed = () => _showClassPicker();
     } else if (is1st) {
-      title = '학년/반을 설정하면 시간표가 표시됩니다';
-      buttonLabel = '학년/반 설정';
+      title = AppLocalizations.of(context)!.timetable_set1stMsg;
+      buttonLabel = AppLocalizations.of(context)!.timetable_setGrade;
       buttonIcon = Icons.school;
       onPressed = () => _showClassPicker();
     } else {
-      title = '선택과목을 설정하면 시간표가 표시됩니다';
-      buttonLabel = '선택과목 설정';
+      title = AppLocalizations.of(context)!.timetable_setSubjectMsg;
+      buttonLabel = AppLocalizations.of(context)!.timetable_setSubject;
       buttonIcon = Icons.settings;
       onPressed = () async {
         await Navigator.of(context).push(
@@ -439,7 +440,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-        title: Text(_isTeacher ? '내 수업 시간표' : SettingData().isGradeSet ? '$_grade학년 $_classNum반 시간표' : '시간표'),
+        title: Text(_isTeacher ? AppLocalizations.of(context)!.timetable_teacherScreenTitle : SettingData().isGradeSet ? AppLocalizations.of(context)!.timetable_classTitle(_grade, _classNum) : AppLocalizations.of(context)!.timetable_screenTitle),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -450,13 +451,13 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
                 await Navigator.of(context).push(MaterialPageRoute(builder: (_) => const TeacherTimetableSelectScreen()));
                 _future = _buildTeacherTimetable(); setState(() {});
               },
-              tooltip: '수업 설정',
+              tooltip: AppLocalizations.of(context)!.timetable_setting,
             ),
           if (!_isTeacher && _grade == 1)
             IconButton(
               icon: const Icon(Icons.swap_horiz),
               onPressed: _showClassPicker,
-              tooltip: '반 변경',
+              tooltip: AppLocalizations.of(context)!.timetable_changeClass,
             ),
           if (!_isTeacher && _grade >= 2)
             IconButton(
@@ -467,7 +468,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
                 _future = _buildTimetable();
                 setState(() {});
               },
-              tooltip: '새로고침',
+              tooltip: AppLocalizations.of(context)!.timetable_refresh,
             ),
         ],
       ),
@@ -478,7 +479,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (!snapshot.hasData) {
-            return const Center(child: Text('시간표를 불러올 수 없습니다'));
+            return Center(child: Text(AppLocalizations.of(context)!.timetable_loadError));
           }
 
           final result = snapshot.data!;
@@ -506,7 +507,8 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
   Widget _buildGridView(_TimetableResult result, bool isDark) {
     final todayWeekday = DateTime.now().weekday;
-    final days = ['월', '화', '수', '목', '금'];
+    final l10n = AppLocalizations.of(context)!;
+    final days = [l10n.timetable_dayMon, l10n.timetable_dayTue, l10n.timetable_dayWed, l10n.timetable_dayThu, l10n.timetable_dayFri];
     int maxPeriod = 0;
     for (int d = 0; d < 5; d++) for (int p = 6; p >= 0; p--) if (result.grid[d][p].isNotEmpty) { if (p + 1 > maxPeriod) maxPeriod = p + 1; break; }
     if (maxPeriod == 0) maxPeriod = 7;

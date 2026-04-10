@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 현재/다음 교시 실시간 표시 카드
@@ -46,7 +47,8 @@ class _CurrentSubjectCardState extends State<CurrentSubjectCard> {
   ];
 
   String _formatTime(int h, int m) {
-    final period = h < 12 ? '오전' : '오후';
+    final l10n = AppLocalizations.of(context)!;
+    final period = h < 12 ? l10n.widget_morning : l10n.widget_afternoon;
     final hour = h > 12 ? h - 12 : h;
     return '$period $hour:${m.toString().padLeft(2, '0')}';
   }
@@ -54,19 +56,19 @@ class _CurrentSubjectCardState extends State<CurrentSubjectCard> {
   @override
   Widget build(BuildContext context) {
     if (!SettingData().isGradeSet) {
-      return _buildEmptyCard(context, '학년/반을 설정하면\n시간표가 표시됩니다');
+      return _buildEmptyCard(context, AppLocalizations.of(context)!.widget_gradeNotSet);
     }
 
     final now = _now;
     if (now.weekday > 5) {
-      return _buildEmptyCard(context, '주말에는 수업이 없어요');
+      return _buildEmptyCard(context, AppLocalizations.of(context)!.widget_weekend);
     }
 
     return FutureBuilder<List<String>>(
       future: _getTodaySubjects(),
       builder: (context, snapshot) {
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
-          return _buildEmptyCard(context, '오늘 시간표를 불러오는 중...');
+          return _buildEmptyCard(context, AppLocalizations.of(context)!.widget_loadingSchedule);
         }
 
         final subjects = snapshot.data!;
@@ -108,7 +110,7 @@ class _CurrentSubjectCardState extends State<CurrentSubjectCard> {
             nextSubject: afterNext >= 0 ? subjects[afterNext] : null,
             nowMinutes: nowMinutes, isCurrently: false);
         } else {
-          return _buildEmptyCard(context, '오늘 남은 수업이 없어요');
+          return _buildEmptyCard(context, AppLocalizations.of(context)!.widget_noClass);
         }
       },
     );
@@ -186,15 +188,15 @@ class _CurrentSubjectCardState extends State<CurrentSubjectCard> {
               Expanded(child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${period + 1}교시는',
+                  Text(AppLocalizations.of(context)!.widget_currentPeriod(period + 1),
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.bodyLarge?.color)),
-                  Text('$subject${isCurrently ? "이에요!" : " 시작 예정"}',
+                  Text(isCurrently ? AppLocalizations.of(context)!.widget_isClass(subject) : AppLocalizations.of(context)!.widget_willStart(subject),
                     style: TextStyle(fontSize: 20, fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.bodyLarge?.color)),
                   const SizedBox(height: 8),
                   if (nextPeriod != null && nextSubject != null)
-                    Text('${nextPeriod + 1}교시 $nextSubject',
+                    Text(AppLocalizations.of(context)!.widget_nextClass(nextPeriod + 1, nextSubject),
                       style: TextStyle(fontSize: 13, color: AppColors.theme.mealTypeTextColor)),
                   const SizedBox(height: 4),
                   Text('${_formatTime(times[0], times[1])} - ${_formatTime(times[2], times[3])}',

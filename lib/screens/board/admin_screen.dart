@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/admin/admin_widgets.dart';
 import 'package:hansol_high_school/screens/board/admin/delete_logs_tab.dart';
 import 'package:hansol_high_school/screens/board/admin/popup_notice_manager.dart';
@@ -20,6 +21,16 @@ class AdminScreen extends StatefulWidget {
 }
 
 class _AdminScreenState extends State<AdminScreen> {
+  final _pendingKey = GlobalKey<UsersTabState>();
+  final _suspendedKey = GlobalKey<UsersTabState>();
+  final _approvedKey = GlobalKey<UsersTabState>();
+
+  void _refreshAllTabs() {
+    _pendingKey.currentState?.refresh();
+    _suspendedKey.currentState?.refresh();
+    _approvedKey.currentState?.refresh();
+  }
+
   @override
   Widget build(BuildContext context) {
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
@@ -42,37 +53,37 @@ class _AdminScreenState extends State<AdminScreen> {
       body: ListView(
         padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
         children: [
-          AdminSection(title: '사용자 관리', icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
-            AdminTile(title: '승인 대기', icon: Icons.hourglass_top, color: Colors.orange, initiallyExpanded: true,
-              cardColor: cardColor, child: UsersTab(filter: 'pending')),
+          AdminSection(title: AppLocalizations.of(context)!.admin_userManagement, icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
+            AdminTile(title: AppLocalizations.of(context)!.admin_usersPending, icon: Icons.hourglass_top, color: Colors.orange, initiallyExpanded: true,
+              cardColor: cardColor, child: UsersTab(key: _pendingKey, filter: 'pending', onChanged: _refreshAllTabs)),
             const SizedBox(height: 8),
-            AdminTile(title: '정지된 사용자', icon: Icons.block, color: Colors.red,
-              cardColor: cardColor, child: UsersTab(filter: 'suspended')),
+            AdminTile(title: AppLocalizations.of(context)!.admin_usersSuspended, icon: Icons.block, color: Colors.red,
+              cardColor: cardColor, child: UsersTab(key: _suspendedKey, filter: 'suspended', onChanged: _refreshAllTabs)),
             const SizedBox(height: 8),
-            AdminTile(title: '일반 사용자', icon: Icons.person_outline, color: AppColors.theme.primaryColor,
-              cardColor: cardColor, child: UsersTab(filter: 'approved')),
+            AdminTile(title: AppLocalizations.of(context)!.admin_usersApproved, icon: Icons.person_outline, color: AppColors.theme.primaryColor,
+              cardColor: cardColor, child: UsersTab(key: _approvedKey, filter: 'approved', onChanged: _refreshAllTabs)),
           ]),
           const SizedBox(height: 16),
 
-          AdminSection(title: '게시판 관리', icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
-            AdminTile(title: '신고', icon: Icons.flag_outlined, color: Colors.red, initiallyExpanded: true,
+          AdminSection(title: AppLocalizations.of(context)!.admin_boardManagement, icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
+            AdminTile(title: AppLocalizations.of(context)!.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, initiallyExpanded: true,
               cardColor: cardColor, child: ReportsTab()),
             const SizedBox(height: 8),
-            AdminTile(title: '삭제 로그', icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
+            AdminTile(title: AppLocalizations.of(context)!.admin_deleteLogs, icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
               cardColor: cardColor, child: const DeleteLogsTab()),
           ]),
           const SizedBox(height: 16),
 
-          AdminSection(title: '건의사항', icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
-            AdminTile(title: '학생회 건의', icon: Icons.school_outlined, color: const Color(0xFF4CAF50), initiallyExpanded: true,
+          AdminSection(title: AppLocalizations.of(context)!.admin_feedback, icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
+            AdminTile(title: AppLocalizations.of(context)!.admin_feedbackCouncil, icon: Icons.school_outlined, color: const Color(0xFF4CAF50), initiallyExpanded: true,
               cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
             const SizedBox(height: 8),
-            AdminTile(title: '앱 건의/버그', icon: Icons.bug_report_outlined, color: AppColors.theme.primaryColor,
+            AdminTile(title: AppLocalizations.of(context)!.admin_feedbackApp, icon: Icons.bug_report_outlined, color: AppColors.theme.primaryColor,
               cardColor: cardColor, child: const FeedbackListScreen(type: 'app')),
           ]),
           const SizedBox(height: 16),
 
-          AdminSection(title: '긴급 공지', icon: Icons.warning_amber_rounded, color: Colors.red, cardColor: cardColor, children: [
+          AdminSection(title: AppLocalizations.of(context)!.admin_emergencyNotice, icon: Icons.warning_amber_rounded, color: Colors.red, cardColor: cardColor, children: [
             PopupNoticeManager(cardColor: cardColor),
           ]),
         ],

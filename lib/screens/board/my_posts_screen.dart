@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -39,7 +40,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
 
     if (uid == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('내 활동')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.myActivity_title)),
         body: const Center(child: Text('로그인이 필요합니다')),
       );
     }
@@ -49,7 +50,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('내 활동'),
+        title: Text(AppLocalizations.of(context)!.myActivity_title),
         centerTitle: true,
         elevation: 0,
         bottom: TabBar(
@@ -59,10 +60,10 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
           indicatorColor: AppColors.theme.primaryColor,
           indicatorSize: TabBarIndicatorSize.label,
           labelStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
-          tabs: const [
-            Tab(text: '내가 쓴 글'),
-            Tab(text: '내가 쓴 댓글'),
-            Tab(text: '저장한 글'),
+          tabs: [
+            Tab(text: AppLocalizations.of(context)!.myActivity_myPosts),
+            Tab(text: AppLocalizations.of(context)!.myActivity_myComments),
+            Tab(text: AppLocalizations.of(context)!.myActivity_savedPosts),
           ],
         ),
       ),
@@ -99,7 +100,7 @@ class _MyPostsList extends StatelessWidget {
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
           return Center(
-            child: Text('작성한 글이 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            child: Text(AppLocalizations.of(context)!.myActivity_noPosts, style: TextStyle(color: AppColors.theme.darkGreyColor)),
           );
         }
 
@@ -141,7 +142,7 @@ class _MyCommentsList extends StatelessWidget {
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
           return Center(
-            child: Text('작성한 댓글이 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            child: Text(AppLocalizations.of(context)!.myActivity_noComments, style: TextStyle(color: AppColors.theme.darkGreyColor)),
           );
         }
 
@@ -220,7 +221,7 @@ class _BookmarkedPostsList extends StatelessWidget {
         if (docs.isEmpty) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.bookmark_border, size: 40, color: AppColors.theme.darkGreyColor),
           const SizedBox(height: 8),
-          Text('저장한 글이 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+          Text(AppLocalizations.of(context)!.bookmarks_empty, style: TextStyle(color: AppColors.theme.darkGreyColor)),
         ]));
         return ListView.separated(
           padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),

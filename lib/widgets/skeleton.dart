@@ -119,7 +119,6 @@ class HomeSkeleton extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // 현재 교시 카드
             Container(
               height: 70,
               decoration: BoxDecoration(
@@ -128,7 +127,6 @@ class HomeSkeleton extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // 시간표 카드
             Container(
               height: 56,
               decoration: BoxDecoration(
@@ -137,7 +135,6 @@ class HomeSkeleton extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // 게시판 카드
             Container(
               height: 56,
               decoration: BoxDecoration(

@@ -5,6 +5,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 
@@ -33,7 +34,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (user == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 취소되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.login_canceled)),
       );
       return;
     }
@@ -74,8 +75,12 @@ class _LoginScreenState extends State<LoginScreen> {
       } else {
         token = await kakao.UserApi.instance.loginWithKakaoAccount();
       }
-      return AuthService.signInWithKakao(token.accessToken);
-    } catch (e) {
+      debugPrint('KakaoLogin: got access token, calling signInWithKakao...');
+      final user = await AuthService.signInWithKakao(token.accessToken);
+      debugPrint('KakaoLogin: result = $user');
+      return user;
+    } catch (e, st) {
+      debugPrint('KakaoLogin error: $e\n$st');
       return null;
     }
   }
@@ -102,16 +107,16 @@ class _LoginScreenState extends State<LoginScreen> {
                 child: Image.asset('assets/images/app_icon.png', width: 80, height: 80),
               ),
               const SizedBox(height: 24),
-              Text('한솔고등학교', style: TextStyle(
+              Text(AppLocalizations.of(context)!.login_schoolName, style: TextStyle(
                 fontSize: 24, fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.bodyLarge?.color)),
               const SizedBox(height: 8),
-              Text('로그인하면 더 많은 기능을 이용할 수 있어요',
+              Text(AppLocalizations.of(context)!.login_subtitle,
                 style: TextStyle(fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
               const Spacer(flex: 3),
 
               _loginButton(
-                label: 'Google로 계속하기',
+                label: AppLocalizations.of(context)!.login_googleContinue,
                 svgAsset: 'assets/icons/google.svg',
                 bgColor: isDark ? const Color(0xFF2A2D35) : Colors.white,
                 borderColor: isDark ? const Color(0xFF3A3D45) : const Color(0xFFDADCE0),
@@ -123,7 +128,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
               if (Platform.isIOS) ...[
                 _loginButton(
-                  label: 'Apple로 계속하기',
+                  label: AppLocalizations.of(context)!.login_appleContinue,
                   svgAsset: 'assets/icons/apple.svg',
                   svgColor: Colors.white,
                   bgColor: Colors.black,
@@ -134,7 +139,7 @@ class _LoginScreenState extends State<LoginScreen> {
               ],
 
               _loginButton(
-                label: '카카오로 계속하기',
+                label: AppLocalizations.of(context)!.login_kakaoContinue,
                 svgAsset: 'assets/icons/kakao.svg',
                 svgColor: isDark ? const Color(0xFFFEE500) : const Color(0xFF181600),
                 bgColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFFEE500),
@@ -146,7 +151,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 10),
 
               _loginButton(
-                label: 'GitHub로 계속하기',
+                label: AppLocalizations.of(context)!.login_githubContinue,
                 svgAsset: 'assets/icons/github.svg',
                 svgColor: Colors.white,
                 bgColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFF24292F),
@@ -158,7 +163,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 16),
               TextButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: Text('나중에 하기', style: TextStyle(color: AppColors.theme.mealTypeTextColor)),
+                child: Text(AppLocalizations.of(context)!.login_skipButton, style: TextStyle(color: AppColors.theme.mealTypeTextColor)),
               ),
               const Spacer(),
             ],

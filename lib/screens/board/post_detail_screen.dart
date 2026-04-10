@@ -6,6 +6,7 @@ import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/widgets/event_attach_card.dart';
 import 'package:hansol_high_school/screens/board/widgets/poll_card.dart';
@@ -32,6 +33,19 @@ class PostDetailScreen extends StatefulWidget {
 
   @override
   State<PostDetailScreen> createState() => _PostDetailScreenState();
+}
+
+String _formatSuspendDuration(AppLocalizations l, Duration diff) {
+  final days = diff.inDays;
+  final hours = diff.inHours % 24;
+  final minutes = diff.inMinutes % 60;
+  final seconds = diff.inSeconds % 60;
+  final parts = <String>[];
+  if (days > 0) parts.add(l.data_suspendDays(days));
+  if (hours > 0) parts.add(l.data_suspendHours(hours));
+  if (minutes > 0) parts.add(l.data_suspendMinutes(minutes));
+  if (parts.isEmpty) parts.add(l.data_suspendSeconds(seconds));
+  return parts.join(' ');
 }
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
@@ -108,13 +122,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                             size: 22,
                             color: isBookmarked ? AppColors.theme.primaryColor : null,
                           ),
-                          tooltip: '저장',
+                          tooltip: AppLocalizations.of(context)!.post_bookmark,
                           onPressed: () => _toggleBookmark(isBookmarked),
                         ),
                       if (!isAuthor && data['isAnonymous'] != true)
                         IconButton(
                           icon: const Icon(Icons.chat_bubble_outline, size: 22),
-                          tooltip: '채팅',
+                          tooltip: AppLocalizations.of(context)!.post_chat,
                           onPressed: () => startChat(context, data['authorUid'], data['authorName'] ?? ''),
                         ),
                       IconButton(
@@ -287,7 +301,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         child: ElevatedButton.icon(
                           onPressed: post['isResolved'] == true ? null : _resolvePost,
                           icon: Icon(post['isResolved'] == true ? Icons.check_circle : Icons.check, size: 18),
-                          label: Text(post['isResolved'] == true ? '해결됨' : '찾았어요'),
+                          label: Text(post['isResolved'] == true ? AppLocalizations.of(context)!.post_resolvedLabel : AppLocalizations.of(context)!.post_found),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: post['isResolved'] == true ? Colors.grey : const Color(0xFF4CAF50),
                             foregroundColor: Colors.white,
@@ -310,14 +324,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('댓글 ${comments.length}',
+                            Text(AppLocalizations.of(context)!.post_comments(comments.length),
                               style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textColor)),
                             const SizedBox(height: 12),
                             if (comments.isEmpty)
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20),
                                 child: Center(
-                                  child: Text('첫 댓글을 남겨보세요',
+                                  child: Text(AppLocalizations.of(context)!.post_firstComment,
                                     style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
                                 ),
                               )
@@ -349,7 +363,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       children: [
                         Icon(Icons.reply, size: 14, color: AppColors.theme.primaryColor),
                         const SizedBox(width: 4),
-                        Text('$_replyToName에게 답글',
+                        Text(AppLocalizations.of(context)!.post_replyTo(_replyToName!),
                           style: TextStyle(fontSize: 12, color: AppColors.theme.primaryColor)),
                         const Spacer(),
                         GestureDetector(
@@ -377,7 +391,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 : AppColors.theme.darkGreyColor,
                           ),
                         ),
-                        child: Text('익명',
+                        child: Text(AppLocalizations.of(context)!.post_anonymous,
                           style: TextStyle(
                             fontSize: 12, fontWeight: FontWeight.w600,
                             color: _commentAnonymous
@@ -393,7 +407,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         controller: _commentController,
                         style: TextStyle(fontSize: 14, color: textColor),
                         decoration: InputDecoration(
-                          hintText: _replyToName != null ? '@$_replyToName' : '댓글을 입력하세요',
+                          hintText: _replyToName != null ? '@$_replyToName' : AppLocalizations.of(context)!.post_commentPlaceholder,
                           hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                           filled: true,
                           fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
@@ -449,7 +463,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 backgroundColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFF0F0F0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+              child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
             )),
             const SizedBox(width: 10),
             Expanded(child: ElevatedButton(
@@ -484,23 +498,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   ) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final items = <_ActionItem>[];
-    items.add(_ActionItem(Icons.share_outlined, '공유', () {
+    items.add(_ActionItem(Icons.share_outlined, AppLocalizations.of(context)!.post_share, () {
       final title = data['title'] ?? '';
       final content = data['content'] ?? '';
       Share.share('$title\n\n$content');
     }));
     if (isAuthor) {
-      items.add(_ActionItem(Icons.edit_outlined, '수정', () => _editPost(data)));
-      items.add(_ActionItem(Icons.delete_outline, '삭제', _deletePost, isDestructive: true));
+      items.add(_ActionItem(Icons.edit_outlined, AppLocalizations.of(context)!.post_edit, () => _editPost(data)));
+      items.add(_ActionItem(Icons.delete_outline, AppLocalizations.of(context)!.post_delete, _deletePost, isDestructive: true));
     }
     if (!isAuthor && isManager)
-      items.add(_ActionItem(Icons.delete_outline, '삭제 (관리자)', _deletePost, isDestructive: true));
+      items.add(_ActionItem(Icons.delete_outline, AppLocalizations.of(context)!.post_deleteByAdmin, _deletePost, isDestructive: true));
     if (isManager && !isPinned)
-      items.add(_ActionItem(Icons.push_pin_outlined, '공지 등록', _pinPost));
+      items.add(_ActionItem(Icons.push_pin_outlined, AppLocalizations.of(context)!.post_pinAsNotice, _pinPost));
     if (isManager && isPinned)
-      items.add(_ActionItem(Icons.push_pin, '공지 해제', _unpinPost));
+      items.add(_ActionItem(Icons.push_pin, AppLocalizations.of(context)!.post_unpinNotice, _unpinPost));
     if (!isAuthor) {
-      items.add(_ActionItem(Icons.flag_outlined, '신고', _reportPost, isDestructive: true));
+      items.add(_ActionItem(Icons.flag_outlined, AppLocalizations.of(context)!.post_report, _reportPost, isDestructive: true));
     }
 
     showModalBottomSheet(
@@ -561,10 +575,16 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             Container(width: 36, height: 4, decoration: BoxDecoration(
               color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
-            Text('신고 사유 선택', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+            Text(AppLocalizations.of(context)!.post_reportSelectReason, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
               color: Theme.of(ctx).textTheme.bodyLarge?.color)),
             const SizedBox(height: 12),
-            ...['욕설/비방', '음란물', '광고/스팸', '개인정보 노출', '기타'].map((r) =>
+            ...[
+              AppLocalizations.of(context)!.post_reportReasonSwearing,
+              AppLocalizations.of(context)!.post_reportReasonAdult,
+              AppLocalizations.of(context)!.post_reportReasonSpam,
+              AppLocalizations.of(context)!.post_reportReasonPrivacy,
+              AppLocalizations.of(context)!.post_reportReasonOther,
+            ].map((r) =>
               RadioListTile<String>(
                 value: r, groupValue: selected,
                 title: Text(r, style: TextStyle(fontSize: 14, color: Theme.of(ctx).textTheme.bodyLarge?.color)),
@@ -580,7 +600,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0,
                   padding: const EdgeInsets.symmetric(vertical: 12)),
-                child: const Text('신고'),
+                child: Text(AppLocalizations.of(context)!.post_reportButton),
               ),
             )),
           ])),
@@ -600,7 +620,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (existingReport.docs.isNotEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('이미 신고한 게시글입니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.post_reportAlreadyReported)),
         );
       }
       return;
@@ -615,7 +635,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('신고가 접수되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.post_reportSuccess)),
       );
     }
   }
@@ -711,17 +731,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     ));
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${DateFormat('M/d').format(date)} 일정에 추가되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.post_eventAdded(DateFormat('M/d').format(date)))),
       );
     }
   }
 
   Future<void> _submitComment() async {
+    FocusScope.of(context).unfocus();
     final text = _commentController.text.trim();
     if (text.isEmpty) return;
     if (text.length > 1000) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('댓글은 1000자 이내로 입력하세요')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.post_commentTooLong)),
       );
       return;
     }
@@ -734,11 +755,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (result != true) return;
     }
 
-    final suspendMsg = await AuthService.getSuspendedMessage();
-    if (suspendMsg != null) {
+    final suspendDuration = await AuthService.getSuspendedDuration();
+    if (suspendDuration != null) {
       if (mounted) {
+        final l = AppLocalizations.of(context)!;
+        final formatted = _formatSuspendDuration(l, suspendDuration);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('계정 정지 상태입니다\n남은 기간: $suspendMsg')),
+          SnackBar(content: Text('${l.board_accountSuspended}\n${l.board_suspendedRemaining(formatted)}')),
         );
       }
       return;
@@ -760,7 +783,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (now - lastCommentTime < 10000) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('댓글은 10초에 한 번만 작성할 수 있습니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.post_commentRateLimit)),
         );
       }
       return;
@@ -907,7 +930,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         _replyToCommentId = null;
         _replyToName = null;
       });
-      await _refresh();
     }
   }
 
@@ -977,12 +999,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (c['isAnonymous'] == true && c['authorUid'] != null) {
       final uid = c['authorUid'] as String;
       if (uid == _currentPostAuthorUid) {
-        c['authorName'] = '익명(글쓴이)';
+        c['authorName'] = AppLocalizations.of(context)!.post_anonymousAuthor;
       } else if (_anonymousMapping.containsKey(uid)) {
-        c['authorName'] = '익명${_anonymousMapping[uid]}';
+        c['authorName'] = AppLocalizations.of(context)!.post_anonymousNum(_anonymousMapping[uid]);
       }
     }
-    final String resolvedName = (c['authorName'] ?? '익명') as String;
+    final String resolvedName = (c['authorName'] ?? AppLocalizations.of(context)!.post_anonymous) as String;
 
     return Padding(
       padding: EdgeInsets.only(left: indent ? 32 : 0),
@@ -1018,7 +1040,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Future<void> _confirmDeleteComment(String commentId) async {
-    final confirm = await _showConfirmSheet('댓글 삭제', '댓글을 삭제하시겠습니까?', '삭제');
+    final confirm = await _showConfirmSheet(AppLocalizations.of(context)!.post_confirmDeleteComment, AppLocalizations.of(context)!.post_confirmDeleteCommentMessage, AppLocalizations.of(context)!.common_delete);
 
     if (confirm == true) {
       await _postRef.collection('comments').doc(commentId).delete();
@@ -1035,7 +1057,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (pinnedSnapshot.docs.length >= 3) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('공지는 최대 3개까지 가능합니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.post_pinMaxed)),
         );
       }
       return;
@@ -1048,7 +1070,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('공지로 등록되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.post_pinSuccess)),
       );
     }
   }
@@ -1060,7 +1082,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('공지가 해제되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.post_unpinSuccess)),
       );
     }
   }
@@ -1080,7 +1102,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   }
 
   Future<void> _deletePost() async {
-    final confirm = await _showConfirmSheet('게시글 삭제', '정말 삭제하시겠습니까?', '삭제');
+    final confirm = await _showConfirmSheet(AppLocalizations.of(context)!.post_deleteConfirm, AppLocalizations.of(context)!.post_deleteConfirmMessage, AppLocalizations.of(context)!.common_delete);
 
     if (confirm == true) {
       final uid = AuthService.currentUser?.uid;
@@ -1126,7 +1148,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     await _postRef.update({'isResolved': true});
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('해결됨으로 표시되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.post_resolvedMarked)),
       );
     }
   }

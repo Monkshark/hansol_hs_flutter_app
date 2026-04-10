@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
 import 'package:hansol_high_school/data/dday_manager.dart';
 import 'package:hansol_high_school/data/local_database.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
@@ -91,14 +92,14 @@ class _DDayScreenState extends State<DDayScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('D-day 추가', style: TextStyle(
+                  Text(AppLocalizations.of(context)!.dday_addTitle, style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w700,
                     color: Theme.of(ctx).textTheme.bodyLarge?.color)),
                   const SizedBox(height: 20),
                   TextField(
                     controller: titleController,
                     decoration: InputDecoration(
-                      hintText: '예: 중간고사, 수행평가',
+                      hintText: AppLocalizations.of(context)!.dday_hint,
                       filled: true,
                       fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
                       border: OutlineInputBorder(
@@ -131,7 +132,7 @@ class _DDayScreenState extends State<DDayScreen> {
                       child: Text(
                         selectedDate != null
                             ? DateFormat('yyyy년 M월 d일', 'ko_KR').format(selectedDate!)
-                            : '날짜를 선택하세요',
+                            : AppLocalizations.of(context)!.dday_selectDate,
                         style: TextStyle(
                           color: selectedDate != null
                               ? Theme.of(ctx).textTheme.bodyLarge?.color
@@ -146,7 +147,7 @@ class _DDayScreenState extends State<DDayScreen> {
                       Expanded(
                         child: TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                          child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -162,7 +163,7 @@ class _DDayScreenState extends State<DDayScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: const Text('추가'),
+                          child: Text(AppLocalizations.of(context)!.dday_addButton),
                         ),
                       ),
                     ],
@@ -193,7 +194,7 @@ class _DDayScreenState extends State<DDayScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('D-day 관리'),
+        title: Text(AppLocalizations.of(context)!.dday_screenTitle),
         centerTitle: true,
         elevation: 0,
       ),
@@ -209,7 +210,7 @@ class _DDayScreenState extends State<DDayScreen> {
                 children: [
                   Icon(Icons.event, size: 48, color: AppColors.theme.darkGreyColor),
                   const SizedBox(height: 12),
-                  Text('D-day를 추가해보세요', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                  Text(AppLocalizations.of(context)!.dday_empty, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                 ],
               ),
             )
@@ -223,7 +224,7 @@ class _DDayScreenState extends State<DDayScreen> {
                   if (eventIndex == 0) {
                     return Padding(
                       padding: const EdgeInsets.only(top: 16, bottom: 4),
-                      child: Text('예정된 일정', style: TextStyle(
+                      child: Text(AppLocalizations.of(context)!.dday_upcoming, style: TextStyle(
                         fontSize: 14, fontWeight: FontWeight.w600,
                         color: AppColors.theme.darkGreyColor)),
                     );
@@ -240,7 +241,7 @@ class _DDayScreenState extends State<DDayScreen> {
                       await _save();
                       setState(() {});
                       ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('${event.title}이(가) D-day에 추가되었습니다')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.dday_added(event.title))),
                       );
                     },
                     child: Container(
@@ -258,7 +259,7 @@ class _DDayScreenState extends State<DDayScreen> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(child: Text(
-                            event.dDay == 0 ? '오늘' : 'D-${event.dDay}',
+                            event.dDay == 0 ? AppLocalizations.of(context)!.dday_today : AppLocalizations.of(context)!.dday_daysPrefix(event.dDay),
                             style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: accentColor),
                           )),
                         ),
@@ -280,7 +281,7 @@ class _DDayScreenState extends State<DDayScreen> {
                                       color: accentColor.withAlpha(20),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: Text('학사', style: TextStyle(fontSize: 10, color: accentColor)),
+                                    child: Text(AppLocalizations.of(context)!.dday_school, style: TextStyle(fontSize: 10, color: accentColor)),
                                   ),
                                 ],
                               ],
@@ -352,7 +353,7 @@ class _DDayScreenState extends State<DDayScreen> {
                             ),
                             child: Center(
                               child: Text(
-                                isPast ? 'D+${-days}' : days == 0 ? 'D-Day' : 'D-$days',
+                                isPast ? AppLocalizations.of(context)!.dday_daysPastPrefix(-days) : days == 0 ? AppLocalizations.of(context)!.dday_dday : AppLocalizations.of(context)!.dday_daysPrefix(days),
                                 style: TextStyle(
                                   fontSize: days.abs() > 99 ? 12 : 16,
                                   fontWeight: FontWeight.w800,

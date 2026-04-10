@@ -7,6 +7,7 @@ import 'package:hansol_high_school/data/meal.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 급식 메뉴 카드 위젯
@@ -105,15 +106,18 @@ class _MealCardState extends State<MealCard>
     }
   }
 
-  static const _allergyMap = {
-    '1': '난류', '2': '우유', '3': '메밀', '4': '땅콩',
-    '5': '대두', '6': '밀', '7': '고등어', '8': '게',
-    '9': '새우', '10': '돼지고기', '11': '복숭아', '12': '토마토',
-    '13': '아황산류', '14': '호두', '15': '닭고기', '16': '쇠고기',
-    '17': '오징어', '18': '조개류',
-  };
+  Map<String, String> _getAllergyMap(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    return {
+      '1': l10n.data_allergyEgg, '2': l10n.data_allergyMilk, '3': l10n.data_allergyBuckwheat, '4': l10n.data_allergyPeanut,
+      '5': l10n.data_allergyBean, '6': l10n.data_allergyWheat, '7': l10n.data_allergyMackerel, '8': l10n.data_allergyCrab,
+      '9': l10n.data_allergyShrimp, '10': l10n.data_allergyPork, '11': l10n.data_allergyPeach, '12': l10n.data_allergyTomato,
+      '13': l10n.data_allergySulfite, '14': l10n.data_allergyWalnut, '15': l10n.data_allergyChicken, '16': l10n.data_allergyBeef,
+      '17': l10n.data_allergySquid, '18': l10n.data_allergyShellfish,
+    };
+  }
 
-  Set<String> _extractAllergyNumbers(String? meal) {
+  Set<String> _extractAllergyNumbers(String? meal, Map<String, String> allergyMap) {
     if (meal == null) return {};
     final regex = RegExp(r'\(([0-9.,\s]+)\)');
     final matches = regex.allMatches(meal);
@@ -122,7 +126,7 @@ class _MealCardState extends State<MealCard>
       final inside = match.group(1)!;
       for (final num in inside.split(RegExp(r'[.,\s]+'))) {
         final trimmed = num.trim();
-        if (trimmed.isNotEmpty && _allergyMap.containsKey(trimmed)) {
+        if (trimmed.isNotEmpty && allergyMap.containsKey(trimmed)) {
           numbers.add(trimmed);
         }
       }
@@ -131,7 +135,8 @@ class _MealCardState extends State<MealCard>
   }
 
   void _showNutritionInfo() {
-    final allergyNumbers = _extractAllergyNumbers(mealData.meal);
+    final allergyMap = _getAllergyMap(context);
+    final allergyNumbers = _extractAllergyNumbers(mealData.meal, allergyMap);
 
     showModalBottomSheet(
       context: context,
@@ -163,7 +168,7 @@ class _MealCardState extends State<MealCard>
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  '영양 정보',
+                  AppLocalizations.of(context)!.meal_nutritionTitle,
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w700,
@@ -171,13 +176,13 @@ class _MealCardState extends State<MealCard>
                   ),
                 ),
                 const SizedBox(height: 16),
-                _infoRow('식사', mealData.getMealType()),
-                _infoRow('칼로리', mealData.kcal.isNotEmpty ? mealData.kcal : '정보 없음'),
+                _infoRow(AppLocalizations.of(context)!.meal_mealType, _localizedMealType(context, mealData.getMealTypeKey())),
+                _infoRow(AppLocalizations.of(context)!.meal_calorie, mealData.kcal.isNotEmpty ? mealData.kcal : AppLocalizations.of(context)!.meal_noInfoShort),
                 if (mealData.ntrInfo.isNotEmpty) ...[
                   const SizedBox(height: 12),
                   const Divider(),
                   const SizedBox(height: 12),
-                  Text('영양 성분', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600,
+                  Text(AppLocalizations.of(context)!.meal_nutrition, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.bodyLarge?.color)),
                   const SizedBox(height: 8),
                   ...mealData.ntrInfo.split('\n').where((s) => s.trim().isNotEmpty).map((line) {
@@ -193,7 +198,7 @@ class _MealCardState extends State<MealCard>
                   const Divider(),
                   const SizedBox(height: 12),
                   Text(
-                    '포함된 알레르기 유발 식품',
+                    AppLocalizations.of(context)!.meal_allergy,
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
@@ -215,7 +220,7 @@ class _MealCardState extends State<MealCard>
                           ),
                         ),
                         child: Text(
-                          '$num. ${_allergyMap[num]}',
+                          '$num. ${allergyMap[num]}',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w600,
@@ -233,6 +238,16 @@ class _MealCardState extends State<MealCard>
         ),
       ),
     );
+  }
+
+  String _localizedMealType(BuildContext context, String key) {
+    final l = AppLocalizations.of(context)!;
+    switch (key) {
+      case 'breakfast': return l.meal_breakfast;
+      case 'lunch': return l.meal_lunch;
+      case 'dinner': return l.meal_dinner;
+      default: return l.meal_lunch;
+    }
   }
 
   Widget _infoRow(String label, String value) {
@@ -271,7 +286,7 @@ class _MealCardState extends State<MealCard>
                     child: Padding(
                       padding: const EdgeInsets.all(16),
                       child: Text(
-                        mealData.meal ?? "급식 정보가 없습니다",
+                        mealData.meal ?? AppLocalizations.of(context)!.meal_noData,
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.w500,

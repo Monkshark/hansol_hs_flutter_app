@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class TimetableColorPickerDialog extends StatefulWidget {
@@ -119,7 +120,7 @@ class TimetableColorPickerDialogState extends State<TimetableColorPickerDialog> 
                         side: BorderSide(color: AppColors.theme.darkGreyColor),
                       ),
                     ),
-                    child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                    child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -136,7 +137,7 @@ class TimetableColorPickerDialogState extends State<TimetableColorPickerDialog> 
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('확인'),
+                    child: Text(AppLocalizations.of(context)!.common_confirm),
                   ),
                 ),
               ],
@@ -149,7 +150,7 @@ class TimetableColorPickerDialogState extends State<TimetableColorPickerDialog> 
                     widget.onColorSelected(const Color(0x00000000));
                     Navigator.of(context).pop();
                   },
-                  child: Text('기본 색상으로 초기화', style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                  child: Text(AppLocalizations.of(context)!.timetable_colorPickerReset, style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
                 ),
               ),
           ],

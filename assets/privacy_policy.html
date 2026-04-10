@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>개인정보 처리방침 - 한솔고등학교</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, 'Pretendard', 'Noto Sans KR', sans-serif; line-height: 1.75; color: #222; background: #fff; padding: 24px 20px 60px; max-width: 720px; margin: 0 auto; font-size: 15px; }
+  h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  h2 { font-size: 17px; font-weight: 700; margin-top: 36px; margin-bottom: 12px; padding-bottom: 6px; border-bottom: 1px solid #e5e5e5; }
+  h3 { font-size: 15px; font-weight: 600; margin-top: 20px; margin-bottom: 8px; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 8px 0 12px 20px; }
+  li { margin-bottom: 4px; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 14px; }
+  th, td { border: 1px solid #ddd; padding: 8px 10px; text-align: left; vertical-align: top; }
+  th { background: #f7f7f7; font-weight: 600; white-space: nowrap; }
+  .date { color: #666; font-size: 14px; margin-bottom: 24px; }
+  .note { background: #f9f9f9; border-left: 3px solid #4A90D9; padding: 12px 16px; margin: 12px 0; border-radius: 4px; font-size: 14px; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #1a1a1a; color: #e0e0e0; }
+    th { background: #2a2a2a; }
+    th, td { border-color: #444; }
+    h2 { border-bottom-color: #444; }
+    .note { background: #252525; border-left-color: #5a9fd4; }
+    .date { color: #999; }
+  }
+</style>
+</head>
+<body>
+
+<h1>개인정보 처리방침</h1>
+<p class="date">시행일자: 2026년 4월 10일</p>
+
+<p><strong>한솔고등학교</strong> 앱(이하 "앱")은 「개인정보 보호법」 제30조에 따라 이용자의 개인정보를 보호하고, 이와 관련한 고충을 신속하게 처리하기 위하여 다음과 같이 개인정보 처리방침을 수립·공개합니다.</p>
+
+<!-- 제1조 -->
+<h2>제1조 (개인정보의 처리 목적)</h2>
+<p>앱은 다음의 목적을 위하여 개인정보를 처리합니다. 처리한 개인정보는 아래 목적 이외의 용도로는 이용하지 않으며, 목적이 변경되는 경우 별도의 동의를 받겠습니다.</p>
+<ol>
+  <li><strong>회원 가입 및 인증</strong>: 소셜 로그인(Google, Apple, Kakao, GitHub)을 통한 본인 확인 및 회원 식별</li>
+  <li><strong>프로필 관리</strong>: 학교 구성원(학생, 졸업생, 교사, 학부모) 식별 및 학년·반 정보 관리</li>
+  <li><strong>게시판 서비스</strong>: 게시글·댓글·좋아요·북마크·투표·익명글 기능 제공</li>
+  <li><strong>1:1 채팅 서비스</strong>: 사용자 간 메시지 송수신</li>
+  <li><strong>알림 서비스</strong>: 급식 알림, 댓글·멘션·인기글·새글·채팅·계정 상태 변경 푸시 알림</li>
+  <li><strong>학사 정보 조회</strong>: 급식 메뉴, 시간표 정보 제공 및 로컬 알림</li>
+  <li><strong>성적 관리</strong>: 시험 성적·목표 성적 저장 (기기 내 암호화 저장, 서버 미전송)</li>
+  <li><strong>앱 개선</strong>: 이용 통계 분석 및 오류·충돌 수집을 통한 서비스 안정성 향상</li>
+  <li><strong>부정 이용 방지</strong>: 신고·차단·계정 정지 처리 및 서비스 건전성 유지</li>
+</ol>
+
+<!-- 제2조 -->
+<h2>제2조 (수집하는 개인정보의 항목 및 수집 방법)</h2>
+
+<h3>1. 필수 수집 항목</h3>
+<table>
+  <tr><th>항목</th><th>수집 방법</th></tr>
+  <tr><td>이름</td><td>소셜 로그인 프로필 또는 직접 입력</td></tr>
+  <tr><td>이메일</td><td>소셜 로그인 제공자로부터 자동 수집</td></tr>
+  <tr><td>고유 사용자 식별자(UID)</td><td>Firebase 인증 시 자동 생성</td></tr>
+  <tr><td>로그인 제공자 정보</td><td>Google/Apple/Kakao/GitHub 로그인 시 자동 수집</td></tr>
+  <tr><td>사용자 유형</td><td>학생/졸업생/교사/학부모 중 직접 선택</td></tr>
+  <tr><td>학년·반</td><td>직접 입력</td></tr>
+</table>
+
+<h3>2. 선택 수집 항목</h3>
+<table>
+  <tr><th>항목</th><th>수집 방법</th></tr>
+  <tr><td>프로필 사진</td><td>소셜 로그인 프로필 또는 직접 업로드</td></tr>
+  <tr><td>졸업연도</td><td>졸업생인 경우 직접 입력</td></tr>
+  <tr><td>담당 과목</td><td>교사인 경우 직접 입력</td></tr>
+</table>
+
+<h3>3. 서비스 이용 중 자동 생성되는 정보</h3>
+<table>
+  <tr><th>항목</th><th>설명</th></tr>
+  <tr><td>게시글·댓글·채팅 내용</td><td>사용자가 작성한 텍스트 및 이미지</td></tr>
+  <tr><td>상호작용 기록</td><td>좋아요·싫어요·북마크·투표 참여 기록</td></tr>
+  <tr><td>신고·차단 기록</td><td>부정 이용 방지 목적으로 생성</td></tr>
+  <tr><td>검색 기록</td><td>최근 검색어 최대 10개 (기기 내에만 저장)</td></tr>
+  <tr><td>알림 설정값</td><td>푸시·급식 알림 on/off 및 알림 시간</td></tr>
+</table>
+
+<h3>4. 자동 수집 항목</h3>
+<table>
+  <tr><th>항목</th><th>설명</th></tr>
+  <tr><td>FCM 디바이스 토큰</td><td>푸시 알림 발송을 위한 기기 식별 토큰</td></tr>
+  <tr><td>앱 이용 로그</td><td>화면 조회, 로그인/로그아웃, 게시글 작성·조회 등 (Firebase Analytics)</td></tr>
+  <tr><td>오류·충돌 정보</td><td>스택트레이스, 기기 OS 버전, 앱 버전 등 (Firebase Crashlytics)</td></tr>
+  <tr><td>기기 정보</td><td>OS 종류·버전, 화면 크기, 앱 버전 (Firebase SDK 자동 수집)</td></tr>
+</table>
+
+<h3>5. 기기 내에만 저장되는 정보 (서버 미전송)</h3>
+<table>
+  <tr><th>항목</th><th>저장 방식</th></tr>
+  <tr><td>시험 성적·목표 성적</td><td>Android Keystore / iOS Keychain 암호화 저장</td></tr>
+  <tr><td>D-day 목록</td><td>암호화 로컬 저장</td></tr>
+  <tr><td>임시저장 게시글</td><td>기기 내 저장 (SharedPreferences)</td></tr>
+  <tr><td>테마·알림 시간 설정</td><td>기기 내 저장 (SharedPreferences)</td></tr>
+</table>
+
+<!-- 제3조 -->
+<h2>제3조 (개인정보의 보유 및 이용 기간)</h2>
+<p>앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다. 각 항목별 보유 기간은 다음과 같습니다.</p>
+<table>
+  <tr><th>구분</th><th>보유 기간</th><th>근거</th></tr>
+  <tr><td>회원 정보 (프로필·인증)</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>
+  <tr><td>게시글·댓글·첨부 이미지</td><td>작성일로부터 4년 (고정 공지 제외)</td><td>서비스 운영 정책</td></tr>
+  <tr><td>채팅 메시지</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>
+  <tr><td>앱 이용 로그 (Analytics)</td><td>수집일로부터 14개월</td><td>Firebase 기본 보존 정책</td></tr>
+  <tr><td>오류·충돌 보고 (Crashlytics)</td><td>수집일로부터 90일</td><td>Firebase 기본 보존 정책</td></tr>
+  <tr><td>기기 내 저장 데이터</td><td>앱 삭제 시 자동 삭제</td><td>로컬 저장</td></tr>
+</table>
+
+<!-- 제4조 -->
+<h2>제4조 (개인정보의 제3자 제공)</h2>
+<p>앱은 이용자의 개인정보를 제1조에서 명시한 범위 내에서만 처리하며, 이용자의 사전 동의 없이 제3자에게 제공하지 않습니다. 다만 다음의 경우에는 예외로 합니다.</p>
+<ul>
+  <li>이용자가 사전에 동의한 경우</li>
+  <li>법령의 규정에 의거하거나, 수사 목적으로 법령에 정해진 절차와 방법에 따라 수사기관의 요구가 있는 경우</li>
+</ul>
+
+<!-- 제5조 -->
+<h2>제5조 (개인정보 처리의 위탁)</h2>
+<p>앱은 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.</p>
+<table>
+  <tr><th>수탁자</th><th>위탁 업무</th><th>소재국</th></tr>
+  <tr><td>Google LLC (Firebase)</td><td>인증, 데이터 저장(Firestore/Storage), 푸시 알림(FCM), 이용 통계(Analytics), 오류 수집(Crashlytics), 앱 호스팅</td><td>미국</td></tr>
+  <tr><td>Google LLC</td><td>Google 계정 로그인 인증</td><td>미국</td></tr>
+  <tr><td>Apple Inc.</td><td>Apple 계정 로그인 인증</td><td>미국</td></tr>
+  <tr><td>Kakao Corp.</td><td>카카오 계정 로그인 인증</td><td>한국</td></tr>
+  <tr><td>GitHub Inc. (Microsoft)</td><td>GitHub 계정 로그인 인증</td><td>미국</td></tr>
+</table>
+
+<!-- 제6조 -->
+<h2>제6조 (개인정보의 국외 이전)</h2>
+<p>앱은 「개인정보 보호법」 제28조의8에 따라 다음과 같이 개인정보를 국외로 이전하고 있습니다.</p>
+<table>
+  <tr><th>항목</th><th>내용</th></tr>
+  <tr><td>이전받는 자</td><td>Google LLC</td></tr>
+  <tr><td>이전되는 국가</td><td>미국</td></tr>
+  <tr><td>이전 항목</td><td>회원 정보, 게시글·댓글·채팅 내용, 첨부 이미지, 이용 로그, 오류 정보, FCM 토큰</td></tr>
+  <tr><td>이전 목적</td><td>클라우드 서버를 통한 서비스 제공 및 앱 안정성 개선</td></tr>
+  <tr><td>보유·이용 기간</td><td>제3조에 명시된 기간과 동일</td></tr>
+  <tr><td>이전받는 자의 보호 조치</td><td>Google Cloud 보안 인증(SOC 2, ISO 27001), 전송 구간 TLS 암호화, 저장 데이터 AES-256 암호화</td></tr>
+</table>
+
+<!-- 제7조 -->
+<h2>제7조 (정보주체의 권리·의무 및 행사 방법)</h2>
+<p>이용자(정보주체)는 언제든지 다음의 권리를 행사할 수 있습니다.</p>
+<ol>
+  <li><strong>개인정보 열람 요구</strong>: 본인의 개인정보 처리 현황을 열람할 수 있습니다.</li>
+  <li><strong>개인정보 정정·삭제 요구</strong>: 앱 내 프로필 수정 기능을 통해 이름·사진·학년·반 등을 직접 정정할 수 있으며, 게시글·댓글은 직접 삭제할 수 있습니다.</li>
+  <li><strong>개인정보 처리정지 요구</strong>: 개인정보 처리의 정지를 요구할 수 있습니다.</li>
+  <li><strong>동의 철회(회원 탈퇴)</strong>: 앱 내 <strong>설정 → 계정 삭제</strong> 기능을 통해 언제든지 회원 탈퇴 및 동의 철회가 가능합니다. 탈퇴 시 서버에 저장된 회원 정보, 하위 데이터(알림 등)가 즉시 삭제됩니다.</li>
+</ol>
+<p>위 권리 행사는 앱 내 기능 또는 아래 개인정보 보호책임자에게 이메일로 요청하실 수 있으며, 지체 없이 조치하겠습니다.</p>
+<div class="note">
+  만 14세 미만 아동의 경우 법정대리인이 해당 아동의 개인정보에 대한 열람, 정정·삭제, 처리정지를 요구할 수 있습니다.
+</div>
+
+<!-- 제8조 -->
+<h2>제8조 (개인정보의 파기 절차 및 방법)</h2>
+<p>앱은 개인정보의 보유 기간이 경과하거나 처리 목적이 달성된 때에는 지체 없이 해당 개인정보를 파기합니다.</p>
+
+<h3>1. 파기 절차</h3>
+<ul>
+  <li><strong>회원 탈퇴 시</strong>: Firebase 인증 정보 삭제, Firestore 프로필 문서 및 하위 컬렉션(알림 등) 일괄 삭제</li>
+  <li><strong>게시글 자동 파기</strong>: 작성일로부터 4년이 경과한 비고정 게시글과 해당 첨부 이미지·댓글을 자동으로 일괄 삭제 (서버 예약 작업)</li>
+  <li><strong>기기 내 데이터</strong>: 앱 삭제 시 SharedPreferences 및 SecureStorage 데이터 자동 삭제</li>
+</ul>
+
+<h3>2. 파기 방법</h3>
+<ul>
+  <li><strong>전자적 파일</strong>: 복구 불가능한 방법으로 영구 삭제</li>
+  <li><strong>서버 저장 데이터</strong>: Firebase Firestore·Storage에서 문서 및 파일 영구 삭제</li>
+</ul>
+
+<!-- 제9조 -->
+<h2>제9조 (개인정보의 안전성 확보 조치)</h2>
+<p>앱은 「개인정보 보호법」 제29조에 따라 다음과 같은 안전성 확보 조치를 취하고 있습니다.</p>
+<ol>
+  <li><strong>전송 구간 암호화</strong>: 모든 서버 통신은 HTTPS/TLS로 암호화됩니다.</li>
+  <li><strong>접근 통제</strong>: Firestore Security Rules를 통해 본인 데이터만 수정 가능하도록 제한하고, 관리자 권한을 분리하고 있습니다.</li>
+  <li><strong>민감 정보 암호화 저장</strong>: 시험 성적 등 민감 데이터는 Android Keystore / iOS Keychain을 이용하여 기기 내 암호화 저장합니다.</li>
+  <li><strong>앱 무결성 검증</strong>: Firebase App Check(Android Play Integrity)를 적용하여 무단 접근을 방지합니다.</li>
+  <li><strong>비밀번호 미보관</strong>: 소셜 로그인만 사용하며, 앱에서 비밀번호를 직접 저장하거나 관리하지 않습니다.</li>
+  <li><strong>부정 이용 방지</strong>: 신고 기능에 5분당 3건 제한(rate limiting)을 적용하고 있습니다.</li>
+</ol>
+
+<!-- 제10조 -->
+<h2>제10조 (자동 수집 장치의 설치·운영 및 거부)</h2>
+<p>앱은 웹 쿠키를 사용하지 않습니다. 다만 Firebase Analytics SDK를 통해 앱 이용 로그(화면 조회, 이벤트 등)를 자동으로 수집합니다.</p>
+<ul>
+  <li><strong>수집 목적</strong>: 서비스 이용 통계 분석 및 앱 개선</li>
+  <li><strong>거부 방법</strong>: 기기 설정에서 광고 추적 제한을 활성화하거나, 앱을 삭제하여 수집을 중단할 수 있습니다.</li>
+</ul>
+
+<!-- 제11조 -->
+<h2>제11조 (익명 게시에 관한 사항)</h2>
+<p>앱은 게시판에서 익명 게시 기능을 제공합니다. 익명으로 작성된 게시글·댓글의 작성자 정보(이름 등)는 다른 이용자에게 표시되지 않습니다. 다만, <strong>서비스 운영 및 신고 처리 목적</strong>으로 작성자 식별 정보(UID)는 서버에 보관됩니다.</p>
+
+<!-- 제12조 -->
+<h2>제12조 (만 14세 미만 아동의 개인정보)</h2>
+<p>앱은 고등학생 및 학교 관계자를 주 이용 대상으로 하며, <strong>만 14세 미만 아동의 개인정보를 수집하지 않습니다</strong>. 만 14세 미만임이 확인된 경우 회원 가입이 제한될 수 있으며, 수집된 정보는 지체 없이 파기합니다.</p>
+
+<!-- 제13조 -->
+<h2>제13조 (개인정보 보호책임자)</h2>
+<p>앱은 개인정보 처리에 관한 업무를 총괄하고, 이용자의 불만 처리 및 피해 구제를 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.</p>
+<table>
+  <tr><th>항목</th><th>내용</th></tr>
+  <tr><td>성명</td><td>추희도</td></tr>
+  <tr><td>직위</td><td>앱 개발자</td></tr>
+  <tr><td>연락처</td><td>justinchoo0814@gmail.com</td></tr>
+</table>
+<p>개인정보 관련 문의, 불만, 피해 구제 등은 위 연락처로 문의해 주시기 바랍니다.</p>
+
+<!-- 제14조 -->
+<h2>제14조 (권익 침해 구제 방법)</h2>
+<p>이용자는 개인정보 침해로 인한 피해 구제를 아래 기관에 문의할 수 있습니다.</p>
+<ul>
+  <li><strong>개인정보침해 신고센터</strong> (한국인터넷진흥원): <a href="https://privacy.kisa.or.kr">privacy.kisa.or.kr</a> / 국번 없이 118</li>
+  <li><strong>개인정보 분쟁조정위원회</strong>: <a href="https://www.kopico.go.kr">kopico.go.kr</a> / 국번 없이 1833-6972</li>
+  <li><strong>대검찰청 사이버수사과</strong>: <a href="https://www.spo.go.kr">spo.go.kr</a> / 국번 없이 1301</li>
+  <li><strong>경찰청 사이버수사국</strong>: <a href="https://ecrm.police.go.kr">ecrm.police.go.kr</a> / 국번 없이 182</li>
+</ul>
+
+<!-- 제15조 -->
+<h2>제15조 (개인정보 처리방침의 변경)</h2>
+<p>이 개인정보 처리방침은 시행일로부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 수정될 수 있습니다. 변경 사항이 있을 경우 시행일 7일 전부터 앱 내 공지사항 또는 푸시 알림을 통해 고지하겠습니다.</p>
+<ul>
+  <li><strong>공고일자</strong>: 2026년 4월 10일</li>
+  <li><strong>시행일자</strong>: 2026년 4월 10일</li>
+</ul>
+
+</body>
+</html>

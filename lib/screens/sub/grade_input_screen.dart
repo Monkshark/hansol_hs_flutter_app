@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -91,7 +92,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     if (gridData == null || gridData.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('저장된 시간표가 없습니다. 시간표를 먼저 설정해주세요.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.gradeInput_noTimetable)),
         );
       }
       return;
@@ -112,13 +113,13 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     if (available.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('시간표의 모든 과목이 이미 추가되어 있습니다.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.gradeInput_allSubjectsAdded)),
         );
       }
       return;
     }
 
-    final selected = await _showSubjectPicker(available, '시간표 과목 선택');
+    final selected = await _showSubjectPicker(available, AppLocalizations.of(context)!.gradeInput_selectSubjects);
     if (selected != null && selected.isNotEmpty) {
       setState(() {
         for (final name in selected) {
@@ -140,7 +141,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     if (available.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('모든 과목이 이미 추가되어 있습니다.')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.gradeInput_allMockAdded)),
         );
       }
       return;
@@ -200,7 +201,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   Row(children: [
                     Expanded(child: TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                     )),
                     const SizedBox(width: 10),
                     Expanded(child: ElevatedButton(
@@ -217,7 +218,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: const Text('추가'),
+                      child: Text(AppLocalizations.of(context)!.dday_addButton),
                     )),
                   ]),
                 ],
@@ -253,7 +254,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('모의고사 과목 선택', style: TextStyle(
+                  Text(AppLocalizations.of(context)!.gradeInput_mockSubjectPicker, style: TextStyle(
                     fontSize: 18, fontWeight: FontWeight.w700,
                     color: Theme.of(ctx).textTheme.bodyLarge?.color,
                   )),
@@ -300,7 +301,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   Row(children: [
                     Expanded(child: TextButton(
                       onPressed: () => Navigator.pop(ctx),
-                      child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                     )),
                     const SizedBox(width: 10),
                     Expanded(child: ElevatedButton(
@@ -317,7 +318,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: const Text('추가'),
+                      child: Text(AppLocalizations.of(context)!.dday_addButton),
                     )),
                   ]),
                 ],
@@ -354,7 +355,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 Container(width: 36, height: 4, decoration: BoxDecoration(
                   color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
                 const SizedBox(height: 16),
-                Text('과목 추가', style: TextStyle(
+                Text(AppLocalizations.of(context)!.gradeInput_addSubject, style: TextStyle(
                   fontSize: 17, fontWeight: FontWeight.w700,
                   color: Theme.of(ctx).textTheme.bodyLarge?.color,
                 )),
@@ -363,7 +364,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   controller: ctrl,
                   autofocus: true,
                   decoration: InputDecoration(
-                    hintText: '과목명 입력',
+                    hintText: AppLocalizations.of(context)!.gradeInput_subjectName,
                     filled: true,
                     fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
                     border: OutlineInputBorder(
@@ -379,7 +380,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 Row(children: [
                   Expanded(child: TextButton(
                     onPressed: () => Navigator.pop(ctx),
-                    child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                    child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                   )),
                   const SizedBox(width: 10),
                   Expanded(child: ElevatedButton(
@@ -393,7 +394,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('추가'),
+                    child: Text(AppLocalizations.of(context)!.dday_addButton),
                   )),
                 ]),
               ],
@@ -407,7 +408,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       if (_subjects.any((s) => s.name == name)) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('\'$name\' 과목이 이미 추가되어 있습니다.')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.gradeInput_addSubjectDuplicate(name))),
           );
         }
         return;
@@ -420,13 +421,13 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   Future<void> _save() async {
     if (_subjects.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('과목을 1개 이상 추가해주세요.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.gradeInput_addMinSubjects)),
       );
       return;
     }
     if (_type == 'private_mock' && _privateLabelController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('사설모의 이름을 입력해주세요.')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.gradeInput_privateNameRequired)),
       );
       return;
     }
@@ -481,7 +482,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: Text(_isEdit ? '시험 수정' : '시험 추가'),
+        title: Text(_isEdit ? AppLocalizations.of(context)!.gradeInput_screenEdit : AppLocalizations.of(context)!.gradeInput_screenTitle),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -499,7 +500,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           children: [
             // ── 시험 유형 ──
-            _sectionLabel('시험 유형'),
+            _sectionLabel(AppLocalizations.of(context)!.gradeInput_typeSection),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -529,7 +530,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             const SizedBox(height: 20),
 
             // ── 시험 정보 ──
-            _sectionLabel('시험 정보'),
+            _sectionLabel(AppLocalizations.of(context)!.gradeInput_infoSection),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(16),
@@ -542,7 +543,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   // 연도 / 학기 / 학년
                   Row(children: [
                     Expanded(child: _dropdown<int>(
-                      label: '연도',
+                      label: AppLocalizations.of(context)!.gradeInput_year,
                       value: _year,
                       items: List.generate(5, (i) => DateTime.now().year - 2 + i),
                       itemLabel: (v) => '$v년',
@@ -551,7 +552,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     )),
                     const SizedBox(width: 10),
                     Expanded(child: _dropdown<int>(
-                      label: '학기',
+                      label: AppLocalizations.of(context)!.gradeInput_semester,
                       value: _semester,
                       items: [1, 2],
                       itemLabel: (v) => '$v학기',
@@ -560,7 +561,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     )),
                     const SizedBox(width: 10),
                     Expanded(child: _dropdown<int>(
-                      label: '학년',
+                      label: AppLocalizations.of(context)!.gradeInput_grade,
                       value: _grade,
                       items: [1, 2, 3],
                       itemLabel: (v) => '$v학년',
@@ -572,7 +573,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   if (_type == 'mock') ...[
                     const SizedBox(height: 12),
                     _dropdown<String>(
-                      label: '시행월',
+                      label: AppLocalizations.of(context)!.gradeInput_month,
                       value: _mockMonth,
                       items: _mockMonths,
                       itemLabel: (v) => '$v 모의고사',
@@ -587,7 +588,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       controller: _privateLabelController,
                       decoration: InputDecoration(
                         hintText: '예: 메가스터디 3회',
-                        labelText: '사설모의 이름',
+                        labelText: AppLocalizations.of(context)!.gradeInput_privateLabel,
                         filled: true,
                         fillColor: fieldFill,
                         border: OutlineInputBorder(
@@ -603,7 +604,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             const SizedBox(height: 20),
 
             // ── 과목 추가 버튼 ──
-            _sectionLabel('과목 및 점수'),
+            _sectionLabel(AppLocalizations.of(context)!.gradeInput_subjectSection),
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
@@ -612,18 +613,18 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 if (!_isMock)
                   _actionChip(
                     icon: Icons.calendar_today,
-                    label: '시간표에서 선택',
+                    label: AppLocalizations.of(context)!.gradeInput_fromTimetable,
                     onTap: _loadFromTimetable,
                   ),
                 if (_isMock)
                   _actionChip(
                     icon: Icons.list_alt,
-                    label: '모의고사 과목 선택',
+                    label: AppLocalizations.of(context)!.gradeInput_mockSubjects,
                     onTap: _loadMockSubjects,
                   ),
                 _actionChip(
                   icon: Icons.add,
-                  label: '직접 추가',
+                  label: AppLocalizations.of(context)!.gradeInput_addManual,
                   onTap: _addManualSubject,
                 ),
               ],
@@ -637,17 +638,17 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(children: [
                   const SizedBox(width: 36), // dot + gap
-                  Expanded(flex: 3, child: Text('과목', style: _headerStyle)),
+                  Expanded(flex: 3, child: Text(AppLocalizations.of(context)!.gradeInput_subjectCol, style: _headerStyle)),
                   if (!_isMock) ...[
-                    Expanded(flex: 2, child: Text('원점수', style: _headerStyle, textAlign: TextAlign.center)),
-                    Expanded(flex: 2, child: Text('평균', style: _headerStyle, textAlign: TextAlign.center)),
-                    Expanded(flex: 2, child: Text('등급', style: _headerStyle, textAlign: TextAlign.center)),
-                    Expanded(flex: 2, child: Text('성취도', style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_rawScore, style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_average, style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_rank, style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_achievement, style: _headerStyle, textAlign: TextAlign.center)),
                   ],
                   if (_isMock) ...[
-                    Expanded(flex: 2, child: Text('백분위', style: _headerStyle, textAlign: TextAlign.center)),
-                    Expanded(flex: 2, child: Text('표준', style: _headerStyle, textAlign: TextAlign.center)),
-                    Expanded(flex: 2, child: Text('등급', style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_percentile, style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_standard, style: _headerStyle, textAlign: TextAlign.center)),
+                    Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_rank, style: _headerStyle, textAlign: TextAlign.center)),
                   ],
                   const SizedBox(width: 32), // delete button
                 ]),
@@ -721,7 +722,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 40),
                 child: Center(
                   child: Text(
-                    '위 버튼으로 과목을 추가해주세요',
+                    AppLocalizations.of(context)!.gradeInput_noSubjects,
                     style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor),
                   ),
                 ),

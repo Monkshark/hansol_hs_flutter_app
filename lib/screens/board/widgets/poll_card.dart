@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 게시글 투표 카드
@@ -23,6 +24,7 @@ class PollCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    final l10n = AppLocalizations.of(context)!;
     final totalVotes = voters.length;
     final hasVoted = myVote != null;
 
@@ -46,10 +48,10 @@ class PollCard extends StatelessWidget {
             children: [
               Icon(Icons.poll, size: 18, color: AppColors.theme.secondaryColor),
               const SizedBox(width: 6),
-              Text('투표', style: TextStyle(
+              Text(l10n.poll_cardTitle, style: TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.theme.secondaryColor)),
               const Spacer(),
-              Text('$totalVotes명 참여', style: TextStyle(
+              Text(l10n.poll_cardParticipants(totalVotes), style: TextStyle(
                 fontSize: 12, color: AppColors.theme.darkGreyColor)),
             ],
           ),

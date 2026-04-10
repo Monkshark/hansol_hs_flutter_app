@@ -65,4 +65,9 @@ class SettingData {
       _sharedPreferences.setBool('isBoardNotificationOn', value);
   bool get isBoardNotificationOn =>
       _sharedPreferences.getBool('isBoardNotificationOn') ?? true;
+
+  bool getBool(String key, {bool defaultValue = false}) =>
+      _sharedPreferences.getBool(key) ?? defaultValue;
+  void setBool(String key, bool value) =>
+      _sharedPreferences.setBool(key, value);
 }

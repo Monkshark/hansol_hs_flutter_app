@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -26,11 +27,15 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   bool _isSending = false;
 
   bool get _isApp => widget.type == 'app';
-  String get _title => _isApp ? '앱 건의사항 & 버그 제보' : '학생회 건의사항';
+  String _title(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return _isApp ? l.feedback_appTitle : l.feedback_councilTitle;
+  }
   String get _collection => _isApp ? 'app_feedbacks' : 'council_feedbacks';
-  String get _hint => _isApp
-      ? '버그가 발생한 상황이나 개선 사항을 자세히 적어주세요'
-      : '학생회에 전달할 건의사항을 적어주세요';
+  String _hint(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return _isApp ? l.feedback_appHint : l.feedback_councilHint;
+  }
 
   @override
   void dispose() {
@@ -41,7 +46,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
   Future<void> _pickImage() async {
     if (_images.length >= 3) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('사진은 최대 3장까지 첨부할 수 있습니다')));
+        SnackBar(content: Text(AppLocalizations.of(context)!.feedback_photoLimit)));
       return;
     }
 
@@ -81,7 +86,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
     final content = _contentController.text.trim();
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('내용을 입력해주세요')));
+        SnackBar(content: Text(AppLocalizations.of(context)!.feedback_noContent)));
       return;
     }
 
@@ -102,13 +107,13 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(_isApp ? '제보가 접수되었습니다' : '건의사항이 전달되었습니다')));
+          SnackBar(content: Text(_isApp ? AppLocalizations.of(context)!.feedback_success : AppLocalizations.of(context)!.feedback_councilSuccess)));
         Navigator.of(context).pop();
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('전송에 실패했습니다')));
+          SnackBar(content: Text(AppLocalizations.of(context)!.feedback_sendError)));
       }
     } finally {
       if (mounted) setState(() => _isSending = false);
@@ -126,7 +131,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: Text(_title),
+        title: Text(_title(context)),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -135,7 +140,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             child: _isSending
                 ? const SizedBox(width: 20, height: 20,
                     child: CircularProgressIndicator(strokeWidth: 2))
-                : Text('보내기', style: TextStyle(
+                : Text(AppLocalizations.of(context)!.feedback_send, style: TextStyle(
                     color: AppColors.theme.primaryColor, fontWeight: FontWeight.w700)),
           ),
         ],
@@ -151,7 +156,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
               maxLength: 1000,
               style: TextStyle(fontSize: 15, color: textColor),
               decoration: InputDecoration(
-                hintText: _hint,
+                hintText: _hint(context),
                 hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                 filled: true,
                 fillColor: fillColor,
@@ -164,7 +169,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
             ),
             const SizedBox(height: 16),
 
-            Text('사진 첨부 (최대 3장)', style: TextStyle(
+            Text(AppLocalizations.of(context)!.feedback_photoLabel, style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
             const SizedBox(height: 8),
             Wrap(

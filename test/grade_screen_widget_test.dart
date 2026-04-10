@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/providers/grade_provider.dart';
 import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -33,6 +35,14 @@ void main() {
     return ProviderScope(
       overrides: overrides,
       child: MaterialApp(
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        supportedLocales: AppLocalizations.supportedLocales,
+        locale: const Locale('ko'),
         home: child,
       ),
     );

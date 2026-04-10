@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -34,6 +35,8 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
   bool _notiNewPost = true;
   bool _notiChat = true;
   bool _notiAccount = true;
+  bool _notiPopular = true;
+  final Map<String, bool> _notiCategory = {};
   bool _isLoading = true;
 
   @override
@@ -89,6 +92,11 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
         });
       }
     } catch (_) {}
+    // 카테고리별 + 인기글 구독 상태 (로컬)
+    for (final cat in FcmService.boardCategories) {
+      _notiCategory[cat] = SettingData().getBool('noti_board_$cat', defaultValue: true);
+    }
+    _notiPopular = SettingData().getBool('noti_board_popular', defaultValue: true);
     setState(() => _isLoading = false);
   }
 
@@ -124,7 +132,7 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? const Color(0xFF14151A) : const Color(0xFFF5F5F5),
         foregroundColor: textColor,
-        title: const Text('알림 설정'),
+        title: Text(AppLocalizations.of(context)!.notiSetting_screenTitle),
         centerTitle: true,
         elevation: 0,
       ),
@@ -135,21 +143,21 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _sectionTitle('급식 알림'),
+                  _sectionTitle(AppLocalizations.of(context)!.notiSetting_mealSection),
                   _card(cardColor, [
-                    _mealRow('조식 알림', _breakfastTime, _breakfast, (t) {
+                    _mealRow(AppLocalizations.of(context)!.notiSetting_breakfast, _breakfastTime, _breakfast, (t) {
                       setState(() { _breakfastTime = t; _saveMealSettings(); });
                     }, (v) {
                       setState(() { _breakfast = v; _saveMealSettings(); });
                     }),
                     _divider(),
-                    _mealRow('중식 알림', _lunchTime, _lunch, (t) {
+                    _mealRow(AppLocalizations.of(context)!.notiSetting_lunch, _lunchTime, _lunch, (t) {
                       setState(() { _lunchTime = t; _saveMealSettings(); });
                     }, (v) {
                       setState(() { _lunch = v; _saveMealSettings(); });
                     }),
                     _divider(),
-                    _mealRow('석식 알림', _dinnerTime, _dinner, (t) {
+                    _mealRow(AppLocalizations.of(context)!.notiSetting_dinner, _dinnerTime, _dinner, (t) {
                       setState(() { _dinnerTime = t; _saveMealSettings(); });
                     }, (v) {
                       setState(() { _dinner = v; _saveMealSettings(); });
@@ -157,40 +165,62 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
                   ]),
 
                   if (AuthService.isLoggedIn) ...[
-                    _sectionTitle('게시판 알림'),
+                    _sectionTitle(AppLocalizations.of(context)!.notiSetting_boardSection),
                     _card(cardColor, [
-                      _pushRow('내 글 댓글 알림', '내 게시글에 댓글이 달리면 알림', _notiComment, (v) {
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_comment, AppLocalizations.of(context)!.notiSetting_commentDesc, _notiComment, (v) {
                         setState(() => _notiComment = v);
                         _savePushSetting('notiComment', v);
                       }),
                       _divider(),
-                      _pushRow('대댓글 알림', '내 댓글에 답글이 달리면 알림', _notiReply, (v) {
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_reply, AppLocalizations.of(context)!.notiSetting_replyDesc, _notiReply, (v) {
                         setState(() => _notiReply = v);
                         _savePushSetting('notiReply', v);
                       }),
                       _divider(),
-                      _pushRow('멘션 알림', '댓글에서 누군가 나를 @로 언급하면 알림', _notiMention, (v) {
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_mention, AppLocalizations.of(context)!.notiSetting_mentionDesc, _notiMention, (v) {
                         setState(() => _notiMention = v);
                         _savePushSetting('notiMention', v);
                       }),
                       _divider(),
-                      _pushRow('새 글 알림', '게시판에 새 글이 올라오면 알림', _notiNewPost, (v) {
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_newPost, AppLocalizations.of(context)!.notiSetting_newPostDesc, _notiNewPost, (v) {
                         setState(() => _notiNewPost = v);
                         _savePushSetting('notiNewPost', v);
                       }),
+                      _divider(),
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_popular, AppLocalizations.of(context)!.notiSetting_popularDesc, _notiPopular, (v) {
+                        setState(() => _notiPopular = v);
+                        FcmService.togglePopularNotification(v);
+                      }),
                     ]),
 
-                    _sectionTitle('채팅 알림'),
+                    _sectionTitle(AppLocalizations.of(context)!.notiSetting_categorySection),
                     _card(cardColor, [
-                      _pushRow('메시지 알림', '새 채팅 메시지가 오면 알림', _notiChat, (v) {
+                      for (int i = 0; i < FcmService.boardCategories.length; i++) ...[
+                        if (i > 0) _divider(),
+                        _pushRow(
+                          FcmService.boardCategories[i],
+                          AppLocalizations.of(context)!.notiSetting_categoryDesc(FcmService.boardCategories[i]),
+                          _notiCategory[FcmService.boardCategories[i]] ?? true,
+                          (v) {
+                            final cat = FcmService.boardCategories[i];
+                            setState(() => _notiCategory[cat] = v);
+                            FcmService.toggleCategoryNotification(cat, v);
+                          },
+                        ),
+                      ],
+                    ]),
+
+                    _sectionTitle(AppLocalizations.of(context)!.notiSetting_chatSection),
+                    _card(cardColor, [
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_chat, AppLocalizations.of(context)!.notiSetting_chatDesc, _notiChat, (v) {
                         setState(() => _notiChat = v);
                         _savePushSetting('notiChat', v);
                       }),
                     ]),
 
-                    _sectionTitle('계정 알림'),
+                    _sectionTitle(AppLocalizations.of(context)!.notiSetting_accountSection),
                     _card(cardColor, [
-                      _pushRow('승인/정지/역할 변경', '계정 상태 변경 시 알림', _notiAccount, (v) {
+                      _pushRow(AppLocalizations.of(context)!.notiSetting_account, AppLocalizations.of(context)!.notiSetting_accountDesc, _notiAccount, (v) {
                         setState(() => _notiAccount = v);
                         _savePushSetting('notiAccount', v);
                       }),

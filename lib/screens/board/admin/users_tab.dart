@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class UsersTab extends StatefulWidget {
   final String filter;
-  const UsersTab({required this.filter});
+  final VoidCallback? onChanged;
+  const UsersTab({super.key, required this.filter, this.onChanged});
 
   @override
   State<UsersTab> createState() => UsersTabState();
@@ -23,7 +25,12 @@ class UsersTabState extends State<UsersTab> {
   Future<QuerySnapshot<Map<String, dynamic>>> _fetch() =>
       FirebaseFirestore.instance.collection('users').get();
 
-  void _refresh() => setState(() => _future = _fetch());
+  void refresh() => setState(() => _future = _fetch());
+
+  void _refreshAll() {
+    refresh();
+    widget.onChanged?.call();
+  }
 
   Future<void> _logAdminAction(String action, String targetUid, String targetName) async {
     await FirebaseFirestore.instance.collection('admin_logs').add({
@@ -43,16 +50,17 @@ class UsersTabState extends State<UsersTab> {
     return DateTime.now().isBefore(ts.toDate());
   }
 
-  String _suspendRemaining(Timestamp ts) {
+  String _suspendRemaining(BuildContext context, Timestamp ts) {
+    final l = AppLocalizations.of(context)!;
     final diff = ts.toDate().difference(DateTime.now());
     final d = diff.inDays;
     final h = diff.inHours % 24;
     final m = diff.inMinutes % 60;
     final parts = <String>[];
-    if (d > 0) parts.add('${d}일');
-    if (h > 0) parts.add('${h}시간');
-    if (m > 0) parts.add('${m}분');
-    return parts.isEmpty ? '1분 미만' : parts.join(' ');
+    if (d > 0) parts.add(l.admin_usersDaysLeft(d));
+    if (h > 0) parts.add(l.admin_usersHoursLeft(h));
+    if (m > 0) parts.add(l.admin_usersMinutesLeft(m));
+    return parts.isEmpty ? l.admin_usersLessThan1Minute : parts.join(' ');
   }
 
   @override
@@ -95,10 +103,11 @@ class UsersTabState extends State<UsersTab> {
           });
         }
 
+        final l = AppLocalizations.of(context)!;
         final emptyMsg = {
-          'pending': '대기 중인 사용자가 없습니다',
-          'approved': '승인된 사용자가 없습니다',
-          'suspended': '정지된 사용자가 없습니다',
+          'pending': l.admin_usersNoPending,
+          'approved': l.admin_usersNoApproved,
+          'suspended': l.admin_usersNoSuspended,
         };
 
         if (docs.isEmpty) {
@@ -171,7 +180,7 @@ class UsersTabState extends State<UsersTab> {
                                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
                                         decoration: BoxDecoration(
                                           color: AppColors.theme.secondaryColor.withAlpha(20), borderRadius: BorderRadius.circular(4)),
-                                        child: Text('매니저', style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.theme.secondaryColor)),
+                                        child: Text(l.admin_usersMakeManager, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.theme.secondaryColor)),
                                       ),
                                     ],
                                   ],
@@ -180,7 +189,7 @@ class UsersTabState extends State<UsersTab> {
                                   style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
                                 if (widget.filter == 'suspended') ...[
                                   const SizedBox(height: 4),
-                                  Text('남은 기간: ${_suspendRemaining(data['suspendedUntil'] as Timestamp)}',
+                                  Text(l.admin_usersSuspendedRemaining(_suspendRemaining(context, data['suspendedUntil'] as Timestamp)),
                                     style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Colors.orange)),
                                 ],
                               ],
@@ -193,77 +202,77 @@ class UsersTabState extends State<UsersTab> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           if (widget.filter == 'pending') ...[
-                            _actionBtn('승인', AppColors.theme.primaryColor, () async {
+                            _actionBtn(l.admin_usersApprove, AppColors.theme.primaryColor, () async {
                               await docs[index].reference.update({'approved': true});
-                              await _sendAccountNotification(uid, '가입 승인', '가입이 승인되었습니다.');
+                              await _sendAccountNotification(uid, l.admin_usersAccountApproved, l.admin_usersApprovedMessage);
                               await _logAdminAction('승인', uid, name);
-                              _refresh();
+                              _refreshAll();
                             }),
                             const SizedBox(width: 6),
-                            _actionBtn('거절', Colors.red, () async {
-                              await _sendAccountNotification(uid, '가입 거절', '가입이 거절되었습니다.');
+                            _actionBtn(l.admin_usersReject, Colors.red, () async {
+                              await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
                               await docs[index].reference.delete();
                               await _logAdminAction('거절', uid, name);
-                              _refresh();
+                              _refreshAll();
                             }),
                           ],
                           if (widget.filter == 'approved') ...[
                             if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
-                              _actionBtn('Admin 해제', AppColors.theme.darkGreyColor, () async {
+                              _actionBtn(l.admin_usersRemoveAdmin, AppColors.theme.darkGreyColor, () async {
                                 await docs[index].reference.update({'role': 'user'});
                                 AuthService.clearProfileCache();
-                                _refresh();
+                                _refreshAll();
                               }),
                             if (isAdmin && role != 'admin') ...[
                               _actionBtn(
-                                role == 'manager' ? '매니저 해제' : '매니저',
+                                role == 'manager' ? l.admin_usersRemoveManager : l.admin_usersMakeManager,
                                 role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
                                 () async {
                                   final newRole = role == 'manager' ? 'user' : 'manager';
                                   await docs[index].reference.update({'role': newRole});
                                   await _logAdminAction('역할 변경: $newRole', uid, name);
-                                  _refresh();
+                                  _refreshAll();
                                 },
                               ),
                               const SizedBox(width: 6),
                               _actionBtn('Admin', Colors.red, () async {
                                 await docs[index].reference.update({'role': 'admin'});
                                 await _logAdminAction('역할 변경: admin', uid, name);
-                                _refresh();
+                                _refreshAll();
                               }),
                             ],
                             if (uid != AuthService.currentUser?.uid && role == 'user') ...[
                               const SizedBox(width: 6),
-                              _actionBtn('정지', Colors.orange, () async {
+                              _actionBtn(l.admin_usersSuspend, Colors.orange, () async {
                                 final hours = await _showSuspendDialog(context, name);
                                 if (hours != null) {
                                   final until = DateTime.now().add(Duration(hours: hours));
                                   await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
-                                  await _sendAccountNotification(uid, '계정 정지', '${_formatDuration(hours)} 동안 계정이 정지되었습니다.');
+                                  await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
                                   await _logAdminAction('정지', uid, name);
-                                  _refresh();
+                                  _refreshAll();
                                 }
                               }),
                               const SizedBox(width: 6),
-                              _actionBtn('삭제', Colors.red, () async {
-                                final first = await _confirmDialog(context, '계정 삭제', '$name 계정을 삭제하시겠습니까?');
+                              _actionBtn(l.admin_usersDelete, Colors.red, () async {
+                                final first = await _confirmDialog(context, l.admin_usersDeleteConfirm, l.admin_usersDeleteConfirmMessage(name));
                                 if (first != true) return;
-                                final second = await _confirmDialog(context, '최종 확인', '$name 계정을 정말 삭제합니까?\n되돌릴 수 없습니다.');
+                                final second = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
                                 if (second == true) {
-                                  await _sendAccountNotification(uid, '계정 삭제', '관리자에 의해 계정이 삭제되었습니다.');
+                                  await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
                                   await docs[index].reference.delete();
                                   await _logAdminAction('삭제', uid, name);
-                                  _refresh();
+                                  _refreshAll();
                                 }
                               }),
                             ],
                           ],
                           if (widget.filter == 'suspended') ...[
-                            _actionBtn('정지 해제', AppColors.theme.primaryColor, () async {
+                            _actionBtn(l.admin_usersUnsuspend, AppColors.theme.primaryColor, () async {
                               await docs[index].reference.update({'suspendedUntil': null});
-                              await _sendAccountNotification(uid, '정지 해제', '계정 정지가 해제되었습니다.');
+                              await _sendAccountNotification(uid, l.admin_usersSuspendRemoved, l.admin_usersSuspendRemovedMessage);
                               await _logAdminAction('정지 해제', uid, name);
-                              _refresh();
+                              _refreshAll();
                             }),
                           ],
                         ],
@@ -293,20 +302,22 @@ class UsersTabState extends State<UsersTab> {
     );
   }
 
-  String _formatDuration(int hours) {
-    if (hours < 24) return '$hours시간';
-    return '${hours ~/ 24}일';
+  String _formatDuration(BuildContext context, int hours) {
+    final l = AppLocalizations.of(context)!;
+    if (hours < 24) return l.admin_usersHoursLeft(hours);
+    return l.admin_usersDaysLeft(hours ~/ 24);
   }
 
   Future<int?> _showSuspendDialog(BuildContext context, String name) async {
+    final l = AppLocalizations.of(context)!;
     final options = [
-      {'label': '1시간', 'hours': 1},
-      {'label': '6시간', 'hours': 6},
-      {'label': '12시간', 'hours': 12},
-      {'label': '1일', 'hours': 24},
-      {'label': '3일', 'hours': 72},
-      {'label': '7일', 'hours': 168},
-      {'label': '30일', 'hours': 720},
+      {'label': l.admin_usersSuspend1Hour, 'hours': 1},
+      {'label': l.admin_usersSuspend6Hours, 'hours': 6},
+      {'label': l.admin_usersSuspend12Hours, 'hours': 12},
+      {'label': l.admin_usersSuspend1Day, 'hours': 24},
+      {'label': l.admin_usersSuspend3Days, 'hours': 72},
+      {'label': l.admin_usersSuspend7Days, 'hours': 168},
+      {'label': l.admin_usersSuspend30Days, 'hours': 720},
     ];
 
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -320,11 +331,11 @@ class UsersTabState extends State<UsersTab> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text('$name 정지', style: TextStyle(
+              Text(l.admin_usersSuspendTitle(name), style: TextStyle(
                 fontSize: 18, fontWeight: FontWeight.w700,
                 color: Theme.of(ctx).textTheme.bodyLarge?.color)),
               const SizedBox(height: 8),
-              Text('정지 기간을 선택하세요', style: TextStyle(
+              Text(l.admin_usersSuspendSelectDuration, style: TextStyle(
                 fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
               const SizedBox(height: 16),
               ...options.map((o) => Padding(
@@ -346,7 +357,7 @@ class UsersTabState extends State<UsersTab> {
               const SizedBox(height: 4),
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
-                child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                child: Text(l.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
               ),
             ],
           ),
@@ -394,7 +405,7 @@ class UsersTabState extends State<UsersTab> {
                 children: [
                   Expanded(child: TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                    child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                   )),
                   const SizedBox(width: 10),
                   Expanded(child: ElevatedButton(
@@ -405,7 +416,7 @@ class UsersTabState extends State<UsersTab> {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('삭제'),
+                    child: Text(AppLocalizations.of(context)!.admin_usersDelete),
                   )),
                 ],
               ),

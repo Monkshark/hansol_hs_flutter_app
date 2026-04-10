@@ -48,6 +48,7 @@ exports.kakaoCustomAuth = onRequest(async (req, res) => {
     const uid = `kakao:${kakaoUser.id}`;
     const email = kakaoUser.kakao_account?.email || null;
     const name = kakaoUser.kakao_account?.profile?.nickname || "카카오 사용자";
+    const profileImage = kakaoUser.kakao_account?.profile?.profile_image_url || null;
 
     let firebaseUser;
     try {
@@ -57,7 +58,16 @@ exports.kakaoCustomAuth = onRequest(async (req, res) => {
         uid,
         displayName: name,
         ...(email && { email }),
+        ...(profileImage && { photoURL: profileImage }),
       });
+    }
+
+    // 카카오 프로필 사진이 있고 Firestore에 아직 없으면 저장
+    if (profileImage) {
+      const userDoc = await getFirestore().doc(`users/${uid}`).get();
+      if (userDoc.exists && !userDoc.data().profilePhotoUrl) {
+        await getFirestore().doc(`users/${uid}`).update({ profilePhotoUrl: profileImage });
+      }
     }
 
     const customToken = await getAuth().createCustomToken(uid);
@@ -187,19 +197,52 @@ exports.onPostCreated = onDocumentCreated("posts/{postId}", async (event) => {
   const author = authorDoc.data();
   if (!author.approved && author.role === "user") return;
 
-  const title = `[${(post.category || "").substring(0, 20)}] ${(post.title || "").substring(0, 80)}`;
+  const category = (post.category || "").substring(0, 20);
+  const title = `[${category}] ${(post.title || "").substring(0, 80)}`;
   const body = (post.content || "").length > 50
     ? (post.content || "").substring(0, 50) + "..."
     : (post.content || "");
+  const payload = {
+    notification: { title, body },
+    data: { type: "new_post", postId },
+    android: { notification: { channelId: "board_channel" } },
+  };
 
   try {
-    await getMessaging().send({
-      topic: "board_new_post",
-      notification: { title, body },
-      data: { type: "new_post", postId },
-      android: { notification: { channelId: "board_channel" } },
-    });
+    if (post.isPinned) {
+      // 공지글 → 전체 구독자
+      await getMessaging().send({ ...payload, topic: "board_new_post" });
+    } else if (category) {
+      // 일반글 → 카테고리 구독자만
+      const topicName = `board_${category}`;
+      await getMessaging().send({ ...payload, topic: topicName });
+    }
   } catch (error) { await logError("onPostCreated", error, { postId }); }
+});
+
+// 인기글 알림: 좋아요 10개 도달 시 1회 발송
+const POPULAR_THRESHOLD = 10;
+exports.onPostLikeUpdated = onDocumentUpdated("posts/{postId}", async (event) => {
+  try {
+    const before = event.data.before.data();
+    const after = event.data.after.data();
+    const postId = event.params.postId;
+
+    const beforeLikes = before.likeCount || 0;
+    const afterLikes = after.likeCount || 0;
+
+    // threshold를 이번 업데이트에서 처음 넘었을 때만
+    if (beforeLikes < POPULAR_THRESHOLD && afterLikes >= POPULAR_THRESHOLD) {
+      const title = `🔥 인기글: ${(after.title || "").substring(0, 60)}`;
+      const body = `좋아요 ${afterLikes}개 달성!`;
+      await getMessaging().send({
+        topic: "board_popular",
+        notification: { title, body },
+        data: { type: "new_post", postId },
+        android: { notification: { channelId: "board_channel" } },
+      });
+    }
+  } catch (e) { await logError("onPostLikeUpdated", e, { postId: event.params.postId }); }
 });
 
 exports.onUserCreated = onDocumentCreated("users/{userId}", async (event) => {

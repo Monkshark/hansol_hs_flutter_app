@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 글쓰기 화면의 이미지 첨부 섹션
@@ -96,7 +97,7 @@ class WriteImageSection extends StatelessWidget {
                 children: [
                   Icon(Icons.camera_alt_outlined, size: 18, color: AppColors.theme.darkGreyColor),
                   const SizedBox(width: 6),
-                  Text('사진 추가 (${images.length}/5)',
+                  Text(AppLocalizations.of(context)!.write_imageAddButton(images.length, 5),
                     style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
                 ],
               ),
