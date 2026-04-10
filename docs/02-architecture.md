@@ -44,11 +44,11 @@
 
 ## 상태 관리 전략
 
-이 프로젝트는 **Riverpod 2.5**를 핵심 상태 관리 도구로 사용하되, 레거시 호환을 위해 일부 패턴이 공존한다.
+이 프로젝트는 **Riverpod 2.5**를 핵심 상태 관리 도구로 사용하되, 레거시 호환을 위해 일부 패턴이 공존한다
 
 ### 1. Riverpod AsyncNotifier / Notifier
 
-가장 권장되는 패턴. 비동기 데이터를 `AsyncValue<T>`로 래핑해 로딩/에러/데이터 상태를 자동 관리한다.
+가장 권장되는 패턴. 비동기 데이터를 `AsyncValue<T>`로 래핑해 로딩/에러/데이터 상태를 자동 관리한다
 
 ```dart
 // providers/grade_provider.dart
@@ -69,7 +69,7 @@ class ExamsNotifier extends AsyncNotifier<List<Exam>> {
 
 ### 2. StreamProvider
 
-Firebase 실시간 데이터에 사용한다.
+Firebase 실시간 데이터에 사용한다
 
 ```dart
 // providers/auth_provider.dart
@@ -80,7 +80,7 @@ final authStateProvider = StreamProvider<User?>((ref) {
 
 ### 3. 파생 Provider
 
-다른 Provider에서 계산된 값을 도출한다.
+다른 Provider에서 계산된 값을 도출한다
 
 ```dart
 final isManagerProvider = Provider<bool>((ref) {
@@ -90,8 +90,8 @@ final isManagerProvider = Provider<bool>((ref) {
 
 ### 4. StreamBuilder (위젯 내 직접 사용)
 
-Firestore 실시간 스트림은 대부분 위젯에서 직접 `StreamBuilder`로 소비한다.
-게시글 목록, 댓글, 채팅 메시지, 알림 등이 이 패턴이다.
+Firestore 실시간 스트림은 대부분 위젯에서 직접 `StreamBuilder`로 소비한다
+게시글 목록, 댓글, 채팅 메시지, 알림 등이 이 패턴이다
 
 ```dart
 // board/post_detail_screen.dart
@@ -103,7 +103,7 @@ StreamBuilder<DocumentSnapshot>(
 
 ### 5. FutureBuilder
 
-1회성 비동기 데이터 로드에 사용한다.
+1회성 비동기 데이터 로드에 사용한다
 
 ```dart
 // meal_screen.dart
@@ -115,7 +115,7 @@ FutureBuilder<Meal?>(
 
 ### 6. 레거시: ValueNotifier + setState
 
-일부 화면은 아직 `setState` 기반이다. `themeNotifier`는 Riverpod `themeProvider`와 양방향 동기화된다.
+일부 화면은 아직 `setState` 기반이다. `themeNotifier`는 Riverpod `themeProvider`와 양방향 동기화된다
 
 ```dart
 // main.dart (레거시 ↔ Riverpod 동기화)
@@ -143,7 +143,7 @@ void _onThemeChanged() {
 
 ### GetIt 서비스 로케이터
 
-`service_locator.dart`에서 앱 시작 시 싱글톤 서비스를 등록한다.
+`service_locator.dart`에서 앱 시작 시 싱글톤 서비스를 등록한다
 
 ```dart
 Future<void> setupServiceLocator() async {
@@ -173,7 +173,7 @@ FirebaseAuthRepository       ← 실제 구현체
 GetIt.I<AuthRepository>()    ← 어디서든 접근
 ```
 
-**장점**: 테스트 시 `AuthRepository`를 mock으로 교체 가능.
+**장점**: 테스트 시 `AuthRepository`를 mock으로 교체 가능
 
 ---
 
@@ -321,7 +321,7 @@ class Meal with _$Meal {
 }
 ```
 
-`build_runner`가 `meal.freezed.dart` + `meal.g.dart`를 생성한다.
+`build_runner`가 `meal.freezed.dart` + `meal.g.dart`를 생성한다
 
 ### Riverpod Generator
 
@@ -336,7 +336,7 @@ class Theme extends _$Theme {
 }
 ```
 
-→ `theme_provider.g.dart`에 `themeProvider` 자동 생성.
+→ `theme_provider.g.dart`에 `themeProvider` 자동 생성
 
 ### 코드 생성 실행
 
@@ -364,4 +364,4 @@ Flutter 에러 발생
 
 ### Firebase 초기화 실패
 
-main.dart에서 Firebase 초기화를 try/catch로 감싸 앱 자체는 항상 실행되도록 한다.
+main.dart에서 Firebase 초기화를 try/catch로 감싸 앱 자체는 항상 실행되도록 한다

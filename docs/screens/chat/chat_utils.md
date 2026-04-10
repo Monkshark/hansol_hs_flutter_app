@@ -10,7 +10,7 @@
 Future<void> startChat(BuildContext context, String otherUid, String otherName)
 ```
 
-**설명**: 두 유저 간 1:1 채팅방을 열거나 생성한다.
+**설명**: 두 유저 간 1:1 채팅방을 열거나 생성한다
 
 1. 자기 자신과의 채팅 방지:
    ```dart
@@ -47,4 +47,4 @@ Future<void> startChat(BuildContext context, String otherUid, String otherName)
    ));
    ```
 
-**참고**: 게시글 작성자 프로필 탭 → "1:1 채팅" 버튼에서 호출됨. 익명 게시글의 경우 호출부에서 차단.
+**참고**: 게시글 작성자 프로필 탭 → "1:1 채팅" 버튼에서 호출됨. 익명 게시글의 경우 호출부에서 차단

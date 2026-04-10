@@ -2,7 +2,7 @@
 
 > `lib/data/grade_manager.dart` — 성적 CRUD, 목표 관리, 등급 변환
 
-`SubjectScore`, `Exam` 모델과 `GradeManager` 클래스를 포함. 모든 메서드가 `static`. 데이터는 [`SecureStorageService`](secure_storage_service.md)에 JSON으로 암호화 저장 (서버 저장 안 함).
+`SubjectScore`, `Exam` 모델과 `GradeManager` 클래스를 포함. 모든 메서드가 `static`. 데이터는 [`SecureStorageService`](secure_storage_service.md)에 JSON으로 암호화 저장 (서버 저장 안 함)
 
 ---
 
@@ -20,7 +20,7 @@ class SubjectScore {
 }
 ```
 
-내신(rawScore/average/rank/achievement)과 모의고사(percentile/standardScore/rank)를 하나의 구조체로 통합.
+내신(rawScore/average/rank/achievement)과 모의고사(percentile/standardScore/rank)를 하나의 구조체로 통합
 
 ### 상수
 
@@ -46,7 +46,7 @@ class Exam {
 }
 ```
 
-`displayName` 프로퍼티: type별 한국어 표시명 생성.
+`displayName` 프로퍼티: type별 한국어 표시명 생성
 ```dart
 'midterm' → '$year ${semester}학기 중간고사'
 'mock'    → '$year $mockLabel 모의고사'
@@ -60,7 +60,7 @@ class Exam {
 static int percentileToRank(double percentile)
 ```
 
-**설명**: 수능 백분위를 등급으로 변환한다 (9등급제).
+**설명**: 수능 백분위를 등급으로 변환한다 (9등급제)
 
 ```dart
 if (percentile >= 96) return 1;
@@ -78,7 +78,7 @@ return 9;
 static Future<List<Exam>> loadExams()
 ```
 
-**설명**: 저장된 시험 목록을 로드한다.
+**설명**: 저장된 시험 목록을 로드한다
 
 1. SharedPreferences → SecureStorage 일회성 마이그레이션:
    ```dart
@@ -97,7 +97,7 @@ static Future<List<Exam>> loadExams()
      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
    ```
 
-**마이그레이션**: 기존 SharedPreferences(평문)에서 SecureStorage(암호화)로 자동 이전. 한 번 옮기면 이전 데이터 삭제.
+**마이그레이션**: 기존 SharedPreferences(평문)에서 SecureStorage(암호화)로 자동 이전. 한 번 옮기면 이전 데이터 삭제
 
 ---
 
@@ -107,7 +107,7 @@ static Future<List<Exam>> loadExams()
 static Future<void> saveExams(List<Exam> exams)
 ```
 
-시험 목록 전체를 SecureStorage에 JSON으로 저장.
+시험 목록 전체를 SecureStorage에 JSON으로 저장
 
 ---
 
@@ -119,7 +119,7 @@ static Future<void> updateExam(Exam exam)
 static Future<void> deleteExam(String id)
 ```
 
-각각 `loadExams()` → 수정 → `saveExams()` 패턴. `updateExam`은 id 매칭, `deleteExam`은 `removeWhere`.
+각각 `loadExams()` → 수정 → `saveExams()` 패턴. `updateExam`은 id 매칭, `deleteExam`은 `removeWhere`
 
 ---
 
@@ -129,9 +129,9 @@ static Future<void> deleteExam(String id)
 static Future<Map<String, double>> loadGoals()
 ```
 
-**설명**: 수시 목표 등급(과목명 → 등급)을 로드한다.
+**설명**: 수시 목표 등급(과목명 → 등급)을 로드한다
 
-`loadExams`와 동일한 마이그레이션 + SecureStorage 패턴. 키: `SecureStorageService.keyGradeGoals`.
+`loadExams`와 동일한 마이그레이션 + SecureStorage 패턴. 키: `SecureStorageService.keyGradeGoals`
 
 ---
 
@@ -141,7 +141,7 @@ static Future<Map<String, double>> loadGoals()
 static Future<void> saveGoals(Map<String, double> goals)
 ```
 
-수시 목표를 SecureStorage에 JSON 저장.
+수시 목표를 SecureStorage에 JSON 저장
 
 ---
 
@@ -152,7 +152,7 @@ static Future<Map<String, double>> loadJeongsiGoals()
 static Future<void> saveJeongsiGoals(Map<String, double> goals)
 ```
 
-정시 목표(백분위 기준). 키: `SecureStorageService.keyGradeJeongsiGoals`. 로직은 `loadGoals`/`saveGoals`와 동일.
+정시 목표(백분위 기준). 키: `SecureStorageService.keyGradeJeongsiGoals`. 로직은 `loadGoals`/`saveGoals`와 동일
 
 ---
 
@@ -182,4 +182,4 @@ static Future<void> saveJeongsiGoals(Map<String, double> goals)
 static int getSubjectColor(String subject)
 ```
 
-`subjectColors`에 없는 과목은 `subject.hashCode | 0xFF000000`로 결정론적 색상 생성.
+`subjectColors`에 없는 과목은 `subject.hashCode | 0xFF000000`로 결정론적 색상 생성

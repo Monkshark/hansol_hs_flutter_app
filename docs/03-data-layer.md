@@ -1,8 +1,8 @@
 # 데이터 레이어 상세 가이드
 
-`lib/data/` 디렉토리는 앱의 비즈니스 로직과 데이터 접근을 담당한다.
+`lib/data/` 디렉토리는 앱의 비즈니스 로직과 데이터 접근을 담당한다
 
-> 각 클래스의 함수별 상세 설명은 [API Reference](api/README.md)�� 참조한다.
+> 각 클래스의 함수별 상세 설명은 [API Reference](api/README.md)�� 참조한다
 
 ---
 
@@ -38,20 +38,20 @@
 
 ## 레포지토리 패턴
 
-정적 메서드 → 인스턴스 인터페이스 래핑으로 테스트에서 mock 주입을 가능하게 한다.
+정적 메서드 → 인스턴스 인터페이스 래핑으로 테스트에서 mock 주입을 가능하게 한다
 
 | Repository | 위임 대상 | 레퍼런스 |
 |------------|-----------|----------|
 | [AuthRepository](data/auth_repository.md) | [`AuthService`](data/auth_service.md) 정적 메서드 |
 | [GradeRepository](data/grade_repository.md) | [`GradeManager`](data/grade_manager.md) 정적 메서드 |
 
-**현재 상태**: GetIt + Riverpod 병행. 신규 코드는 Repository를, 기존 호출처는 정적 메서드를 사용 (점진적 마이그레이션).
+**현재 상태**: GetIt + Riverpod 병행. 신규 코드는 Repository를, 기존 호출처는 정적 메서드를 사용 (점진적 마이그레이션)
 
 ---
 
 ## 서비스 로케이터
 
-[ServiceLocator](data/service_locator.md) — GetIt 컨테이너에 Repository와 서비스를 등록한다.
+[ServiceLocator](data/service_locator.md) — GetIt 컨테이너에 Repository와 서비스를 등록한다
 
 ```dart
 // 사용 예시

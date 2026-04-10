@@ -14,7 +14,7 @@ final authStateProvider = StreamProvider<User?>((ref) {
 });
 ```
 
-Firebase Auth 상태 스트림. 로그인/로그아웃 시 자동 갱신.
+Firebase Auth 상태 스트림. 로그인/로그아웃 시 자동 갱신
 
 ### `UserProfileNotifier` / `userProfileProvider`
 
@@ -32,7 +32,7 @@ class UserProfileNotifier extends AsyncNotifier<UserProfile?> {
 }
 ```
 
-`authStateProvider`를 watch → 로그인 상태 변경 시 자동 재조회.
+`authStateProvider`를 watch → 로그인 상태 변경 시 자동 재조회
 
 #### `refresh()`
 
@@ -44,7 +44,7 @@ Future<void> refresh() async {
 }
 ```
 
-프로필 수정 후 호출. 캐시 초기화 + Firestore에서 새로 조회.
+프로필 수정 후 호출. 캐시 초기화 + Firestore에서 새로 조회
 
 #### `save(profile)`
 
@@ -78,7 +78,7 @@ class ExamsNotifier extends AsyncNotifier<List<Exam>> {
 }
 ```
 
-모든 mutator는 `await future`로 초기 build 완료를 보장한 뒤 직접 state를 갱신 (`invalidateSelf` race condition 회피). 데이터 저장은 [`GradeManager`](../data/grade_manager.md) 정적 메서드에 위임.
+모든 mutator는 `await future`로 초기 build 완료를 보장한 뒤 직접 state를 갱신 (`invalidateSelf` race condition 회피). 데이터 저장은 [`GradeManager`](../data/grade_manager.md) 정적 메서드에 위임
 
 #### `add(exam)`
 
@@ -115,7 +115,7 @@ final examsByTypeProvider = Provider.family<List<Exam>, ExamTab>((ref, tab) {
 });
 ```
 
-탭 0 = 수시 (중간/기말), 탭 1 = 정시 (모의/사설).
+탭 0 = 수시 (중간/기말), 탭 1 = 정시 (모의/사설)
 
 ### `GoalsNotifier` / `goalsProvider`
 
@@ -132,11 +132,11 @@ class GoalsNotifier extends AsyncNotifier<Map<String, double>> {
 }
 ```
 
-수시 목표 등급 (과목명 → 등급 double).
+수시 목표 등급 (과목명 → 등급 double)
 
 ### `JeongsiGoalsNotifier` / `jeongsiGoalsProvider`
 
-정시 목표 백분위. `GoalsNotifier`와 동일 구조, `GradeManager.loadJeongsiGoals()` 사용.
+정시 목표 백분위. `GoalsNotifier`와 동일 구조, `GradeManager.loadJeongsiGoals()` 사용
 
 ---
 
@@ -154,7 +154,7 @@ class GradeClassNotifier extends Notifier<GradeClassState> {
 }
 ```
 
-동기 `Notifier`. [SettingData](../data/setting_data.md) 싱글톤과 양방향 동기화.
+동기 `Notifier`. [SettingData](../data/setting_data.md) 싱글톤과 양방향 동기화
 
 #### 메서드
 
@@ -180,7 +180,7 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
 }
 ```
 
-알림 설정 통합 상태. 각 setter(`setBreakfast`, `setLunch`, `setDinner`, `setBoard`)가 [SettingData](../data/setting_data.md)와 state를 동시에 갱신.
+알림 설정 통합 상태. 각 setter(`setBreakfast`, `setLunch`, `setDinner`, `setBoard`)가 [SettingData](../data/setting_data.md)와 state를 동시에 갱신
 
 ---
 
@@ -201,6 +201,6 @@ class Theme extends _$Theme {
 }
 ```
 
-`riverpod_annotation` (코드 생성) 기반. `keepAlive: true`로 Provider가 dispose되지 않음.
+`riverpod_annotation` (코드 생성) 기반. `keepAlive: true`로 Provider가 dispose되지 않음
 
-인덱스 매핑: 0 = 라이트, 1 = 다크, 2 = 시스템.
+인덱스 매핑: 0 = 라이트, 1 = 다크, 2 = 시스템

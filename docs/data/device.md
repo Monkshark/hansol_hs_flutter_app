@@ -2,7 +2,7 @@
 
 > `lib/data/device.dart` — 디바이스 크기 계산 유틸리티
 
-모든 메서드가 `static`. 화면 크기를 퍼센트 기반으로 계산하는 반응형 레이아웃 헬퍼.
+모든 메서드가 `static`. 화면 크기를 퍼센트 기반으로 계산하는 반응형 레이아웃 헬퍼
 
 ---
 
@@ -17,7 +17,7 @@ static void init(BuildContext context) {
 }
 ```
 
-**설명**: 디바이스 크기를 초기화한다.
+**설명**: 디바이스 크기를 초기화한다
 
 `MainScreen.build`에서 매 빌드마다 호출:
 ```dart
@@ -37,7 +37,7 @@ static double getWidth(double percent) {
 }
 ```
 
-**설명**: 화면 너비의 퍼센트를 픽셀로 변환한다.
+**설명**: 화면 너비의 퍼센트를 픽셀로 변환한다
 
 ```dart
 // 예: 화면 너비가 400px일 때
@@ -55,7 +55,7 @@ static double getHeight(double percent) {
 }
 ```
 
-화면 높이의 퍼센트를 픽셀로 변환. `getWidth`와 동일한 계산 방식.
+화면 높이의 퍼센트를 픽셀로 변환. `getWidth`와 동일한 계산 방식
 
 ---
 

@@ -6,7 +6,7 @@
 
 ### users/{uid}
 
-사용자 프로필 및 설정.
+사용자 프로필 및 설정
 
 ```
 users/{uid}
@@ -56,7 +56,7 @@ users/{uid}
 
 ### posts/{postId}
 
-게시판 글.
+게시판 글
 
 ```
 posts/{postId}
@@ -106,7 +106,7 @@ posts/{postId}
 
 ### chats/{chatId}
 
-1:1 채팅방.
+1:1 채팅방
 
 ```
 chats/{chatId}
@@ -129,7 +129,7 @@ chats/{chatId}
 
 ### reports/{reportId}
 
-게시글/댓글 신고.
+게시글/댓글 신고
 
 ```
 reports/{reportId}
@@ -142,7 +142,7 @@ reports/{reportId}
 
 ### app_config/
 
-앱 설정 문서들.
+앱 설정 문서들
 
 ```
 app_config/
@@ -198,7 +198,7 @@ validCounterDelta(field) // 카운터 ±1 범위 검증
 | update | 본인 (role/suspendedUntil/approved 변경 불가) 또는 admin/manager |
 | delete | 본인 또는 admin |
 
-**중요**: `update` 시 `.get('role', 'user')` 기본값을 사용해 필드 누락 시에도 규칙이 정상 작동.
+**중요**: `update` 시 `.get('role', 'user')` 기본값을 사용해 필드 누락 시에도 규칙이 정상 작동
 
 #### posts
 | 작업 | 조건 |
@@ -236,18 +236,18 @@ validCounterDelta(field) // 카운터 ±1 범위 검증
 | `chats/{chatId}/{file}` | 로그인 | 로그인 | 5 MB |
 | `feedbacks/{type}/{file}` | 로그인 | 로그인 | 5 MB |
 
-모든 업로드는 `image/*` content-type만 허용.
+모든 업로드는 `image/*` content-type만 허용
 
 ---
 
 ## Cloud Functions (functions/index.js)
 
-Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
+Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증
 
 ### HTTP 함수
 
 #### `kakaoCustomAuth` (POST)
-카카오 OAuth 토큰 → Firebase Custom Token 변환.
+카카오 OAuth 토큰 → Firebase Custom Token 변환
 
 ```
 요청: POST { token: "kakao_access_token" }
@@ -262,13 +262,13 @@ Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
 ```
 
 #### `backfillCustomClaims` (POST)
-기존 사용자에게 Custom Claims 일괄 적용 (1회성 마이그레이션).
-`x-admin-secret` 헤더로 인증.
+기존 사용자에게 Custom Claims 일괄 적용 (1회성 마이그레이션)
+`x-admin-secret` 헤더로 인증
 
 ### Firestore 트리거
 
 #### `onCommentCreated` (posts/{postId}/comments/{commentId})
-댓글 생성 시 알림 발송.
+댓글 생성 시 알림 발송
 
 ```
 알림 대상 (중복 제거):
@@ -283,7 +283,7 @@ Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
 ```
 
 #### `onPostCreated` (posts/{postId})
-새 글 생성 시 FCM 토픽 알림.
+새 글 생성 시 FCM 토픽 알림
 
 ```
 공지글 (isPinned) → "board_new_post" 토픽 (전체)
@@ -291,7 +291,7 @@ Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
 ```
 
 #### `onPostLikeUpdated` (posts/{postId})
-좋아요 수가 10개를 처음 넘으면 인기글 알림.
+좋아요 수가 10개를 처음 넘으면 인기글 알림
 
 ```
 조건: beforeLikes < 10 && afterLikes >= 10
@@ -299,7 +299,7 @@ Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
 ```
 
 #### `onUserCreated` (users/{userId})
-새 사용자 생성 시 admin/manager에게 가입 알림 발송.
+새 사용자 생성 시 admin/manager에게 가입 알림 발송
 
 #### `onUserUpdated` (users/{userId})
 사용자 상태 변경 시 처리:
@@ -318,17 +318,17 @@ Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
 3. 서브컬렉션 (subjects, notifications) 정리
 
 #### `onChatMessageCreated` (chats/{chatId}/messages/{messageId})
-채팅 메시지 생성 시 상대방에게 푸시 알림.
-이미지 메시지는 "[사진]"으로 표시.
+채팅 메시지 생성 시 상대방에게 푸시 알림
+이미지 메시지는 "[사진]"으로 표시
 
 #### `onReportCreated` (reports/{reportId})
-신고 레이트 리미팅: 5분 내 3건 초과 시 자동 삭제 + 로그.
+신고 레이트 리미팅: 5분 내 3건 초과 시 자동 삭제 + 로그
 
 ### 스케줄러
 
 #### `checkSuspensionExpiry` (매시간)
-정지 만료된 사용자의 `suspendedUntil` 필드 삭제.
-→ `onUserUpdated` 트리거 → 정지 해제 알림 자동 발송.
+정지 만료된 사용자의 `suspendedUntil` 필드 삭제
+→ `onUserUpdated` 트리거 → 정지 해제 알림 자동 발송
 
 #### `cleanupOldPosts` (매일 03:00 KST = 18:00 UTC)
 4년 지난 비공지 게시글 자동 삭제:
@@ -352,7 +352,7 @@ Node.js 20, Firebase Functions v2 기반. Zod로 입력 검증.
 | `board_club` | 동아리 카테고리 |
 | `board_popular` | 인기글 (좋아요 10+) |
 
-**주의**: 한국어 카테고리명은 FCM 토픽으로 사용 불가 (영문 매핑 필요).
+**주의**: 한국어 카테고리명은 FCM 토픽으로 사용 불가 (영문 매핑 필요)
 ```dart
 static const _categoryTopicKey = {
   '자유': 'free', '질문': 'question', '정보공유': 'info',

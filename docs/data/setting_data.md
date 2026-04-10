@@ -2,7 +2,7 @@
 
 > `lib/data/setting_data.dart` — SharedPreferences 설정 싱글톤
 
-앱 전체 설정을 SharedPreferences로 관리하는 싱글턴 클래스.
+앱 전체 설정을 SharedPreferences로 관리하는 싱글턴 클래스
 
 ---
 
@@ -13,7 +13,7 @@ static final SettingData _instance = SettingData._internal();
 factory SettingData() => _instance;
 ```
 
-`SettingData()`로 어디서든 같은 인스턴스 접근.
+`SettingData()`로 어디서든 같은 인스턴스 접근
 
 ---
 
@@ -23,7 +23,7 @@ factory SettingData() => _instance;
 Future<void> init()
 ```
 
-`main()` 시작 시 한 번 호출. `SharedPreferences.getInstance()` 결과를 내부에 캐시.
+`main()` 시작 시 한 번 호출. `SharedPreferences.getInstance()` 결과를 내부에 캐시
 
 ---
 
@@ -67,4 +67,4 @@ bool getBool(String key, {bool defaultValue = false})
 void setBool(String key, bool value)
 ```
 
-카테고리별 알림 토글 등 동적 키에 사용. 예: `getBool('noti_board_자유', defaultValue: true)`.
+카테고리별 알림 토글 등 동적 키에 사용. 예: `getBool('noti_board_자유', defaultValue: true)`

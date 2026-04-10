@@ -1,6 +1,6 @@
 # API Reference - 목차
 
-> 화면(Screen)·위젯(Widget) 문서는 제외. 서비스·모델·API·알림 등 핵심 계층만 정리.
+> 화면(Screen)·위젯(Widget) 문서는 제외. 서비스·모델·API·알림 등 핵심 계층만 정리
 
 ## 앱 진입점
 - [main](main.md) — 앱 초기화, MainScreen, 전역 상태

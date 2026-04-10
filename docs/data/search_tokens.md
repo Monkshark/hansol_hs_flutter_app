@@ -2,7 +2,7 @@
 
 > `lib/data/search_tokens.dart` — 한국어 2-gram 토큰화
 
-Firestore는 LIKE/full-text 검색이 없으므로, 글 작성 시 제목+본문을 2-gram으로 분해해 `searchTokens` 배열에 저장하고, 검색 시 `array-contains-any` 쿼리로 매칭한다.
+Firestore는 LIKE/full-text 검색이 없으므로, 글 작성 시 제목+본문을 2-gram으로 분해해 `searchTokens` 배열에 저장하고, 검색 시 `array-contains-any` 쿼리로 매칭한다
 
 예) `"기말고사 일정"` → `['기말', '말고', '고사', '일정']`
 
@@ -14,7 +14,7 @@ Firestore는 LIKE/full-text 검색이 없으므로, 글 작성 시 제목+본문
 static List<String> forDocument(String title, String content, {int maxTokens = 200})
 ```
 
-**설명**: 글 저장 시 사용. 제목+본문을 합쳐 2-gram 토큰을 생성한다.
+**설명**: 글 저장 시 사용. 제목+본문을 합쳐 2-gram 토큰을 생성한다
 
 ```dart
 final combined = '$title $content';
@@ -34,7 +34,7 @@ return tokens.take(maxTokens).toList();
 static List<String> forQuery(String query, {int maxTokens = 10})
 ```
 
-**설명**: 검색 시 사용. 사용자 쿼리에서 2-gram을 추출한다.
+**설명**: 검색 시 사용. 사용자 쿼리에서 2-gram을 추출한다
 
 ```dart
 final cleaned = _normalize(query);
@@ -54,7 +54,7 @@ return tokens.take(maxTokens).toList();
 static Set<String> _ngrams(String text)
 ```
 
-**설명**: 정규화된 텍스트에서 연속 2글자 조합(sliding window)을 Set으로 생성한다.
+**설명**: 정규화된 텍스트에서 연속 2글자 조합(sliding window)을 Set으로 생성한다
 
 ```dart
 final cleaned = _normalize(text);
@@ -71,7 +71,7 @@ for (int i = 0; i + 2 <= cleaned.length; i++) {
 static String _normalize(String text)
 ```
 
-**설명**: 텍스트를 검색용으로 정규화한다.
+**설명**: 텍스트를 검색용으로 정규화한다
 
 1. 소문자 변환: `text.toLowerCase()`
 2. 허용 문자만 남기고 나머지 제거:

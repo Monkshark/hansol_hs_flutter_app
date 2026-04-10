@@ -2,7 +2,7 @@
 
 > `lib/notification/daily_meal_notification.dart` — 로컬 급식 알림 스케줄링
 
-인스턴스 메서드. 조식/중식/석식 평일 반복 알림을 `flutter_local_notifications` + `timezone`으로 스케줄링. [`MealDataApi`](../api/meal_data_api.md)에서 메뉴를 조회해 알림 본문에 포함.
+인스턴스 메서드. 조식/중식/석식 평일 반복 알림을 `flutter_local_notifications` + `timezone`으로 스케줄링. [`MealDataApi`](../api/meal_data_api.md)에서 메뉴를 조회해 알림 본문에 포함
 
 ---
 
@@ -12,7 +12,7 @@
 Future<void> initializeNotifications()
 ```
 
-**설명**: 로컬 알림 플러그인을 초기화한다.
+**설명**: 로컬 알림 플러그인을 초기화한다
 
 1. Android/iOS 초기화 설정:
    ```dart
@@ -43,7 +43,7 @@ Future<void> initializeNotifications()
 Future<void> scheduleDailyNotifications()
 ```
 
-**설명**: [SettingData](../data/setting_data.md) 설정에 따라 평일(월~금) 반복 알림을 등록한다.
+**설명**: [SettingData](../data/setting_data.md) 설정에 따라 평일(월~금) 반복 알림을 등록한다
 
 ```dart
 if (settings.isBreakfastNotificationOn) {
@@ -57,7 +57,7 @@ if (settings.isDinnerNotificationOn) {
 }
 ```
 
-기존 알림을 모두 취소 후 재등록 (`cancelAllNotifications` 먼저 호출).
+기존 알림을 모두 취소 후 재등록 (`cancelAllNotifications` 먼저 호출)
 
 ---
 
@@ -70,7 +70,7 @@ Future<void> _scheduleWeeklyNotification({
 })
 ```
 
-**설명**: 특정 식사의 요일별 반복 알림을 등록한다.
+**설명**: 특정 식사의 요일별 반복 알림을 등록한다
 
 1. 오늘의 급식 메뉴를 미리 조회해 알림 본문에 포함:
    ```dart
@@ -89,7 +89,7 @@ Future<void> _scheduleWeeklyNotification({
    }
    ```
 
-3. `BigTextStyleInformation`으로 메뉴 미리보기 표시.
+3. `BigTextStyleInformation`으로 메뉴 미리보기 표시
 
 ---
 
@@ -99,7 +99,7 @@ Future<void> _scheduleWeeklyNotification({
 Future<void> sendTestNotification()
 ```
 
-5초 후 테스트 알림 전송. 알림 설정 화면에서 "테스트 알림 보내기" 버튼에 연결.
+5초 후 테스트 알림 전송. 알림 설정 화면에서 "테스트 알림 보내기" 버튼에 연결
 
 ---
 
@@ -109,7 +109,7 @@ Future<void> sendTestNotification()
 Future<void> updateNotifications()
 ```
 
-설정 변경 시 호출. `cancelAllNotifications()` + `scheduleDailyNotifications()`.
+설정 변경 시 호출. `cancelAllNotifications()` + `scheduleDailyNotifications()`
 
 ---
 

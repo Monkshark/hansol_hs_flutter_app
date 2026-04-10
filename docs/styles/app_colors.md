@@ -23,7 +23,7 @@ abstract class AppColors {
 }
 ```
 
-라이트/다크 테마의 색상 속성을 추상으로 정의.
+라이트/다크 테마의 색상 속성을 추상으로 정의
 
 ### 정적 접근자
 
@@ -43,7 +43,7 @@ class AnimatedAppColors extends AppColors {
 }
 ```
 
-라이트↔다크 전환 시 색상 보간(lerp)을 지원하는 싱글톤.
+라이트↔다크 전환 시 색상 보간(lerp)을 지원하는 싱글톤
 
 ### `setDark(dark, {animate})`
 
@@ -54,7 +54,7 @@ void setDark(bool dark, {bool animate = true}) {
 }
 ```
 
-테마 방향 설정. `animate: false`면 즉시 전환 (초기화 시).
+테마 방향 설정. `animate: false`면 즉시 전환 (초기화 시)
 
 ### `tick(t)`
 
@@ -62,7 +62,7 @@ void setDark(bool dark, {bool animate = true}) {
 void tick(double t) => _t = t;
 ```
 
-`AnimationController`에서 호출. `_t`는 0.0(라이트)~1.0(다크) 보간 진행도.
+`AnimationController`에서 호출. `_t`는 0.0(라이트)~1.0(다크) 보간 진행도
 
 ### 색상 보간
 
@@ -73,4 +73,4 @@ Color _lerp(Color light, Color dark) => Color.lerp(light, dark, _t)!;
     _lerp(AppColors.lightTheme.primaryColor, AppColors.darkTheme.primaryColor);
 ```
 
-모든 색상 프로퍼티가 `_lerp`를 통해 현재 `_t` 값에 따라 라이트/다크 사이를 보간. 테마 전환 애니메이션 시 부드러운 색상 전환 구현.
+모든 색상 프로퍼티가 `_lerp`를 통해 현재 `_t` 값에 따라 라이트/다크 사이를 보간. 테마 전환 애니메이션 시 부드러운 색상 전환 구현

@@ -2,7 +2,7 @@
 
 > `lib/data/subject_data_manager.dart` — 선택과목 로드/저장, Firestore 동기화
 
-모든 메서드가 `static`. 학년별 선택과목을 SharedPreferences(로컬)와 Firestore(클라우드) 양쪽에 관리.
+모든 메서드가 `static`. 학년별 선택과목을 SharedPreferences(로컬)와 Firestore(클라우드) 양쪽에 관리
 
 ---
 
@@ -12,7 +12,7 @@
 static Future<List<Subject>> loadSelectedSubjects(int grade)
 ```
 
-**설명**: 학년별 선택과목 목록을 로드한다.
+**설명**: 학년별 선택과목 목록을 로드한다
 
 1. SharedPreferences에서 로컬 데이터 확인:
    ```dart
@@ -43,7 +43,7 @@ static Future<List<Subject>> loadSelectedSubjects(int grade)
 static Future<void> saveSelectedSubjects(int grade, List<Subject> selectedSubjects)
 ```
 
-**설명**: 선택과목을 로컬과 Firestore 양쪽에 저장한다.
+**설명**: 선택과목을 로컬과 Firestore 양쪽에 저장한다
 
 1. 로컬 SharedPreferences에 즉시 저장:
    ```dart
@@ -69,4 +69,4 @@ static Future<void> saveSelectedSubjects(int grade, List<Subject> selectedSubjec
 static Future<void> _saveLocal(SharedPreferences prefs, int grade, List<Subject> subjects)
 ```
 
-내부 헬퍼. [Subject](subject.md) 리스트를 JSON 인코딩 후 SharedPreferences에 저장.
+내부 헬퍼. [Subject](subject.md) 리스트를 JSON 인코딩 후 SharedPreferences에 저장
