@@ -204,7 +204,7 @@ graph LR
 </details>
 
 <details>
-<summary><b>2. 민감 데이터 저장소: flutter_secure_storage (vs SharedPreferences)</b></summary>
+<summary><b>2. 민감 데이터 저장소: <a href="docs/data/secure_storage_service.md">flutter_secure_storage</a> (vs SharedPreferences)</b></summary>
 <br>
 
 - **대상**: 성적 (사용자 식별 가능 + 학교 맥락에서 민감)
@@ -214,7 +214,7 @@ graph LR
 </details>
 
 <details>
-<summary><b>3. 게시판 검색: 클라이언트 n-gram 인덱싱 (vs Algolia / Typesense / 클라이언트 필터)</b></summary>
+<summary><b>3. 게시판 검색: <a href="docs/data/search_tokens.md">클라이언트 n-gram 인덱싱</a> (vs Algolia / Typesense / 클라이언트 필터)</b></summary>
 <br>
 
 - **선택 이유**: Firestore는 LIKE/full-text 미지원. 외부 검색 인프라 추가 없이 글 저장 시 제목+본문을 2-gram으로 분해해 `searchTokens` 배열에 저장 → `array-contains-any` 쿼리. 한국어 단어 구분 모호성에도 강함
@@ -247,7 +247,7 @@ graph LR
 </details>
 
 <details>
-<summary><b>6. 저장소 분담: SQLite / Firestore / SecureStorage / Cloud Storage</b></summary>
+<summary><b>6. 저장소 분담: <a href="docs/data/local_database.md">SQLite</a> / Firestore / <a href="docs/data/secure_storage_service.md">SecureStorage</a> / Cloud Storage</b></summary>
 <br>
 
 | 저장소 | 용도 | 이유 |
@@ -261,7 +261,7 @@ graph LR
 </details>
 
 <details>
-<summary><b>7. DI: GetIt + 추상 Repository (vs Riverpod Provider만 / get_it 직접만)</b></summary>
+<summary><b>7. DI: <a href="docs/data/service_locator.md">GetIt + 추상 Repository</a> (vs Riverpod Provider만 / get_it 직접만)</b></summary>
 <br>
 
 - **선택 이유**: Riverpod은 위젯 트리 의존, 비위젯 코드(Manager, Cloud Functions 트리거 핸들러)에서 쓰기 어색. GetIt은 service locator로 어디서나 호출 가능
@@ -300,14 +300,14 @@ graph LR
 | 분류 | 기술 |
 |------|------|
 | **Mobile** | Flutter (Dart) — Android / iOS |
-| **State** | Riverpod 2.5 — AsyncNotifier / Notifier (StateNotifier 마이그레이션 완료) |
-| **DI** | GetIt + Abstract Repository — 테스트 시 Mock 주입 가능 |
+| **State** | Riverpod 2.5 — AsyncNotifier / Notifier (StateNotifier 마이그레이션 완료) ([providers 문서](docs/providers/providers.md)) |
+| **DI** | GetIt + Abstract Repository — 테스트 시 Mock 주입 가능 ([ServiceLocator 문서](docs/data/service_locator.md)) |
 | **Admin Web** | Next.js 14 — App Router, TypeScript, Tailwind CSS |
 | **Backend** | Firebase — Auth, Firestore, Storage, FCM, Crashlytics |
 | **Server** | Cloud Functions (Node.js) — 푸시 알림, Kakao OAuth, 스케줄러 |
 | **External API** | NEIS 공공데이터 — 급식, 시간표, 학사일정 |
-| **Local** | sqflite (일정 DB), SharedPreferences (설정/캐시) |
-| **Auth** | Google, Apple, Kakao, GitHub OAuth |
+| **Local** | sqflite ([일정 DB](docs/data/local_database.md)), SharedPreferences ([설정/캐시](docs/data/setting_data.md)) |
+| **Auth** | Google, Apple, Kakao, GitHub OAuth ([AuthService](docs/data/auth_service.md), [AuthRepository](docs/data/auth_repository.md)) |
 | **i18n** | Flutter ARB (`gen-l10n`) — 한국어(기본) + 영어, 500+ 키 |
 | **CI** | GitHub Actions — analyze + test (matrix) + Codecov + Android APK 빌드 |
 | **Test** | flutter_test — Unit + Widget + Provider (113 tests) |
@@ -317,16 +317,16 @@ graph LR
 <details>
 <summary><b>급식 조회</b></summary>
 
-- **NEIS API** 기반 조식/중식/석식 메뉴 실시간 조회
-- **월간 프리페치** 캐시 (24시간/빈 결과 5분), Completer 패턴으로 동시 요청 방지
+- [**NEIS API**](docs/api/meal_data_api.md) 기반 조식/중식/석식 메뉴 실시간 조회
+- **월간 프리페치** 캐시 (24시간/빈 결과 5분), Completer 패턴으로 동시 요청 방지 ([Meal 모델](docs/data/meal.md))
 - 급식 카드 탭 → 이미지 공유, **영양 성분** (탄수화물/단백질/지방 등) + 알레르기 유발 식품 표시
-- 급식 알림에 메뉴 미리보기 포함
+- [급식 알림](docs/notification/daily_meal_notification.md)에 메뉴 미리보기 포함
 </details>
 
 <details>
 <summary><b>시간표</b></summary>
 
-- **1학년**: 반별 자동 조회 / **2-3학년**: 선택과목 기반 맞춤 시간표
+- **1학년**: 반별 자동 조회 / **2-3학년**: [선택과목](docs/data/subject.md) 기반 맞춤 시간표 ([API](docs/api/timetable_data_api.md), [SubjectDataManager](docs/data/subject_data_manager.md))
 - **교사 전용 시간표**: 학년 탭(1/2/3학년) → 과목 스와이프 → 중복 반 선택
 - **충돌 자동 감지** + 해결 팝업, 과목별 컬러 커스터마이징 (원형 피커)
 - **현재 교시** 실시간 표시 (1분 갱신, 프로그레스 바), 오늘 요일 하이라이트
@@ -340,8 +340,8 @@ graph LR
 - **커스텀 월간 캘린더** (스와이프 월 이동, 유동적 주 수, 한국어)
 - **연속 학사일정 바** (끊김 없이 이어지는 컬러 바 + 일정명 표시)
 - **개인일정** 하루/연속, **6색 + 원형 컬러피커** (밝기 조절)
-- **NEIS 학사일정** 자동 표시, 개인일정 색상 점
-- **D-day** 관리 + 홈 화면 핀 고정
+- **NEIS 학사일정** 자동 표시 ([API](docs/api/notice_data_api.md)), 개인일정 색상 점 ([ScheduleData](docs/data/schedule_data.md))
+- [**D-day**](docs/data/dday_manager.md) 관리 + 홈 화면 핀 고정
 </details>
 
 <details>
@@ -357,8 +357,8 @@ graph LR
 - **투표** 첨부 (최대 6선택지, 실시간 결과 바)
 - **추천/비추천**: `Map<uid,bool>` + `likeCount` int counter, rules 단계 ±1 delta 검증
 - **이미지 첨부**: 1080px 압축 + EXIF/GPS 제거, PageView swipe viewer + Hero animation + pinch-zoom
-- **n-gram 검색**: 제목+본문 2-gram을 `searchTokens` 배열에 인덱싱, `array-contains-any` 쿼리 (350ms debounce, 50개 fetch + client substring 필터)
-- **검색 history**: 최근 10개 검색어 chip, 개별/전체 삭제
+- [**n-gram 검색**](docs/data/search_tokens.md): 제목+본문 2-gram을 `searchTokens` 배열에 인덱싱, `array-contains-any` 쿼리 (350ms debounce, 50개 fetch + client substring 필터)
+- [**검색 history**](docs/data/search_history_service.md): 최근 10개 검색어 chip, 개별/전체 삭제
 - **일정 공유**, Shimmer 스켈레톤 로딩
 - **바텀시트 메뉴** (아이콘 + 텍스트, 삭제/신고 빨간색 강조)
 - 신고, 사용자 차단, 글 자동 삭제 (TTL), Rate Limiting
@@ -368,7 +368,7 @@ graph LR
 <details>
 <summary><b>1:1 채팅</b></summary>
 
-- **유저 검색**으로 새 채팅 시작 (이름/학번 검색, 관리자 기본 표시)
+- **유저 검색**으로 새 채팅 시작 (이름/학번 검색, 관리자 기본 표시) ([ChatUtils](docs/screens/chat/chat_utils.md))
 - **실시간 메시지** (Firestore onSnapshot, limit 30)
 - **읽음 표시** + 읽지 않은 메시지 수 뱃지
 - **메시지 삭제**: 나만 삭제 / 같이 삭제 (안 읽었고 1시간 이내)
@@ -380,9 +380,9 @@ graph LR
 <summary><b>알림 시스템</b></summary>
 
 - **알림 설정 화면**: 5개 카테고리별 개별 on/off
-- **급식 알림**: 로컬 스케줄링 (조식/중식/석식, 시간 설정, 메뉴 미리보기)
+- [**급식 알림**](docs/notification/daily_meal_notification.md): 로컬 스케줄링 (조식/중식/석식, 시간 설정, 메뉴 미리보기)
 - **인앱 알림**: 댓글/답글/계정 (벨 아이콘 + 뱃지)
-- **FCM 푸시**: 댓글, 대댓글, 새 글, 가입/승인/거절/정지/정지 해제/역할변경, 채팅
+- [**FCM 푸시**](docs/notification/fcm_service.md): 댓글, 대댓글, 새 글, 가입/승인/거절/정지/정지 해제/역할변경, 채팅
 - **딥링크 라우팅**: 알림 탭 시 해당 화면으로 자동 이동 — 게시글 상세, 채팅방, 관리자 화면(가입 요청), 알림 화면(계정 승인)
 - **중복 알림 방지**: 대댓글 알림을 보낸 대상에게 게시글 댓글 알림 중복 발송 스킵
 - **권한 요청 타이밍**: 앱 최초 실행 시가 아닌 온보딩 완료 후 요청하여 사용자 경험 개선
@@ -400,7 +400,7 @@ graph LR
 <details>
 <summary><b>긴급 팝업 공지</b></summary>
 
-- 앱 실행 시 **모달 팝업**으로 중요 공지 표시
+- 앱 실행 시 **모달 팝업**으로 중요 공지 표시 ([PopupNotice](docs/notification/popup_notice.md))
 - **3종 타입**: 긴급(빨강), 공지(파랑), 이벤트(초록)
 - **시작/종료일** 설정 → 기간 외 자동 비활성화
 - **"오늘 안 보기"** 지원 (관리자 설정으로 비활성화 가능)
@@ -438,7 +438,7 @@ graph LR
 - **과목별 목표** 등급(수시 0.1단위) / 목표 백분위(정시) 분리 설정
 - **백분위 → 등급 자동 변환** (등급컷 기준 점선 표시)
 - **영어/한국사** 절대평가 과목 백분위 목표 제외
-- 과목별 고정 색상, 성적 **로컬 전용 저장** (서버에 저장되지 않음)
+- 과목별 고정 색상, 성적 **로컬 전용 저장** (서버에 저장되지 않음) ([GradeManager](docs/data/grade_manager.md), [SecureStorage](docs/data/secure_storage_service.md))
 </details>
 
 <details>
@@ -448,7 +448,7 @@ graph LR
 - **시간표 위젯 (3×2)**: 오늘의 시간표, 현재 교시 강조
 - **급식+시간표 통합 위젯 (5×2)**: 급식과 시간표를 한 화면에
 - 시스템 다크/라이트 모드 자동 대응
-- **자정 자동 갱신** (AlarmManager + Dart 백그라운드 콜백)
+- **자정 자동 갱신** (AlarmManager + Dart 백그라운드 콜백) ([WidgetService](docs/widgets/home_widget/widget_service.md))
 - 앱 실행 시 자동 갱신, **Firestore 읽기 0** (캐시 데이터 활용)
 </details>
 
@@ -489,11 +489,11 @@ graph LR
 <details>
 <summary><b>앱 업데이트 & 오프라인</b></summary>
 
-- **업데이트 체커**: Firestore `app_config/version`에서 최신/최소 버전 비교
+- [**업데이트 체커**](docs/notification/update_checker.md): Firestore `app_config/version`에서 최신/최소 버전 비교
   - **필수 업데이트**: 닫기 불가 다이얼로그 + 스토어 이동
   - **선택 업데이트**: "나중에" 버튼 포함 안내 다이얼로그
   - 버전 비교 로직 (`major.minor.patch`)
-- **오프라인 배너**: 네트워크 끊기면 상단에 빨간 "오프라인 상태입니다" 표시, 재연결 시 자동 소멸
+- [**오프라인 배너**](docs/network/network_status.md): 네트워크 끊기면 상단에 빨간 "오프라인 상태입니다" 표시, 재연결 시 자동 소멸
 - **오프라인 캐시**: 급식/시간표는 로컬 캐시로 오프라인에서도 조회 가능
 </details>
 
@@ -610,7 +610,7 @@ erDiagram
 
 **문제:** 여러 화면에서 동시에 같은 월의 급식 데이터를 요청하면 중복 API 호출 발생
 
-**해결:** `Completer` 패턴으로 동일 월 프리페치를 단일 Future로 병합, 진행 중인 요청이 있으면 기존 Future를 공유
+**해결:** [`Completer` 패턴](docs/api/meal_data_api.md)으로 동일 월 프리페치를 단일 Future로 병합, 진행 중인 요청이 있으면 기존 Future를 공유
 </details>
 
 <details>
@@ -720,16 +720,16 @@ erDiagram
 <summary><b>Repository 패턴 + GetIt 점진적 마이그레이션</b></summary>
 <br>
 
-**문제:** `AuthService`/`GradeManager`가 static 메서드로 25개 이상의 호출 사이트에 흩어져 있어 한번에 DI로 전환하면 전 파일 수정 필요 + 회귀 위험
+**문제:** [`AuthService`](docs/data/auth_service.md)/[`GradeManager`](docs/data/grade_manager.md)가 static 메서드로 25개 이상의 호출 사이트에 흩어져 있어 한번에 DI로 전환하면 전 파일 수정 필요 + 회귀 위험
 
-**해결:** Abstract `AuthRepository` / `GradeRepository` 인터페이스를 새로 정의하고 `FirebaseAuthRepository` / `LocalGradeRepository` 가 기존 static 메서드를 위임 호출. 신규 코드는 `GetIt.I<AuthRepository>()`로 가져가고 기존 호출 사이트는 그대로 둠. 테스트에서는 `setupServiceLocator()` / `resetServiceLocator()` + Mock 구현체로 주입 가능 → 점진적 마이그레이션과 백워드 호환을 동시에 확보
+**해결:** Abstract [`AuthRepository`](docs/data/auth_repository.md) / [`GradeRepository`](docs/data/grade_repository.md) 인터페이스를 새로 정의하고 `FirebaseAuthRepository` / `LocalGradeRepository` 가 기존 static 메서드를 위임 호출. 신규 코드는 `GetIt.I<AuthRepository>()`로 가져가고 기존 호출 사이트는 그대로 둠. 테스트에서는 `setupServiceLocator()` / `resetServiceLocator()` + Mock 구현체로 주입 가능 → 점진적 마이그레이션과 백워드 호환을 동시에 확보
 </details>
 
 <details>
 <summary><b>i18n Context-less 계층 번역 (Notification · Widget Service)</b></summary>
 <br>
 
-**문제:** 로컬 알림(`DailyMealNotification`)과 홈 위젯 서비스(`WidgetService`)는 `BuildContext` 없이 실행되어 `AppLocalizations.of(context)` 사용 불가. 데이터 모델(`Meal.getMealType`, `Exam.displayName`)의 반환값은 Firestore 저장과 UI 표시에 동시 사용되어 단순 교체 불가
+**문제:** 로컬 알림([`DailyMealNotification`](docs/notification/daily_meal_notification.md))과 홈 위젯 서비스([`WidgetService`](docs/widgets/home_widget/widget_service.md))는 `BuildContext` 없이 실행되어 `AppLocalizations.of(context)` 사용 불가. 데이터 모델(`Meal.getMealType`, `Exam.displayName`)의 반환값은 Firestore 저장과 UI 표시에 동시 사용되어 단순 교체 불가
 
 **해결:** 3가지 패턴 적용
 1. **delegate.load()**: 알림·위젯 서비스에서 `AppLocalizations.delegate.load(Locale('ko'))`로 context 없이 번역 객체 획득
