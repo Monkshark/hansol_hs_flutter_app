@@ -16,6 +16,8 @@ AuthRepository (인스턴스 인터페이스)
 FirebaseAuthRepository (AuthService에 위임)
 ```
 
+> 📎 [`AuthService`](auth_service.md)
+
 정적 메서드를 한 번에 제거하면 25개 파일을 동시에 수정해야 하므로, 두 인터페이스를 **병행**:
 - **신규 코드 / Riverpod Provider** → `AuthRepository` 사용
 - **기존 호출처** → [`AuthService`](auth_service.md) 직접 호출 (점진적 마이그레이션)
