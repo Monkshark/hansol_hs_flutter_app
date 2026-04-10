@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class ConflictDialog extends StatelessWidget {
@@ -28,7 +29,7 @@ class ConflictDialog extends StatelessWidget {
                 color: AppColors.theme.primaryColor),
             const SizedBox(height: 12),
             Text(
-              '$dayName요일 $period교시',
+              AppLocalizations.of(context)!.timetable_conflictTitle(dayName, period),
               style: TextStyle(
                 fontSize: 18, fontWeight: FontWeight.w700,
                 color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -36,7 +37,7 @@ class ConflictDialog extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '어떤 과목을 듣나요?',
+              AppLocalizations.of(context)!.timetable_conflictQuestion,
               style: TextStyle(
                   fontSize: 14, color: AppColors.theme.darkGreyColor),
             ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/providers/grade_provider.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/grade_input_screen.dart';
@@ -62,10 +63,10 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
           Container(width: 36, height: 4, decoration: BoxDecoration(
             color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          Text('시험 삭제', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+          Text(AppLocalizations.of(context)!.grade_deleteTitle, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
             color: Theme.of(ctx).textTheme.bodyLarge?.color)),
           const SizedBox(height: 8),
-          Text('${exam.displayName}을(를) 삭제하시겠습니까?',
+          Text(AppLocalizations.of(context)!.grade_deleteMsg(exam.localizedDisplayName(AppLocalizations.of(context)!)),
             style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor)),
           const SizedBox(height: 20),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
@@ -75,14 +76,14 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                 backgroundColor: isDark ? const Color(0xFF2A2D35) : const Color(0xFFF0F0F0),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+              child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
             )),
             const SizedBox(width: 10),
             Expanded(child: ElevatedButton(
               onPressed: () => Navigator.pop(ctx, true),
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-              child: const Text('삭제'),
+              child: Text(AppLocalizations.of(context)!.common_delete),
             )),
           ])),
           const SizedBox(height: 12),
@@ -117,7 +118,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
     if (subjects.isEmpty) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('시험 데이터가 없습니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.grade_noDataMsg)),
         );
       }
       return;
@@ -163,7 +164,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                     child: Text(
-                      isJeongsi ? '과목별 목표 백분위' : '과목별 목표 등급',
+                      isJeongsi ? AppLocalizations.of(context)!.grade_targetTitle : AppLocalizations.of(context)!.grade_targetGradeTitle,
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.w700,
@@ -243,7 +244,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                                 controller: ctrl, autofocus: true, keyboardType: TextInputType.number,
                                                 textAlign: TextAlign.center,
                                                 decoration: InputDecoration(
-                                                  hintText: '0~100', filled: true,
+                                                  hintText: AppLocalizations.of(context)!.gradeInput_hintScore, filled: true,
                                                   fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
                                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                                                 ),
@@ -254,7 +255,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                                 onPressed: () { final v = double.tryParse(ctrl.text); if (v != null) Navigator.pop(c, v.clamp(0, 100)); },
                                                 style: ElevatedButton.styleFrom(backgroundColor: AppColors.theme.primaryColor, foregroundColor: Colors.white,
                                                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0, minimumSize: const Size(double.infinity, 44)),
-                                                child: const Text('확인'),
+                                                child: Text(AppLocalizations.of(context)!.common_confirm),
                                               ),
                                             ])),
                                           ),
@@ -365,9 +366,9 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                           padding: const EdgeInsets.symmetric(vertical: 14),
                           elevation: 0,
                         ),
-                        child: const Text(
-                          '저장',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        child: Text(
+                          AppLocalizations.of(context)!.common_save,
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -392,7 +393,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('성적 관리'),
+        title: Text(AppLocalizations.of(context)!.grade_screenTitle),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -434,7 +435,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '성적 점수는 서버에 저장되지 않습니다',
+                      AppLocalizations.of(context)!.grade_notice,
                       style: TextStyle(
                         fontSize: 12,
                         color: AppColors.theme.primaryColor,
@@ -483,8 +484,8 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                       ),
                       Row(
                         children: [
-                          _buildTab('수시', 0, isDark),
-                          _buildTab('정시', 1, isDark),
+                          _buildTab(AppLocalizations.of(context)!.grade_sujungTab, 0, isDark),
+                          _buildTab(AppLocalizations.of(context)!.grade_jeongsiTab, 1, isDark),
                         ],
                       ),
                     ],
@@ -498,7 +499,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
           Expanded(
             child: ref.watch(examsProvider).when(
                   loading: () => const Center(child: CircularProgressIndicator()),
-                  error: (e, _) => Center(child: Text('불러오기 실패: $e')),
+                  error: (e, _) => Center(child: Text(AppLocalizations.of(context)!.grade_loadFailed(e))),
                   data: (allExams) => PageView(
                     controller: _pageController,
                     physics: const BouncingScrollPhysics(),
@@ -531,7 +532,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
           children: [
             Icon(Icons.assignment_outlined, size: 48, color: AppColors.theme.darkGreyColor),
             const SizedBox(height: 12),
-            Text('시험을 추가하세요', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+            Text(AppLocalizations.of(context)!.grade_addPrompt, style: TextStyle(color: AppColors.theme.darkGreyColor)),
           ],
         ),
       );
@@ -593,7 +594,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                             ),
                                           ),
                                           Text(
-                                            '평균',
+                                            AppLocalizations.of(context)!.grade_averageLabel,
                                             style: TextStyle(
                                               fontSize: 10,
                                               color: AppColors.theme.primaryColor,
@@ -614,7 +615,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    exam.displayName,
+                                    exam.localizedDisplayName(AppLocalizations.of(context)!),
                                     style: TextStyle(
                                       fontSize: 16,
                                       fontWeight: FontWeight.w600,
@@ -643,7 +644,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                         ),
                                         const SizedBox(width: 8),
                                         Text(
-                                          '평균 ${avgRank.toStringAsFixed(1)}등급',
+                                          AppLocalizations.of(context)!.grade_averageRank(avgRank.toStringAsFixed(1)),
                                           style: TextStyle(
                                             fontSize: 13,
                                             color: AppColors.theme.mealTypeTextColor,

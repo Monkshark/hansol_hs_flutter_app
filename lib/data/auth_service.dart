@@ -8,6 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:http/http.dart' as http;
 
@@ -61,6 +62,7 @@ class UserProfile {
   bool get isTeacher => userType == 'teacher';
   bool get isParent => userType == 'parent';
 
+  /// Korean display name (for Firestore storage)
   String get displayName {
     switch (userType) {
       case 'graduate':
@@ -69,6 +71,20 @@ class UserProfile {
         return '교사 $name';
       case 'parent':
         return '학부모 $name';
+      default:
+        return studentId.isNotEmpty ? '$studentId $name' : name;
+    }
+  }
+
+  /// Localized display name (for UI)
+  String localizedDisplayName(AppLocalizations l) {
+    switch (userType) {
+      case 'graduate':
+        return l.data_graduateLabel(name);
+      case 'teacher':
+        return l.data_teacherLabel(name);
+      case 'parent':
+        return l.data_parentLabel(name);
       default:
         return studentId.isNotEmpty ? '$studentId $name' : name;
     }
@@ -289,20 +305,11 @@ class AuthService {
     return profile.approved || profile.isManager;
   }
 
-  static Future<String?> getSuspendedMessage() async {
+  /// Returns suspend remaining duration, or null if not suspended.
+  static Future<Duration?> getSuspendedDuration() async {
     final profile = await getCachedProfile();
     if (profile == null || !profile.isSuspended) return null;
-    final diff = profile.suspendedUntil!.difference(DateTime.now());
-    final days = diff.inDays;
-    final hours = diff.inHours % 24;
-    final minutes = diff.inMinutes % 60;
-    final seconds = diff.inSeconds % 60;
-    final parts = <String>[];
-    if (days > 0) parts.add('${days}일');
-    if (hours > 0) parts.add('${hours}시간');
-    if (minutes > 0) parts.add('${minutes}분');
-    if (parts.isEmpty) parts.add('${seconds}초');
-    return parts.join(' ');
+    return profile.suspendedUntil!.difference(DateTime.now());
   }
 
   static Future<bool> isManager() async {

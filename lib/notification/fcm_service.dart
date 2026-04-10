@@ -84,10 +84,36 @@ class FcmService {
     }, SetOptions(merge: true));
   }
 
+  static const boardCategories = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+
+  /// 한글 카테고리명 → FCM 토픽용 영문 키
+  static const _categoryTopicKey = {
+    '자유': 'free',
+    '질문': 'question',
+    '정보공유': 'info',
+    '분실물': 'lost',
+    '학생회': 'council',
+    '동아리': 'club',
+  };
+
+  static String _topicName(String category) =>
+      'board_${_categoryTopicKey[category] ?? category}';
+
   static Future<void> _subscribeTopics() async {
     if (SettingData().isBoardNotificationOn) {
       await _messaging.subscribeToTopic('board_new_post');
       log('FcmService: subscribed to board_new_post');
+    }
+    // 카테고리별 토픽
+    for (final cat in boardCategories) {
+      final key = 'noti_board_$cat';
+      if (SettingData().getBool(key, defaultValue: true)) {
+        await _messaging.subscribeToTopic(_topicName(cat));
+      }
+    }
+    // 인기글 토픽
+    if (SettingData().getBool('noti_board_popular', defaultValue: true)) {
+      await _messaging.subscribeToTopic('board_popular');
     }
   }
 
@@ -98,6 +124,25 @@ class FcmService {
       await _messaging.unsubscribeFromTopic('board_new_post');
     }
     SettingData().isBoardNotificationOn = enabled;
+  }
+
+  static Future<void> toggleCategoryNotification(String category, bool enabled) async {
+    final topic = _topicName(category);
+    if (enabled) {
+      await _messaging.subscribeToTopic(topic);
+    } else {
+      await _messaging.unsubscribeFromTopic(topic);
+    }
+    SettingData().setBool('noti_board_$category', enabled);
+  }
+
+  static Future<void> togglePopularNotification(bool enabled) async {
+    if (enabled) {
+      await _messaging.subscribeToTopic('board_popular');
+    } else {
+      await _messaging.unsubscribeFromTopic('board_popular');
+    }
+    SettingData().setBool('noti_board_popular', enabled);
   }
 
   static void _onForegroundMessage(RemoteMessage message) {

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -75,7 +76,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                   borderRadius: BorderRadius.circular(2),
                 ),
               )),
-              Text('일정 만들기', style: TextStyle(
+              Text(AppLocalizations.of(context)!.calendar_createSchedule, style: TextStyle(
                 fontSize: 18, fontWeight: FontWeight.w700, color: textColor)),
               const SizedBox(height: 16),
 
@@ -83,7 +84,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                 controller: contentController,
                 style: TextStyle(color: textColor),
                 decoration: InputDecoration(
-                  hintText: '일정 내용을 입력하세요',
+                  hintText: AppLocalizations.of(context)!.calendar_scheduleContent,
                   hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                   filled: true,
                   fillColor: fillColor,
@@ -97,7 +98,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
 
               Row(
                 children: [
-                  Expanded(child: _datePicker('시작일', _startDate, (d) => setState(() {
+                  Expanded(child: _datePicker(AppLocalizations.of(context)!.calendar_startDate, _startDate, (d) => setState(() {
                     _startDate = d;
                     if (_endDate.isBefore(_startDate)) _endDate = _startDate;
                   }))),
@@ -105,20 +106,20 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     child: Text('~', style: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 16)),
                   ),
-                  Expanded(child: _datePicker('종료일', _endDate, (d) => setState(() => _endDate = d))),
+                  Expanded(child: _datePicker(AppLocalizations.of(context)!.calendar_endDate, _endDate, (d) => setState(() => _endDate = d))),
                 ],
               ),
               if (isMultiDay)
                 Padding(
                   padding: const EdgeInsets.only(top: 6),
                   child: Text(
-                    '${_endDate.difference(_startDate).inDays + 1}일간',
+                    AppLocalizations.of(context)!.calendar_multiDay(_endDate.difference(_startDate).inDays + 1),
                     style: TextStyle(fontSize: 12, color: AppColors.theme.primaryColor, fontWeight: FontWeight.w600),
                   ),
                 ),
               const SizedBox(height: 16),
 
-              Text('색상', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
+              Text(AppLocalizations.of(context)!.calendar_color, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor)),
               const SizedBox(height: 8),
               Row(
                 children: [
@@ -167,7 +168,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                   Expanded(
                     child: TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -180,7 +181,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 0,
                       ),
-                      child: const Text('추가'),
+                      child: Text(AppLocalizations.of(context)!.calendar_add),
                     ),
                   ),
                 ],
@@ -285,8 +286,8 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                       color: previewColor,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Center(child: Text('미리보기',
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white))),
+                    child: Center(child: Text(AppLocalizations.of(context)!.calendar_colorPreview,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white))),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
@@ -308,7 +309,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                     children: [
                       Expanded(child: TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                        child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                       )),
                       const SizedBox(width: 10),
                       Expanded(child: ElevatedButton(
@@ -331,7 +332,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                           elevation: 0,
                         ),
-                        child: const Text('선택'),
+                        child: Text(AppLocalizations.of(context)!.calendar_colorSelect),
                       )),
                     ],
                   ),

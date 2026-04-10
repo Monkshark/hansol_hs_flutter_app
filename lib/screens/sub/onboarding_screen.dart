@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -18,32 +19,35 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   final _controller = PageController();
   int _currentPage = 0;
 
-  static const _pages = [
-    _OnboardingPage(
-      icon: Icons.restaurant,
-      title: '급식 정보',
-      description: '조식/중식/석식 메뉴를\n한눈에 확인하세요',
-      color: Color(0xFF4CAF50),
-    ),
-    _OnboardingPage(
-      icon: Icons.calendar_view_week,
-      title: '시간표',
-      description: '선택과목 기반 시간표를\n자동으로 구성해드려요',
-      color: Color(0xFF2196F3),
-    ),
-    _OnboardingPage(
-      icon: Icons.event,
-      title: '일정 관리',
-      description: '개인 일정과 학사일정을\n한 곳에서 관리하세요',
-      color: Color(0xFFFF9800),
-    ),
-    _OnboardingPage(
-      icon: Icons.forum,
-      title: '게시판',
-      description: '자유롭게 소통하고\n투표, 일정 공유도 가능해요',
-      color: Color(0xFF9C27B0),
-    ),
-  ];
+  List<_OnboardingPage> _pages(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return [
+      _OnboardingPage(
+        icon: Icons.restaurant,
+        title: l.onboarding_meal,
+        description: l.onboarding_mealDesc,
+        color: const Color(0xFF4CAF50),
+      ),
+      _OnboardingPage(
+        icon: Icons.calendar_view_week,
+        title: l.onboarding_timetable,
+        description: l.onboarding_timetableDesc,
+        color: const Color(0xFF2196F3),
+      ),
+      _OnboardingPage(
+        icon: Icons.event,
+        title: l.onboarding_schedule,
+        description: l.onboarding_scheduleDesc,
+        color: const Color(0xFFFF9800),
+      ),
+      _OnboardingPage(
+        icon: Icons.forum,
+        title: l.onboarding_board,
+        description: l.onboarding_boardDesc,
+        color: const Color(0xFF9C27B0),
+      ),
+    ];
+  }
 
   @override
   void dispose() {
@@ -59,7 +63,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final isLast = _currentPage == _pages.length - 1;
+    final l = AppLocalizations.of(context)!;
+    final pages = _pages(context);
+    final isLast = _currentPage == pages.length - 1;
 
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -70,16 +76,16 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               alignment: Alignment.topRight,
               child: TextButton(
                 onPressed: _finish,
-                child: Text('건너뛰기', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                child: Text(l.onboarding_skip, style: TextStyle(color: AppColors.theme.darkGreyColor)),
               ),
             ),
             Expanded(
               child: PageView.builder(
                 controller: _controller,
-                itemCount: _pages.length,
+                itemCount: pages.length,
                 onPageChanged: (i) => setState(() => _currentPage = i),
                 itemBuilder: (context, index) {
-                  final page = _pages[index];
+                  final page = pages[index];
                   return Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -109,7 +115,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               child: Row(
                 children: [
                   Row(
-                    children: List.generate(_pages.length, (i) =>
+                    children: List.generate(pages.length, (i) =>
                       Container(
                         width: _currentPage == i ? 24 : 8,
                         height: 8,
@@ -137,7 +143,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        isLast ? '시작하기' : '다음',
+                        isLast ? l.onboarding_start : l.onboarding_next,
                         style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
                       ),
                     ),

@@ -11,6 +11,7 @@ import 'package:hansol_high_school/screens/board/my_posts_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 /// 게시판 목록 화면 (BoardScreen)
@@ -26,8 +27,22 @@ class BoardScreen extends StatefulWidget {
   State<BoardScreen> createState() => _BoardScreenState();
 }
 
+String _formatSuspendDuration(AppLocalizations l, Duration diff) {
+  final days = diff.inDays;
+  final hours = diff.inHours % 24;
+  final minutes = diff.inMinutes % 60;
+  final seconds = diff.inSeconds % 60;
+  final parts = <String>[];
+  if (days > 0) parts.add(l.data_suspendDays(days));
+  if (hours > 0) parts.add(l.data_suspendHours(hours));
+  if (minutes > 0) parts.add(l.data_suspendMinutes(minutes));
+  if (parts.isEmpty) parts.add(l.data_suspendSeconds(seconds));
+  return parts.join(' ');
+}
+
 class _BoardScreenState extends State<BoardScreen> {
-  static const _categories = ['전체', '인기글', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+  // DB category keys (never localized – used for Firestore queries)
+  static const _categoryKeys = ['전체', '인기글', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   static const _pageSize = 20;
   static const _searchLimit = 50;
   int _selectedIndex = 0;
@@ -47,7 +62,23 @@ class _BoardScreenState extends State<BoardScreen> {
   bool _loadingMore = false;
   bool _initialLoading = true;
 
-  String get _selectedCategory => _categories[_selectedIndex];
+  String get _selectedCategory => _categoryKeys[_selectedIndex];
+
+  /// Localized display name for a category key
+  String _localizedCategory(BuildContext context, String key) {
+    final l = AppLocalizations.of(context)!;
+    switch (key) {
+      case '전체': return l.board_categoryAll;
+      case '인기글': return l.board_categoryPopular;
+      case '자유': return l.board_categoryFree;
+      case '질문': return l.board_categoryQuestion;
+      case '정보공유': return l.board_categoryInfoShare;
+      case '분실물': return l.board_categoryLostFound;
+      case '학생회': return l.board_categoryStudentCouncil;
+      case '동아리': return l.board_categoryClub;
+      default: return key;
+    }
+  }
 
   @override
   void initState() {
@@ -250,7 +281,7 @@ class _BoardScreenState extends State<BoardScreen> {
                 controller: _searchController,
                 style: TextStyle(fontSize: 15, color: textColor),
                 decoration: InputDecoration(
-                  hintText: '제목/본문 검색...',
+                  hintText: AppLocalizations.of(context)!.board_searchHint,
                   hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                   border: InputBorder.none,
                 ),
@@ -261,7 +292,7 @@ class _BoardScreenState extends State<BoardScreen> {
                   _runSearch(v.trim());
                 },
               )
-            : const Text('게시판'),
+            : Text(AppLocalizations.of(context)!.board_title),
         centerTitle: !_isSearching,
         elevation: 0,
         actions: [
@@ -301,7 +332,7 @@ class _BoardScreenState extends State<BoardScreen> {
                 controller: _categoryScrollController,
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                itemCount: _categories.length,
+                itemCount: _categoryKeys.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   final selected = _selectedIndex == index;
@@ -324,7 +355,7 @@ class _BoardScreenState extends State<BoardScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        _categories[index],
+                        _localizedCategory(context, _categoryKeys[index]),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -343,7 +374,7 @@ class _BoardScreenState extends State<BoardScreen> {
                 ? _buildSearchBody(context)
                 : PageView.builder(
                     controller: _pageController,
-                    itemCount: _categories.length,
+                    itemCount: _categoryKeys.length,
                     onPageChanged: (i) {
                       setState(() => _selectedIndex = i);
                       _scrollCategoryIntoView();
@@ -388,7 +419,7 @@ class _BoardScreenState extends State<BoardScreen> {
             Icon(Icons.article_outlined,
                 size: 40, color: AppColors.theme.darkGreyColor),
             const SizedBox(height: 8),
-            Text('게시글이 없습니다',
+            Text(AppLocalizations.of(context)!.board_emptyPosts,
                 style: TextStyle(color: AppColors.theme.darkGreyColor)),
           ],
         ),
@@ -435,7 +466,7 @@ class _BoardScreenState extends State<BoardScreen> {
           child: Column(mainAxisSize: MainAxisSize.min, children: [
             Icon(Icons.history, size: 40, color: AppColors.theme.darkGreyColor),
             const SizedBox(height: 8),
-            Text('검색어를 입력하세요',
+            Text(AppLocalizations.of(context)!.board_searchEmptyQuery,
                 style: TextStyle(color: AppColors.theme.darkGreyColor)),
           ]),
         );
@@ -447,7 +478,7 @@ class _BoardScreenState extends State<BoardScreen> {
           children: [
             Row(
               children: [
-                Text('최근 검색어',
+                Text(AppLocalizations.of(context)!.board_recentSearches,
                     style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
@@ -455,7 +486,7 @@ class _BoardScreenState extends State<BoardScreen> {
                 const Spacer(),
                 TextButton(
                   onPressed: _clearAllHistory,
-                  child: Text('전체 삭제',
+                  child: Text(AppLocalizations.of(context)!.board_clearAllSearches,
                       style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
                 ),
               ],
@@ -490,7 +521,7 @@ class _BoardScreenState extends State<BoardScreen> {
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.search_off, size: 40, color: AppColors.theme.darkGreyColor),
           const SizedBox(height: 8),
-          Text('검색 결과가 없습니다',
+          Text(AppLocalizations.of(context)!.board_searchNoResults,
               style: TextStyle(color: AppColors.theme.darkGreyColor)),
         ]),
       );
@@ -527,11 +558,13 @@ class _BoardScreenState extends State<BoardScreen> {
       if (result != true) return;
     }
 
-    final suspendMsg = await AuthService.getSuspendedMessage();
-    if (suspendMsg != null) {
+    final suspendDuration = await AuthService.getSuspendedDuration();
+    if (suspendDuration != null) {
       if (mounted) {
+        final l = AppLocalizations.of(context)!;
+        final formatted = _formatSuspendDuration(l, suspendDuration);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('계정 정지 상태입니다\n남은 기간: $suspendMsg')),
+          SnackBar(content: Text('${l.board_accountSuspended}\n${l.board_suspendedRemaining(formatted)}')),
         );
       }
       return;
@@ -541,7 +574,7 @@ class _BoardScreenState extends State<BoardScreen> {
     if (!approved) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('관리자 승인 대기 중입니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.board_awaitingAdminApproval)),
         );
       }
       return;
@@ -597,7 +630,7 @@ class PostCard extends StatelessWidget {
     final firstImage = hasImages ? imageUrls.first : null;
     final hasPoll = data['pollOptions'] != null && (data['pollOptions'] as List).isNotEmpty;
     final createdAt = data['createdAt'] as Timestamp?;
-    final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
+    final timeStr = createdAt != null ? _formatTime(context, createdAt.toDate()) : '';
 
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -624,7 +657,7 @@ class PostCard extends StatelessWidget {
                     color: _categoryColor(category).withAlpha(20),
                     borderRadius: BorderRadius.circular(6),
                   ),
-                  child: Text(category,
+                  child: Text(_localizedCategoryName(context, category),
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _categoryColor(category))),
                 ),
                 if (data['isResolved'] == true && category == '분실물')
@@ -636,8 +669,8 @@ class PostCard extends StatelessWidget {
                         color: const Color(0xFF4CAF50).withAlpha(20),
                         borderRadius: BorderRadius.circular(6),
                       ),
-                      child: const Text('해결',
-                        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF4CAF50))),
+                      child: Text(AppLocalizations.of(context)!.post_resolved,
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: Color(0xFF4CAF50))),
                     ),
                   ),
                 const Spacer(),
@@ -739,6 +772,20 @@ class PostCard extends StatelessWidget {
     );
   }
 
+  String _localizedCategoryName(BuildContext context, String key) {
+    final l = AppLocalizations.of(context)!;
+    switch (key) {
+      case '자유': return l.board_categoryFree;
+      case '인기글': return l.board_categoryPopular;
+      case '질문': return l.board_categoryQuestion;
+      case '정보공유': return l.board_categoryInfoShare;
+      case '분실물': return l.board_categoryLostFound;
+      case '학생회': return l.board_categoryStudentCouncil;
+      case '동아리': return l.board_categoryClub;
+      default: return key;
+    }
+  }
+
   Color _categoryColor(String category) {
     switch (category) {
       case '자유': return AppColors.theme.primaryColor;
@@ -751,12 +798,13 @@ class PostCard extends StatelessWidget {
     }
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(BuildContext context, DateTime dt) {
+    final l = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return '방금';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    if (diff.inDays < 7) return '${diff.inDays}일 전';
+    if (diff.inMinutes < 1) return l.common_justNow;
+    if (diff.inMinutes < 60) return l.common_minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.common_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.common_daysAgo(diff.inDays);
     return DateFormat('M/d').format(dt);
   }
 }

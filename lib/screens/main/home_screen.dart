@@ -16,6 +16,7 @@ import 'package:hansol_high_school/screens/sub/timetable_view_screen.dart';
 import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -181,8 +182,8 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           const SizedBox(width: 6),
                           Text(
                             SettingData().isGradeSet
-                                ? '한솔고 $grade학년 $classNum반'
-                                : '한솔고등학교',
+                                ? AppLocalizations.of(context)!.home_schoolInfo(grade, classNum)
+                                : AppLocalizations.of(context)!.home_schoolName,
                             style: const TextStyle(
                               color: Colors.white,
                               fontSize: 13,
@@ -235,9 +236,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('시간표', style: TextStyle(
+                                Text(AppLocalizations.of(context)!.home_timetableTitle, style: TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
-                                Text('이번 주 시간표를 확인하세요', style: TextStyle(
+                                Text(AppLocalizations.of(context)!.home_timetableSubtitle, style: TextStyle(
                                   fontSize: 12, color: AppColors.theme.darkGreyColor)),
                               ],
                             ),
@@ -275,9 +276,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('성적 관리', style: TextStyle(
+                                Text(AppLocalizations.of(context)!.home_gradesTitle, style: TextStyle(
                                   fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
-                                Text('내신/모의고사 성적을 기록하세요', style: TextStyle(
+                                Text(AppLocalizations.of(context)!.home_gradesSubtitle, style: TextStyle(
                                   fontSize: 12, color: AppColors.theme.darkGreyColor)),
                               ],
                             ),
@@ -316,9 +317,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Text('게시판', style: TextStyle(
+                                      Text(AppLocalizations.of(context)!.home_boardTitle, style: TextStyle(
                                         fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
-                                      Text('자유롭게 소통해보세요', style: TextStyle(
+                                      Text(AppLocalizations.of(context)!.home_boardSubtitle, style: TextStyle(
                                         fontSize: 12, color: AppColors.theme.darkGreyColor)),
                                     ],
                                   ),
@@ -360,9 +361,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text('채팅', style: TextStyle(
+                                  Text(AppLocalizations.of(context)!.home_chatTitle, style: TextStyle(
                                     fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
-                                  Text('1:1 대화하기', style: TextStyle(
+                                  Text(AppLocalizations.of(context)!.home_chatSubtitle, style: TextStyle(
                                     fontSize: 12, color: AppColors.theme.darkGreyColor)),
                                 ],
                               ),
@@ -377,9 +378,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     children: [
                       Expanded(child: _LinkCard(icon: Icons.school_outlined, label: 'NEIS+', color: const Color(0xFF4CAF50), url: 'https://neisplus.kr/')),
                       const SizedBox(width: 12),
-                      Expanded(child: _LinkCard(icon: Icons.language_outlined, label: '리로스쿨', color: const Color(0xFF2196F3), url: 'https://sjhansol.riroschool.kr/')),
+                      Expanded(child: _LinkCard(icon: Icons.language_outlined, label: AppLocalizations.of(context)!.home_linkRiroschool, color: const Color(0xFF2196F3), url: 'https://sjhansol.riroschool.kr/')),
                       const SizedBox(width: 12),
-                      Expanded(child: _LinkCard(icon: Icons.campaign_outlined, label: '한솔 공식', color: const Color(0xFFFF9800), url: 'https://sjhansol.sjeduhs.kr/sjhansol-h/main.do?sso=ok')),
+                      Expanded(child: _LinkCard(icon: Icons.campaign_outlined, label: AppLocalizations.of(context)!.home_linkOfficial, color: const Color(0xFFFF9800), url: 'https://sjhansol.sjeduhs.kr/sjhansol-h/main.do?sso=ok')),
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
@@ -403,8 +404,8 @@ class _UpcomingEventDDay extends StatelessWidget {
       future: DDayManager.getPinned(),
       builder: (context, snapshot) {
         if (snapshot.connectionState != ConnectionState.done) {
-          return const Text(
-            '일정 로딩중...',
+          return Text(
+            AppLocalizations.of(context)!.home_scheduleLoading,
             style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
           );
         }
@@ -421,7 +422,7 @@ class _UpcomingEventDDay extends StatelessWidget {
                 Icon(Icons.add_circle_outline, color: Colors.white.withAlpha(200), size: 20),
                 const SizedBox(width: 8),
                 Text(
-                  'D-day를 설정하세요',
+                  AppLocalizations.of(context)!.home_ddaySet,
                   style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 16, fontWeight: FontWeight.w500),
                 ),
               ],
@@ -475,7 +476,7 @@ class _TodayLunchPreview extends StatelessWidget {
         type: MealDataApi.MENU,
       ),
       builder: (context, snapshot) {
-        String preview = '급식 정보 로딩중...';
+        String preview = AppLocalizations.of(context)!.home_lunchPreview;
         if (snapshot.hasData && snapshot.data?.meal != null) {
           final menu = snapshot.data!.meal!;
           final items = menu.split('\n').take(3).map((e) =>
@@ -483,7 +484,7 @@ class _TodayLunchPreview extends StatelessWidget {
           ).where((e) => e.isNotEmpty).join(' · ');
           preview = '🍱 $items';
         } else if (snapshot.hasData) {
-          preview = '오늘 급식 정보가 없습니다';
+          preview = AppLocalizations.of(context)!.home_lunchNoInfo;
         }
         return Text(
           preview,

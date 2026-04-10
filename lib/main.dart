@@ -34,6 +34,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -294,8 +295,9 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
       darkTheme: _darkTheme,
       themeMode: mode,
       locale: const Locale('ko', 'KR'),
-      supportedLocales: const [Locale('ko', 'KR'), Locale('en', 'US')],
+      supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
+        AppLocalizations.delegate,
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
@@ -390,7 +392,7 @@ class _MainScreenState extends State<MainScreen> {
         appRefreshNotifier.value++;
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('계정이 삭제되었습니다. 다시 가입해주세요.')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.main_accountDeleted)),
           );
         }
       }

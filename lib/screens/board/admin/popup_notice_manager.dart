@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class PopupNoticeManager extends StatefulWidget {
@@ -22,8 +23,12 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
   bool _saving = false;
 
   static const _types = ['emergency', 'notice', 'event'];
-  static const _typeLabels = {'emergency': '긴급', 'notice': '공지', 'event': '이벤트'};
   static const _typeColors = {'emergency': Colors.red, 'notice': Color(0xFF3F72AF), 'event': Color(0xFF4CAF50)};
+
+  Map<String, String> _typeLabels(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
+    return {'emergency': l.admin_popupTypeEmergency, 'notice': l.admin_popupTypeNotice, 'event': l.admin_popupTypeEvent};
+  }
 
   @override
   void initState() {
@@ -62,7 +67,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
       'dismissible': _dismissible,
     });
     setState(() => _saving = false);
-    if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('저장되었습니다')));
+    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.admin_popupSaved)));
   }
 
   Future<void> _pickDate(TextEditingController controller) async {
@@ -102,7 +107,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
         children: [
           Row(
             children: [
-              Text('팝업 활성화', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+              Text(AppLocalizations.of(context)!.admin_popupActivate, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
               const Spacer(),
               Switch.adaptive(
                 value: _active,
@@ -128,7 +133,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
                       borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: selected ? color : AppColors.theme.darkGreyColor),
                     ),
-                    child: Text(_typeLabels[t] ?? t, style: TextStyle(
+                    child: Text(_typeLabels(context)[t] ?? t, style: TextStyle(
                       fontSize: 13, fontWeight: FontWeight.w600,
                       color: selected ? Colors.white : AppColors.theme.darkGreyColor)),
                   ),
@@ -142,7 +147,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
             controller: _titleController,
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-              hintText: '제목', hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+              hintText: AppLocalizations.of(context)!.admin_popupTitle, hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
               filled: true, fillColor: fillColor,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             ),
@@ -154,7 +159,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
             maxLines: 4,
             style: TextStyle(color: textColor),
             decoration: InputDecoration(
-              hintText: '내용', hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+              hintText: AppLocalizations.of(context)!.admin_popupContent, hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
               filled: true, fillColor: fillColor,
               border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
             ),
@@ -169,7 +174,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
                   controller: _startController,
                   style: TextStyle(color: textColor, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: '시작일', hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                    hintText: AppLocalizations.of(context)!.admin_popupStartDate, hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                     filled: true, fillColor: fillColor, prefixIcon: Icon(Icons.calendar_today, size: 16, color: AppColors.theme.darkGreyColor),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
@@ -182,7 +187,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
                   controller: _endController,
                   style: TextStyle(color: textColor, fontSize: 13),
                   decoration: InputDecoration(
-                    hintText: '종료일', hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                    hintText: AppLocalizations.of(context)!.admin_popupEndDate, hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                     filled: true, fillColor: fillColor, prefixIcon: Icon(Icons.calendar_today, size: 16, color: AppColors.theme.darkGreyColor),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
                   ),
@@ -194,7 +199,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
 
           Row(
             children: [
-              Text('"오늘 안 보기" 허용', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+              Text(AppLocalizations.of(context)!.admin_popupDismissible, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
               const Spacer(),
               Switch.adaptive(value: _dismissible, activeColor: AppColors.theme.primaryColor,
                 onChanged: (v) => setState(() => _dismissible = v)),
@@ -215,7 +220,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
               ),
               child: _saving
                   ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('저장', style: TextStyle(fontWeight: FontWeight.w700)),
+                  : Text(AppLocalizations.of(context)!.admin_popupSave, style: const TextStyle(fontWeight: FontWeight.w700)),
             ),
           ),
         ],

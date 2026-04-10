@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
@@ -39,7 +40,7 @@ class ReportsTabState extends State<ReportsTab> {
         if (docs.isEmpty) {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
-            child: Center(child: Text('신고가 없습니다',
+            child: Center(child: Text(AppLocalizations.of(context)!.admin_reportsEmpty,
               style: TextStyle(color: AppColors.theme.darkGreyColor))),
           );
         }
@@ -88,7 +89,7 @@ class ReportsTabState extends State<ReportsTab> {
                         child: GestureDetector(
                           onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => PostDetailScreen(postId: postId))),
-                          child: Text('글 보기', style: TextStyle(
+                          child: Text(AppLocalizations.of(context)!.admin_reportsViewPost, style: TextStyle(
                             fontSize: 13, color: AppColors.theme.primaryColor, fontWeight: FontWeight.w600)),
                         ),
                       ),
@@ -109,7 +110,7 @@ class ReportsTabState extends State<ReportsTab> {
                             color: Colors.red,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text('글 삭제', style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                          child: Text(AppLocalizations.of(context)!.admin_reportsDeletePost, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -121,7 +122,7 @@ class ReportsTabState extends State<ReportsTab> {
                             color: AppColors.theme.darkGreyColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
-                          child: const Text('무시', style: TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
+                          child: Text(AppLocalizations.of(context)!.admin_reportsIgnore, style: const TextStyle(fontSize: 12, color: Colors.white, fontWeight: FontWeight.w600)),
                         ),
                       ),
                     ],

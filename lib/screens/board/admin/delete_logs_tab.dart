@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class DeleteLogsTab extends StatefulWidget {
@@ -46,7 +47,7 @@ class DeleteLogsTabState extends State<DeleteLogsTab> {
           return Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: Center(
-              child: Text('삭제 로그가 없습니다',
+              child: Text(AppLocalizations.of(context)!.admin_logsEmpty,
                   style: TextStyle(color: AppColors.theme.darkGreyColor)),
             ),
           );
@@ -61,15 +62,16 @@ class DeleteLogsTabState extends State<DeleteLogsTab> {
           itemBuilder: (context, index) {
             final data = docs[index].data();
             final action = data['action'] ?? '';
-            final adminName = data['adminName'] ?? '관리자';
+            final l = AppLocalizations.of(context)!;
+            final adminName = data['adminName'] ?? 'Admin';
             final isFeedback = action == 'delete_feedback';
             final title = isFeedback
-                ? (data['feedbackContent'] ?? '내용 없음')
-                : (data['postTitle'] ?? '제목 없음');
+                ? (data['feedbackContent'] ?? l.admin_logsNoContent)
+                : (data['postTitle'] ?? l.admin_logsNoTitle);
             final authorName = isFeedback
-                ? (data['feedbackAuthorName'] ?? '알 수 없음')
-                : (data['postAuthorName'] ?? '알 수 없음');
-            final label = isFeedback ? '건의 삭제' : '게시글 삭제';
+                ? (data['feedbackAuthorName'] ?? l.admin_logsUnknown)
+                : (data['postAuthorName'] ?? l.admin_logsUnknown);
+            final label = isFeedback ? l.admin_logsFeedbackDeleted : l.admin_logsPostDeleted;
             final labelColor = isFeedback ? Colors.orange : Colors.red;
             final createdAt = data['createdAt'] as Timestamp?;
             final timeStr = createdAt != null
@@ -105,12 +107,12 @@ class DeleteLogsTabState extends State<DeleteLogsTab> {
                     ],
                   ),
                   const SizedBox(height: 6),
-                  Text('작성자: $authorName', style: TextStyle(
+                  Text(l.admin_logsAuthor(authorName), style: TextStyle(
                       fontSize: 12, color: AppColors.theme.darkGreyColor)),
                   const SizedBox(height: 2),
                   Row(
                     children: [
-                      Text('삭제: $adminName', style: TextStyle(
+                      Text(l.admin_logsDeletedBy(adminName), style: TextStyle(
                           fontSize: 12, color: AppColors.theme.primaryColor)),
                       const Spacer(),
                       Text(timeStr, style: TextStyle(

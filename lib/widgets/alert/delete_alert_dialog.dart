@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 삭제 확인 다이얼로그
@@ -47,7 +48,7 @@ class DeleteAlertDialog extends StatelessWidget {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                    child: Text(AppLocalizations.of(context)!.delete_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -61,7 +62,7 @@ class DeleteAlertDialog extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: const Text('삭제'),
+                    child: Text(AppLocalizations.of(context)!.delete_confirm),
                   ),
                 ),
               ],

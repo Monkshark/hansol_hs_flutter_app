@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -30,8 +31,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
     if (uid == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('채팅')),
-        body: const Center(child: Text('로그인이 필요합니다')),
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.chat_title)),
+        body: Center(child: Text(AppLocalizations.of(context)!.chat_loginRequired)),
       );
     }
 
@@ -40,13 +41,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: const Text('채팅'),
+        title: Text(AppLocalizations.of(context)!.chat_title),
         centerTitle: true,
         elevation: 0,
         actions: [
           IconButton(
             icon: const Icon(Icons.person_add_outlined, size: 22),
-            tooltip: '새 채팅',
+            tooltip: AppLocalizations.of(context)!.chat_newChat,
             onPressed: () => _showUserSearch(context, uid),
           ),
         ],
@@ -70,9 +71,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 children: [
                   Icon(Icons.chat_outlined, size: 40, color: AppColors.theme.darkGreyColor),
                   const SizedBox(height: 8),
-                  Text('채팅이 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                  Text(AppLocalizations.of(context)!.chat_noChats, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                   const SizedBox(height: 4),
-                  Text('게시글에서 사용자를 탭하면 채팅을 시작할 수 있어요',
+                  Text(AppLocalizations.of(context)!.chat_startTip,
                     style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor),
                     textAlign: TextAlign.center),
                 ],
@@ -89,7 +90,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               final participants = List<String>.from(data['participants'] ?? []);
               final names = Map<String, dynamic>.from(data['participantNames'] ?? {});
               final otherUid = participants.firstWhere((p) => p != uid, orElse: () => '');
-              final otherName = names[otherUid] ?? '알 수 없음';
+              final otherName = names[otherUid] ?? AppLocalizations.of(context)!.chat_unknownUser;
               final lastMessage = data['lastMessage'] ?? '';
               final lastMessageAt = data['lastMessageAt'] as Timestamp?;
               final unreadCount = (data['unreadCount'] as Map<String, dynamic>?)?[uid] ?? 0;
@@ -207,7 +208,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   autofocus: true,
                   style: TextStyle(color: Theme.of(context).textTheme.bodyLarge?.color),
                   decoration: InputDecoration(
-                    hintText: '이름 또는 학번으로 검색',
+                    hintText: AppLocalizations.of(context)!.chat_searchPlaceholder,
                     hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                     prefixIcon: Icon(Icons.search, color: AppColors.theme.darkGreyColor),
                     filled: true,
@@ -244,7 +245,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   Widget _buildUserList(BuildContext context, List<Map<String, dynamic>> list, bool isSearch, BuildContext sheetCtx) {
     if (list.isEmpty) {
       return Center(child: Text(
-        isSearch ? '검색 결과가 없습니다' : '관리자를 불러오는 중...',
+        isSearch ? AppLocalizations.of(context)!.chat_noResults : AppLocalizations.of(context)!.chat_loadingAdmins,
         style: TextStyle(color: AppColors.theme.darkGreyColor)));
     }
     return ListView.builder(
@@ -256,11 +257,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
         final userType = user['userType'] ?? 'student';
         final role = user['role'] ?? 'user';
 
+        final l10n = AppLocalizations.of(context)!;
         String displayName;
         switch (userType) {
-          case 'teacher': displayName = '교사 $name'; break;
-          case 'parent': displayName = '학부모 $name'; break;
-          case 'graduate': displayName = '졸업생 $name'; break;
+          case 'teacher': displayName = l10n.data_teacherLabel(name); break;
+          case 'parent': displayName = l10n.data_parentLabel(name); break;
+          case 'graduate': displayName = l10n.data_graduateLabel(name); break;
           default: displayName = sid.isNotEmpty ? '$sid $name' : name;
         }
 
@@ -282,7 +284,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   color: role == 'admin' ? Colors.red.withAlpha(25) : AppColors.theme.primaryColor.withAlpha(25),
                   borderRadius: BorderRadius.circular(4),
                 ),
-                child: Text(role == 'admin' ? 'Admin' : '매니저',
+                child: Text(role == 'admin' ? 'Admin' : AppLocalizations.of(context)!.chat_managerLabel,
                   style: TextStyle(fontSize: 9, fontWeight: FontWeight.w700,
                     color: role == 'admin' ? Colors.red : AppColors.theme.primaryColor)),
               ),
@@ -312,12 +314,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Container(width: 36, height: 4, decoration: BoxDecoration(color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 12),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('$otherName 님과의 채팅방을 나가시겠습니까?\n상대방에게 퇴장 메시지가 표시됩니다.',
+            child: Text(AppLocalizations.of(context)!.chat_leaveConfirmation(otherName),
               textAlign: TextAlign.center, style: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black87, height: 1.5))),
           const SizedBox(height: 16),
           ListTile(
             leading: const Icon(Icons.exit_to_app, color: Colors.redAccent, size: 22),
-            title: const Text('채팅방 나가기', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
+            title: Text(AppLocalizations.of(context)!.chat_leaveAction, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
             onTap: () { Navigator.pop(ctx); _leaveChat(chatId); },
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
@@ -332,28 +334,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
       final uid = AuthService.currentUser?.uid;
       if (uid == null) return;
       final profile = await AuthService.getCachedProfile();
-      final myName = profile?.displayName ?? '알 수 없음';
+      final myName = profile?.displayName ?? AppLocalizations.of(context)!.chat_unknownUser;
       final chatRef = FirebaseFirestore.instance.collection('chats').doc(chatId);
       await chatRef.collection('messages').add({
-        'type': 'system', 'content': '$myName님이 채팅방을 나갔습니다.', 'createdAt': FieldValue.serverTimestamp(),
+        'type': 'system', 'content': AppLocalizations.of(context)!.chat_leftMessage(myName), 'createdAt': FieldValue.serverTimestamp(),
       });
       await chatRef.update({
         'participants': FieldValue.arrayRemove([uid]),
-        'lastMessage': '$myName님이 나갔습니다.', 'lastMessageAt': FieldValue.serverTimestamp(),
+        'lastMessage': AppLocalizations.of(context)!.chat_leftShort(myName), 'lastMessageAt': FieldValue.serverTimestamp(),
       });
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('채팅방을 나갔습니다')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftSuccess)));
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('채팅방 나가기에 실패했습니다')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftError)));
     }
   }
 
   String _formatTime(DateTime dt) {
     final now = DateTime.now();
     final diff = now.difference(dt);
-    if (diff.inMinutes < 1) return '방금';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    if (diff.inDays < 7) return '${diff.inDays}일 전';
+    final l10n = AppLocalizations.of(context)!;
+    if (diff.inMinutes < 1) return l10n.common_justNow;
+    if (diff.inMinutes < 60) return l10n.common_minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l10n.common_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l10n.common_daysAgo(diff.inDays);
     return DateFormat('M/d').format(dt);
   }
 }

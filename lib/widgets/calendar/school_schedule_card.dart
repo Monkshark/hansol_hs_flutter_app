@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 학사일정 카드 위젯
@@ -53,7 +54,7 @@ class SchoolScheduleCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(6),
             ),
             child: Text(
-              '학사',
+              AppLocalizations.of(context)!.calendar_school,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,

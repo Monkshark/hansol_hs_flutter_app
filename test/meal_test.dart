@@ -20,11 +20,11 @@ void main() {
       expect(restored.kcal, '650 Kcal');
     });
 
-    test('getMealType returns correct label', () {
-      expect(Meal(meal: '', date: DateTime.now(), mealType: 1, kcal: '').getMealType(), '조식');
-      expect(Meal(meal: '', date: DateTime.now(), mealType: 2, kcal: '').getMealType(), '중식');
-      expect(Meal(meal: '', date: DateTime.now(), mealType: 3, kcal: '').getMealType(), '석식');
-      expect(Meal(meal: '', date: DateTime.now(), mealType: 99, kcal: '').getMealType(), '중식');
+    test('getMealTypeKey returns correct key', () {
+      expect(Meal(meal: '', date: DateTime.now(), mealType: 1, kcal: '').getMealTypeKey(), 'breakfast');
+      expect(Meal(meal: '', date: DateTime.now(), mealType: 2, kcal: '').getMealTypeKey(), 'lunch');
+      expect(Meal(meal: '', date: DateTime.now(), mealType: 3, kcal: '').getMealTypeKey(), 'dinner');
+      expect(Meal(meal: '', date: DateTime.now(), mealType: 99, kcal: '').getMealTypeKey(), 'lunch');
     });
 
     test('toString returns meal content', () {

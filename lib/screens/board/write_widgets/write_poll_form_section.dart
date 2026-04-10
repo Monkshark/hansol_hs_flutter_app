@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 글쓰기 화면의 투표 폼
@@ -54,7 +55,7 @@ class WritePollFormSection extends StatelessWidget {
                       controller: pollControllers[i],
                       style: TextStyle(fontSize: 14, color: textColor),
                       decoration: InputDecoration(
-                        hintText: '선택지 ${i + 1}',
+                        hintText: AppLocalizations.of(context)!.write_pollOptionHint(i + 1),
                         hintStyle: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
                         filled: true,
                         fillColor: fillColor,
@@ -93,7 +94,7 @@ class WritePollFormSection extends StatelessWidget {
                   children: [
                     Icon(Icons.add, size: 16, color: AppColors.theme.secondaryColor),
                     const SizedBox(width: 4),
-                    Text('선택지 추가', style: TextStyle(
+                    Text(AppLocalizations.of(context)!.write_pollAddOption, style: TextStyle(
                       fontSize: 13, color: AppColors.theme.secondaryColor, fontWeight: FontWeight.w600)),
                   ],
                 ),

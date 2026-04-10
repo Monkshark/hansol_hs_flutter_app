@@ -84,7 +84,9 @@ dependency_overrides:
   analyzer_plugin: ^0.13.0
 
 flutter:
+  generate: true
   uses-material-design: true
   assets:
     - assets/images/
     - assets/icons/
+    - assets/privacy_policy.html

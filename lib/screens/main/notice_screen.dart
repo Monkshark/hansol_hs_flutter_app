@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
@@ -149,7 +150,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
                                       Icon(Icons.event_note, size: 40, color: AppColors.theme.darkGreyColor),
                                       const SizedBox(height: 8),
                                       Text(
-                                        '일정이 없습니다',
+                                        AppLocalizations.of(context)!.notice_noSchedule,
                                         style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor),
                                       ),
                                     ],
@@ -220,17 +221,17 @@ class _NoticeScreenState extends State<NoticeScreen> {
                       color: isDark ? Colors.grey[600] : Colors.grey[300],
                       borderRadius: BorderRadius.circular(2))),
                     const SizedBox(height: 16),
-                    Text('연속 일정 삭제', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
+                    Text(AppLocalizations.of(context)!.notice_continuousDeleteTitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700,
                       color: Theme.of(context).textTheme.bodyLarge?.color)),
                     const SizedBox(height: 12),
                     ListTile(
                       leading: const Icon(Icons.today, color: Colors.orange),
-                      title: const Text('이 날만 삭제'),
+                      title: Text(AppLocalizations.of(context)!.notice_deleteThisDayOnly),
                       onTap: () => Navigator.pop(ctx, 'this'),
                     ),
                     ListTile(
                       leading: const Icon(Icons.delete_sweep, color: Colors.red),
-                      title: const Text('전체 일정 삭제', style: TextStyle(color: Colors.red)),
+                      title: Text(AppLocalizations.of(context)!.notice_deleteAllSchedule, style: const TextStyle(color: Colors.red)),
                       onTap: () => Navigator.pop(ctx, 'all'),
                     ),
                     const SizedBox(height: 8),

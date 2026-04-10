@@ -1,8 +1,10 @@
 import 'dart:developer';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/auth/profile_edit_screen.dart';
 import 'package:hansol_high_school/screens/sub/feedback_screen.dart';
@@ -181,7 +183,7 @@ class _SettingScreenState extends State<SettingScreen> {
         centerTitle: true,
         backgroundColor: AppColors.theme.settingScreenBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-        title: const Text('설정'),
+        title: Text(AppLocalizations.of(context)!.settings_title),
         titleTextStyle: TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -198,15 +200,15 @@ class _SettingScreenState extends State<SettingScreen> {
               const SizedBox(height: 16),
               _buildAuthCard(),
               const SizedBox(height: 24),
-              _buildSectionTitle('학교 정보'),
+              _buildSectionTitle(AppLocalizations.of(context)!.settings_schoolSection),
               _buildGroupedCard([
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () => _selectGradeAndClass(),
                   child: _buildSettingRow(
-                    '학년 반 설정',
+                    AppLocalizations.of(context)!.settings_gradeClass,
                     trailing: Text(
-                      '$grade학년 $classNum반',
+                      AppLocalizations.of(context)!.settings_gradeClassLabel(grade, classNum),
                       style: TextStyle(
                         fontSize: 16,
                         color: AppColors.theme.primaryColor,
@@ -221,7 +223,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   onTap: grade == 1 ? null : () {
                     if (!SettingData().isGradeSet) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('학년/반을 먼저 설정해주세요')),
+                        SnackBar(content: Text(AppLocalizations.of(context)!.settings_gradeClassError)),
                       );
                       return;
                     }
@@ -230,51 +232,51 @@ class _SettingScreenState extends State<SettingScreen> {
                     );
                   },
                   child: _buildSettingRow(
-                    '선택과목 시간표',
+                    AppLocalizations.of(context)!.settings_selectiveSubject,
                     trailing: Icon(Icons.chevron_right, color: grade == 1
                         ? AppColors.theme.darkGreyColor : AppColors.theme.primaryColor),
                   ),
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionTitle('테마'),
+              _buildSectionTitle(AppLocalizations.of(context)!.settings_themeSection),
               _buildGroupedCard([
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                   child: Row(
                     children: [
-                      _buildThemeButton(0, '라이트', Icons.light_mode),
+                      _buildThemeButton(0, AppLocalizations.of(context)!.settings_light, Icons.light_mode),
                       const SizedBox(width: 8),
-                      _buildThemeButton(1, '다크', Icons.dark_mode),
+                      _buildThemeButton(1, AppLocalizations.of(context)!.settings_dark, Icons.dark_mode),
                       const SizedBox(width: 8),
-                      _buildThemeButton(2, '시스템', Icons.settings_brightness),
+                      _buildThemeButton(2, AppLocalizations.of(context)!.settings_system, Icons.settings_brightness),
                     ],
                   ),
                 ),
               ]),
               const SizedBox(height: 24),
-              _buildSectionTitle('알림'),
+              _buildSectionTitle(AppLocalizations.of(context)!.settings_notificationSection),
               _buildGroupedCard([
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const NotificationSettingScreen())),
                   child: _buildSettingRow(
-                    '알림 설정',
+                    AppLocalizations.of(context)!.settings_notification,
                     trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                   ),
                 ),
               ]),
               if (AuthService.isLoggedIn) ...[
                 const SizedBox(height: 24),
-                _buildSectionTitle('건의사항'),
+                _buildSectionTitle(AppLocalizations.of(context)!.settings_feedbackSection),
                 _buildGroupedCard([
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const FeedbackScreen(type: 'app'))),
                     child: _buildSettingRow(
-                      '앱 건의사항 & 버그 제보',
+                      AppLocalizations.of(context)!.settings_appFeedback,
                       trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                     ),
                   ),
@@ -284,27 +286,27 @@ class _SettingScreenState extends State<SettingScreen> {
                     onTap: () => Navigator.push(context,
                       MaterialPageRoute(builder: (_) => const FeedbackScreen(type: 'council'))),
                     child: _buildSettingRow(
-                      '학생회 건의사항',
+                      AppLocalizations.of(context)!.settings_councilFeedback,
                       trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                     ),
                   ),
                 ]),
               ],
               const SizedBox(height: 24),
-              _buildSectionTitle('기타'),
+              _buildSectionTitle(AppLocalizations.of(context)!.settings_etcSection),
               _buildGroupedCard([
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.push(context,
                     MaterialPageRoute(builder: (_) => const _PrivacyPolicyScreen())),
                   child: _buildSettingRow(
-                    '개인정보 처리방침',
+                    AppLocalizations.of(context)!.settings_privacy,
                     trailing: Icon(Icons.chevron_right, size: 18, color: AppColors.theme.darkGreyColor),
                   ),
                 ),
                 _buildDivider(),
                 _buildSettingRow(
-                  '캐시 삭제${_cacheSize.isNotEmpty ? ' ($_cacheSize)' : ''}',
+                  AppLocalizations.of(context)!.settings_cacheLabel(_cacheSize.isNotEmpty ? ' ($_cacheSize)' : ''),
                   trailing: TextButton(
                     onPressed: () async {
                       final prefs = await SharedPreferences.getInstance();
@@ -326,16 +328,16 @@ class _SettingScreenState extends State<SettingScreen> {
                       _calcCacheSize();
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('캐시가 삭제되었습니다')),
+                          SnackBar(content: Text(AppLocalizations.of(context)!.settings_cacheSuccess)),
                         );
                       }
                     },
-                    child: Text('삭제', style: TextStyle(color: Colors.red[400])),
+                    child: Text(AppLocalizations.of(context)!.settings_cacheDelete, style: TextStyle(color: Colors.red[400])),
                   ),
                 ),
                 _buildDivider(),
                 _buildSettingRow(
-                  '앱 버전',
+                  AppLocalizations.of(context)!.settings_appVersion,
                   trailing: Text(
                     'v1.0.0',
                     style: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
@@ -424,7 +426,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                   ),
-                  title: Text(name.isNotEmpty ? name : '이름 없음',
+                  title: Text(name.isNotEmpty ? name : AppLocalizations.of(context)!.settings_nameDefault,
                     style: TextStyle(fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.bodyLarge?.color)),
                   subtitle: Column(
@@ -435,7 +437,7 @@ class _SettingScreenState extends State<SettingScreen> {
                         style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
                       const SizedBox(height: 2),
                       Text(
-                        profile?.approved == true ? '승인됨' : '승인 대기중',
+                        profile?.approved == true ? AppLocalizations.of(context)!.settings_approved : AppLocalizations.of(context)!.settings_pendingApproval,
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
@@ -451,7 +453,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       appRefreshNotifier.value++;
                       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
                     },
-                    child: Text('로그아웃', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                    child: Text(AppLocalizations.of(context)!.settings_logout, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
                   ),
                 ),
               ]),
@@ -459,7 +461,7 @@ class _SettingScreenState extends State<SettingScreen> {
               _buildGroupedCard([
                 ListTile(
                   leading: Icon(Icons.edit, size: 20, color: AppColors.theme.primaryColor),
-                  title: Text('내 계정', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
+                  title: Text(AppLocalizations.of(context)!.settings_myAccount, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
                     color: Theme.of(context).textTheme.bodyLarge?.color)),
                   trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                   onTap: () async {
@@ -495,9 +497,9 @@ class _SettingScreenState extends State<SettingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('로그인', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                    Text(AppLocalizations.of(context)!.settings_login, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.bodyLarge?.color)),
-                    Text('Google 계정으로 로그인하세요', style: TextStyle(
+                    Text(AppLocalizations.of(context)!.settings_loginDesc, style: TextStyle(
                         fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
                   ],
                 ),
@@ -543,11 +545,12 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 
   String _providerLabel(String provider) {
+    final l = AppLocalizations.of(context)!;
     switch (provider) {
-      case 'kakao': return 'Kakao 로그인';
-      case 'apple': return 'Apple 로그인';
-      case 'github': return 'GitHub 로그인';
-      default: return 'Google 로그인';
+      case 'kakao': return l.settings_loginKakao;
+      case 'apple': return l.settings_loginApple;
+      case 'github': return l.settings_loginGithub;
+      default: return l.settings_loginGoogle;
     }
   }
 
@@ -583,37 +586,101 @@ class _PrivacyPolicyScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l = AppLocalizations.of(context)!;
     final textColor = Theme.of(context).textTheme.bodyLarge?.color;
     final subColor = AppColors.theme.darkGreyColor;
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(backgroundColor: Theme.of(context).scaffoldBackgroundColor, foregroundColor: textColor,
-        title: const Text('개인정보 처리방침'), centerTitle: true, elevation: 0),
+        title: Text(l.settings_privacyTitle), centerTitle: true, elevation: 0),
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 32),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          _t('1. 수집하는 개인정보 항목', textColor),
-          _b('이름, 학번, 학년/반(재학생), 졸업연도(졸업생), 담당과목(교사), 이메일, 프로필 사진(선택), 기기 토큰(푸시 알림용)', subColor),
-          _t('2. 수집·이용 목적', textColor),
-          _b('사용자 식별 및 가입 승인, 커뮤니티 서비스 제공, 맞춤 정보 제공, 푸시 알림, 부적절한 이용 방지', subColor),
-          _t('3. 보유 및 이용 기간', textColor),
-          _b('회원 탈퇴 시 즉시 삭제. 게시글은 작성일로부터 1년 후 자동 삭제.', subColor),
-          _t('4. 제3자 제공', textColor),
-          _b('수집된 개인정보는 제3자에게 제공하지 않습니다. 법령에 의한 요청 시 예외.', subColor),
-          _t('5. 파기 절차', textColor),
-          _b('회원 탈퇴 시 Firebase Authentication, Firestore 데이터, Storage 프로필 사진 즉시 삭제.', subColor),
-          _t('6. 이용자의 권리', textColor),
-          _b('언제든지 회원정보 조회, 수정, 탈퇴 가능.', subColor),
-          _t('7. 보호 조치', textColor),
-          _b('Firebase 보안 규칙, 역할 기반 권한, HTTPS 암호화, API 키 환경변수 분리.', subColor),
-          const SizedBox(height: 16),
-          Text('시행일: 2025년 1월 1일', style: TextStyle(fontSize: 12, color: subColor)),
+          Text(l.settings_privacyEffectiveDate, style: TextStyle(fontSize: 12, color: subColor)),
+          const SizedBox(height: 8),
+          _b(l.settings_privacyIntro, subColor),
+
+          _t(l.settings_privacySection1Title, textColor),
+          _b(l.settings_privacySection1Intro, subColor),
+          _b(l.settings_privacySection1Content, subColor),
+
+          _t(l.settings_privacySection2Title, textColor),
+          _s(l.settings_privacySection2Required, textColor),
+          _b(l.settings_privacySection2RequiredContent, subColor),
+          _s(l.settings_privacySection2Optional, textColor),
+          _b(l.settings_privacySection2OptionalContent, subColor),
+          _s(l.settings_privacySection2Auto, textColor),
+          _b(l.settings_privacySection2AutoContent, subColor),
+          _s(l.settings_privacySection2AutoCollect, textColor),
+          _b(l.settings_privacySection2AutoCollectContent, subColor),
+          _s(l.settings_privacySection2LocalOnly, textColor),
+          _b(l.settings_privacySection2LocalOnlyContent, subColor),
+
+          _t(l.settings_privacySection3Title, textColor),
+          _b(l.settings_privacySection3Content, subColor),
+
+          _t(l.settings_privacySection4Title, textColor),
+          _b(l.settings_privacySection4Content, subColor),
+
+          _t(l.settings_privacySection5Title, textColor),
+          _b(l.settings_privacySection5Content, subColor),
+
+          _t(l.settings_privacySection6Title, textColor),
+          _b(l.settings_privacySection6Content, subColor),
+
+          _t(l.settings_privacySection7Title, textColor),
+          _b(l.settings_privacySection7Content, subColor),
+
+          _t(l.settings_privacySection8Title, textColor),
+          _b(l.settings_privacySection8Content, subColor),
+
+          _t(l.settings_privacySection9Title, textColor),
+          _b(l.settings_privacySection9Content, subColor),
+
+          _t(l.settings_privacySection10Title, textColor),
+          _b(l.settings_privacySection10Content, subColor),
+
+          _t(l.settings_privacySection11Title, textColor),
+          _b(l.settings_privacySection11Content, subColor),
+
+          _t(l.settings_privacySection12Title, textColor),
+          _b(l.settings_privacySection12Content, subColor),
+
+          _t(l.settings_privacySection13Title, textColor),
+          _b(l.settings_privacySection13Content, subColor),
+
+          _t(l.settings_privacySection14Title, textColor),
+          _b(l.settings_privacySection14Content, subColor),
+          const SizedBox(height: 8),
+          _link(l.settings_privacySection14Link1, l.settings_privacySection14Phone1, l.settings_privacySection14Url1),
+          _link(l.settings_privacySection14Link2, l.settings_privacySection14Phone2, l.settings_privacySection14Url2),
+          _link(l.settings_privacySection14Link3, l.settings_privacySection14Phone3, l.settings_privacySection14Url3),
+          _link(l.settings_privacySection14Link4, l.settings_privacySection14Phone4, l.settings_privacySection14Url4),
+
+          _t(l.settings_privacySection15Title, textColor),
+          _b(l.settings_privacySection15Content, subColor),
         ]),
       ),
     );
   }
 
-  Widget _t(String text, Color? c) => Padding(padding: const EdgeInsets.only(top: 20, bottom: 8),
+  Widget _t(String text, Color? c) => Padding(padding: const EdgeInsets.only(top: 24, bottom: 8),
     child: Text(text, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c)));
-  Widget _b(String text, Color c) => Text(text, style: TextStyle(fontSize: 13, color: c, height: 1.7));
+  Widget _s(String text, Color? c) => Padding(padding: const EdgeInsets.only(top: 14, bottom: 4),
+    child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: c)));
+  Widget _b(String text, Color c) => Padding(padding: const EdgeInsets.only(bottom: 4),
+    child: Text(text, style: TextStyle(fontSize: 13, color: c, height: 1.7)));
+  Widget _link(String name, String phone, String url) => Padding(
+    padding: const EdgeInsets.only(bottom: 6),
+    child: GestureDetector(
+      onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+      child: Row(children: [
+        Text('• ', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+        Expanded(child: Text.rich(TextSpan(children: [
+          TextSpan(text: name, style: TextStyle(fontSize: 13, color: AppColors.theme.primaryColor, decoration: TextDecoration.underline)),
+          TextSpan(text: ' / $phone', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+        ]))),
+      ]),
+    ),
+  );
 }

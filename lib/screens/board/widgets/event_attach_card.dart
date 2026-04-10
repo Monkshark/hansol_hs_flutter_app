@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -21,11 +22,11 @@ class EventAttachCard extends StatelessWidget {
     required this.onAdd,
   });
 
-  String _formatTime(int minutes) {
+  String _formatTime(int minutes, {required String am, required String pm}) {
     if (minutes < 0) return '';
     final h = minutes ~/ 60;
     final m = minutes % 60;
-    final period = h < 12 ? '오전' : '오후';
+    final period = h < 12 ? am : pm;
     final hour = h == 0 ? 12 : (h > 12 ? h - 12 : h);
     return '$period $hour:${m.toString().padLeft(2, '0')}';
   }
@@ -33,6 +34,7 @@ class EventAttachCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final l10n = AppLocalizations.of(context)!;
     final hasTime = startTime >= 0 && endTime >= 0;
 
     return Container(
@@ -49,7 +51,7 @@ class EventAttachCard extends StatelessWidget {
             children: [
               Icon(Icons.event, size: 18, color: AppColors.theme.tertiaryColor),
               const SizedBox(width: 6),
-              Text('일정 공유', style: TextStyle(
+              Text(l10n.event_cardTitle, style: TextStyle(
                 fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.theme.tertiaryColor)),
             ],
           ),
@@ -60,7 +62,7 @@ class EventAttachCard extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(eventDate) +
-                (hasTime ? '  ${_formatTime(startTime)} - ${_formatTime(endTime)}' : ''),
+                (hasTime ? '  ${_formatTime(startTime, am: l10n.event_am, pm: l10n.event_pm)} - ${_formatTime(endTime, am: l10n.event_am, pm: l10n.event_pm)}' : ''),
             style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
           ),
           const SizedBox(height: 12),
@@ -69,7 +71,7 @@ class EventAttachCard extends StatelessWidget {
             child: ElevatedButton.icon(
               onPressed: onAdd,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('내 일정에 추가'),
+              label: Text(l10n.event_cardAddButton),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.theme.tertiaryColor,
                 foregroundColor: Colors.white,

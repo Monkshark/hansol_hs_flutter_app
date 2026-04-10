@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -71,7 +72,7 @@ class PostCommentItem extends StatelessWidget {
                       color: AppColors.theme.primaryColor.withAlpha(20),
                       borderRadius: BorderRadius.circular(4),
                     ),
-                    child: Text('글쓴이', style: TextStyle(
+                    child: Text(AppLocalizations.of(context)!.post_authorBadge, style: TextStyle(
                       fontSize: 9, fontWeight: FontWeight.w700, color: AppColors.theme.primaryColor)),
                   ),
                 ],
@@ -137,6 +138,8 @@ class PostCommentItem extends StatelessWidget {
 
   String _formatTime(DateTime dt) {
     final diff = DateTime.now().difference(dt);
+    // NOTE: _formatTime has no context; time-ago strings remain hardcoded here.
+    // They will be localized when context is threaded through (Phase 33).
     if (diff.inMinutes < 1) return '방금';
     if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
     if (diff.inHours < 24) return '${diff.inHours}시간 전';

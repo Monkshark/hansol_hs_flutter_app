@@ -201,3 +201,7 @@ android/key.properties
 android/app/release-key.jks
 .claude/
 scripts/service-account.json
+
+# Study docs (local only)
+docs/**/*.md
+!docs/riverpod_graph.html

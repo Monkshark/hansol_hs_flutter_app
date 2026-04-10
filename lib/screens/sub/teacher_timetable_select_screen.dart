@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/subject.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -150,7 +151,7 @@ class _TeacherTimetableSelectScreenState
     setState(() => _hasChanges = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('저장되었습니다')),
+        SnackBar(content: Text(AppLocalizations.of(context)!.timetable_teacherSaved)),
       );
     }
   }
@@ -190,16 +191,16 @@ class _TeacherTimetableSelectScreenState
         final discard = await showDialog<bool>(
           context: context,
           builder: (ctx) => AlertDialog(
-            title: const Text('변경사항이 있습니다'),
-            content: const Text('저장하지 않고 나가시겠습니까?'),
+            title: Text(AppLocalizations.of(context)!.timetable_teacherAlert),
+            content: Text(AppLocalizations.of(context)!.timetable_teacherDiscardMsg),
             actions: [
               TextButton(
                   onPressed: () => Navigator.pop(ctx, false),
-                  child: const Text('취소')),
+                  child: Text(AppLocalizations.of(context)!.common_cancel)),
               TextButton(
                   onPressed: () => Navigator.pop(ctx, true),
                   child:
-                      const Text('나가기', style: TextStyle(color: Colors.red))),
+                      Text(AppLocalizations.of(context)!.timetable_teacherLeave, style: const TextStyle(color: Colors.red))),
             ],
           ),
         );
@@ -210,7 +211,7 @@ class _TeacherTimetableSelectScreenState
         appBar: AppBar(
           backgroundColor: Theme.of(context).scaffoldBackgroundColor,
           foregroundColor: textColor,
-          title: const Text('수업 시간표 설정'),
+          title: Text(AppLocalizations.of(context)!.timetable_teacherSelectTitle),
           centerTitle: true,
           elevation: 0,
           actions: [
@@ -229,10 +230,10 @@ class _TeacherTimetableSelectScreenState
             indicatorSize: TabBarIndicatorSize.label,
             labelStyle:
                 const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-            tabs: const [
-              Tab(text: '1학년'),
-              Tab(text: '2학년'),
-              Tab(text: '3학년'),
+            tabs: [
+              Tab(text: AppLocalizations.of(context)!.timetable_teacherTab1),
+              Tab(text: AppLocalizations.of(context)!.timetable_teacherTab2),
+              Tab(text: AppLocalizations.of(context)!.timetable_teacherTab3),
             ],
           ),
         ),
@@ -254,7 +255,7 @@ class _TeacherTimetableSelectScreenState
                             size: 20, color: AppColors.theme.primaryColor),
                         const SizedBox(width: 8),
                         Text(
-                          '총 ${_selected.length}개 수업 선택됨',
+                          AppLocalizations.of(context)!.timetable_teacherCount(_selected.length),
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -284,7 +285,7 @@ class _TeacherTimetableSelectScreenState
     final groups = _gradeSubjectGroups[grade];
     if (groups == null || groups.isEmpty) {
       return Center(
-        child: Text('과목을 불러올 수 없습니다',
+        child: Text(AppLocalizations.of(context)!.timetable_teacherLoadError,
             style: TextStyle(color: AppColors.theme.darkGreyColor)),
       );
     }
@@ -489,8 +490,8 @@ class _TeacherSubjectCardState extends State<_TeacherSubjectCard> {
                   const SizedBox(height: 2),
                   Text(
                     subject.subjectClass < 0
-                        ? '특별실'
-                        : '${subject.subjectClass}반',
+                        ? AppLocalizations.of(context)!.timetable_teacherSpecial
+                        : AppLocalizations.of(context)!.timetable_teacherClass(subject.subjectClass),
                     style: TextStyle(
                         fontSize: 13,
                         color: AppColors.theme.mealTypeTextColor),

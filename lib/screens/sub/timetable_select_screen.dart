@@ -3,6 +3,7 @@ import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/subject.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 선택과목 설정 화면 (TimetableSelectScreen)
@@ -116,6 +117,10 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
     setState(() => scheduleMap = map);
   }
 
+  String _getConflictMsg(String day, int period, String subject) {
+    return AppLocalizations.of(context)!.timetable_selectConflict(day, period, subject);
+  }
+
   void _checkConflicts() {
     conflictMap.clear();
     if (selectedSubjects.length < 2) return;
@@ -138,9 +143,9 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
           for (var bInfo in bInfos) {
             if (aInfo.dayName == bInfo.dayName && aInfo.period == bInfo.period) {
               conflictMap[a.subjectName] =
-                  '${aInfo.dayName} ${aInfo.period}교시에 ${b.subjectName}과(와) 겹침';
+                  _getConflictMsg(aInfo.dayName, aInfo.period, b.subjectName);
               conflictMap[b.subjectName] =
-                  '${bInfo.dayName} ${bInfo.period}교시에 ${a.subjectName}과(와) 겹침';
+                  _getConflictMsg(bInfo.dayName, bInfo.period, a.subjectName);
               return; // 첫 번째 충돌만 표시
             }
           }
@@ -189,18 +194,18 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text('변경사항이 있습니다', style: TextStyle(
+                    Text(AppLocalizations.of(context)!.timetable_selectAlert, style: TextStyle(
                       fontSize: 18, fontWeight: FontWeight.w700,
                       color: Theme.of(ctx).textTheme.bodyLarge?.color)),
                     const SizedBox(height: 12),
-                    Text('저장하지 않고 나가시겠습니까?', style: TextStyle(
+                    Text(AppLocalizations.of(context)!.timetable_selectDiscardMsg, style: TextStyle(
                       fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
                     const SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(child: TextButton(
                           onPressed: () => Navigator.pop(ctx, false),
-                          child: Text('취소', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                          child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                         )),
                         const SizedBox(width: 10),
                         Expanded(child: ElevatedButton(
@@ -211,7 +216,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                             elevation: 0,
                           ),
-                          child: const Text('나가기'),
+                          child: Text(AppLocalizations.of(context)!.timetable_selectLeave),
                         )),
                       ],
                     ),
@@ -228,7 +233,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
-        title: const Text('선택과목 설정'),
+        title: Text(AppLocalizations.of(context)!.timetable_selectTitle),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -239,7 +244,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                 setState(() => _hasChanges = false);
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('저장되었습니다')),
+                    SnackBar(content: Text(AppLocalizations.of(context)!.timetable_selectSaved)),
                   );
                 }
               },
@@ -254,7 +259,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return Center(child: Text('오류: ${snapshot.error}'));
+            return Center(child: Text(AppLocalizations.of(context)!.grade_loadFailed(snapshot.error!)));
           }
           if (!snapshot.hasData || snapshot.data!.isEmpty) {
             return Center(
@@ -263,7 +268,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                 children: [
                   Icon(Icons.school_outlined, size: 48, color: AppColors.theme.darkGreyColor),
                   const SizedBox(height: 12),
-                  Text('과목을 불러올 수 없습니다', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                  Text(AppLocalizations.of(context)!.timetable_selectLoadError, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                 ],
               ),
             );
@@ -284,7 +289,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                     Icon(Icons.check_circle_outline, size: 20, color: AppColors.theme.primaryColor),
                     const SizedBox(width: 8),
                     Text(
-                      '${selectedSubjects.length}개 과목 선택됨',
+                      AppLocalizations.of(context)!.timetable_selectCount(selectedSubjects.length),
                       style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
@@ -502,7 +507,7 @@ class _SubjectSwipeCardState extends State<_SubjectSwipeCard> {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    subject.subjectClass < 0 ? '특별실' : '${subject.subjectClass}반',
+                    subject.subjectClass < 0 ? AppLocalizations.of(context)!.timetable_selectSpecial : AppLocalizations.of(context)!.timetable_selectClass(subject.subjectClass),
                     style: TextStyle(fontSize: 13, color: AppColors.theme.mealTypeTextColor),
                   ),
                   if (scheduleText.isNotEmpty)

@@ -7,6 +7,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/search_tokens.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_event_form_section.dart';
@@ -43,7 +44,8 @@ class WritePostScreen extends StatefulWidget {
 }
 
 class _WritePostScreenState extends State<WritePostScreen> {
-  static const _categories = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+  // DB category keys (never localized – used for Firestore queries)
+  static const _categoryKeys = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   late String _category;
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;
@@ -67,10 +69,23 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
   bool get _isEdit => widget.postId != null;
 
+  String _localizedCategory(BuildContext context, String key) {
+    final l = AppLocalizations.of(context)!;
+    switch (key) {
+      case '자유': return l.board_categoryFree;
+      case '질문': return l.board_categoryQuestion;
+      case '정보공유': return l.board_categoryInfoShare;
+      case '분실물': return l.board_categoryLostFound;
+      case '학생회': return l.board_categoryStudentCouncil;
+      case '동아리': return l.board_categoryClub;
+      default: return key;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
-    _category = widget.initialCategory ?? _categories[0];
+    _category = widget.initialCategory ?? _categoryKeys[0];
     _titleController = TextEditingController(text: widget.initialTitle ?? '');
     _contentController = TextEditingController(text: widget.initialContent ?? '');
     _eventContentController = TextEditingController();
@@ -188,19 +203,19 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 Container(width: 36, height: 4, decoration: BoxDecoration(
                   color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
                 const SizedBox(height: 16),
-                Text('작성 중인 글이 있습니다', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
+                Text(AppLocalizations.of(context)!.write_unsavedChanges, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
                 const SizedBox(height: 20),
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
                   Expanded(child: TextButton(
                     onPressed: () => Navigator.pop(ctx, 'discard'),
-                    child: Text('삭제', style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                    child: Text(AppLocalizations.of(context)!.write_draftDelete, style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
                   )),
                   const SizedBox(width: 10),
                   Expanded(child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, 'save'),
                     style: ElevatedButton.styleFrom(backgroundColor: AppColors.theme.primaryColor, foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-                    child: const Text('임시저장'),
+                    child: Text(AppLocalizations.of(context)!.write_draftSave),
                   )),
                 ])),
                 const SizedBox(height: 12),
@@ -218,7 +233,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
         foregroundColor: textColor,
-        title: Text(_isEdit ? '글 수정' : '글쓰기'),
+        title: Text(_isEdit ? AppLocalizations.of(context)!.write_editTitle : AppLocalizations.of(context)!.write_title),
         centerTitle: true,
         elevation: 0,
         actions: [
@@ -228,19 +243,25 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 await _saveDraft();
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('임시저장되었습니다')));
+                    SnackBar(content: Text(AppLocalizations.of(context)!.write_draftSaved)));
                 }
               },
               icon: Icon(Icons.save_outlined, color: AppColors.theme.darkGreyColor, size: 24),
-              tooltip: '임시저장',
+              tooltip: AppLocalizations.of(context)!.write_draftSave,
             ),
           IconButton(
             onPressed: _saving ? null : _onSubmit,
-            icon: Icon(
-              Icons.check,
-              color: _saving ? AppColors.theme.darkGreyColor : AppColors.theme.primaryColor,
-              size: 28,
-            ),
+            icon: _saving
+                ? const SizedBox(
+                    width: 24,
+                    height: 24,
+                    child: CircularProgressIndicator(strokeWidth: 2.5),
+                  )
+                : Icon(
+                    Icons.check,
+                    color: AppColors.theme.primaryColor,
+                    size: 28,
+                  ),
           ),
         ],
       ),
@@ -249,17 +270,17 @@ class _WritePostScreenState extends State<WritePostScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('카테고리', style: TextStyle(
+            Text(AppLocalizations.of(context)!.write_category, style: TextStyle(
               fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
             const SizedBox(height: 8),
             SizedBox(
               height: 36,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
-                itemCount: _categories.length,
+                itemCount: _categoryKeys.length,
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
-                  final cat = _categories[index];
+                  final cat = _categoryKeys[index];
                   final selected = _category == cat;
                   return GestureDetector(
                     onTap: () => setState(() {
@@ -275,7 +296,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
-                        cat,
+                        _localizedCategory(context, cat),
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -292,7 +313,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
               controller: _titleController,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: textColor),
               decoration: InputDecoration(
-                hintText: '제목을 입력하세요',
+                hintText: AppLocalizations.of(context)!.write_titlePlaceholder,
                 hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                 filled: true,
                 fillColor: fillColor,
@@ -309,7 +330,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
               maxLines: null,
               minLines: 8,
               decoration: InputDecoration(
-                hintText: '내용을 입력하세요',
+                hintText: AppLocalizations.of(context)!.write_contentPlaceholder,
                 hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                 filled: true,
                 fillColor: fillColor,
@@ -356,7 +377,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                       child: _attachEvent ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
                     ),
                     const SizedBox(width: 8),
-                    Text('일정 첨부', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
+                    Text(AppLocalizations.of(context)!.write_eventAttach, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
                     const SizedBox(width: 4),
                     Icon(Icons.event, size: 16, color: AppColors.theme.tertiaryColor),
                   ],
@@ -396,7 +417,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                     child: _attachPoll ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
                   ),
                   const SizedBox(width: 8),
-                  Text('투표 첨부', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
+                  Text(AppLocalizations.of(context)!.write_pollAttach, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
                   const SizedBox(width: 4),
                   Icon(Icons.poll, size: 16, color: AppColors.theme.secondaryColor),
                 ],
@@ -435,7 +456,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                     child: _isAnonymous ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
                   ),
                   const SizedBox(width: 8),
-                  Text('익명으로 작성', style: TextStyle(fontSize: 14, color: textColor)),
+                  Text(AppLocalizations.of(context)!.write_anonymous, style: TextStyle(fontSize: 14, color: textColor)),
                 ],
               ),
             ),
@@ -459,7 +480,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                       child: _isPinned ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
                     ),
                     const SizedBox(width: 8),
-                    Text('공지로 등록', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
+                    Text(AppLocalizations.of(context)!.write_pinAsNotice, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
                     const SizedBox(width: 4),
                     const Icon(Icons.push_pin, size: 16, color: Colors.red),
                   ],
@@ -469,7 +490,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
             const SizedBox(height: 20),
             Text(
-              '작성한 글은 1년 후 자동 삭제됩니다',
+              AppLocalizations.of(context)!.write_expiresInfo,
               style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor),
             ),
           ],
@@ -586,27 +607,29 @@ class _WritePostScreenState extends State<WritePostScreen> {
     final title = _titleController.text.trim();
     final content = _contentController.text.trim();
 
+    final l = AppLocalizations.of(context)!;
+
     if (title.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('제목을 입력하세요')),
+        SnackBar(content: Text(l.write_errorTitleRequired)),
       );
       return;
     }
     if (title.length > 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('제목은 200자 이내로 입력하세요')),
+        SnackBar(content: Text(l.write_errorTitleTooLong)),
       );
       return;
     }
     if (content.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('내용을 입력하세요')),
+        SnackBar(content: Text(l.write_errorContentRequired)),
       );
       return;
     }
     if (content.length > 5000) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('내용은 5000자 이내로 입력하세요')),
+        SnackBar(content: Text(l.write_errorContentTooLong)),
       );
       return;
     }
@@ -615,14 +638,14 @@ class _WritePostScreenState extends State<WritePostScreen> {
       final validOptions = _pollControllers.where((c) => c.text.trim().isNotEmpty).toList();
       if (validOptions.length < 2) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('투표 선택지를 2개 이상 입력하세요')),
+          SnackBar(content: Text(l.write_errorPollOptionsRequired)),
         );
         return;
       }
       for (var c in _pollControllers) {
         if (c.text.trim().length > 100) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('투표 선택지는 100자 이내로 입력하세요')),
+            SnackBar(content: Text(l.write_errorPollOptionTooLong)),
           );
           return;
         }
@@ -631,19 +654,19 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
     if (_attachEvent && _eventDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('일정 날짜를 선택하세요')),
+        SnackBar(content: Text(l.write_errorEventDateRequired)),
       );
       return;
     }
     if (_attachEvent && _eventContentController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('일정 내용을 입력하세요')),
+        SnackBar(content: Text(l.write_errorEventContentRequired)),
       );
       return;
     }
     if (_attachEvent && _eventContentController.text.trim().length > 200) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('일정 내용은 200자 이내로 입력하세요')),
+        SnackBar(content: Text(l.write_errorEventContentTooLong)),
       );
       return;
     }
@@ -656,7 +679,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       if (now - lastPostTime < 30000) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('게시글은 30초에 한 번만 작성할 수 있습니다')),
+            SnackBar(content: Text(l.write_errorRateLimit)),
           );
         }
         return;
@@ -668,7 +691,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
     if (!AuthService.isLoggedIn) {
       if (mounted) setState(() => _saving = false);
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('로그인이 필요합니다')),
+        SnackBar(content: Text(l.write_errorLoginRequired)),
       );
       return;
     }
@@ -683,7 +706,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       if (mounted) {
         setState(() => _saving = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('프로필 정보를 불러올 수 없습니다. 다시 시도해주세요.')),
+          SnackBar(content: Text(l.write_errorProfileLoadFailed)),
         );
       }
       return;
@@ -815,16 +838,16 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 borderRadius: BorderRadius.circular(2),
               )),
               const SizedBox(height: 16),
-              Text('공지가 이미 3개입니다', style: TextStyle(
+              Text(AppLocalizations.of(context)!.write_pinLimitExceeded, style: TextStyle(
                 fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
               const SizedBox(height: 8),
-              Text('기존 공지를 해제하거나, 이 글을 일반 글로 등록하세요.',
+              Text(AppLocalizations.of(context)!.write_pinLimitMessage,
                 style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
                 textAlign: TextAlign.center),
               const SizedBox(height: 16),
               ...pinnedDocs.map((doc) {
                 final data = doc.data();
-                final title = data['title'] ?? '제목 없음';
+                final title = data['title'] ?? AppLocalizations.of(context)!.write_noTitle;
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: GestureDetector(
@@ -845,7 +868,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                             fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
                             maxLines: 1, overflow: TextOverflow.ellipsis)),
                           const SizedBox(width: 8),
-                          Text('해제', style: TextStyle(
+                          Text(AppLocalizations.of(context)!.write_pinUnpinAction, style: TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w600, color: Colors.red)),
                         ],
                       ),
@@ -860,7 +883,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   width: double.infinity,
                   child: TextButton(
                     onPressed: () => Navigator.pop(ctx, 'cancel'),
-                    child: Text('공지 없이 등록', style: TextStyle(
+                    child: Text(AppLocalizations.of(context)!.write_registerWithoutPin, style: TextStyle(
                       color: AppColors.theme.darkGreyColor, fontWeight: FontWeight.w600)),
                   ),
                 ),

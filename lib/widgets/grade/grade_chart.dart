@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 
 import '../../data/grade_manager.dart';
 
@@ -111,21 +112,21 @@ class _GradeChartState extends State<GradeChart> {
           child: Row(
             children: [
               if (_isMockExams) ...[
-                _buildModeChip('${String.fromCharCodes([48177, 48516, 50948])}', _chartMode == 2, isDark, () {
+                _buildModeChip(AppLocalizations.of(context)!.grade_percentile, _chartMode == 2, isDark, () {
                   if (_chartMode != 2) setState(() => _chartMode = 2);
                 }),
                 const SizedBox(width: 6),
-                _buildModeChip('${String.fromCharCodes([54364, 51456, 51216, 49688])}', _chartMode == 1, isDark, () {
+                _buildModeChip(AppLocalizations.of(context)!.grade_standardScore, _chartMode == 1, isDark, () {
                   if (_chartMode != 1) setState(() => _chartMode = 1);
                 }),
                 const SizedBox(width: 6),
               ] else ...[
-                _buildModeChip('원점수', _chartMode == 1, isDark, () {
+                _buildModeChip(AppLocalizations.of(context)!.grade_rawScore, _chartMode == 1, isDark, () {
                   if (_chartMode != 1) setState(() => _chartMode = 1);
                 }),
                 const SizedBox(width: 6),
               ],
-              _buildModeChip('등급', _chartMode == 0, isDark, () {
+              _buildModeChip(AppLocalizations.of(context)!.grade_rank, _chartMode == 0, isDark, () {
                 if (_chartMode != 0) setState(() => _chartMode = 0);
               }),
             ],
@@ -262,7 +263,7 @@ class _GradeChartState extends State<GradeChart> {
       child: examsWithRanks.isEmpty
           ? Center(
               child: Text(
-                '데이터가 없습니다',
+                AppLocalizations.of(context)!.grade_noData,
                 style: TextStyle(
                   color: isDark ? Colors.white54 : Colors.black45,
                   fontSize: 14,
@@ -357,7 +358,7 @@ class _GradeChartState extends State<GradeChart> {
       child: examsWithScores.isEmpty
           ? Center(
               child: Text(
-                '점수 데이터가 없습니다',
+                AppLocalizations.of(context)!.grade_scoreNoData,
                 style: TextStyle(
                   color: isDark ? Colors.white54 : Colors.black45,
                   fontSize: 14,
@@ -467,7 +468,7 @@ class _GradeChartState extends State<GradeChart> {
         children: [
           const SizedBox(height: 4),
           Text(
-            '목표 등급',
+            AppLocalizations.of(context)!.grade_goalGrade,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,

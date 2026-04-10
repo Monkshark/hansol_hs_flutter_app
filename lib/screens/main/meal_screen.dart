@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/api/meal_data_api.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/widgets/meal/meal_card.dart';
@@ -54,6 +55,16 @@ class _MealScreenState extends State<MealScreen> {
     });
   }
 
+  String _localizedMealType(BuildContext context, String key) {
+    final l = AppLocalizations.of(context)!;
+    switch (key) {
+      case 'breakfast': return l.meal_breakfast;
+      case 'lunch': return l.meal_lunch;
+      case 'dinner': return l.meal_dinner;
+      default: return l.meal_lunch;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -90,10 +101,10 @@ class _MealScreenState extends State<MealScreen> {
                             return const Center(child: CircularProgressIndicator());
                           }
                           if (snapshot.hasError) {
-                            return Center(child: Text('오류: ${snapshot.error}'));
+                            return Center(child: Text(AppLocalizations.of(context)!.meal_error(snapshot.error.toString())));
                           }
                           if (!snapshot.hasData) {
-                            return const Center(child: Text('급식 정보 없음'));
+                            return Center(child: Text(AppLocalizations.of(context)!.meal_noInfo));
                           }
 
                           final meals = snapshot.data!;
@@ -113,11 +124,11 @@ class _MealScreenState extends State<MealScreen> {
                                   children: [
                                     Icon(Icons.no_meals, size: 40, color: AppColors.theme.darkGreyColor),
                                     const SizedBox(height: 8),
-                                    Text('급식 정보가 없습니다',
+                                    Text(AppLocalizations.of(context)!.meal_noInfoEmpty,
                                       style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor)),
                                     if (isWeekday) ...[
                                       const SizedBox(height: 6),
-                                      Text('탭하여 새로고침',
+                                      Text(AppLocalizations.of(context)!.meal_refreshHint,
                                         style: TextStyle(fontSize: 12, color: AppColors.theme.primaryColor)),
                                     ],
                                   ],
@@ -139,7 +150,7 @@ class _MealScreenState extends State<MealScreen> {
                                     Padding(
                                       padding: const EdgeInsets.only(left: 4, bottom: 6),
                                       child: Text(
-                                        meal.getMealType(),
+                                        _localizedMealType(context, meal.getMealTypeKey()),
                                         style: TextStyle(
                                           color: AppColors.theme.mealTypeTextColor,
                                           fontSize: 13,

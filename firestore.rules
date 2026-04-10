@@ -45,9 +45,9 @@ service cloud.firestore {
       allow create: if isSignedIn();
       allow update: if isSignedIn() && (
         (request.auth.uid == userId &&
-          request.resource.data.role == resource.data.role &&
-          request.resource.data.suspendedUntil == resource.data.suspendedUntil &&
-          request.resource.data.approved == resource.data.approved) ||
+          request.resource.data.get('role', 'user') == resource.data.get('role', 'user') &&
+          request.resource.data.get('suspendedUntil', null) == resource.data.get('suspendedUntil', null) &&
+          request.resource.data.get('approved', false) == resource.data.get('approved', false)) ||
         isAdminOrManager()
       );
       allow delete: if isSignedIn() && (request.auth.uid == userId || isAdmin());

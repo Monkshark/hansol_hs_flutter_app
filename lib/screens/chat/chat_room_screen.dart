@@ -6,6 +6,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -79,14 +80,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               const SizedBox(height: 12),
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Text('채팅방을 나가시겠습니까?\n상대방에게 퇴장 메시지가 표시됩니다.',
+                child: Text(AppLocalizations.of(context)!.chat_leaveConfirmationRoom,
                   textAlign: TextAlign.center,
                   style: TextStyle(fontSize: 14, color: isDark ? Colors.white70 : Colors.black87, height: 1.5)),
               ),
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.exit_to_app, color: Colors.redAccent, size: 22),
-                title: const Text('채팅방 나가기', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
+                title: Text(AppLocalizations.of(context)!.chat_leaveAction, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
                 onTap: () { Navigator.pop(ctx); _leaveChat(); },
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
@@ -103,21 +104,21 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       final uid = AuthService.currentUser?.uid;
       if (uid == null) return;
       final profile = await AuthService.getCachedProfile();
-      final myName = profile?.displayName ?? '알 수 없음';
+      final myName = profile?.displayName ?? AppLocalizations.of(context)!.chat_unknownUser;
       final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
       await chatRef.collection('messages').add({
         'type': 'system',
-        'content': '$myName님이 채팅방을 나갔습니다.',
+        'content': AppLocalizations.of(context)!.chat_leftMessage(myName),
         'createdAt': FieldValue.serverTimestamp(),
       });
       await chatRef.update({
         'participants': FieldValue.arrayRemove([uid]),
-        'lastMessage': '$myName님이 나갔습니다.',
+        'lastMessage': AppLocalizations.of(context)!.chat_leftShort(myName),
         'lastMessageAt': FieldValue.serverTimestamp(),
       });
       if (mounted) Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('채팅방 나가기에 실패했습니다')));
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftError)));
     }
   }
 
@@ -153,14 +154,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                   const SizedBox(height: 12),
                   ListTile(
                     leading: Icon(Icons.delete_outline, size: 22, color: isDark ? Colors.white70 : Colors.black87),
-                    title: Text('나만 삭제', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87)),
+                    title: Text(AppLocalizations.of(context)!.chat_deleteForMe, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: isDark ? Colors.white : Colors.black87)),
                     onTap: () { Navigator.pop(ctx); _deleteForMe(doc.reference); },
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   if (canDeleteForAll)
                     ListTile(
                       leading: const Icon(Icons.delete_forever, size: 22, color: Colors.redAccent),
-                      title: const Text('같이 삭제', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
+                      title: Text(AppLocalizations.of(context)!.chat_deleteForAll, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500, color: Colors.redAccent)),
                       onTap: () { Navigator.pop(ctx); _deleteForAll(doc.reference); },
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                     ),
@@ -181,10 +182,10 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Future<void> _deleteForAll(DocumentReference ref) async {
-    await ref.update({'content': '삭제된 메시지입니다.', 'deleted': true});
+    await ref.update({'content': AppLocalizations.of(context)!.chat_deletedMessage, 'deleted': true});
     // 채팅 목록 미리보기 업데이트
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
-    await chatRef.update({'lastMessage': '삭제된 메시지입니다.'});
+    await chatRef.update({'lastMessage': AppLocalizations.of(context)!.chat_deletedMessage});
   }
 
   void _showImageViewer(String url) {
@@ -263,13 +264,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         'createdAt': FieldValue.serverTimestamp(), 'deletedFor': [],
       });
       await chatRef.update({
-        'lastMessage': '[사진]', 'lastMessageAt': FieldValue.serverTimestamp(),
+        'lastMessage': AppLocalizations.of(context)!.chat_imageCaption, 'lastMessageAt': FieldValue.serverTimestamp(),
         'unreadCount.${widget.otherUid}': FieldValue.increment(1),
       });
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('이미지 전송에 실패했습니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.chat_imageSendError)),
         );
       }
     } finally {
@@ -290,7 +291,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         foregroundColor: textColor,
         title: Text(widget.otherName), centerTitle: true, elevation: 0,
         actions: [
-          IconButton(icon: const Icon(Icons.exit_to_app, size: 22), tooltip: '나가기', onPressed: _showLeaveDialog),
+          IconButton(icon: const Icon(Icons.exit_to_app, size: 22), tooltip: AppLocalizations.of(context)!.chat_leaveButton, onPressed: _showLeaveDialog),
         ],
       ),
       body: Column(
@@ -307,7 +308,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       .collection('messages').orderBy('createdAt', descending: true).limit(30).snapshots(),
                   builder: (context, snapshot) {
                     final docs = snapshot.data?.docs ?? [];
-                    if (docs.isEmpty) return Center(child: Text('첫 메시지를 보내보세요', style: TextStyle(color: AppColors.theme.darkGreyColor)));
+                    if (docs.isEmpty) return Center(child: Text(AppLocalizations.of(context)!.chat_firstMessage, style: TextStyle(color: AppColors.theme.darkGreyColor)));
 
                     return ListView.builder(
                       controller: _scrollController, reverse: true,
@@ -352,7 +353,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                 if (isMe) ...[
                                   Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
                                     if (!isDeleted && (otherUnread as int) == 0)
-                                      Text('읽음', style: TextStyle(fontSize: 9, color: AppColors.theme.primaryColor, fontWeight: FontWeight.w600)),
+                                      Text(AppLocalizations.of(context)!.chat_read, style: TextStyle(fontSize: 9, color: AppColors.theme.primaryColor, fontWeight: FontWeight.w600)),
                                     Text(timeStr, style: TextStyle(fontSize: 10, color: AppColors.theme.darkGreyColor)),
                                   ]),
                                   const SizedBox(width: 6),
@@ -429,13 +430,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 icon: _uploadingImage
                     ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2))
                     : Icon(Icons.image_outlined, color: AppColors.theme.primaryColor),
-                tooltip: '사진 보내기',
+                tooltip: AppLocalizations.of(context)!.chat_sendImage,
               ),
               Expanded(child: TextField(
                 controller: _controller,
                 style: TextStyle(fontSize: 14, color: textColor),
                 decoration: InputDecoration(
-                  hintText: '메시지를 입력하세요', hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                  hintText: AppLocalizations.of(context)!.chat_messagePlaceholder, hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
                   filled: true, fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(20), borderSide: BorderSide.none),
                   contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10)),

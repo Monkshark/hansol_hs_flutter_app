@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 /// 학년/반 선택 휠 피커
@@ -61,7 +62,7 @@ class _GradeAndClassPickerDialogState extends State<GradeAndClassPickerDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '학년 · 반 설정',
+              AppLocalizations.of(context)!.grade_classSetting,
               style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor),
             ),
             const SizedBox(height: 16),
@@ -73,7 +74,7 @@ class _GradeAndClassPickerDialogState extends State<GradeAndClassPickerDialog> {
                     child: _buildWheel(
                       controller: _gradeController,
                       count: 3,
-                      label: '학년',
+                      label: AppLocalizations.of(context)!.grade_grade,
                       onChanged: (i) => selectedGrade = i + 1,
                     ),
                   ),
@@ -85,7 +86,7 @@ class _GradeAndClassPickerDialogState extends State<GradeAndClassPickerDialog> {
                     child: _buildWheel(
                       controller: _classController,
                       count: widget.classCount,
-                      label: '반',
+                      label: AppLocalizations.of(context)!.grade_class,
                       onChanged: (i) => selectedClass = i + 1,
                     ),
                   ),
@@ -104,7 +105,7 @@ class _GradeAndClassPickerDialogState extends State<GradeAndClassPickerDialog> {
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
                 ),
-                child: const Text('확인', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                child: Text(AppLocalizations.of(context)!.common_confirm, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
               ),
             ),
           ],

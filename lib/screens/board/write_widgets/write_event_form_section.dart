@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -43,7 +44,7 @@ class WriteEventFormSection extends StatelessWidget {
             controller: eventContentController,
             style: TextStyle(fontSize: 14, color: textColor),
             decoration: InputDecoration(
-              hintText: '일정 내용 (예: 중간고사, 체육대회)',
+              hintText: AppLocalizations.of(context)!.write_eventContentHint,
               hintStyle: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
               filled: true,
               fillColor: fillColor,
@@ -71,7 +72,7 @@ class WriteEventFormSection extends StatelessWidget {
                   Text(
                     eventDate != null
                         ? DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(eventDate!)
-                        : '날짜를 선택하세요',
+                        : AppLocalizations.of(context)!.write_eventSelectDate,
                     style: TextStyle(
                       fontSize: 14,
                       color: eventDate != null ? textColor : AppColors.theme.darkGreyColor,
@@ -98,7 +99,7 @@ class WriteEventFormSection extends StatelessWidget {
                         Icon(Icons.access_time, size: 16, color: AppColors.theme.darkGreyColor),
                         const SizedBox(width: 8),
                         Text(
-                          eventStartTime != null ? eventStartTime!.format(context) : '시작 (선택)',
+                          eventStartTime != null ? eventStartTime!.format(context) : AppLocalizations.of(context)!.write_eventStartTimeOptional,
                           style: TextStyle(
                             fontSize: 14,
                             color: eventStartTime != null ? textColor : AppColors.theme.darkGreyColor,
@@ -127,7 +128,7 @@ class WriteEventFormSection extends StatelessWidget {
                         Icon(Icons.access_time, size: 16, color: AppColors.theme.darkGreyColor),
                         const SizedBox(width: 8),
                         Text(
-                          eventEndTime != null ? eventEndTime!.format(context) : '종료 (선택)',
+                          eventEndTime != null ? eventEndTime!.format(context) : AppLocalizations.of(context)!.write_eventEndTimeOptional,
                           style: TextStyle(
                             fontSize: 14,
                             color: eventEndTime != null ? textColor : AppColors.theme.darkGreyColor,
