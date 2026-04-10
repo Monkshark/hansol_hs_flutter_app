@@ -177,7 +177,7 @@ class _TeacherTimetableSelectScreenState
       return d != 0 ? d : a.period - b.period;
     });
 
-    return sorted.map((s) => '${s.dayName} ${s.period}교시').join(' · ');
+    return sorted.map((s) => AppLocalizations.of(context)!.timetable_selectPeriod(s.dayName, s.period)).join(' · ');
   }
 
   @override

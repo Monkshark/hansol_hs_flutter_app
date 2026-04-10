@@ -61,7 +61,9 @@ class DailyMealNotification {
   }
 
   Future<AppLocalizations> _getLocalizations() async {
-    return await AppLocalizations.delegate.load(const Locale('ko'));
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    final supported = AppLocalizations.supportedLocales.any((l) => l.languageCode == deviceLocale.languageCode);
+    return await AppLocalizations.delegate.load(supported ? deviceLocale : const Locale('ko'));
   }
 
   Future<void> scheduleDailyNotifications() async {

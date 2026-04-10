@@ -135,6 +135,15 @@
   "common_delete": "Delete",
   "common_confirm": "OK",
   "common_save": "Save",
+  "common_loginRequired": "Login required",
+  "common_chatPartner": "Chat partner",
+  "common_dateYmd": "MMM d, yyyy",
+  "common_dateMdE": "MMM d (E)",
+  "common_dateYM": "MMMM yyyy",
+  "common_dateYmdE": "MMM d, yyyy (E)",
+  "common_dateMdEHm": "MMM d (E) HH:mm",
+  "common_dateYMdE": "yyyy.M.d (E)",
+  "common_dateMdEEEE": "EEEE, MMM d",
 
   "post_resolved": "Resolved",
   "post_bookmark": "Save",
@@ -375,6 +384,19 @@
   "gradeInput_addMinSubjects": "Add at least one subject.",
   "gradeInput_privateNameRequired": "Enter private mock name.",
   "gradeInput_hintScore": "0-100",
+  "gradeInput_typeMidterm": "Midterm",
+  "gradeInput_typeFinal": "Final",
+  "gradeInput_typeMock": "Mock Exam",
+  "gradeInput_typePrivateMock": "Private Mock",
+  "gradeInput_monthMar": "March",
+  "gradeInput_monthJun": "June",
+  "gradeInput_monthSep": "September",
+  "gradeInput_monthNov": "November",
+  "gradeInput_privateHint": "e.g. Megastudy #3",
+  "gradeInput_yearSuffix": "{year}",
+  "gradeInput_semesterSuffix": "Sem {semester}",
+  "gradeInput_gradeSuffix": "Grade {grade}",
+  "gradeInput_mockMonthSuffix": "{month} Mock Exam",
 
   "timetable_screenTitle": "Timetable",
   "timetable_teacherScreenTitle": "My Class Timetable",
@@ -704,5 +726,10 @@
   "delete_confirm": "Delete",
   "delete_cancel": "Cancel",
 
-  "offline_status": "You are offline"
+  "offline_status": "You are offline",
+
+  "settings_languageSection": "Language",
+  "settings_langSystem": "System",
+  "settings_langKo": "한국어",
+  "settings_langEn": "English"
 }

@@ -131,7 +131,7 @@ class _DDayScreenState extends State<DDayScreen> {
                       ),
                       child: Text(
                         selectedDate != null
-                            ? DateFormat('yyyy년 M월 d일', 'ko_KR').format(selectedDate!)
+                            ? DateFormat(AppLocalizations.of(context)!.common_dateYmd, Localizations.localeOf(context).toString()).format(selectedDate!)
                             : AppLocalizations.of(context)!.dday_selectDate,
                         style: TextStyle(
                           color: selectedDate != null
@@ -271,7 +271,7 @@ class _DDayScreenState extends State<DDayScreen> {
                               fontSize: 15, fontWeight: FontWeight.w500, color: textColor)),
                             Row(
                               children: [
-                                Text(DateFormat('M/d (E)', 'ko_KR').format(event.date),
+                                Text(DateFormat(AppLocalizations.of(context)!.common_dateMdE, Localizations.localeOf(context).toString()).format(event.date),
                                   style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
                                 if (isSchool) ...[
                                   const SizedBox(width: 6),
@@ -371,7 +371,7 @@ class _DDayScreenState extends State<DDayScreen> {
                                   fontSize: 16, fontWeight: FontWeight.w600, color: textColor)),
                                 const SizedBox(height: 4),
                                 Text(
-                                  DateFormat('yyyy.M.d (E)', 'ko_KR').format(dday.date),
+                                  DateFormat(AppLocalizations.of(context)!.common_dateYMdE, Localizations.localeOf(context).toString()).format(dday.date),
                                   style: TextStyle(fontSize: 13, color: AppColors.theme.mealTypeTextColor),
                                 ),
                               ],

@@ -66,7 +66,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final dateStr = DateFormat('M월 d일 EEEE', 'ko_KR').format(now);
+    final dateStr = DateFormat(AppLocalizations.of(context)!.common_dateMdEEEE, Localizations.localeOf(context).toString()).format(now);
     final grade = SettingData().grade;
     final classNum = SettingData().classNum;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -432,7 +432,7 @@ class _UpcomingEventDDay extends StatelessWidget {
 
         final d = pinnedDDay.dDay;
         final dDayText = d == 0 ? 'D-Day' : d > 0 ? 'D-$d' : 'D+${-d}';
-        final titleText = '${pinnedDDay.title} · ${DateFormat('M/d', 'ko_KR').format(pinnedDDay.date)}';
+        final titleText = '${pinnedDDay.title} · ${DateFormat('M/d', Localizations.localeOf(context).toString()).format(pinnedDDay.date)}';
 
         return GestureDetector(
           onTap: () => Navigator.of(context).push(

@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Docs — 한솔고등학교 앱</title>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/highlight.min.js"></script>
+<style>
+:root{--bg:#0d1117;--sidebar-bg:#161b22;--card-bg:#1c2128;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--accent-dim:#1f6feb33}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
+.sidebar{width:280px;min-width:280px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
+.sidebar-header{padding:20px 16px 12px;border-bottom:1px solid var(--border)}
+.sidebar-header h1{font-size:15px;font-weight:600;margin-bottom:10px}
+.search-box{width:100%;padding:7px 10px;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none}
+.search-box:focus{border-color:var(--accent)}
+.search-box::placeholder{color:var(--muted)}
+.nav-list{flex:1;overflow-y:auto;padding:8px 0}
+.nav-group{padding:0 8px;margin-bottom:4px}
+.nav-group-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);padding:8px 8px 4px}
+.nav-item{display:block;padding:6px 12px;font-size:13px;color:var(--muted);text-decoration:none;border-radius:6px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;transition:background .15s}
+.nav-item:hover{background:var(--accent-dim);color:var(--text)}
+.nav-item.active{background:var(--accent-dim);color:var(--accent);font-weight:500}
+.content{flex:1;overflow-y:auto;padding:40px;scroll-behavior:smooth}
+.content-inner{max-width:860px;margin:0 auto}
+.welcome{text-align:center;padding:120px 20px;color:var(--muted)}
+.welcome h2{font-size:20px;margin-bottom:8px;color:var(--text)}
+.welcome p{font-size:14px}
+.md h1{font-size:28px;font-weight:600;margin:0 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.md h2{font-size:22px;font-weight:600;margin:28px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.md h3{font-size:17px;font-weight:600;margin:24px 0 8px}
+.md h4{font-size:15px;font-weight:600;margin:20px 0 6px}
+.md p{font-size:14px;line-height:1.7;margin:0 0 12px}
+.md a{color:var(--accent);text-decoration:none}
+.md a:hover{text-decoration:underline}
+.md ul,.md ol{padding-left:24px;margin:0 0 12px}
+.md li{font-size:14px;line-height:1.7;margin:2px 0}
+.md code{background:var(--card-bg);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'Fira Code',Consolas,monospace}
+.md pre{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin:0 0 16px;overflow-x:auto}
+.md pre code{background:none;padding:0;font-size:13px;line-height:1.5}
+.md blockquote{border-left:3px solid var(--accent);padding:4px 16px;margin:0 0 12px;color:var(--muted)}
+.md table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px}
+.md th,.md td{padding:8px 12px;border:1px solid var(--border);text-align:left}
+.md th{background:var(--card-bg);font-weight:600}
+.md hr{border:none;border-top:1px solid var(--border);margin:24px 0}
+.md img{max-width:100%;border-radius:8px}
+.md details{margin:0 0 12px}
+.md summary{cursor:pointer;font-weight:600;font-size:14px;padding:6px 0}
+.md details[open] summary{margin-bottom:8px}
+.breadcrumb{font-size:12px;color:var(--muted);margin-bottom:20px}
+.breadcrumb a{color:var(--accent);text-decoration:none}
+.breadcrumb a:hover{text-decoration:underline}
+.menu-toggle{display:none;position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:22px;cursor:pointer;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+@media(max-width:768px){.sidebar{position:fixed;left:-300px;top:0;bottom:0;z-index:99;transition:left .25s ease}.sidebar.open{left:0}.menu-toggle{display:block}.content{padding:24px 16px}}
+::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
+</style>
+</head>
+<body>
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <h1>한솔고 앱 Docs</h1>
+    <input type="text" class="search-box" id="search" placeholder="검색... (Ctrl+K)">
+  </div>
+  <nav class="nav-list" id="navList"></nav>
+</aside>
+<main class="content" id="content">
+  <div class="content-inner" id="contentInner">
+    <div class="welcome"><h2>문서 뷰어</h2><p>왼쪽 사이드바에서 문서를 선택하세요</p></div>
+  </div>
+</main>
+<button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
+
+<script>
+/*__MD_DATA__*/
+
+var FILES = {
+  '개요': [
+    {name:'README',path:'README.md'},
+    {name:'01 Overview',path:'01-overview.md'},
+    {name:'02 Architecture',path:'02-architecture.md'},
+    {name:'03 Data Layer',path:'03-data-layer.md'},
+    {name:'04 Screens Guide',path:'04-screens-guide.md'},
+    {name:'05 Firebase Backend',path:'05-firebase-backend.md'},
+    {name:'06 API Integration',path:'06-api-integration.md'},
+    {name:'07 Admin System',path:'07-admin-system.md'},
+    {name:'08 Phase 4: i18n + 알림',path:'08-phase4-i18n-notifications.md'},
+    {name:'Main (진입점)',path:'main.md'}
+  ],
+  'API': [
+    {name:'MealDataApi',path:'api/meal_data_api.md'},
+    {name:'NoticeDataApi',path:'api/notice_data_api.md'},
+    {name:'TimetableDataApi',path:'api/timetable_data_api.md'}
+  ],
+  '데이터': [
+    {name:'AuthService',path:'data/auth_service.md'},
+    {name:'AuthRepository',path:'data/auth_repository.md'},
+    {name:'GradeManager',path:'data/grade_manager.md'},
+    {name:'GradeRepository',path:'data/grade_repository.md'},
+    {name:'DdayManager',path:'data/dday_manager.md'},
+    {name:'LocalDatabase',path:'data/local_database.md'},
+    {name:'SubjectDataManager',path:'data/subject_data_manager.md'},
+    {name:'SearchTokens',path:'data/search_tokens.md'},
+    {name:'SearchHistoryService',path:'data/search_history_service.md'},
+    {name:'SecureStorageService',path:'data/secure_storage_service.md'},
+    {name:'AnalyticsService',path:'data/analytics_service.md'},
+    {name:'SettingData',path:'data/setting_data.md'},
+    {name:'ServiceLocator',path:'data/service_locator.md'},
+    {name:'Meal (모델)',path:'data/meal.md'},
+    {name:'ScheduleData (모델)',path:'data/schedule_data.md'},
+    {name:'Subject (모델)',path:'data/subject.md'},
+    {name:'Device',path:'data/device.md'}
+  ],
+  '알림': [
+    {name:'FcmService',path:'notification/fcm_service.md'},
+    {name:'DailyMealNotification',path:'notification/daily_meal_notification.md'},
+    {name:'PopupNotice',path:'notification/popup_notice.md'},
+    {name:'UpdateChecker',path:'notification/update_checker.md'}
+  ],
+  '상태 관리': [
+    {name:'Providers',path:'providers/providers.md'}
+  ],
+  '스타일': [
+    {name:'AppColors',path:'styles/app_colors.md'},
+    {name:'DarkAppColors',path:'styles/dark_app_colors.md'},
+    {name:'LightAppColors',path:'styles/light_app_colors.md'}
+  ],
+  '기타': [
+    {name:'WidgetService',path:'widgets/home_widget/widget_service.md'},
+    {name:'ChatUtils',path:'screens/chat/chat_utils.md'},
+    {name:'NetworkStatus',path:'network/network_status.md'}
+  ]
+};
+
+(function(){
+  try {
+    if(globalThis.markedHighlight && globalThis.hljs){
+      marked.use(globalThis.markedHighlight.markedHighlight({
+        langPrefix:'hljs language-',
+        highlight:function(code,lang){
+          try{
+            if(lang && hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value;
+            return hljs.highlightAuto(code).value;
+          }catch(e){return code;}
+        }
+      }));
+    }
+  }catch(e){ console.warn('Highlight init skipped:', e); }
+  marked.use({breaks:false,gfm:true});
+
+  var navList = document.getElementById('navList');
+  var allItems = [];
+
+  Object.keys(FILES).forEach(function(group){
+    var g = document.createElement('div');
+    g.className = 'nav-group';
+    g.innerHTML = '<div class="nav-group-title">' + group + '</div>';
+    FILES[group].forEach(function(f){
+      var a = document.createElement('a');
+      a.className = 'nav-item';
+      a.textContent = f.name;
+      a.dataset.path = f.path;
+      a.onclick = function(){ loadFile(f.path, f.name); };
+      g.appendChild(a);
+      allItems.push({el:a, name:f.name.toLowerCase(), path:f.path.toLowerCase()});
+    });
+    navList.appendChild(g);
+  });
+
+  document.getElementById('search').addEventListener('input', function(e){
+    var q = e.target.value.toLowerCase().trim();
+    allItems.forEach(function(i){
+      i.el.style.display = (!q || i.name.indexOf(q)!==-1 || i.path.indexOf(q)!==-1) ? '' : 'none';
+    });
+    navList.querySelectorAll('.nav-group').forEach(function(g){
+      var vis = Array.from(g.querySelectorAll('.nav-item')).some(function(i){ return i.style.display !== 'none'; });
+      g.style.display = vis ? '' : 'none';
+    });
+  });
+
+  function loadFile(p, name){
+    allItems.forEach(function(i){ i.el.classList.toggle('active', i.el.dataset.path === p); });
+    var inner = document.getElementById('contentInner');
+    var text = MD_DATA[p];
+    if(!text){
+      inner.innerHTML = '<div class="welcome"><h2>문서를 찾을 수 없습니다</h2><p>' + p + '</p></div>';
+      return;
+    }
+    var html = marked.parse(text);
+    var dir = p.indexOf('/') !== -1 ? p.substring(0, p.lastIndexOf('/')) : '';
+    var fileName = p.split('/').pop();
+    var crumb = dir
+      ? '<a href="#" onclick="window._loadFile(\'README.md\',\'README\');return false">docs</a> / ' + dir + ' / <strong>' + fileName + '</strong>'
+      : '<a href="#" onclick="window._loadFile(\'README.md\',\'README\');return false">docs</a> / <strong>' + fileName + '</strong>';
+
+    inner.innerHTML = '<div class="breadcrumb">' + crumb + '</div><div class="md">' + html + '</div>';
+
+    // Rewrite .md links to in-viewer navigation
+    inner.querySelectorAll('.md a[href]').forEach(function(a){
+      var href = a.getAttribute('href');
+      if(!href || !href.endsWith('.md') || href.indexOf('http') === 0) return;
+      var resolved = href;
+      if(dir && href.indexOf('/') !== 0 && href.indexOf('..') !== 0){
+        resolved = dir + '/' + href;
+      } else if(href.indexOf('../') === 0){
+        var parts = dir.split('/'); parts.pop();
+        resolved = (parts.length ? parts.join('/') + '/' : '') + href.replace('../','');
+      }
+      if(MD_DATA[resolved]){
+        a.onclick = function(e){ e.preventDefault(); loadFile(resolved, resolved.split('/').pop().replace('.md','')); };
+      }
+    });
+
+    document.getElementById('content').scrollTop = 0;
+    document.getElementById('sidebar').classList.remove('open');
+    location.hash = p;
+  }
+
+  // expose for breadcrumb onclick
+  window._loadFile = loadFile;
+
+  document.addEventListener('keydown', function(e){
+    if((e.ctrlKey || e.metaKey) && e.key === 'k'){ e.preventDefault(); document.getElementById('search').focus(); }
+  });
+
+  var hash = location.hash.slice(1);
+  if(hash && MD_DATA[hash]){
+    var found = allItems.find(function(i){ return i.el.dataset.path === hash; });
+    loadFile(hash, found ? found.el.textContent : hash);
+  } else {
+    loadFile('README.md', 'README');
+  }
+})();
+</script>
+</body>
+</html>

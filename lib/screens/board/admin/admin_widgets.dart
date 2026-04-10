@@ -60,6 +60,7 @@ class AdminTile extends StatefulWidget {
 
 class AdminTileState extends State<AdminTile> {
   late bool _expanded;
+  DateTime _lastScrollTime = DateTime(2000);
 
   @override
   void initState() {
@@ -67,26 +68,61 @@ class AdminTileState extends State<AdminTile> {
     _expanded = widget.initiallyExpanded;
   }
 
+  bool _handleScrollNotification(ScrollNotification notification) {
+    if (notification is ScrollUpdateNotification) {
+      _lastScrollTime = DateTime.now();
+    }
+    return false;
+  }
+
+  void _toggle() {
+    // 스크롤 직후 탭 무시 (빠른 스크롤 중 오작동 방지)
+    if (DateTime.now().difference(_lastScrollTime).inMilliseconds < 150) return;
+    setState(() => _expanded = !_expanded);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
-      child: AnimatedSize(
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeInOut,
-        child: ExpansionTile(
-          key: ValueKey<String>('admin_tile_${widget.title}'),
-          initiallyExpanded: widget.initiallyExpanded,
-          onExpansionChanged: (expanded) => setState(() => _expanded = expanded),
-          collapsedBackgroundColor: widget.cardColor,
-          backgroundColor: widget.cardColor,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          collapsedShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          leading: Icon(widget.icon, size: 20, color: widget.color),
-          title: Text(widget.title, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600,
-            color: Theme.of(context).textTheme.bodyLarge?.color)),
-          children: [if (_expanded) widget.child],
+    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
+    return NotificationListener<ScrollNotification>(
+      onNotification: _handleScrollNotification,
+      child: Container(
+        decoration: BoxDecoration(
+          color: widget.cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          children: [
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _toggle,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                child: Row(
+                  children: [
+                    Icon(widget.icon, size: 20, color: widget.color),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: Text(widget.title, style: TextStyle(
+                        fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
+                    ),
+                    AnimatedRotation(
+                      turns: _expanded ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 200),
+                      child: Icon(Icons.expand_more, size: 22,
+                        color: textColor?.withAlpha(150)),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            AnimatedSize(
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeInOut,
+              child: _expanded ? widget.child : const SizedBox.shrink(),
+            ),
+          ],
         ),
       ),
     );

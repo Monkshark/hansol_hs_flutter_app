@@ -61,7 +61,7 @@ class EventAttachCard extends StatelessWidget {
             color: Theme.of(context).textTheme.bodyLarge?.color)),
           const SizedBox(height: 4),
           Text(
-            DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(eventDate) +
+            DateFormat(AppLocalizations.of(context)!.common_dateYmdE, Localizations.localeOf(context).toString()).format(eventDate) +
                 (hasTime ? '  ${_formatTime(startTime, am: l10n.event_am, pm: l10n.event_pm)} - ${_formatTime(endTime, am: l10n.event_am, pm: l10n.event_pm)}' : ''),
             style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
           ),

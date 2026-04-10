@@ -54,8 +54,7 @@ class _AdminScreenState extends State<AdminScreen> {
         padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
         children: [
           AdminSection(title: AppLocalizations.of(context)!.admin_userManagement, icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_usersPending, icon: Icons.hourglass_top, color: Colors.orange, initiallyExpanded: true,
-              cardColor: cardColor, child: UsersTab(key: _pendingKey, filter: 'pending', onChanged: _refreshAllTabs)),
+            AdminTile(title: AppLocalizations.of(context)!.admin_usersPending, icon: Icons.hourglass_top, color: Colors.orange, cardColor: cardColor, child: UsersTab(key: _pendingKey, filter: 'pending', onChanged: _refreshAllTabs)),
             const SizedBox(height: 8),
             AdminTile(title: AppLocalizations.of(context)!.admin_usersSuspended, icon: Icons.block, color: Colors.red,
               cardColor: cardColor, child: UsersTab(key: _suspendedKey, filter: 'suspended', onChanged: _refreshAllTabs)),
@@ -66,8 +65,7 @@ class _AdminScreenState extends State<AdminScreen> {
           const SizedBox(height: 16),
 
           AdminSection(title: AppLocalizations.of(context)!.admin_boardManagement, icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, initiallyExpanded: true,
-              cardColor: cardColor, child: ReportsTab()),
+            AdminTile(title: AppLocalizations.of(context)!.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, cardColor: cardColor, child: ReportsTab()),
             const SizedBox(height: 8),
             AdminTile(title: AppLocalizations.of(context)!.admin_deleteLogs, icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
               cardColor: cardColor, child: const DeleteLogsTab()),
@@ -75,8 +73,7 @@ class _AdminScreenState extends State<AdminScreen> {
           const SizedBox(height: 16),
 
           AdminSection(title: AppLocalizations.of(context)!.admin_feedback, icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_feedbackCouncil, icon: Icons.school_outlined, color: const Color(0xFF4CAF50), initiallyExpanded: true,
-              cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
+            AdminTile(title: AppLocalizations.of(context)!.admin_feedbackCouncil, icon: Icons.school_outlined, color: const Color(0xFF4CAF50), cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
             const SizedBox(height: 8),
             AdminTile(title: AppLocalizations.of(context)!.admin_feedbackApp, icon: Icons.bug_report_outlined, color: AppColors.theme.primaryColor,
               cardColor: cardColor, child: const FeedbackListScreen(type: 'app')),

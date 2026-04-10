@@ -190,6 +190,24 @@ class _SettingScreenState extends State<SettingScreen> {
           color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: Text(
+              SettingData().localeCode == 'en' ? 'EN' : '한',
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.theme.primaryColor,
+              ),
+            ),
+            onPressed: () {
+              final newCode = SettingData().localeCode == 'en' ? 'ko' : 'en';
+              SettingData().localeCode = newCode;
+              localeNotifier.value = Locale(newCode);
+              setState(() {});
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -312,6 +330,7 @@ class _SettingScreenState extends State<SettingScreen> {
                       final prefs = await SharedPreferences.getInstance();
                       const preserveKeys = {
                         'Grade', 'Class', 'isDarkMode', 'themeModeIndex',
+                        'localeCode',
                         'isBreakfastNotificationOn', 'breakfastTime',
                         'isLunchNotificationOn', 'lunchTime',
                         'isDinnerNotificationOn', 'dinnerTime',
@@ -543,6 +562,7 @@ class _SettingScreenState extends State<SettingScreen> {
       ),
     );
   }
+
 
   String _providerLabel(String provider) {
     final l = AppLocalizations.of(context)!;

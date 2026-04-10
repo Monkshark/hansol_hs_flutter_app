@@ -36,14 +36,14 @@ class PostCommentItem extends StatelessWidget {
     final isAnon = data['isAnonymous'] == true;
     final isManagerView = AuthService.cachedProfile?.isManager ?? false;
     final realName = data['authorRealName'] as String?;
-    final rawName = (data['authorName'] ?? '익명') as String;
+    final rawName = (data['authorName'] ?? AppLocalizations.of(context)!.post_anonymous) as String;
     // 익명이면 per-post 익명N(또는 익명(글쓴이)) 번호 + manager view에선 실명 append
     final name = (isAnon && isManagerView && realName != null)
         ? '$rawName ($realName)'
         : rawName;
     final content = data['content'] ?? '';
     final createdAt = data['createdAt'] as Timestamp?;
-    final timeStr = createdAt != null ? _formatTime(createdAt.toDate()) : '';
+    final timeStr = createdAt != null ? _formatTime(context, createdAt.toDate()) : '';
 
     return Padding(
       padding: EdgeInsets.only(bottom: isReply ? 6 : 12),
@@ -104,7 +104,7 @@ class PostCommentItem extends StatelessWidget {
   /// 댓글 본문 텍스트에서 `@nickname` 패턴을 primary color로 강조
   /// (한글/영문/숫자/언더바 + 익명숫자 형식 지원, 공백/마침표 등에서 종료)
   Widget _buildMentionText(String content, Color? textColor) {
-    final pattern = RegExp(r'@([\w가-힣]+)');
+    final pattern = RegExp(r'@([\w가-힣]+(?: [\w가-힣]+)*)');
     final matches = pattern.allMatches(content);
     if (matches.isEmpty) {
       return Text(content,
@@ -136,14 +136,13 @@ class PostCommentItem extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(BuildContext context, DateTime dt) {
+    final l = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(dt);
-    // NOTE: _formatTime has no context; time-ago strings remain hardcoded here.
-    // They will be localized when context is threaded through (Phase 33).
-    if (diff.inMinutes < 1) return '방금';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    if (diff.inDays < 7) return '${diff.inDays}일 전';
+    if (diff.inMinutes < 1) return l.common_justNow;
+    if (diff.inMinutes < 60) return l.common_minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.common_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.common_daysAgo(diff.inDays);
     return DateFormat('M/d').format(dt);
   }
 }

@@ -6,7 +6,11 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
-import 'package:hansol_high_school/main.dart' show rootNavigatorKey;
+import 'package:hansol_high_school/l10n/app_localizations.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/main.dart' show onNotificationTap, rootNavigatorKey;
+import 'package:hansol_high_school/screens/board/admin_screen.dart';
+import 'package:hansol_high_school/screens/board/notification_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
 
@@ -20,14 +24,29 @@ class FcmService {
   static final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  static const _channel = AndroidNotificationChannel(
-    'board_channel',
-    '게시판 알림',
-    description: '새 댓글, 게시글 알림',
-    importance: Importance.high,
-  );
+  static late AndroidNotificationChannel _channel;
+
+  static Future<void> _initChannel() async {
+    final l = await AppLocalizations.delegate.load(const Locale('ko'));
+    _channel = AndroidNotificationChannel(
+      'board_channel',
+      l.noti_boardChannelName,
+      description: l.noti_boardChannelDesc,
+      importance: Importance.high,
+    );
+  }
 
   static Future<void> initialize() async {
+    await _initChannel();
+
+    // 로컬 알림 플러그인 초기화 (포그라운드 FCM 알림 탭 콜백 등록)
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const iosSettings = DarwinInitializationSettings();
+    await _localNotifications.initialize(
+      const InitializationSettings(android: androidSettings, iOS: iosSettings),
+      onDidReceiveNotificationResponse: onNotificationTap,
+    );
+
     await _localNotifications
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
@@ -191,6 +210,18 @@ class FcmService {
             builder: (_) => PostDetailScreen(postId: postId),
           ));
           break;
+        case 'account':
+          final isManager = AuthService.cachedProfile?.isManager ?? false;
+          if (isManager) {
+            navigator.push(MaterialPageRoute(
+              builder: (_) => const AdminScreen(),
+            ));
+          } else {
+            navigator.push(MaterialPageRoute(
+              builder: (_) => const NotificationScreen(),
+            ));
+          }
+          break;
         case 'chat':
           final chatId = data['chatId']?.toString();
           if (chatId == null || chatId.isEmpty) return;
@@ -209,7 +240,8 @@ class FcmService {
           if (otherUid.isEmpty) return;
           final userDoc = await FirebaseFirestore.instance
               .collection('users').doc(otherUid).get();
-          final otherName = userDoc.data()?['name']?.toString() ?? '대화상대';
+          final l = await AppLocalizations.delegate.load(const Locale('ko'));
+          final otherName = userDoc.data()?['name']?.toString() ?? l.common_chatPartner;
           navigator.push(MaterialPageRoute(
             builder: (_) => ChatRoomScreen(
               chatId: chatId, otherUid: otherUid, otherName: otherName,

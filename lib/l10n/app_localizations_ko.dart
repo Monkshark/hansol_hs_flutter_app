@@ -409,6 +409,33 @@ class AppLocalizationsKo extends AppLocalizations {
   String get common_save => '저장';
 
   @override
+  String get common_loginRequired => '로그인이 필요합니다';
+
+  @override
+  String get common_chatPartner => '대화상대';
+
+  @override
+  String get common_dateYmd => 'yyyy년 M월 d일';
+
+  @override
+  String get common_dateMdE => 'M월 d일 (E)';
+
+  @override
+  String get common_dateYM => 'yyyy년 M월';
+
+  @override
+  String get common_dateYmdE => 'yyyy년 M월 d일 (E)';
+
+  @override
+  String get common_dateMdEHm => 'M월 d일 (E) HH:mm';
+
+  @override
+  String get common_dateYMdE => 'yyyy.M.d (E)';
+
+  @override
+  String get common_dateMdEEEE => 'M월 d일 EEEE';
+
+  @override
   String get post_resolved => '해결';
 
   @override
@@ -1147,6 +1174,53 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get gradeInput_hintScore => '0~100';
+
+  @override
+  String get gradeInput_typeMidterm => '중간고사';
+
+  @override
+  String get gradeInput_typeFinal => '기말고사';
+
+  @override
+  String get gradeInput_typeMock => '모의고사';
+
+  @override
+  String get gradeInput_typePrivateMock => '사설모의';
+
+  @override
+  String get gradeInput_monthMar => '3월';
+
+  @override
+  String get gradeInput_monthJun => '6월';
+
+  @override
+  String get gradeInput_monthSep => '9월';
+
+  @override
+  String get gradeInput_monthNov => '11월';
+
+  @override
+  String get gradeInput_privateHint => '예: 메가스터디 3회';
+
+  @override
+  String gradeInput_yearSuffix(Object year) {
+    return '$year년';
+  }
+
+  @override
+  String gradeInput_semesterSuffix(Object semester) {
+    return '$semester학기';
+  }
+
+  @override
+  String gradeInput_gradeSuffix(Object grade) {
+    return '$grade학년';
+  }
+
+  @override
+  String gradeInput_mockMonthSuffix(Object month) {
+    return '$month 모의고사';
+  }
 
   @override
   String get timetable_screenTitle => '시간표';
@@ -2186,4 +2260,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get offline_status => '오프라인 상태입니다';
+
+  @override
+  String get settings_languageSection => '언어';
+
+  @override
+  String get settings_langSystem => '시스템';
+
+  @override
+  String get settings_langKo => '한국어';
+
+  @override
+  String get settings_langEn => 'English';
 }

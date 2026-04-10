@@ -41,7 +41,7 @@ class _MyPostsScreenState extends State<MyPostsScreen> with SingleTickerProvider
     if (uid == null) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.myActivity_title)),
-        body: const Center(child: Text('로그인이 필요합니다')),
+        body: Center(child: Text(AppLocalizations.of(context)!.common_loginRequired)),
       );
     }
 
@@ -180,7 +180,7 @@ class _MyCommentsList extends StatelessWidget {
                     const SizedBox(height: 6),
                     Text(
                       createdAt != null
-                          ? _formatTime(createdAt.toDate())
+                          ? _formatTime(context, createdAt.toDate())
                           : '',
                       style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor),
                     ),
@@ -194,12 +194,13 @@ class _MyCommentsList extends StatelessWidget {
     );
   }
 
-  String _formatTime(DateTime dt) {
+  String _formatTime(BuildContext context, DateTime dt) {
+    final l = AppLocalizations.of(context)!;
     final diff = DateTime.now().difference(dt);
-    if (diff.inMinutes < 1) return '방금';
-    if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
-    if (diff.inHours < 24) return '${diff.inHours}시간 전';
-    if (diff.inDays < 7) return '${diff.inDays}일 전';
+    if (diff.inMinutes < 1) return l.common_justNow;
+    if (diff.inMinutes < 60) return l.common_minutesAgo(diff.inMinutes);
+    if (diff.inHours < 24) return l.common_hoursAgo(diff.inHours);
+    if (diff.inDays < 7) return l.common_daysAgo(diff.inDays);
     return '${dt.month}/${dt.day}';
   }
 }

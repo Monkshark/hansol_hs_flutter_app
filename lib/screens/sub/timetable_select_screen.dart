@@ -173,7 +173,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
       return a.period - b.period;
     });
 
-    return sorted.map((s) => '${s.dayName} ${s.period}교시').join(' · ');
+    return sorted.map((s) => AppLocalizations.of(context)!.timetable_selectPeriod(s.dayName, s.period)).join(' · ');
   }
 
   @override
