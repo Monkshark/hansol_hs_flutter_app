@@ -126,7 +126,7 @@ HomeScreen
 3. MealCard 위젯으로 표시
 ```
 
-**캐싱**: MealDataApi 내부에서 응답 캐싱. 주간 데이터 프리페치.
+**캐싱**: [MealDataApi](api/meal_data_api.md) 내부에서 응답 캐싱. 주간 데이터 프리페치.
 
 ---
 
@@ -135,8 +135,8 @@ HomeScreen
 **역할**: 캘린더 뷰 + 학사일정 + 개인 일정.
 
 **데이터 소스 2개**:
-1. `NoticeDataApi` → NEIS 학사일정 (서버)
-2. `LocalDataBase` → 개인 일정 (SQLite)
+1. [`NoticeDataApi`](api/notice_data_api.md) → NEIS 학사일정 (서버)
+2. [`LocalDataBase`](data/local_database.md) → 개인 일정 (SQLite)
 
 **캘린더**: `table_calendar` 위젯 사용. 날짜 마커로 일정 표시.
 
@@ -304,7 +304,7 @@ chats.where('participants', arrayContains: uid)
 
 **주요 설정**:
 - 테마 모드 (라이트/다크/시스템)
-- 학년/반 선택 → SettingData 반영
+- 학년/반 선택 → [SettingData](data/setting_data.md) 반영
 - 급식 알림 시간 설정
 - 게시판 알림 on/off
 - 캐시 크기 표시 및 삭제
@@ -332,7 +332,7 @@ chats.where('participants', arrayContains: uid)
 
 **UI**: 5열(월~금) × 7행(1~7교시) 그리드. 셀 탭 시 색상 변경.
 
-**데이터**: `TimetableDataApi`에서 fetch, `SubjectDataManager`에서 선택과목 관리.
+**데이터**: [`TimetableDataApi`](api/timetable_data_api.md)에서 fetch, [`SubjectDataManager`](data/subject_data_manager.md)에서 선택과목 관리.
 
 **과목 충돌**: 선택과목이 같은 시간에 겹치면 `ConflictDialog`로 해결.
 
