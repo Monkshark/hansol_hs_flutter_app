@@ -64,5 +64,5 @@ factory Subject.fromJson(Map<String, dynamic> json) => _$SubjectFromJson(json);
 | `TimetableDataApi.getAllSubjectCombinations` | NEIS 시간표에서 과목+반 조합 추출, Set으로 중복 제거 |
 | `TimetableDataApi.getCustomTimeTable` | 사용자 선택 Subject 리스트로 커스텀 시간표 생성 |
 | `TimetableDataApi.getSubjectsFromAdminFirestore` | Firestore에서 관리자 등록 과목 조회 |
-| `SubjectDataManager` | 선택과목 로컬/Firestore 저장 |
+| [`SubjectDataManager`](subject_data_manager.md) | 선택과목 로컬/Firestore 저장 |
 | `TimetableSelectScreen` | 과목 선택 UI에서 Subject 리스트 표시 |

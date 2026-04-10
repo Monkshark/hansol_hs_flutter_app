@@ -157,9 +157,9 @@ Future<void> setupServiceLocator() async {
 ```
 
 **등록된 서비스**:
-- `AuthRepository` → `FirebaseAuthRepository` (싱글톤)
-- `GradeRepository` → `LocalGradeRepository` (레이지 싱글톤)
-- `LocalDataBase` (싱글톤, 마이그레이션 후 등록)
+- [`AuthRepository`](data/auth_repository.md) → [`FirebaseAuthRepository`](data/auth_repository.md) (싱글톤)
+- [`GradeRepository`](data/grade_repository.md) → [`LocalGradeRepository`](data/grade_repository.md) (레이지 싱글톤)
+- [`LocalDataBase`](data/local_database.md) (싱글톤, 마이그레이션 후 등록)
 
 ### Repository 패턴
 
@@ -246,7 +246,7 @@ AppColors (abstract)
   └── AnimatedAppColors (싱글톤) - 색상 보간(lerp) 애니메이션
 ```
 
-`AnimatedAppColors`는 라이트/다크 색상 사이를 0.0~1.0 progress로 보간한다:
+[`AnimatedAppColors`](styles/app_colors.md)는 라이트/다크 색상 사이를 0.0~1.0 progress로 보간한다:
 
 ```dart
 AppColors.theme.primaryColor    // 현재 테마의 primary 색상
@@ -295,7 +295,7 @@ SettingData.themeModeIndex (SharedPreferences)
   └── Firestore에 동기화 (백그라운드)
 ```
 
-적용 대상: 개인 일정 (`LocalDataBase`), D-day (`DDayManager`), 선택과목 (`SubjectDataManager`)
+적용 대상: 개인 일정 (`LocalDataBase`), D-day ([`DDayManager`](data/dday_manager.md)), 선택과목 ([`SubjectDataManager`](data/subject_data_manager.md))
 
 ---
 

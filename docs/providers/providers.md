@@ -180,7 +180,7 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
 }
 ```
 
-알림 설정 통합 상태. 각 setter(`setBreakfast`, `setLunch`, `setDinner`, `setBoard`)가 SettingData와 state를 동시에 갱신.
+알림 설정 통합 상태. 각 setter(`setBreakfast`, `setLunch`, `setDinner`, `setBoard`)가 [SettingData](../data/setting_data.md)와 state를 동시에 갱신.
 
 ---
 

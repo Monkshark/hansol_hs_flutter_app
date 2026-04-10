@@ -96,7 +96,7 @@ FCM 토픽명에 한글 불가 → 영문 변환.
 static Future<void> toggleBoardNotification(bool enabled)
 ```
 
-전체 게시판 알림 토글. `board_new_post` 토픽 구독/해제 + SettingData 저장.
+전체 게시판 알림 토글. `board_new_post` 토픽 구독/해제 + [SettingData](../data/setting_data.md) 저장.
 
 ### `toggleCategoryNotification`
 

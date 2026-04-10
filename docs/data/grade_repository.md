@@ -37,7 +37,7 @@ abstract class GradeRepository {
 }
 ```
 
-`GradeManager`의 모든 public 메서드를 인터페이스로 추출. 시험 CRUD + 수시/정시 목표 관리.
+[`GradeManager`](grade_manager.md)의 모든 public 메서드를 인터페이스로 추출. 시험 CRUD + 수시/정시 목표 관리.
 
 ---
 

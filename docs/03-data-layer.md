@@ -42,8 +42,8 @@
 
 | Repository | 위임 대상 | 레퍼런스 |
 |------------|-----------|----------|
-| [AuthRepository](data/auth_repository.md) | `AuthService` 정적 메서드 |
-| [GradeRepository](data/grade_repository.md) | `GradeManager` 정적 메서드 |
+| [AuthRepository](data/auth_repository.md) | [`AuthService`](data/auth_service.md) 정적 메서드 |
+| [GradeRepository](data/grade_repository.md) | [`GradeManager`](data/grade_manager.md) 정적 메서드 |
 
 **현재 상태**: GetIt + Riverpod 병행. 신규 코드는 Repository를, 기존 호출처는 정적 메서드를 사용 (점진적 마이그레이션).
 
