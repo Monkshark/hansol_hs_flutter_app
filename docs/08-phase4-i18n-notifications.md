@@ -1,13 +1,13 @@
 # Phase 4: i18n 완성 + 알림 시스템 ���선
 
-> 이 문서는 Phase 4에서 수행한 국제화 완성, 인앱 언어 전환, 알림 딥링크, 버그 수정 작업을 정리한다.
+> 이 문서는 Phase 4에서 수행한 국제화 완성, 인앱 언어 전환, 알림 딥링크, 버그 수정 작업을 정리한다
 
 ---
 
 ## 1. i18n 완전 적용
 
 ### 개요
-기존에 ARB 키가 적용되지 않은 모든 하드코딩 한국어 문자열을 `AppLocalizations` 키로 교체했다. 과목명·API 데이터 등 서버에서 오는 값은 제외.
+기존에 ARB 키가 적용되지 않은 모든 하드코딩 한국어 문자열을 `AppLocalizations` 키로 교체했다. 과목명·API 데이터 등 서버에서 오는 값은 제외
 
 ### 변경 범위
 
@@ -107,14 +107,14 @@ if (postAuthorUid != myUid && postAuthorUid != replyNotifiedUid) {
 
 **원인**: 멘션 정규식이 공백에서 끊김
 
-**해결**: 정규식을 `@([\w가-힣]+(?: [\w가-힣]+)*)` 로 변경하여 공백 포함 이름 매칭. `post_detail_screen.dart`와 `post_comment_item.dart` 모두 적용.
+**해결**: 정규식을 `@([\w가-힣]+(?: [\w가-힣]+)*)` 로 변경하여 공백 포함 이름 매칭. `post_detail_screen.dart`와 `post_comment_item.dart` 모두 적용
 
 ### 4-3. 관리자 화면 스크롤 시 섹션 오작동
 **문제**: 삭제 로그를 펼친 상태에서 빠르게 스크롤하면 다른 `ExpansionTile`이 의도치 않게 열림
 
 **원인**: `ExpansionTile`의 내부 `InkWell`이 스크롤 중에도 탭 이벤트를 받음
 
-**해결**: `ExpansionTile` → 커스텀 `GestureDetector` + `AnimatedSize` 구현으로 교체. `NotificationListener<ScrollNotification>`으로 스크롤 시점 추적, 스크롤 직후 150ms 이내 탭은 무시.
+**해결**: `ExpansionTile` → 커스텀 `GestureDetector` + `AnimatedSize` 구현으로 교체. `NotificationListener<ScrollNotification>`으로 스크롤 시점 추적, 스크롤 직후 150ms 이내 탭은 무시
 
 ---
 

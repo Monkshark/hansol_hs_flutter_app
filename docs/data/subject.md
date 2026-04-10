@@ -2,7 +2,7 @@
 
 > `lib/data/subject.dart` — 과목 데이터 모델 (freezed)
 
-`@freezed` 기반이지만 커스텀 `==`/`hashCode`를 오버라이드. JSON 직렬화는 코드 생성(`subject.g.dart`).
+`@freezed` 기반이지만 커스텀 `==`/`hashCode`를 오버라이드. JSON 직렬화는 코드 생성(`subject.g.dart`)
 
 ---
 
@@ -41,9 +41,9 @@ bool operator ==(Object other) =>
 int get hashCode => subjectName.hashCode ^ subjectClass.hashCode;
 ```
 
-`subjectName` + `subjectClass` 조합으로 동등성 판단. `category`와 `isOriginal`은 비교에서 제외.
+`subjectName` + `subjectClass` 조합으로 동등성 판단. `category`와 `isOriginal`은 비교에서 제외
 
-**이유**: `TimetableDataApi.getAllSubjectCombinations`에서 Set에 Subject를 넣어 중복 제거 시, 같은 과목+반 조합이면 같은 과목으로 취급해야 하므로.
+**이유**: `TimetableDataApi.getAllSubjectCombinations`에서 Set에 Subject를 넣어 중복 제거 시, 같은 과목+반 조합이면 같은 과목으로 취급해야 하므로
 
 ---
 
@@ -53,7 +53,7 @@ int get hashCode => subjectName.hashCode ^ subjectClass.hashCode;
 factory Subject.fromJson(Map<String, dynamic> json) => _$SubjectFromJson(json);
 ```
 
-[`SubjectDataManager`](subject_data_manager.md)에서 SharedPreferences/Firestore에 저장/복원할 때 사용.
+[`SubjectDataManager`](subject_data_manager.md)에서 SharedPreferences/Firestore에 저장/복원할 때 사용
 
 ---
 

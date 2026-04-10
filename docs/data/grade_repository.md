@@ -2,7 +2,7 @@
 
 > `lib/data/grade_repository.dart` — 성적 관리 Repository 인터페이스
 
-[`GradeManager`](grade_manager.md)의 정적 메서드를 인스턴스 메서드로 감싸 GetIt DI에 등록. 테스트에서 mock 주입 가능.
+[`GradeManager`](grade_manager.md)의 정적 메서드를 인스턴스 메서드로 감싸 GetIt DI에 등록. 테스트에서 mock 주입 가능
 
 ---
 
@@ -19,7 +19,7 @@ LocalGradeRepository (GradeManager에 위임)
 
 > 📎 [`GradeManager`](grade_manager.md) · [`SecureStorageService`](secure_storage_service.md)
 
-Riverpod Provider 테스트에서 `MockGradeRepository`로 교체하면 sqflite/SharedPreferences/SecureStorage 의존을 제거할 수 있음.
+Riverpod Provider 테스트에서 `MockGradeRepository`로 교체하면 sqflite/SharedPreferences/SecureStorage 의존을 제거할 수 있음
 
 ---
 
@@ -39,7 +39,7 @@ abstract class GradeRepository {
 }
 ```
 
-[`GradeManager`](grade_manager.md)의 모든 public 메서드를 인터페이스로 추출. 시험 CRUD + 수시/정시 목표 관리.
+[`GradeManager`](grade_manager.md)의 모든 public 메서드를 인터페이스로 추출. 시험 CRUD + 수시/정시 목표 관리
 
 ---
 
@@ -62,7 +62,7 @@ class LocalGradeRepository implements GradeRepository {
 }
 ```
 
-`const` 생성자. 모든 메서드가 [`GradeManager`](grade_manager.md) 정적 메서드를 그대로 호출.
+`const` 생성자. 모든 메서드가 [`GradeManager`](grade_manager.md) 정적 메서드를 그대로 호출
 
 ---
 
@@ -89,4 +89,4 @@ await resetServiceLocator();
 GetIt.I.registerSingleton<GradeRepository>(MockGradeRepository());
 ```
 
-`MockGradeRepository`에서 인메모리 리스트로 시험 데이터를 관리하면 SecureStorage 없이 [`ExamsNotifier`](../providers/providers.md) 테스트 가능.
+`MockGradeRepository`에서 인메모리 리스트로 시험 데이터를 관리하면 SecureStorage 없이 [`ExamsNotifier`](../providers/providers.md) 테스트 가능

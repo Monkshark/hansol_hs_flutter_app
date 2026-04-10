@@ -2,7 +2,7 @@
 
 > `lib/api/meal_data_api.dart` — NEIS 급식 API 연동
 
-모든 메서드가 `static`. NEIS 교육정보 API에서 급식 데이터를 조회하고, SharedPreferences에 캐싱한다.
+모든 메서드가 `static`. NEIS 교육정보 API에서 급식 데이터를 조회하고, SharedPreferences에 캐싱한다
 
 ---
 
@@ -26,7 +26,7 @@ static Future<Meal?> getMeal({
 })
 ```
 
-**설명**: 특정 날짜·식사 유형의 급식 데이터를 반환한다.
+**설명**: 특정 날짜·식사 유형의 급식 데이터를 반환한다
 
 **흐름**:
 
@@ -75,7 +75,7 @@ static Future<Meal> _fetchSingleMeal(
   DateTime date, int mealType, SharedPreferences prefs, String cacheKey)
 ```
 
-**설명**: 단일 날짜·식사의 급식을 NEIS API로 직접 요청한다.
+**설명**: 단일 날짜·식사의 급식을 NEIS API로 직접 요청한다
 
 1. NEIS API URL을 구성:
    ```dart
@@ -95,9 +95,9 @@ static Future<Meal> _fetchSingleMeal(
    kcal: row['CAL_INFO'] as String,
    ntrInfo: (row['NTR_INFO'] as String?)?.replaceAll('<br/>', '\n') ?? '',
    ```
-   `<br/>` 태그를 줄바꿈으로 치환.
+   `<br/>` 태그를 줄바꿈으로 치환
 
-4. 결과를 캐시에 저장 후 반환. 데이터 없으면 '급식 정보가 없습니다.' 반환.
+4. 결과를 캐시에 저장 후 반환. 데이터 없으면 '급식 정보가 없습니다.' 반환
 
 ---
 
@@ -107,7 +107,7 @@ static Future<Meal> _fetchSingleMeal(
 static Future<void> _prefetchMonth(DateTime date)
 ```
 
-**설명**: 해당 월의 전체 급식을 한 번의 API 호출로 프리페치한다.
+**설명**: 해당 월의 전체 급식을 한 번의 API 호출로 프리페치한다
 
 1. 같은 월이 이미 프리페치 중이면 그 Future를 대기:
    ```dart
@@ -116,7 +116,7 @@ static Future<void> _prefetchMonth(DateTime date)
      return;
    }
    ```
-   `Completer`로 중복 요청 방지.
+   `Completer`로 중복 요청 방지
 
 2. 월의 첫날~마지막날 범위로 API 호출:
    ```dart
@@ -131,7 +131,7 @@ static Future<void> _prefetchMonth(DateTime date)
    _saveToCache(prefs, key, meal);
    ```
 
-4. `finally`에서 `_prefetchingMonths` 맵에서 제거.
+4. `finally`에서 `_prefetchingMonths` 맵에서 제거
 
 ---
 
@@ -141,7 +141,7 @@ static Future<void> _prefetchMonth(DateTime date)
 static Future<void> prefetchWeek(DateTime baseDate)
 ```
 
-**설명**: 주간 뷰 진입 시 해당 주의 급식을 프리페치한다.
+**설명**: 주간 뷰 진입 시 해당 주의 급식을 프리페치한다
 
 - 월~금이 같은 달이면 `_prefetchMonth` 1회
 - 달이 걸치면 2개월 병렬 프리페치:
@@ -157,7 +157,7 @@ static Future<void> prefetchWeek(DateTime baseDate)
 static Meal? _getFromCache(SharedPreferences prefs, String key)
 ```
 
-**설명**: 캐시에서 급식 데이터를 읽되, 만료된 데이터는 null 반환한다.
+**설명**: 캐시에서 급식 데이터를 읽되, 만료된 데이터는 null 반환한다
 
 **캐시 전략 (차등 TTL)**:
 - 정상 급식 데이터 → **24시간** 캐시
@@ -179,7 +179,7 @@ if (meal.meal == '급식 정보가 없습니다.') {
 static void _saveToCache(SharedPreferences prefs, String key, Meal meal)
 ```
 
-[Meal](../data/meal.md) JSON + 타임스탬프를 SharedPreferences에 저장.
+[Meal](../data/meal.md) JSON + 타임스탬프를 SharedPreferences에 저장
 
 ---
 
@@ -189,7 +189,7 @@ static void _saveToCache(SharedPreferences prefs, String key, Meal meal)
 static Future<void> clearCacheForDate(DateTime date)
 ```
 
-특정 날짜의 조식/중식/석식 캐시를 모두 삭제한다.
+특정 날짜의 조식/중식/석식 캐시를 모두 삭제한다
 
 ---
 
@@ -199,7 +199,7 @@ static Future<void> clearCacheForDate(DateTime date)
 static Future<Map<String, dynamic>?> _fetchData(String url)
 ```
 
-**설명**: HTTP GET 요청을 수행한다.
+**설명**: HTTP GET 요청을 수행한다
 
 - **타임아웃**: 10초
 - NEIS `INFO-200` (데이터 없음) 응답은 `null` 반환
@@ -213,6 +213,6 @@ static Future<Map<String, dynamic>?> _fetchData(String url)
 static Future<bool> isAllMealEmpty(DateTime date)
 ```
 
-**설명**: 특정 날짜에 급식이 하나도 없는지 확인한다.
-NEIS `INFO-200` 응답이면 `true` (급식 없음).
-홈 위젯에서 "급식 없음" 표시 여부 판단에 사용.
+**설명**: 특정 날짜에 급식이 하나도 없는지 확인한다
+NEIS `INFO-200` 응답이면 `true` (급식 없음)
+홈 위젯에서 "급식 없음" 표시 여부 판단에 사용

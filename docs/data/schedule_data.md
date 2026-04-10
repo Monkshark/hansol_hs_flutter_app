@@ -2,7 +2,7 @@
 
 > `lib/data/schedule_data.dart` — 개인일정 데이터 모델
 
-SQLite `schedules` 테이블과 1:1 매핑되는 순수 Dart 클래스. freezed를 사용하지 않고 수동 `toMap`/`fromMap` 제공.
+SQLite `schedules` 테이블과 1:1 매핑되는 순수 Dart 클래스. freezed를 사용하지 않고 수동 `toMap`/`fromMap` 제공
 
 ---
 
@@ -40,7 +40,7 @@ Map<String, dynamic> toMap() => {
 };
 ```
 
-SQLite 삽입용. `id`가 null이면 맵에서 제외 → auto-increment로 자동 생성.
+SQLite 삽입용. `id`가 null이면 맵에서 제외 → auto-increment로 자동 생성
 
 ---
 
@@ -58,7 +58,7 @@ factory Schedule.fromMap(Map<String, dynamic> map) => Schedule(
 );
 ```
 
-SQLite 쿼리 결과에서 Schedule 객체 생성. `color`가 null(v1 데이터)이면 기본 파란색.
+SQLite 쿼리 결과에서 Schedule 객체 생성. `color`가 null(v1 데이터)이면 기본 파란색
 
 ---
 

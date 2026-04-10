@@ -2,7 +2,7 @@
 
 > `lib/data/local_database.dart` — SQLite 일정 DB, Firestore 동기화
 
-인스턴스 메서드 (GetIt에 싱글턴 등록). sqflite 기반 개인 일정 CRUD.
+인스턴스 메서드 (GetIt에 싱글턴 등록). sqflite 기반 개인 일정 CRUD
 
 ---
 
@@ -36,7 +36,7 @@ Future<Database> get database async {
 }
 ```
 
-Lazy singleton 패턴. 최초 호출 시 DB 생성/열기.
+Lazy singleton 패턴. 최초 호출 시 DB 생성/열기
 
 ---
 
@@ -46,7 +46,7 @@ Lazy singleton 패턴. 최초 호출 시 DB 생성/열기.
 Future<Database> _initDB()
 ```
 
-**설명**: SQLite DB를 열고 스키마를 생성한다.
+**설명**: SQLite DB를 열고 스키마를 생성한다
 
 ```dart
 return openDatabase(
@@ -62,7 +62,7 @@ return openDatabase(
 );
 ```
 
-v1→v2 마이그레이션: `endDate`, `color` 컬럼 추가.
+v1→v2 마이그레이션: `endDate`, `color` 컬럼 추가
 
 ---
 
@@ -72,7 +72,7 @@ v1→v2 마이그레이션: `endDate`, `color` 컬럼 추가.
 Future<void> migrateFromPrefs()
 ```
 
-**설명**: SharedPreferences의 레거시 일정 데이터를 SQLite로 마이그레이션한다.
+**설명**: SharedPreferences의 레거시 일정 데이터를 SQLite로 마이그레이션한다
 
 ```dart
 final old = prefs.getStringList('schedules');
@@ -84,7 +84,7 @@ await batch.commit(noResult: true);
 await prefs.remove('schedules');
 ```
 
-배치 삽입으로 성능 최적화. 마이그레이션 후 원본 삭제.
+배치 삽입으로 성능 최적화. 마이그레이션 후 원본 삭제
 
 ---
 
@@ -94,7 +94,7 @@ await prefs.remove('schedules');
 Future<int> insertSchedule(Schedule schedule)
 ```
 
-일정 삽입 후 `syncToFirestore()` 호출. 반환값은 auto-increment ID.
+일정 삽입 후 `syncToFirestore()` 호출. 반환값은 auto-increment ID
 
 ---
 
@@ -104,7 +104,7 @@ Future<int> insertSchedule(Schedule schedule)
 Future<void> deleteSchedule(Schedule schedule)
 ```
 
-**설명**: 일정을 삭제한다. ID가 있으면 ID로, 없으면 복합 조건으로 매칭한다.
+**설명**: 일정을 삭제한다. ID가 있으면 ID로, 없으면 복합 조건으로 매칭한다
 
 ```dart
 if (schedule.id != null) {
@@ -117,7 +117,7 @@ if (schedule.id != null) {
 }
 ```
 
-삭제 후 `syncToFirestore()` 호출.
+삭제 후 `syncToFirestore()` 호출
 
 ---
 
@@ -127,7 +127,7 @@ if (schedule.id != null) {
 Stream<List<Schedule>> watchSchedules(DateTime date)
 ```
 
-**설명**: 특정 날짜의 일정 목록을 스트림으로 반환한다.
+**설명**: 특정 날짜의 일정 목록을 스트림으로 반환한다
 
 ```dart
 final results = await db.query(
@@ -138,9 +138,9 @@ final results = await db.query(
 );
 ```
 
-여러 날 일정도 포함: `date <= 조회일 <= endDate` 조건.
+여러 날 일정도 포함: `date <= 조회일 <= endDate` 조건
 
-> **참고**: 현재 `async*`로 한 번만 yield 후 종료. 실시간 갱신이 아닌 일회성 쿼리.
+> **참고**: 현재 `async*`로 한 번만 yield 후 종료. 실시간 갱신이 아닌 일회성 쿼리
 
 ---
 
@@ -150,7 +150,7 @@ final results = await db.query(
 Future<List<Schedule>> getSchedulesForDateRange(DateTime start, int days)
 ```
 
-`start`부터 `days`일간의 일정을 조회. 날짜별로 개별 쿼리 실행.
+`start`부터 `days`일간의 일정을 조회. 날짜별로 개별 쿼리 실행
 
 ---
 
@@ -160,7 +160,7 @@ Future<List<Schedule>> getSchedulesForDateRange(DateTime start, int days)
 Future<void> syncToFirestore()
 ```
 
-**설명**: 전체 일정 목록을 Firestore에 동기화한다.
+**설명**: 전체 일정 목록을 Firestore에 동기화한다
 
 ```dart
 final all = await _getAllSchedules();
@@ -173,7 +173,7 @@ await FirebaseFirestore.instance
 });
 ```
 
-매 CRUD 작업 후 자동 호출. 비로그인 시 skip.
+매 CRUD 작업 후 자동 호출. 비로그인 시 skip
 
 ---
 
@@ -183,11 +183,11 @@ await FirebaseFirestore.instance
 Future<void> loadFromFirestore()
 ```
 
-**설명**: Firestore에서 일정을 복원한다 (로컬 DB가 비어있을 때만).
+**설명**: Firestore에서 일정을 복원한다 (로컬 DB가 비어있을 때만)
 
 ```dart
 final existing = await db.query('schedules');
 if (existing.isNotEmpty) return;  // 로컬 데이터가 있으면 skip
 ```
 
-기기 변경/재설치 시 복원 용도. 배치 삽입으로 성능 최적화.
+기기 변경/재설치 시 복원 용도. 배치 삽입으로 성능 최적화

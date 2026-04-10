@@ -2,7 +2,7 @@
 
 > `lib/network/network_status.dart` — 네트워크 연결 상태
 
-`connectivity_plus` 플러그인으로 현재 연결 상태를 확인한다.
+`connectivity_plus` 플러그인으로 현재 연결 상태를 확인한다
 
 ---
 
@@ -12,7 +12,7 @@
 static Future<bool> isUnconnected()
 ```
 
-**설명**: WiFi/모바일 데이터 미연결 시 `true`를 반환한다.
+**설명**: WiFi/모바일 데이터 미연결 시 `true`를 반환한다
 
 ```dart
 final results = await Connectivity().checkConnectivity();

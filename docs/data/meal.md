@@ -2,7 +2,7 @@
 
 > `lib/data/meal.dart` — 급식 데이터 모델 (freezed)
 
-`@freezed` 기반 불변 데이터 클래스. JSON 직렬화(`meal.g.dart`), 동등성/copyWith(`meal.freezed.dart`)는 코드 생성으로 자동 처리.
+`@freezed` 기반 불변 데이터 클래스. JSON 직렬화(`meal.g.dart`), 동등성/copyWith(`meal.freezed.dart`)는 코드 생성으로 자동 처리
 
 ---
 
@@ -39,7 +39,7 @@ String getMealType() {
 }
 ```
 
-`mealType` 정수를 한국어 문자열로 변환. 급식 카드 UI에서 식사 유형 라벨에 사용.
+`mealType` 정수를 한국어 문자열로 변환. 급식 카드 UI에서 식사 유형 라벨에 사용
 
 ---
 
@@ -50,7 +50,7 @@ String getMealType() {
 String toString() => meal ?? '';
 ```
 
-`meal`이 null이면 빈 문자열. 디버그 출력 및 위젯 텍스트 바인딩에 활용.
+`meal`이 null이면 빈 문자열. 디버그 출력 및 위젯 텍스트 바인딩에 활용
 
 ---
 
@@ -60,7 +60,7 @@ String toString() => meal ?? '';
 factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
 ```
 
-`_$MealFromJson`/`_$MealToJson`은 `meal.g.dart`에 자동 생성. `MealDataApi._saveToCache`/`_getFromCache`에서 SharedPreferences JSON 저장/복원에 사용.
+`_$MealFromJson`/`_$MealToJson`은 `meal.g.dart`에 자동 생성. `MealDataApi._saveToCache`/`_getFromCache`에서 SharedPreferences JSON 저장/복원에 사용
 
 ---
 

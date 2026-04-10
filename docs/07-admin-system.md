@@ -14,8 +14,8 @@
 
 ### 승인 (approved)
 
-신규 가입자는 `approved: false` 상태.
-admin 또는 manager가 승인해야 게시판 등 주요 기능 이용 가능.
+신규 가입자는 `approved: false` 상태
+admin 또는 manager가 승인해야 게시판 등 주요 기능 이용 가능
 
 ```
 가입 → approved: false → 관리자 승인 → approved: true → 모든 기능 이용
@@ -23,7 +23,7 @@ admin 또는 manager가 승인해야 게시판 등 주요 기능 이용 가능.
 
 ### 정지 (suspendedUntil)
 
-관리자가 특정 기간 동안 사용자를 정지할 수 있다.
+관리자가 특정 기간 동안 사용자를 정지할 수 있다
 
 ```
 정지 설정 → suspendedUntil: timestamp → 기능 제한
@@ -55,7 +55,7 @@ static Future<void> refreshCustomClaims() async {
 
 ### AdminScreen (`admin_screen.dart`)
 
-TabBar 기반 관리 대시보드.
+TabBar 기반 관리 대시보드
 
 **탭 구성**:
 1. 가입 대기 (`UsersTab` - pending)
@@ -104,11 +104,11 @@ void _refreshAllTabs() {
 | 삭제 | 유저 문서 삭제 + Auth 삭제 | admin |
 | 역할 변경 | role 변경 | admin만 |
 
-모든 액션은 `_refreshAll()` 호출 → 3개 탭 모두 새로고침.
+모든 액션은 `_refreshAll()` 호출 → 3개 탭 모두 새로고침
 
 ### ReportsTab (`admin/reports_tab.dart`)
 
-게시글/댓글 신고 관리.
+게시글/댓글 신고 관리
 
 ```
 reports 컬렉션 조회
@@ -120,7 +120,7 @@ reports 컬렉션 조회
 
 ### DeleteLogsTab (`admin/delete_logs_tab.dart`)
 
-관리자 작업 로그 조회 (`admin_logs` 컬렉션).
+관리자 작업 로그 조회 (`admin_logs` 컬렉션)
 
 ```
 admin_logs/{id}
@@ -134,7 +134,7 @@ admin_logs/{id}
 
 ### PopupNoticeManager (`admin/popup_notice_manager.dart`)
 
-인앱 팝업 공지 관리 (`app_config/popup` 문서).
+인앱 팝업 공지 관리 (`app_config/popup` 문서)
 
 설정 가능 항목:
 - 활성화/비활성화
@@ -147,7 +147,7 @@ admin_logs/{id}
 
 ## 관리자 웹 대시보드 (admin-web/)
 
-Next.js 16 + React 18 + Tailwind CSS 기반 웹 관리 도구.
+Next.js 16 + React 18 + Tailwind CSS 기반 웹 관리 도구
 
 ### 페이지 구성
 
@@ -227,5 +227,5 @@ NEXT_PUBLIC_FIREBASE_APP_ID=...
 | 역할 변경 | "{새 역할}(으)로 변경되었습니다" |
 | 계정 삭제 | "관리자에 의해 계정이 삭제되었습니다" |
 
-모든 알림은 `onUserUpdated` / `onUserDeleted` Cloud Function에서 자동 처리.
-사용자의 `notiAccount` 설정이 false면 발송하지 않음.
+모든 알림은 `onUserUpdated` / `onUserDeleted` Cloud Function에서 자동 처리
+사용자의 `notiAccount` 설정이 false면 발송하지 않음

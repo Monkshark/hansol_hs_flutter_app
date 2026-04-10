@@ -2,7 +2,7 @@
 
 > `lib/data/secure_storage_service.dart` — 암호화 저장소 래퍼
 
-`flutter_secure_storage` wrapper. 모든 메서드가 `static`. Silent fail (에러 시 로깅만).
+`flutter_secure_storage` wrapper. 모든 메서드가 `static`. Silent fail (에러 시 로깅만)
 
 ---
 
@@ -24,7 +24,7 @@ static const String keyGradeJeongsiGoals = 'secure_grade_jeongsi_goals';
 static const String keyDdays = 'secure_ddays';
 ```
 
-네임스페이스 prefix(`secure_`)로 충돌 방지.
+네임스페이스 prefix(`secure_`)로 충돌 방지
 
 ---
 
@@ -48,7 +48,7 @@ static const _storage = FlutterSecureStorage(
 static Future<String?> read(String key)
 ```
 
-키에 해당하는 값을 읽음. 에러 시 null 반환 (로깅만).
+키에 해당하는 값을 읽음. 에러 시 null 반환 (로깅만)
 
 ---
 
@@ -58,7 +58,7 @@ static Future<String?> read(String key)
 static Future<void> write(String key, String value)
 ```
 
-키-값 쌍을 암호화 저장. 에러 시 silent fail.
+키-값 쌍을 암호화 저장. 에러 시 silent fail
 
 ---
 
@@ -69,7 +69,7 @@ static Future<void> delete(String key)
 static Future<void> deleteAll()
 ```
 
-단일/전체 키 삭제. 에러 시 silent fail.
+단일/전체 키 삭제. 에러 시 silent fail
 
 ---
 
@@ -83,7 +83,7 @@ static Future<bool> migrateFromPlain({
 })
 ```
 
-**설명**: SharedPreferences(평문) → SecureStorage(암호화) 일회성 마이그레이션 helper.
+**설명**: SharedPreferences(평문) → SecureStorage(암호화) 일회성 마이그레이션 helper
 
 ```dart
 if (oldValue == null || oldValue.isEmpty) return false;  // 옮길 게 없음

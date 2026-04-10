@@ -2,7 +2,7 @@
 
 > `lib/api/timetable_data_api.dart` — NEIS 시간표 API 연동
 
-모든 메서드가 `static`. 시간표 데이터 조회, 과목 조합 추출, 캐싱을 담당한다.
+모든 메서드가 `static`. 시간표 데이터 조회, 과목 조합 추출, 캐싱을 담당한다
 
 ---
 
@@ -17,7 +17,7 @@ static Future<Map<String, Map<String, List<String>>>> getTimeTable({
 })
 ```
 
-**설명**: 학년/반별 시간표를 날짜 범위로 조회한다.
+**설명**: 학년/반별 시간표를 날짜 범위로 조회한다
 
 **반환 구조**: `{ "20260410": { "3": ["국어","수학","영어",...] } }` — 날짜 → 반 → 교시별 과목 리스트
 
@@ -48,7 +48,7 @@ static Map<String, Map<String, List<String>>> _processTimetable(
     List<dynamic> timetableArray)
 ```
 
-**설명**: NEIS API 응답을 `{ 날짜 → 반 → 과목리스트 }` 구조로 변환한다.
+**설명**: NEIS API 응답을 `{ 날짜 → 반 → 과목리스트 }` 구조로 변환한다
 
 핵심 로직 — **PERIO 기반 교시 배치**:
 ```dart
@@ -59,7 +59,7 @@ while (classList.length < perio) {
 classList[perio - 1] = content;  // 1-based → 0-based
 ```
 
-반 번호가 없는 경우 `'special'`로 처리 (특별실 과목).
+반 번호가 없는 경우 `'special'`로 처리 (특별실 과목)
 
 ---
 
@@ -70,7 +70,7 @@ static Future<Map<String, Map<String, List<String>>>> _getWeekTimetableWithFallb
     String grade)
 ```
 
-**설명**: 이번 주 → 다음 주 → 지난 주 순으로 시간표를 시도한다.
+**설명**: 이번 주 → 다음 주 → 지난 주 순으로 시간표를 시도한다
 
 방학 등 데이터가 없는 주를 대비한 폴백:
 ```dart
@@ -95,10 +95,10 @@ return await getTimeTable(startDate: prevMonday, ...);
 static Future<List<String>?> getSubjects({required int grade})
 ```
 
-**설명**: 학년별 과목명 리스트를 추출한다.
+**설명**: 학년별 과목명 리스트를 추출한다
 
-`_getWeekTimetableWithFallback`로 시간표를 가져온 뒤, 모든 과목명을 `Set`으로 수집.
-`[보강]`, `토요휴업일` 제외. 1주일 캐시.
+`_getWeekTimetableWithFallback`로 시간표를 가져온 뒤, 모든 과목명을 `Set`으로 수집
+`[보강]`, `토요휴업일` 제외. 1주일 캐시
 
 ---
 
@@ -111,9 +111,9 @@ static Future<List<Subject>> getAllSubjectCombinations({
 })
 ```
 
-**설명**: 학년의 모든 반에서 가르치는 과목 + 반 번호 조합을 추출한다.
+**설명**: 학년의 모든 반에서 가르치는 과목 + 반 번호 조합을 추출한다
 
-시간표 선택 화면에서 "어떤 반에서 어떤 과목을 가르치는지" 파악에 사용.
+시간표 선택 화면에서 "어떤 반에서 어떤 과목을 가르치는지" 파악에 사용
 
 1. 로컬 캐시 확인 (1주일 TTL):
    ```dart
@@ -136,7 +136,7 @@ static Future<List<Subject>> getAllSubjectCombinations({
 
 4. 이름순 정렬 후 캐시 저장
 
-**재시도**: 실패 시 `2 * attempt`초 대기 후 재시도.
+**재시도**: 실패 시 `2 * attempt`초 대기 후 재시도
 
 ---
 
@@ -149,9 +149,9 @@ static Future<List<List<String?>>> getCustomTimeTable({
 })
 ```
 
-**설명**: 사용자가 선택한 과목으로 커스텀 시간표를 생성한다.
+**설명**: 사용자가 선택한 과목으로 커스텀 시간표를 생성한다
 
-**반환**: `List<List<String?>>` — 인덱스 1~5가 월~금, 각 리스트의 인덱스 1~7이 1~7교시.
+**반환**: `List<List<String?>>` — 인덱스 1~5가 월~금, 각 리스트의 인덱스 1~7이 1~7교시
 
 1. 전체 학년 시간표를 조회 (반 지정 없이):
    ```dart
@@ -178,7 +178,7 @@ static Future<List<List<String?>>> getCustomTimeTable({
 static Future<int> getClassCount(int grade)
 ```
 
-NEIS `classInfo` API로 학년의 반 수를 조회한다. 1주일 캐시.
+NEIS `classInfo` API로 학년의 반 수를 조회한다. 1주일 캐시
 
 ---
 
@@ -188,8 +188,8 @@ NEIS `classInfo` API로 학년의 반 수를 조회한다. 1주일 캐시.
 static Future<List<Subject>> getSubjectsFromAdminFirestore(int grade)
 ```
 
-Firestore `grade/{grade}/subject/` 컬렉션에서 관리자가 등록한 과목 목록을 조회한다.
-`category`와 `isOriginal` 필드 포함.
+Firestore `grade/{grade}/subject/` 컬렉션에서 관리자가 등록한 과목 목록을 조회한다
+`category`와 `isOriginal` 필드 포함
 
 ---
 

@@ -2,7 +2,7 @@
 
 > `lib/notification/fcm_service.dart` — FCM 푸시 알림, 토픽, 딥링크
 
-모든 메서드가 `static`. Firebase Cloud Messaging 초기화, 토큰 관리, 토픽 구독, 딥링크 라우팅을 담당.
+모든 메서드가 `static`. Firebase Cloud Messaging 초기화, 토큰 관리, 토픽 구독, 딥링크 라우팅을 담당
 
 ---
 
@@ -12,7 +12,7 @@
 static Future<void> initialize()
 ```
 
-**설명**: FCM 서비스를 초기화한다. `main()` 에서 한 번 호출.
+**설명**: FCM 서비스를 초기화한다. `main()` 에서 한 번 호출
 
 1. Android 알림 채널 생성 (`_initChannel`)
 
@@ -61,7 +61,7 @@ static Future<void> _saveToken()
 static Future<void> _onTokenRefresh(String token)
 ```
 
-FCM 토큰을 Firestore `users/{uid}` 문서의 `fcmToken` 필드에 저장. Cloud Function이 이 토큰으로 개인 알림 전송.
+FCM 토큰을 Firestore `users/{uid}` 문서의 `fcmToken` 필드에 저장. Cloud Function이 이 토큰으로 개인 알림 전송
 
 ---
 
@@ -88,7 +88,7 @@ static const _categoryTopicKey = {
 };
 ```
 
-FCM 토픽명에 한글 불가 → 영문 변환.
+FCM 토픽명에 한글 불가 → 영문 변환
 
 ### `toggleBoardNotification`
 
@@ -96,7 +96,7 @@ FCM 토픽명에 한글 불가 → 영문 변환.
 static Future<void> toggleBoardNotification(bool enabled)
 ```
 
-전체 게시판 알림 토글. `board_new_post` 토픽 구독/해제 + [SettingData](../data/setting_data.md) 저장.
+전체 게시판 알림 토글. `board_new_post` 토픽 구독/해제 + [SettingData](../data/setting_data.md) 저장
 
 ### `toggleCategoryNotification`
 
@@ -104,7 +104,7 @@ static Future<void> toggleBoardNotification(bool enabled)
 static Future<void> toggleCategoryNotification(String category, bool enabled)
 ```
 
-카테고리별 알림 토글. 예: `toggleCategoryNotification('자유', false)`.
+카테고리별 알림 토글. 예: `toggleCategoryNotification('자유', false)`
 
 ### `togglePopularNotification`
 
@@ -112,7 +112,7 @@ static Future<void> toggleCategoryNotification(String category, bool enabled)
 static Future<void> togglePopularNotification(bool enabled)
 ```
 
-인기글 알림 토글. `board_popular` 토픽.
+인기글 알림 토글. `board_popular` 토픽
 
 ---
 
@@ -122,7 +122,7 @@ static Future<void> togglePopularNotification(bool enabled)
 static void _onForegroundMessage(RemoteMessage message)
 ```
 
-**설명**: 포그라운드에서 FCM 메시지 수신 시 로컬 알림으로 표시한다.
+**설명**: 포그라운드에서 FCM 메시지 수신 시 로컬 알림으로 표시한다
 
 ```dart
 _localNotifications.show(
@@ -142,7 +142,7 @@ _localNotifications.show(
 static Future<void> _handleDeepLink(Map<String, dynamic> data)
 ```
 
-**설명**: 알림 탭 시 data payload 기반으로 화면을 라우팅한다.
+**설명**: 알림 탭 시 data payload 기반으로 화면을 라우팅한다
 
 ```dart
 switch (type) {
@@ -179,7 +179,7 @@ static Map<String, dynamic> decodePayload(String payload)
 // "type=comment;postId=abc123" → {type: 'comment', postId: 'abc123'}
 ```
 
-포그라운드 로컬 알림의 payload 전달용. `=`로 key-value 분리, `;`로 쌍 분리.
+포그라운드 로컬 알림의 payload 전달용. `=`로 key-value 분리, `;`로 쌍 분리
 
 ---
 
@@ -189,7 +189,7 @@ static Map<String, dynamic> decodePayload(String payload)
 static Future<void> onUserLogin()
 ```
 
-로그인 직후 호출. 토큰 저장 + 토픽 재구독.
+로그인 직후 호출. 토큰 저장 + 토픽 재구독
 
 ---
 
@@ -200,5 +200,5 @@ static Future<void> onUserLogin()
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
 ```
 
-백그라운드 메시지 핸들러. 현재 빈 구현 (시스템 알림은 자동 표시).
-`@pragma('vm:entry-point')`로 tree-shaking 방지.
+백그라운드 메시지 핸들러. 현재 빈 구현 (시스템 알림은 자동 표시)
+`@pragma('vm:entry-point')`로 tree-shaking 방지

@@ -10,7 +10,7 @@
 Future<void> main() async
 ```
 
-**설명**: 앱 초기화를 수행한다.
+**설명**: 앱 초기화를 수행한다
 
 1. **Firebase 초기화**: 중복 방지 체크 후 초기화:
    ```dart
@@ -78,7 +78,7 @@ Future<void> main() async
 class HansolHighSchool extends ConsumerStatefulWidget
 ```
 
-**설명**: 앱의 루트 위젯. 테마 모드 전환과 MaterialApp 설정을 담당.
+**설명**: 앱의 루트 위젯. 테마 모드 전환과 MaterialApp 설정을 담당
 
 1. `initState`에서 [`AnimatedAppColors`](styles/app_colors.md) 초기화 + `themeNotifier` 리스너 등록
 2. `_resolveIsDark`: ThemeMode.system일 때 platformBrightness 확인
@@ -99,7 +99,7 @@ return ValueListenableBuilder<Locale?>(
 );
 ```
 
-`appRefreshNotifier` 값 변경 → `ValueKey` 변경 → MainScreen 재생성.
+`appRefreshNotifier` 값 변경 → `ValueKey` 변경 → MainScreen 재생성
 
 ---
 
@@ -109,7 +109,7 @@ return ValueListenableBuilder<Locale?>(
 class MainScreen extends StatefulWidget
 ```
 
-**설명**: 급식/홈/일정 3탭 하단 네비게이션 + 초기 체크 로직.
+**설명**: 급식/홈/일정 3탭 하단 네비게이션 + 초기 체크 로직
 
 ### `initState` 체크 순서
 
@@ -138,4 +138,4 @@ _pages = [const MealScreen(), HomeScreen(key: _homeKey), const NoticeScreen()];
 void _logCrashToFirestore(FlutterErrorDetails details)
 ```
 
-Firestore `crash_logs` 컬렉션에 에러 정보 저장. 에러 메시지 500자, 스택 1000자로 절삭.
+Firestore `crash_logs` 컬렉션에 에러 정보 저장. 에러 메시지 500자, 스택 1000자로 절삭

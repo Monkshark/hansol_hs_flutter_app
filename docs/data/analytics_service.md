@@ -2,7 +2,7 @@
 
 > `lib/data/analytics_service.dart` — Firebase Analytics 이벤트 래퍼
 
-모든 메서드가 `static`. 이벤트 이름 오타/중복 방지를 위해 모든 로깅을 이 클래스로 집중. 내부에서 silent fail 처리 (호출부에서 try/catch 불필요).
+모든 메서드가 `static`. 이벤트 이름 오타/중복 방지를 위해 모든 로깅을 이 클래스로 집중. 내부에서 silent fail 처리 (호출부에서 try/catch 불필요)
 
 ---
 
@@ -12,7 +12,7 @@
 static FirebaseAnalyticsObserver get observer
 ```
 
-`MaterialApp.navigatorObservers`에 등록하면 화면 전환(`screen_view`) 자동 추적.
+`MaterialApp.navigatorObservers`에 등록하면 화면 전환(`screen_view`) 자동 추적
 
 ---
 
@@ -22,7 +22,7 @@ static FirebaseAnalyticsObserver get observer
 static Future<void> setUserId(String? uid)
 ```
 
-로그인 시 uid 설정, 로그아웃 시 null 전달.
+로그인 시 uid 설정, 로그아웃 시 null 전달
 
 ---
 
@@ -32,7 +32,7 @@ static Future<void> setUserId(String? uid)
 static Future<void> setUserProperty(String name, String? value)
 ```
 
-사용자 속성 설정 (grade, userType 등).
+사용자 속성 설정 (grade, userType 등)
 
 ---
 
@@ -83,4 +83,4 @@ static Future<void> _log(String name, [Map<String, Object>? params]) async {
 }
 ```
 
-모든 public 메서드가 `_log`를 통해 이벤트를 발행. 릴리스 빌드에서 실패해도 앱에 영향 없음.
+모든 public 메서드가 `_log`를 통해 이벤트를 발행. 릴리스 빌드에서 실패해도 앱에 영향 없음
