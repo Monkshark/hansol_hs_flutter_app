@@ -62,7 +62,7 @@ class LocalGradeRepository implements GradeRepository {
 }
 ```
 
-`const` 생성자. 모든 메서드가 `GradeManager` 정적 메서드를 그대로 호출.
+`const` 생성자. 모든 메서드가 [`GradeManager`](grade_manager.md) 정적 메서드를 그대로 호출.
 
 ---
 

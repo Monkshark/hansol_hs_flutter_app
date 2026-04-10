@@ -165,7 +165,7 @@ switch (type) {
 | `account` | 일반 유저 (승인/정지 등) | `NotificationScreen` |
 | `chat` | 채팅 참여자 | `ChatRoomScreen` |
 
-> 관리자/일반 유저 구분은 `AuthService.cachedProfile?.isManager`로 판별
+> 관리자/일반 유저 구분은 [`AuthService`](../data/auth_service.md)`.cachedProfile?.isManager`로 판별
 
 ---
 
