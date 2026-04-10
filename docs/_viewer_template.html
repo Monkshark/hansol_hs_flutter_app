@@ -53,8 +53,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .breadcrumb{font-size:12px;color:var(--muted);margin-bottom:20px}
 .breadcrumb a{color:var(--accent);text-decoration:none}
 .breadcrumb a:hover{text-decoration:underline}
+.nav-btns{display:inline-flex;gap:4px;margin-right:10px;vertical-align:middle}
+.nav-btn{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);width:28px;height:28px;font-size:14px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;transition:background .15s}
+.nav-btn:hover:not(:disabled){background:var(--accent-dim);border-color:var(--accent)}
+.nav-btn:disabled{opacity:.3;cursor:default}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98}
+.overlay.show{display:block}
 .menu-toggle{display:none;position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:22px;cursor:pointer;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.4)}
-@media(max-width:768px){.sidebar{position:fixed;left:-300px;top:0;bottom:0;z-index:99;transition:left .25s ease}.sidebar.open{left:0}.menu-toggle{display:block}.content{padding:24px 16px}}
+@media(max-width:768px){.sidebar{position:fixed;left:-300px;top:0;bottom:0;z-index:99;transition:left .25s ease}.sidebar.open{left:0}.overlay.show{display:block}.menu-toggle{display:block}.content{padding:20px 14px}.md h1{font-size:22px}.md h2{font-size:18px}.md h3{font-size:15px}.md pre{padding:10px 12px;font-size:12px}.md table{font-size:12px;display:block;overflow-x:auto}.md th,.md td{padding:6px 8px;white-space:nowrap}}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 </style>
 </head>
@@ -71,7 +77,12 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
     <div class="welcome"><h2>문서 뷰어</h2><p>왼쪽 사이드바에서 문서를 선택하세요</p></div>
   </div>
 </main>
-<button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">&#9776;</button>
+<div class="overlay" id="overlay" onclick="closeSidebar()"></div>
+<button class="menu-toggle" onclick="toggleSidebar()">&#9776;</button>
+<script>
+function toggleSidebar(){var s=document.getElementById('sidebar'),o=document.getElementById('overlay');s.classList.toggle('open');o.classList.toggle('show',s.classList.contains('open'));}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('overlay').classList.remove('show');}
+</script>
 
 <script>
 /*__MD_DATA__*/
@@ -180,7 +191,11 @@ var FILES = {
     });
   });
 
-  function loadFile(p, name){
+  var history = [];
+  var historyIndex = -1;
+  var navigating = false; // popstate에서 재진입 방지
+
+  function loadFile(p, name, fromPopState){
     allItems.forEach(function(i){ i.el.classList.toggle('active', i.el.dataset.path === p); });
     var inner = document.getElementById('contentInner');
     var text = MD_DATA[p];
@@ -188,14 +203,31 @@ var FILES = {
       inner.innerHTML = '<div class="welcome"><h2>문서를 찾을 수 없습니다</h2><p>' + p + '</p></div>';
       return;
     }
+
+    // history 관리
+    if(!fromPopState){
+      // 현재 위치 이후 기록 삭제 (새 탐색)
+      history = history.slice(0, historyIndex + 1);
+      history.push(p);
+      historyIndex = history.length - 1;
+    }
+
     var html = marked.parse(text);
     var dir = p.indexOf('/') !== -1 ? p.substring(0, p.lastIndexOf('/')) : '';
     var fileName = p.split('/').pop();
-    var crumb = dir
-      ? '<a href="#" onclick="window._loadFile(\'README.md\',\'README\');return false">docs</a> / ' + dir + ' / <strong>' + fileName + '</strong>'
-      : '<a href="#" onclick="window._loadFile(\'README.md\',\'README\');return false">docs</a> / <strong>' + fileName + '</strong>';
 
-    inner.innerHTML = '<div class="breadcrumb">' + crumb + '</div><div class="md">' + html + '</div>';
+    // 뒤로/앞으로 버튼 + breadcrumb
+    var canBack = historyIndex > 0;
+    var canFwd = historyIndex < history.length - 1;
+    var navHtml = '<div class="breadcrumb"><span class="nav-btns">'
+      + '<button class="nav-btn" onclick="window._goBack()" ' + (canBack ? '' : 'disabled') + ' title="뒤로">&#8592;</button>'
+      + '<button class="nav-btn" onclick="window._goForward()" ' + (canFwd ? '' : 'disabled') + ' title="앞으로">&#8594;</button>'
+      + '</span>'
+      + '<a href="#" onclick="window._loadFile(\'README.md\',\'README\');return false">docs</a> / '
+      + (dir ? dir + ' / ' : '')
+      + '<strong>' + fileName + '</strong></div>';
+
+    inner.innerHTML = navHtml + '<div class="md">' + html + '</div>';
 
     // Rewrite .md links to in-viewer navigation
     inner.querySelectorAll('.md a[href]').forEach(function(a){
@@ -214,21 +246,54 @@ var FILES = {
     });
 
     document.getElementById('content').scrollTop = 0;
-    document.getElementById('sidebar').classList.remove('open');
-    location.hash = p;
+    closeSidebar();
+    if(!fromPopState) window.history.pushState({path:p}, '', '#' + p);
   }
+
+  window._goBack = function(){
+    if(historyIndex > 0){
+      historyIndex--;
+      var p = history[historyIndex];
+      loadFile(p, p.split('/').pop().replace('.md',''), true);
+      window.history.pushState({path:p}, '', '#' + p);
+    }
+  };
+  window._goForward = function(){
+    if(historyIndex < history.length - 1){
+      historyIndex++;
+      var p = history[historyIndex];
+      loadFile(p, p.split('/').pop().replace('.md',''), true);
+      window.history.pushState({path:p}, '', '#' + p);
+    }
+  };
 
   // expose for breadcrumb onclick
   window._loadFile = loadFile;
 
+  // 브라우저 뒤로/앞으로 버튼
+  window.addEventListener('popstate', function(e){
+    if(navigating) return;
+    var p = (e.state && e.state.path) || location.hash.slice(1) || 'README.md';
+    if(MD_DATA[p]){
+      navigating = true;
+      // history 배열에서 해당 항목 찾기
+      var idx = history.lastIndexOf(p);
+      if(idx !== -1) historyIndex = idx;
+      loadFile(p, p.split('/').pop().replace('.md',''), true);
+      navigating = false;
+    }
+  });
+
   document.addEventListener('keydown', function(e){
     if((e.ctrlKey || e.metaKey) && e.key === 'k'){ e.preventDefault(); document.getElementById('search').focus(); }
+    // Alt+Left/Right for back/forward
+    if(e.altKey && e.key === 'ArrowLeft'){ e.preventDefault(); window._goBack(); }
+    if(e.altKey && e.key === 'ArrowRight'){ e.preventDefault(); window._goForward(); }
   });
 
   var hash = location.hash.slice(1);
   if(hash && MD_DATA[hash]){
-    var found = allItems.find(function(i){ return i.el.dataset.path === hash; });
-    loadFile(hash, found ? found.el.textContent : hash);
+    loadFile(hash, hash.split('/').pop().replace('.md',''));
   } else {
     loadFile('README.md', 'README');
   }
