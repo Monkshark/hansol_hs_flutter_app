@@ -205,3 +205,6 @@ scripts/service-account.json
 # Study docs (local only)
 docs/**/*.md
 !docs/riverpod_graph.html
+
+# Golden test failure diffs
+test/failures/
