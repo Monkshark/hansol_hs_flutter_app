@@ -17,7 +17,7 @@ GradeRepository (인스턴스 인터페이스)
 LocalGradeRepository (GradeManager에 위임)
 ```
 
-> [`GradeManager`](grade_manager.md) · [`SecureStorageService`](secure_storage_service.md)
+> 📎 [`GradeManager`](grade_manager.md) · [`SecureStorageService`](secure_storage_service.md)
 
 Riverpod Provider 테스트에서 `MockGradeRepository`로 교체하면 sqflite/SharedPreferences/SecureStorage 의존을 제거할 수 있음.
 
