@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
+import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
@@ -22,7 +23,7 @@ class NotificationScreen extends StatelessWidget {
     if (uid == null) {
       return Scaffold(
         appBar: AppBar(title: Text(AppLocalizations.of(context)!.notification_title)),
-        body: const Center(child: Text('로그인이 필요합니다')),
+        body: Center(child: Text(AppLocalizations.of(context)!.common_loginRequired)),
       );
     }
 
@@ -97,7 +98,13 @@ class NotificationScreen extends StatelessWidget {
               return GestureDetector(
                 onTap: () {
                   if (!isRead) docs[index].reference.update({'read': true});
-                  if (!isAccount && postId.isNotEmpty) {
+                  if (isAccount) {
+                    final isManager = AuthService.cachedProfile?.isManager ?? false;
+                    if (isManager) {
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const AdminScreen()));
+                    }
+                  } else if (postId.isNotEmpty) {
                     Navigator.push(context,
                       MaterialPageRoute(builder: (_) => PostDetailScreen(postId: postId)));
                   }

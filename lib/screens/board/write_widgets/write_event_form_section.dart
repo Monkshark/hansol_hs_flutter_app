@@ -71,7 +71,7 @@ class WriteEventFormSection extends StatelessWidget {
                   const SizedBox(width: 8),
                   Text(
                     eventDate != null
-                        ? DateFormat('yyyy년 M월 d일 (E)', 'ko_KR').format(eventDate!)
+                        ? DateFormat(AppLocalizations.of(context)!.common_dateYmdE, Localizations.localeOf(context).toString()).format(eventDate!)
                         : AppLocalizations.of(context)!.write_eventSelectDate,
                     style: TextStyle(
                       fontSize: 14,

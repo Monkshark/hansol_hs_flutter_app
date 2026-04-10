@@ -29,7 +29,7 @@ class BookmarkedPostsScreen extends StatelessWidget {
         elevation: 0,
       ),
       body: uid == null
-          ? const Center(child: Text('로그인이 필요합니다'))
+          ? Center(child: Text(AppLocalizations.of(context)!.common_loginRequired))
           : StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
               stream: FirebaseFirestore.instance
                   .collection('posts')

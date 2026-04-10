@@ -137,7 +137,7 @@ class _MainCalendarState extends State<MainCalendar> {
                   child: Icon(Icons.chevron_left, color: textColor, size: 22),
                 ),
                 const SizedBox(width: 16),
-                Text(DateFormat('yyyy년 M월', 'ko_KR').format(_focusedDay),
+                Text(DateFormat(AppLocalizations.of(context)!.common_dateYM, Localizations.localeOf(context).toString()).format(_focusedDay),
                   style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(width: 16),
                 GestureDetector(

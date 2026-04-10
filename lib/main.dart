@@ -51,6 +51,7 @@ import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSd
 /// - 급식/홈/일정 3탭 하단 네비게이션 구성
 /// - 앱 리프레시 및 업데이트 체크 지원
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+final ValueNotifier<Locale?> localeNotifier = ValueNotifier(null);
 final ValueNotifier<int> appRefreshNotifier = ValueNotifier(0);
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -117,15 +118,15 @@ Future<void> main() async {
   };
 
   KakaoSdk.init(nativeAppKey: KakaoKeys.nativeAppKey);
-  await Future.wait([
-    SettingData().init(),
-    _requestNotificationPermission(),
-  ]);
+  await SettingData().init();
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
   final modeIndex = SettingData().themeModeIndex;
   themeNotifier.value = _indexToThemeMode(modeIndex);
+
+  final savedLocale = SettingData().localeCode;
+  localeNotifier.value = savedLocale.isEmpty ? null : Locale(savedLocale);
 
   unawaited(_preloadSubjects(2));
   unawaited(_preloadSubjects(3));
@@ -287,24 +288,27 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
   @override
   Widget build(BuildContext context) {
     final mode = ref.watch(themeProvider);
-    return MaterialApp(
-      navigatorKey: rootNavigatorKey,
-      navigatorObservers: [AnalyticsService.observer],
-      debugShowCheckedModeBanner: false,
-      theme: _lightTheme,
-      darkTheme: _darkTheme,
-      themeMode: mode,
-      locale: const Locale('ko', 'KR'),
-      supportedLocales: AppLocalizations.supportedLocales,
-      localizationsDelegates: const [
-        AppLocalizations.delegate,
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-      home: ValueListenableBuilder<int>(
-        valueListenable: appRefreshNotifier,
-        builder: (_, value, __) => MainScreen(key: ValueKey(value)),
+    return ValueListenableBuilder<Locale?>(
+      valueListenable: localeNotifier,
+      builder: (_, locale, __) => MaterialApp(
+        navigatorKey: rootNavigatorKey,
+        navigatorObservers: [AnalyticsService.observer],
+        debugShowCheckedModeBanner: false,
+        theme: _lightTheme,
+        darkTheme: _darkTheme,
+        themeMode: mode,
+        locale: locale,
+        supportedLocales: AppLocalizations.supportedLocales,
+        localizationsDelegates: const [
+          AppLocalizations.delegate,
+          GlobalMaterialLocalizations.delegate,
+          GlobalWidgetsLocalizations.delegate,
+          GlobalCupertinoLocalizations.delegate,
+        ],
+        home: ValueListenableBuilder<int>(
+          valueListenable: appRefreshNotifier,
+          builder: (_, value, __) => MainScreen(key: ValueKey(value)),
+        ),
       ),
     );
   }

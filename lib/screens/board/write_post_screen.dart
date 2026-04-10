@@ -712,7 +712,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       return;
     }
 
-    final displayName = _isAnonymous ? '익명' : profile.displayName;
+    final displayName = _isAnonymous ? AppLocalizations.of(context)!.post_anonymous : profile.displayName;
 
     if (_isPinned) {
       final pinnedSnap = await FirebaseFirestore.instance

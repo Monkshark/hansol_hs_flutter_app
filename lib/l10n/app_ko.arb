@@ -145,6 +145,15 @@
   "common_delete": "삭제",
   "common_confirm": "확인",
   "common_save": "저장",
+  "common_loginRequired": "로그인이 필요합니다",
+  "common_chatPartner": "대화상대",
+  "common_dateYmd": "yyyy년 M월 d일",
+  "common_dateMdE": "M월 d일 (E)",
+  "common_dateYM": "yyyy년 M월",
+  "common_dateYmdE": "yyyy년 M월 d일 (E)",
+  "common_dateMdEHm": "M월 d일 (E) HH:mm",
+  "common_dateYMdE": "yyyy.M.d (E)",
+  "common_dateMdEEEE": "M월 d일 EEEE",
 
   "post_resolved": "해결",
   "post_bookmark": "저장",
@@ -410,6 +419,23 @@
   "gradeInput_addMinSubjects": "과목을 1개 이상 추가해주세요.",
   "gradeInput_privateNameRequired": "사설모의 이름을 입력해주세요.",
   "gradeInput_hintScore": "0~100",
+  "gradeInput_typeMidterm": "중간고사",
+  "gradeInput_typeFinal": "기말고사",
+  "gradeInput_typeMock": "모의고사",
+  "gradeInput_typePrivateMock": "사설모의",
+  "gradeInput_monthMar": "3월",
+  "gradeInput_monthJun": "6월",
+  "gradeInput_monthSep": "9월",
+  "gradeInput_monthNov": "11월",
+  "gradeInput_privateHint": "예: 메가스터디 3회",
+  "gradeInput_yearSuffix": "{year}년",
+  "@gradeInput_yearSuffix": {"placeholders": {"year": {}}},
+  "gradeInput_semesterSuffix": "{semester}학기",
+  "@gradeInput_semesterSuffix": {"placeholders": {"semester": {}}},
+  "gradeInput_gradeSuffix": "{grade}학년",
+  "@gradeInput_gradeSuffix": {"placeholders": {"grade": {}}},
+  "gradeInput_mockMonthSuffix": "{month} 모의고사",
+  "@gradeInput_mockMonthSuffix": {"placeholders": {"month": {}}},
 
   "timetable_screenTitle": "시간표",
   "timetable_teacherScreenTitle": "내 수업 시간표",
@@ -775,5 +801,10 @@
   "delete_confirm": "삭제",
   "delete_cancel": "취소",
 
-  "offline_status": "오프라인 상태입니다"
+  "offline_status": "오프라인 상태입니다",
+
+  "settings_languageSection": "언어",
+  "settings_langSystem": "시스템",
+  "settings_langKo": "한국어",
+  "settings_langEn": "English"
 }

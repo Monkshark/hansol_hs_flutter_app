@@ -163,14 +163,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                 final isAnon = post['isAnonymous'] == true;
                 final isManagerView = AuthService.cachedProfile?.isManager ?? false;
                 final realName = post['authorRealName'] as String?;
-                final rawAuthorName = (post['authorName'] ?? '익명') as String;
+                final rawAuthorName = (post['authorName'] ?? AppLocalizations.of(context)!.post_anonymous) as String;
                 final authorName = (isAnon && isManagerView && realName != null)
                     ? '$rawAuthorName ($realName)'
                     : rawAuthorName;
                 final category = post['category'] ?? '';
                 final createdAt = post['createdAt'] as Timestamp?;
                 final timeStr = createdAt != null
-                    ? DateFormat('M월 d일 (E) HH:mm', 'ko_KR').format(createdAt.toDate())
+                    ? DateFormat(AppLocalizations.of(context)!.common_dateMdEHm, Localizations.localeOf(context).toString()).format(createdAt.toDate())
                     : '';
 
                 final hasEvent = post['eventDate'] != null;
@@ -771,7 +771,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (!approved) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('관리자 승인 대기 중입니다')),
+          SnackBar(content: Text(AppLocalizations.of(context)!.board_awaitingAdminApproval)),
         );
       }
       return;
@@ -796,7 +796,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final anonymous = _commentAnonymous;
     _commentController.clear();
 
-    String displayName = anonymous ? '익명' : profile.displayName;
+    final l = AppLocalizations.of(context)!;
+    String displayName = anonymous ? l.post_anonymous : profile.displayName;
 
     if (anonymous) {
       final myUid = AuthService.currentUser!.uid;
@@ -805,7 +806,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final postAuthorUid = postSnap.data()?['authorUid'];
 
       if (myUid == postAuthorUid) {
-        displayName = '익명(글쓴이)';
+        displayName = l.post_anonymousAuthor;
       } else {
         displayName = await FirebaseFirestore.instance.runTransaction<String>((transaction) async {
           final postDoc = await transaction.get(_postRef);
@@ -814,7 +815,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           final count = (data['anonymousCount'] as int?) ?? 0;
 
           if (mapping.containsKey(myUid)) {
-            return '익명${mapping[myUid]}';
+            return l.post_anonymousNum(mapping[myUid]);
           } else {
             final newNum = count + 1;
             mapping[myUid] = newNum;
@@ -822,13 +823,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               'anonymousMapping': mapping,
               'anonymousCount': newNum,
             });
-            return '익명$newNum';
+            return l.post_anonymousNum(newNum);
           }
         });
       }
     }
 
-    final mentionPattern = RegExp(r'@([\w가-힣]+)');
+    final mentionPattern = RegExp(r'@([\w가-힣]+(?: [\w가-힣]+)*)');
     final mentionNames = mentionPattern
         .allMatches(text)
         .map((m) => m.group(1))
@@ -877,10 +878,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       final postTitle = postData['title'] as String? ?? '';
       final myUid = AuthService.currentUser!.uid;
 
+      String? replyNotifiedUid;
       if (_replyToCommentId != null) {
         final origComment = await _postRef.collection('comments').doc(_replyToCommentId).get();
         final origUid = origComment.data()?['authorUid'] as String?;
         if (origUid != null && origUid != myUid) {
+          replyNotifiedUid = origUid;
           await FirebaseFirestore.instance
               .collection('users').doc(origUid).collection('notifications').add({
             'type': 'reply',
@@ -894,7 +897,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         }
       }
 
-      if (postAuthorUid != null && postAuthorUid != myUid) {
+      if (postAuthorUid != null && postAuthorUid != myUid && postAuthorUid != replyNotifiedUid) {
         await FirebaseFirestore.instance
             .collection('users').doc(postAuthorUid).collection('notifications').add({
           'type': 'comment',

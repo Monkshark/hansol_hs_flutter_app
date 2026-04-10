@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -33,7 +34,8 @@ class PopupNotice {
 
       if (!context.mounted) return;
 
-      final title = data['title'] as String? ?? '공지';
+      final l = AppLocalizations.of(context)!;
+      final title = data['title'] as String? ?? l.noti_popupDefault;
       final content = data['content'] as String? ?? '';
       final type = data['type'] as String? ?? 'notice';
       final dismissible = data['dismissible'] ?? true;
@@ -97,7 +99,7 @@ class PopupNotice {
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text('확인'),
+                        child: Text(l.noti_popupConfirm),
                       ),
                     ),
                     if (dismissible) ...[
@@ -107,7 +109,7 @@ class PopupNotice {
                           prefs.setBool(dismissKey, true);
                           Navigator.pop(ctx);
                         },
-                        child: Text('오늘 하루 안 보기',
+                        child: Text(l.noti_popupDismiss,
                           style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
                       ),
                     ],

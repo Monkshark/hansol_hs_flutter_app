@@ -21,7 +21,7 @@ class MealHeader extends StatelessWidget {
       child: Row(
         children: [
           Text(
-            DateFormat('M월 d일 (E)', 'ko_KR').format(selectedDate),
+            DateFormat(AppLocalizations.of(context)!.common_dateMdE, Localizations.localeOf(context).toString()).format(selectedDate),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,

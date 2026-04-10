@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -25,7 +26,8 @@ class UpdateChecker {
       final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
       final updateUrl = (isIOS ? data['updateUrlIOS'] : data['updateUrlAndroid']) as String?
           ?? data['updateUrl'] as String? ?? '';
-      final updateMessage = data['message'] as String? ?? '새로운 버전이 출시되었습니다.';
+      final l = AppLocalizations.of(context)!;
+      final updateMessage = data['message'] as String? ?? l.noti_updateDefault;
 
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
@@ -55,7 +57,7 @@ class UpdateChecker {
                       size: 48, color: AppColors.theme.primaryColor),
                     const SizedBox(height: 16),
                     Text(
-                      forceUpdate ? '필수 업데이트' : '업데이트 안내',
+                      forceUpdate ? l.noti_updateRequired : l.noti_updateAvailable,
                       style: TextStyle(
                         fontSize: 18, fontWeight: FontWeight.w700,
                         color: Theme.of(ctx).textTheme.bodyLarge?.color),
@@ -87,14 +89,14 @@ class UpdateChecker {
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text('업데이트'),
+                        child: Text(l.noti_updateButton),
                       ),
                     ),
                     if (!forceUpdate) ...[
                       const SizedBox(height: 8),
                       TextButton(
                         onPressed: () => Navigator.pop(ctx),
-                        child: Text('나중에', style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                        child: Text(l.noti_updateLater, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                       ),
                     ],
                   ],

@@ -66,6 +66,9 @@ class SettingData {
   bool get isBoardNotificationOn =>
       _sharedPreferences.getBool('isBoardNotificationOn') ?? true;
 
+  set localeCode(String value) => _sharedPreferences.setString('localeCode', value);
+  String get localeCode => _sharedPreferences.getString('localeCode') ?? '';
+
   bool getBool(String key, {bool defaultValue = false}) =>
       _sharedPreferences.getBool(key) ?? defaultValue;
   void setBool(String key, bool value) =>

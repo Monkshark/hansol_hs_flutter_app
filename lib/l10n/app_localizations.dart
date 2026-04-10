@@ -854,6 +854,60 @@ abstract class AppLocalizations {
   /// **'저장'**
   String get common_save;
 
+  /// No description provided for @common_loginRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인이 필요합니다'**
+  String get common_loginRequired;
+
+  /// No description provided for @common_chatPartner.
+  ///
+  /// In ko, this message translates to:
+  /// **'대화상대'**
+  String get common_chatPartner;
+
+  /// No description provided for @common_dateYmd.
+  ///
+  /// In ko, this message translates to:
+  /// **'yyyy년 M월 d일'**
+  String get common_dateYmd;
+
+  /// No description provided for @common_dateMdE.
+  ///
+  /// In ko, this message translates to:
+  /// **'M월 d일 (E)'**
+  String get common_dateMdE;
+
+  /// No description provided for @common_dateYM.
+  ///
+  /// In ko, this message translates to:
+  /// **'yyyy년 M월'**
+  String get common_dateYM;
+
+  /// No description provided for @common_dateYmdE.
+  ///
+  /// In ko, this message translates to:
+  /// **'yyyy년 M월 d일 (E)'**
+  String get common_dateYmdE;
+
+  /// No description provided for @common_dateMdEHm.
+  ///
+  /// In ko, this message translates to:
+  /// **'M월 d일 (E) HH:mm'**
+  String get common_dateMdEHm;
+
+  /// No description provided for @common_dateYMdE.
+  ///
+  /// In ko, this message translates to:
+  /// **'yyyy.M.d (E)'**
+  String get common_dateYMdE;
+
+  /// No description provided for @common_dateMdEEEE.
+  ///
+  /// In ko, this message translates to:
+  /// **'M월 d일 EEEE'**
+  String get common_dateMdEEEE;
+
   /// No description provided for @post_resolved.
   ///
   /// In ko, this message translates to:
@@ -2233,6 +2287,84 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'0~100'**
   String get gradeInput_hintScore;
+
+  /// No description provided for @gradeInput_typeMidterm.
+  ///
+  /// In ko, this message translates to:
+  /// **'중간고사'**
+  String get gradeInput_typeMidterm;
+
+  /// No description provided for @gradeInput_typeFinal.
+  ///
+  /// In ko, this message translates to:
+  /// **'기말고사'**
+  String get gradeInput_typeFinal;
+
+  /// No description provided for @gradeInput_typeMock.
+  ///
+  /// In ko, this message translates to:
+  /// **'모의고사'**
+  String get gradeInput_typeMock;
+
+  /// No description provided for @gradeInput_typePrivateMock.
+  ///
+  /// In ko, this message translates to:
+  /// **'사설모의'**
+  String get gradeInput_typePrivateMock;
+
+  /// No description provided for @gradeInput_monthMar.
+  ///
+  /// In ko, this message translates to:
+  /// **'3월'**
+  String get gradeInput_monthMar;
+
+  /// No description provided for @gradeInput_monthJun.
+  ///
+  /// In ko, this message translates to:
+  /// **'6월'**
+  String get gradeInput_monthJun;
+
+  /// No description provided for @gradeInput_monthSep.
+  ///
+  /// In ko, this message translates to:
+  /// **'9월'**
+  String get gradeInput_monthSep;
+
+  /// No description provided for @gradeInput_monthNov.
+  ///
+  /// In ko, this message translates to:
+  /// **'11월'**
+  String get gradeInput_monthNov;
+
+  /// No description provided for @gradeInput_privateHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'예: 메가스터디 3회'**
+  String get gradeInput_privateHint;
+
+  /// No description provided for @gradeInput_yearSuffix.
+  ///
+  /// In ko, this message translates to:
+  /// **'{year}년'**
+  String gradeInput_yearSuffix(Object year);
+
+  /// No description provided for @gradeInput_semesterSuffix.
+  ///
+  /// In ko, this message translates to:
+  /// **'{semester}학기'**
+  String gradeInput_semesterSuffix(Object semester);
+
+  /// No description provided for @gradeInput_gradeSuffix.
+  ///
+  /// In ko, this message translates to:
+  /// **'{grade}학년'**
+  String gradeInput_gradeSuffix(Object grade);
+
+  /// No description provided for @gradeInput_mockMonthSuffix.
+  ///
+  /// In ko, this message translates to:
+  /// **'{month} 모의고사'**
+  String gradeInput_mockMonthSuffix(Object month);
 
   /// No description provided for @timetable_screenTitle.
   ///
@@ -4123,6 +4255,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'오프라인 상태입니다'**
   String get offline_status;
+
+  /// No description provided for @settings_languageSection.
+  ///
+  /// In ko, this message translates to:
+  /// **'언어'**
+  String get settings_languageSection;
+
+  /// No description provided for @settings_langSystem.
+  ///
+  /// In ko, this message translates to:
+  /// **'시스템'**
+  String get settings_langSystem;
+
+  /// No description provided for @settings_langKo.
+  ///
+  /// In ko, this message translates to:
+  /// **'한국어'**
+  String get settings_langKo;
+
+  /// No description provided for @settings_langEn.
+  ///
+  /// In ko, this message translates to:
+  /// **'English'**
+  String get settings_langEn;
 }
 
 class _AppLocalizationsDelegate

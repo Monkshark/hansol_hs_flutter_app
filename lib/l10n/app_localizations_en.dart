@@ -420,6 +420,33 @@ class AppLocalizationsEn extends AppLocalizations {
   String get common_save => 'Save';
 
   @override
+  String get common_loginRequired => 'Login required';
+
+  @override
+  String get common_chatPartner => 'Chat partner';
+
+  @override
+  String get common_dateYmd => 'MMM d, yyyy';
+
+  @override
+  String get common_dateMdE => 'MMM d (E)';
+
+  @override
+  String get common_dateYM => 'MMMM yyyy';
+
+  @override
+  String get common_dateYmdE => 'MMM d, yyyy (E)';
+
+  @override
+  String get common_dateMdEHm => 'MMM d (E) HH:mm';
+
+  @override
+  String get common_dateYMdE => 'yyyy.M.d (E)';
+
+  @override
+  String get common_dateMdEEEE => 'EEEE, MMM d';
+
+  @override
   String get post_resolved => 'Resolved';
 
   @override
@@ -1171,6 +1198,53 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get gradeInput_hintScore => '0-100';
+
+  @override
+  String get gradeInput_typeMidterm => 'Midterm';
+
+  @override
+  String get gradeInput_typeFinal => 'Final';
+
+  @override
+  String get gradeInput_typeMock => 'Mock Exam';
+
+  @override
+  String get gradeInput_typePrivateMock => 'Private Mock';
+
+  @override
+  String get gradeInput_monthMar => 'March';
+
+  @override
+  String get gradeInput_monthJun => 'June';
+
+  @override
+  String get gradeInput_monthSep => 'September';
+
+  @override
+  String get gradeInput_monthNov => 'November';
+
+  @override
+  String get gradeInput_privateHint => 'e.g. Megastudy #3';
+
+  @override
+  String gradeInput_yearSuffix(Object year) {
+    return '$year';
+  }
+
+  @override
+  String gradeInput_semesterSuffix(Object semester) {
+    return 'Sem $semester';
+  }
+
+  @override
+  String gradeInput_gradeSuffix(Object grade) {
+    return 'Grade $grade';
+  }
+
+  @override
+  String gradeInput_mockMonthSuffix(Object month) {
+    return '$month Mock Exam';
+  }
 
   @override
   String get timetable_screenTitle => 'Timetable';
@@ -2234,4 +2308,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get offline_status => 'You are offline';
+
+  @override
+  String get settings_languageSection => 'Language';
+
+  @override
+  String get settings_langSystem => 'System';
+
+  @override
+  String get settings_langKo => '한국어';
+
+  @override
+  String get settings_langEn => 'English';
 }

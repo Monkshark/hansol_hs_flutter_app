@@ -18,16 +18,17 @@ class GradeInputScreen extends StatefulWidget {
 }
 
 class _GradeInputScreenState extends State<GradeInputScreen> {
-  static const _typeLabels = {
-    'midterm': '중간고사',
-    'final': '기말고사',
-    'mock': '모의고사',
-    'private_mock': '사설모의',
-  };
-  static const _mockMonths = ['3월', '6월', '9월', '11월'];
+  static const _mockMonthKeys = ['3월', '6월', '9월', '11월'];
 
   bool get _isEdit => widget.exam != null;
   bool get _isMock => _type == 'mock' || _type == 'private_mock';
+
+  Map<String, String> _localizedMonths(AppLocalizations l) => {
+    '3월': l.gradeInput_monthMar,
+    '6월': l.gradeInput_monthJun,
+    '9월': l.gradeInput_monthSep,
+    '11월': l.gradeInput_monthNov,
+  };
 
   late String _type;
   late int _year;
@@ -39,9 +40,12 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   final List<_SubjectEntry> _subjects = [];
   bool _saving = false;
 
-  Map<String, String> get _availableTypes => widget.isMock
-      ? {'mock': '모의고사', 'private_mock': '사설모의'}
-      : {'midterm': '중간고사', 'final': '기말고사'};
+  Map<String, String> _availableTypes(AppLocalizations l) {
+    if (widget.isMock) {
+      return {'mock': l.gradeInput_typeMock, 'private_mock': l.gradeInput_typePrivateMock};
+    }
+    return {'midterm': l.gradeInput_typeMidterm, 'final': l.gradeInput_typeFinal};
+  }
 
   @override
   void initState() {
@@ -505,7 +509,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             Wrap(
               spacing: 8,
               runSpacing: 6,
-              children: _availableTypes.entries.map((e) {
+              children: _availableTypes(AppLocalizations.of(context)!).entries.map((e) {
                 final selected = _type == e.key;
                 return ChoiceChip(
                   label: Text(e.value),
@@ -546,7 +550,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       label: AppLocalizations.of(context)!.gradeInput_year,
                       value: _year,
                       items: List.generate(5, (i) => DateTime.now().year - 2 + i),
-                      itemLabel: (v) => '$v년',
+                      itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_yearSuffix(v),
                       onChanged: (v) => setState(() => _year = v!),
                       fillColor: fieldFill,
                     )),
@@ -555,7 +559,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       label: AppLocalizations.of(context)!.gradeInput_semester,
                       value: _semester,
                       items: [1, 2],
-                      itemLabel: (v) => '$v학기',
+                      itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_semesterSuffix(v),
                       onChanged: (v) => setState(() => _semester = v!),
                       fillColor: fieldFill,
                     )),
@@ -564,7 +568,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       label: AppLocalizations.of(context)!.gradeInput_grade,
                       value: _grade,
                       items: [1, 2, 3],
-                      itemLabel: (v) => '$v학년',
+                      itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_gradeSuffix(v),
                       onChanged: (v) => setState(() => _grade = v!),
                       fillColor: fieldFill,
                     )),
@@ -575,8 +579,8 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     _dropdown<String>(
                       label: AppLocalizations.of(context)!.gradeInput_month,
                       value: _mockMonth,
-                      items: _mockMonths,
-                      itemLabel: (v) => '$v 모의고사',
+                      items: _mockMonthKeys,
+                      itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_mockMonthSuffix(_localizedMonths(AppLocalizations.of(context)!)[v] ?? v),
                       onChanged: (v) => setState(() => _mockMonth = v!),
                       fillColor: fieldFill,
                     ),
@@ -587,7 +591,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     TextField(
                       controller: _privateLabelController,
                       decoration: InputDecoration(
-                        hintText: '예: 메가스터디 3회',
+                        hintText: AppLocalizations.of(context)!.gradeInput_privateHint,
                         labelText: AppLocalizations.of(context)!.gradeInput_privateLabel,
                         filled: true,
                         fillColor: fieldFill,

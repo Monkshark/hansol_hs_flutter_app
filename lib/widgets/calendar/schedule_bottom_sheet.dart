@@ -220,7 +220,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
             Icon(Icons.calendar_today, size: 16, color: AppColors.theme.darkGreyColor),
             const SizedBox(width: 8),
             Text(
-              DateFormat('M/d (E)', 'ko_KR').format(date),
+              DateFormat(AppLocalizations.of(context)!.common_dateMdE, Localizations.localeOf(context).toString()).format(date),
               style: TextStyle(fontSize: 14, color: textColor),
             ),
           ],

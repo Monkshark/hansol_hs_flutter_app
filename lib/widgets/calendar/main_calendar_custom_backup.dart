@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
@@ -143,7 +144,7 @@ class _MainCalendarState extends State<MainCalendar> {
                 ),
                 const SizedBox(width: 16),
                 Text(
-                  DateFormat('yyyy년 M월', 'ko_KR').format(_focusedMonth),
+                  DateFormat(AppLocalizations.of(context)!.common_dateYM, Localizations.localeOf(context).toString()).format(_focusedMonth),
                   style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700),
                 ),
                 const SizedBox(width: 16),

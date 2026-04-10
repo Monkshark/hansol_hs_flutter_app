@@ -608,7 +608,7 @@ class PostCard extends StatelessWidget {
     final isAnon = data['isAnonymous'] == true;
     final isManagerView = AuthService.cachedProfile?.isManager ?? false;
     final realName = data['authorRealName'] as String?;
-    final rawAuthorName = (data['authorName'] ?? '익명') as String;
+    final rawAuthorName = (data['authorName'] ?? AppLocalizations.of(context)!.post_anonymous) as String;
     final authorName = (isAnon && isManagerView && realName != null)
         ? '$rawAuthorName ($realName)'
         : rawAuthorName;
