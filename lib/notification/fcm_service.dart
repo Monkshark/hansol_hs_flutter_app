@@ -45,12 +45,6 @@ class FcmService {
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(_channel);
 
-    await _messaging.requestPermission(
-      alert: true,
-      badge: true,
-      sound: true,
-    );
-
     await _messaging.setForegroundNotificationPresentationOptions(
       alert: true,
       badge: true,

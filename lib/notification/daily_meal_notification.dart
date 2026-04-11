@@ -1,5 +1,4 @@
 import 'dart:developer';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:hansol_high_school/api/meal_data_api.dart';
@@ -8,7 +7,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class DailyMealNotification {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
@@ -30,7 +28,6 @@ class DailyMealNotification {
       onDidReceiveBackgroundNotificationResponse: _onBackgroundNotification,
     );
 
-    await _requestPermissions();
     _isInitialized = true;
   }
 
@@ -42,17 +39,6 @@ class DailyMealNotification {
   @pragma('vm:entry-point')
   static void _onBackgroundNotification(NotificationResponse response) {
     log('Background notification: ${response.payload}');
-  }
-
-  Future<void> _requestPermissions() async {
-    if (Platform.isIOS) {
-      final iosPlugin = _localNotificationsPlugin
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>();
-      await iosPlugin?.requestPermissions(alert: true, badge: true, sound: true);
-    } else if (Platform.isAndroid) {
-      await Permission.notification.request();
-    }
   }
 
   Future<AppLocalizations> _getLocalizations() async {
