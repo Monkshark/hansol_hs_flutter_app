@@ -1591,6 +1591,24 @@ class AppLocalizationsKo extends AppLocalizations {
   String get onboarding_start => '시작하기';
 
   @override
+  String get notiPermission_title => '알림 허용';
+
+  @override
+  String get notiPermission_desc => '알림을 허용하면 급식 메뉴 등\n다양한 알림을 받을 수 있어요';
+
+  @override
+  String get notiPermission_allow => '허용';
+
+  @override
+  String get notiPermission_later => '나중에';
+
+  @override
+  String get notiPermission_settingsDesc => '알림을 받으려면 설정에서\n알림 권한을 허용해 주세요';
+
+  @override
+  String get notiPermission_openSettings => '설정으로 이동';
+
+  @override
   String get settings_title => '설정';
 
   @override

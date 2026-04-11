@@ -35,7 +35,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/providers/theme_provider.dart';
@@ -157,10 +156,6 @@ Future<void> _preloadSubjects(int grade) async {
   } catch (e) {
     log('Preload subjects error for grade $grade: $e');
   }
-}
-
-Future<void> _requestNotificationPermission() async {
-  await Permission.notification.request();
 }
 
 final _lightTheme = ThemeData(

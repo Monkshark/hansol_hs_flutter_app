@@ -49,4 +49,5 @@
 ## 유틸
 - [widget_service](widgets/home_widget/widget_service.md) — 홈 화면 위젯 데이터 갱신
 - [chat_utils](screens/chat/chat_utils.md) — 1:1 채팅 시작 유틸리티
+- [notification_permission_sheet](widgets/notification_permission_sheet.md) — 알림 권한 요청 바텀시트
 - [network_status](network/network_status.md) — 네트워크 연결 상태
