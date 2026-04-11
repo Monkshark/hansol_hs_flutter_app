@@ -4,11 +4,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 온보딩 화면 (OnboardingScreen)
-///
-/// - 첫 실행 시 4페이지 슬라이드로 주요 기능 안내
-/// - 급식, 시간표, 일정 관리, 게시판 기능 소개
-/// - 완료 시 SharedPreferences에 플래그 저장하여 재표시 방지
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
 

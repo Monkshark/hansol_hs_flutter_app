@@ -3,7 +3,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 글쓰기 화면의 일정 첨부 폼
 class WriteEventFormSection extends StatelessWidget {
   final TextEditingController eventContentController;
   final DateTime? eventDate;

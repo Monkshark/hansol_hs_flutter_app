@@ -6,11 +6,6 @@ import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 알림 목록 화면 (NotificationScreen)
-///
-/// - 댓글 및 답글 알림을 시간순으로 표시
-/// - 알림 탭 시 해당 게시글 상세로 이동
-/// - 개별 알림 읽음 처리 및 전체 읽음 기능
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({Key? key}) : super(key: key);
 

@@ -8,13 +8,6 @@ import 'package:hansol_high_school/screens/sub/grade_input_screen.dart';
 import 'package:hansol_high_school/widgets/grade/grade_chart.dart';
 import 'package:intl/intl.dart';
 
-/// 성적 관리 화면 (Riverpod ConsumerStatefulWidget)
-///
-/// - 시험 목록: `examsProvider` (AsyncNotifier)
-/// - 수시 목표: `goalsProvider`
-/// - 정시 목표: `jeongsiGoalsProvider`
-/// - 모든 데이터는 `ref.watch`로 자동 재구독되며,
-///   추가/수정/삭제 시 Notifier 메서드를 호출해 상태가 자동 갱신된다.
 class GradeScreen extends ConsumerStatefulWidget {
   const GradeScreen({Key? key}) : super(key: key);
 
@@ -23,7 +16,6 @@ class GradeScreen extends ConsumerStatefulWidget {
 }
 
 class _GradeScreenState extends ConsumerState<GradeScreen> {
-  /// 0 = 수시, 1 = 정시
   int _tabIndex = 0;
   final PageController _pageController = PageController();
 
@@ -103,7 +95,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
     final currentGoals = ref.read(goalsProvider).valueOrNull ?? {};
     final currentJGoals = ref.read(jeongsiGoalsProvider).valueOrNull ?? {};
 
-    // Collect unique subjects in order of first appearance
     const absoluteGradeSubjects = {'영어', '한국사'};
     final subjects = <String>[];
     for (final exam in filtered) {
@@ -124,7 +115,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
       return;
     }
 
-    // Local copy of goals for editing
     final tempGoals = Map<String, double>.from(isJeongsi ? currentJGoals : currentGoals);
 
     if (!mounted) return;
@@ -150,7 +140,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  // Handle bar
                   Container(
                     margin: const EdgeInsets.only(top: 12),
                     width: 40,
@@ -160,7 +149,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
-                  // Title
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
                     child: Text(
@@ -173,7 +161,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                     ),
                   ),
                   const Divider(height: 1),
-                  // Subject list
                   Flexible(
                     child: ListView.separated(
                       shrinkWrap: true,
@@ -207,7 +194,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                               ),
                             ),
                             if (isJeongsi)
-                              // 정시: 백분위 1씩 조절 또는 직접 입력
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -294,7 +280,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                               ],
                             )
                             else
-                              // 수시: 등급 0.1씩 조절
                               Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
@@ -345,7 +330,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                     ),
                   ),
                   const Divider(height: 1),
-                  // Save button
                   Padding(
                     padding: EdgeInsets.fromLTRB(20, 12, 20, MediaQuery.of(ctx).padding.bottom + 12),
                     child: SizedBox(
@@ -417,7 +401,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
       ),
       body: Column(
         children: [
-          // Notice banner
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
             child: Container(
@@ -448,7 +431,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
             ),
           ),
 
-          // Tab toggle with sliding indicator
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
             child: LayoutBuilder(
@@ -495,7 +477,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
             ),
           ),
 
-          // Exam list — Riverpod AsyncValue 패턴
           Expanded(
             child: ref.watch(examsProvider).when(
                   loading: () => const Center(child: CircularProgressIndicator()),
@@ -719,7 +700,6 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
             color: Colors.transparent,
             borderRadius: BorderRadius.circular(10),
           ),
-          // 기존 boxShadow 제거 — AnimatedPositioned 인디케이터가 대신 처리
           child: Center(child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: TextStyle(

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 라이트모드 색상 정의
-/// - AppColors 추상 클래스를 구현하여 라이트 테마 전용 색상 제공
-/// - 블루 계열 primaryColor(0xFF3F72AF)와 밝은 배경색 사용
-/// - 싱글턴 패턴으로 인스턴스 하나만 유지
 class LightAppColors extends AppColors {
   static final LightAppColors _instance = LightAppColors._internal();
 

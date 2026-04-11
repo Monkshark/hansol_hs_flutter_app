@@ -3,11 +3,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'subject.freezed.dart';
 part 'subject.g.dart';
 
-/// 과목 데이터 모델 (freezed)
-///
-/// - 과목명, 반 번호, 카테고리(선택), 원본 여부 포함
-/// - JSON 직렬화/역직렬화는 json_serializable이 자동 생성
-/// - 동등성 비교는 subjectName/subjectClass 기준 (커스텀 ==)
 @freezed
 class Subject with _$Subject {
   const Subject._();

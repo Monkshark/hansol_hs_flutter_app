@@ -15,12 +15,6 @@ import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/main.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 설정 화면 (SettingScreen)
-///
-/// - 로그인/프로필 정보 확인 및 수정
-/// - 학년/반 설정 및 테마(라이트/다크) 변경
-/// - 급식 알림(조식/중식/석식) 시간 설정
-/// - 캐시 크기 확인 및 초기화 기능
 class SettingScreen extends StatefulWidget {
   const SettingScreen({Key? key}) : super(key: key);
 

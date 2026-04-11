@@ -6,12 +6,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 
 import '../../data/grade_manager.dart';
 
-/// 성적 추이 그래프 위젯
-///
-/// - 시험별 과목 등급을 꺾은선 그래프로 표시
-/// - Y축: 등급 (내신 1~5, 모의 1~9, 위가 1등급)
-/// - X축: 시험 이름 (시간순)
-/// - 과목별 필터 칩, 목표 등급 점선, 범례 포함
 class GradeChart extends StatefulWidget {
   final List<Exam> exams;
   final Map<String, double> goals;
@@ -35,7 +29,6 @@ class GradeChart extends StatefulWidget {
 class _GradeChartState extends State<GradeChart> {
   late Set<String> _allSubjects;
   late Set<String> _visibleSubjects;
-  // 0=등급, 1=점수(내신:원점수, 모의:표준점수), 2=백분위(모의만)
   late int _chartMode;
 
   @override
@@ -69,12 +62,10 @@ class _GradeChartState extends State<GradeChart> {
     _visibleSubjects = Set<String>.from(_allSubjects);
   }
 
-  /// 현재 시험 리스트가 모의고사인지 판별
   bool get _isMockExams {
     return widget.exams.any((e) => e.type == 'mock' || e.type == 'private_mock');
   }
 
-  /// 시험 이름 축약
   String _abbreviate(Exam exam) {
     switch (exam.type) {
       case 'midterm':
@@ -95,7 +86,6 @@ class _GradeChartState extends State<GradeChart> {
     final sortedExams = List<Exam>.from(widget.exams)
       ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
 
-    // 등급 데이터가 있는 시험만
     final examsWithRanks = sortedExams.where((e) {
       return e.scores.any((s) => s.rank != null && _visibleSubjects.contains(s.subject));
     }).toList();
@@ -106,7 +96,6 @@ class _GradeChartState extends State<GradeChart> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // 차트 모드 토글
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Row(
@@ -134,7 +123,6 @@ class _GradeChartState extends State<GradeChart> {
         ),
         const SizedBox(height: 6),
 
-        // 과목 필터 칩
         if (_allSubjects.isNotEmpty)
           SizedBox(
             height: 42,
@@ -180,13 +168,11 @@ class _GradeChartState extends State<GradeChart> {
 
         const SizedBox(height: 8),
 
-        // 차트 영역
         if (_chartMode == 0)
           _buildRankChart(examsWithRanks, isDark)
         else
           _buildScoreChart(sortedExams, isDark),
 
-        // 범례
         if (_visibleSubjects.isNotEmpty && examsWithRanks.isNotEmpty)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -220,7 +206,6 @@ class _GradeChartState extends State<GradeChart> {
             ),
           ),
 
-        // 목표 등급 조절 UI (등급 모드에서만)
         if (_chartMode == 0 && widget.onGoalsChanged != null && _visibleSubjects.isNotEmpty)
           _buildGoalControls(isDark),
       ],
@@ -344,7 +329,6 @@ class _GradeChartState extends State<GradeChart> {
 
     final usePercentile = _chartMode == 2 && isMock;
 
-    // 점수 데이터가 있는 시험만 필터
     final examsWithScores = sortedExams.where((e) {
       return e.scores.any((s) {
         final hasScore = usePercentile ? s.percentile != null
@@ -379,7 +363,6 @@ class _GradeChartState extends State<GradeChart> {
                 );
                 final totalWidth = neededWidth + leftPad + rightPad;
 
-                // 과목별 점수 데이터 수집
                 final subjectData = <String, List<_ScoreDataPoint>>{};
                 for (final subject in _visibleSubjects) {
                   final points = <_ScoreDataPoint>[];
@@ -400,7 +383,6 @@ class _GradeChartState extends State<GradeChart> {
                   }
                 }
 
-                // min/max 자동 계산
                 double minScore = double.infinity;
                 double maxScore = double.negativeInfinity;
                 for (final points in subjectData.values) {
@@ -413,7 +395,6 @@ class _GradeChartState extends State<GradeChart> {
                   minScore = 0;
                   maxScore = 100;
                 }
-                // 여유 마진
                 final range = maxScore - minScore;
                 final margin = range < 10 ? 5.0 : range * 0.15;
                 minScore = (minScore - margin).floorToDouble();
@@ -450,7 +431,6 @@ class _GradeChartState extends State<GradeChart> {
   }
 
   Widget _buildGoalControls(bool isDark) {
-    // 보이는 과목 중 목표가 설정된 과목만
     final goalsToShow = <String, double>{};
     for (final subject in _visibleSubjects) {
       if (widget.goals.containsKey(subject)) {
@@ -503,7 +483,6 @@ class _GradeChartState extends State<GradeChart> {
   }
 }
 
-/// 목표 등급 조절 칩 (과목별 +/- 버튼 포함)
 class _GoalChip extends StatelessWidget {
   final String subject;
   final double rank;
@@ -586,14 +565,12 @@ class _GoalChip extends StatelessWidget {
   }
 }
 
-/// 등급 차트용 데이터 포인트 (시험 인덱스 + 등급)
 class _DataPoint {
   final int examIndex;
   final int rank;
   const _DataPoint(this.examIndex, this.rank);
 }
 
-/// 등급 꺾은선 그래프 CustomPainter (Y축: 등급, X축: 시험)
 class _GradeChartPainter extends CustomPainter {
   final List<String> examLabels;
   final int examCount;
@@ -631,7 +608,6 @@ class _GradeChartPainter extends CustomPainter {
     final chartHeight = chartBottom - chartTop;
     final chartWidth = chartRight - chartLeft;
 
-    // Y축: 등급 1~9 (1이 위)
     final gridPaint = Paint()
       ..color = gridColor
       ..strokeWidth = 0.5;
@@ -641,7 +617,6 @@ class _GradeChartPainter extends CustomPainter {
       fontSize: 11,
     );
 
-    // Y축 그리드 + 레이블
     for (var rank = 1; rank <= maxRank; rank++) {
       final y = chartTop + (rank - 1) / (maxRank - 1) * chartHeight;
       canvas.drawLine(Offset(chartLeft, y), Offset(chartRight, y), gridPaint);
@@ -657,7 +632,6 @@ class _GradeChartPainter extends CustomPainter {
       canvas.drawParagraph(paragraph, Offset(chartLeft - 28, y - 7));
     }
 
-    // X축 레이블
     for (var i = 0; i < examCount; i++) {
       final x = examCount == 1
           ? chartLeft + chartWidth / 2
@@ -681,7 +655,6 @@ class _GradeChartPainter extends CustomPainter {
         ? chartLeft + chartWidth / 2
         : chartLeft + index / (examCount - 1) * chartWidth;
 
-    // 목표 점선
     for (final entry in goals.entries) {
       final color = Color(GradeManager.getSubjectColor(entry.key));
       final y = rankToY(entry.value);
@@ -697,7 +670,6 @@ class _GradeChartPainter extends CustomPainter {
       );
     }
 
-    // 과목별 라인 + 데이터 포인트
     for (final entry in subjectData.entries) {
       final subject = entry.key;
       final points = entry.value;
@@ -720,7 +692,6 @@ class _GradeChartPainter extends CustomPainter {
         ..color = isDark ? Colors.black : Colors.white
         ..style = PaintingStyle.fill;
 
-      // 선 그리기
       if (points.length > 1) {
         final path = Path();
         for (var i = 0; i < points.length; i++) {
@@ -735,17 +706,13 @@ class _GradeChartPainter extends CustomPainter {
         canvas.drawPath(path, linePaint);
       }
 
-      // 점 + 등급 텍스트
       for (final p in points) {
         final x = indexToX(p.examIndex);
         final y = rankToY(p.rank);
 
-        // 흰색/검은색 배경 원
         canvas.drawCircle(Offset(x, y), 5.5, dotBorderPaint);
-        // 색상 원
         canvas.drawCircle(Offset(x, y), 4, dotPaint);
 
-        // 등급 숫자
         final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
           textAlign: TextAlign.center,
           fontSize: 9,
@@ -803,14 +770,12 @@ class _GradeChartPainter extends CustomPainter {
   }
 }
 
-/// 점수 차트용 데이터 포인트 (시험 인덱스 + 점수)
 class _ScoreDataPoint {
   final int examIndex;
   final double score;
   const _ScoreDataPoint(this.examIndex, this.score);
 }
 
-/// 점수(원점수/표준점수/백분위) 꺾은선 그래프 CustomPainter
 class _ScoreChartPainter extends CustomPainter {
   final List<String> examLabels;
   final int examCount;
@@ -856,10 +821,8 @@ class _ScoreChartPainter extends CustomPainter {
       fontSize: 11,
     );
 
-    // Y축 그리드 라인 수 결정 (4~6개)
     final scoreRange = maxScore - minScore;
     final rawStep = scoreRange / 5;
-    // 깔끔한 간격으로 반올림
     final step = rawStep <= 5
         ? 5.0
         : rawStep <= 10
@@ -886,7 +849,6 @@ class _ScoreChartPainter extends CustomPainter {
       canvas.drawParagraph(paragraph, Offset(chartLeft - 38, y - 7));
     }
 
-    // X축 레이블
     for (var i = 0; i < examCount; i++) {
       final x = examCount == 1
           ? chartLeft + chartWidth / 2
@@ -909,7 +871,6 @@ class _ScoreChartPainter extends CustomPainter {
         ? chartLeft + chartWidth / 2
         : chartLeft + index / (examCount - 1) * chartWidth;
 
-    // 과목별 라인 + 데이터 포인트
     for (final entry in subjectData.entries) {
       final subject = entry.key;
       final points = entry.value;
@@ -932,7 +893,6 @@ class _ScoreChartPainter extends CustomPainter {
         ..color = isDark ? Colors.black : Colors.white
         ..style = PaintingStyle.fill;
 
-      // 선 그리기
       if (points.length > 1) {
         final path = Path();
         for (var i = 0; i < points.length; i++) {
@@ -947,7 +907,6 @@ class _ScoreChartPainter extends CustomPainter {
         canvas.drawPath(path, linePaint);
       }
 
-      // 점 + 점수 텍스트
       for (final p in points) {
         final x = indexToX(p.examIndex);
         final y = _scoreToY(p.score, chartTop, chartHeight);
@@ -955,7 +914,6 @@ class _ScoreChartPainter extends CustomPainter {
         canvas.drawCircle(Offset(x, y), 5.5, dotBorderPaint);
         canvas.drawCircle(Offset(x, y), 4, dotPaint);
 
-        // 점수 표시
         final scoreLabel = p.score == p.score.roundToDouble()
             ? '${p.score.round()}'
             : p.score.toStringAsFixed(1);
@@ -976,7 +934,6 @@ class _ScoreChartPainter extends CustomPainter {
     }
   }
 
-  /// 점수 -> Y좌표 (높은 점수가 위쪽)
   double _scoreToY(double score, double chartTop, double chartHeight) {
     final ratio = (score - minScore) / (maxScore - minScore);
     return chartTop + (1.0 - ratio) * chartHeight;

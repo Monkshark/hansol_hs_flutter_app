@@ -14,12 +14,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
-/// 게시판 목록 화면 (BoardScreen)
-///
-/// - 카테고리(전체/자유/질문/정보공유) 필터로 게시글 분류
-/// - 키워드 검색으로 게시글 빠르게 탐색
-/// - 내 활동(내가 쓴 글/댓글) 바로가기 제공
-/// - PostCard 위젯으로 각 게시글의 요약 정보 표시
 class BoardScreen extends StatefulWidget {
   const BoardScreen({Key? key}) : super(key: key);
 
@@ -41,7 +35,6 @@ String _formatSuspendDuration(AppLocalizations l, Duration diff) {
 }
 
 class _BoardScreenState extends State<BoardScreen> {
-  // DB category keys (never localized – used for Firestore queries)
   static const _categoryKeys = ['전체', '인기글', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   static const _pageSize = 20;
   static const _searchLimit = 50;
@@ -64,7 +57,6 @@ class _BoardScreenState extends State<BoardScreen> {
 
   String get _selectedCategory => _categoryKeys[_selectedIndex];
 
-  /// Localized display name for a category key
   String _localizedCategory(BuildContext context, String key) {
     final l = AppLocalizations.of(context)!;
     switch (key) {
@@ -98,10 +90,8 @@ class _BoardScreenState extends State<BoardScreen> {
     super.dispose();
   }
 
-  /// 선택된 카테고리 chip을 가로 스크롤 영역 가운데로 이동
   void _scrollCategoryIntoView() {
     if (!_categoryScrollController.hasClients) return;
-    // chip 평균 폭 70px (text + padding) + separator 8 가정
     const chipWidth = 78.0;
     final viewportWidth = _categoryScrollController.position.viewportDimension;
     final target = (_selectedIndex * chipWidth) - (viewportWidth / 2) + (chipWidth / 2);
@@ -143,15 +133,12 @@ class _BoardScreenState extends State<BoardScreen> {
     }
     setState(() => _searchLoading = true);
     try {
-      // array-contains-any: 매칭 토큰 중 1개라도 포함된 글 fetch
-      // (orderBy 없이 fetch 후 client sort → composite index 불필요)
       final snap = await FirebaseFirestore.instance
           .collection('posts')
           .where('searchTokens', arrayContainsAny: tokens)
           .limit(_searchLimit)
           .get();
 
-      // 클라이언트 사이드 추가 필터: 원본 query substring 매칭으로 false positive 제거
       final lowerQuery = query.toLowerCase();
       final filtered = snap.docs.where((doc) {
         final d = doc.data();
@@ -160,7 +147,6 @@ class _BoardScreenState extends State<BoardScreen> {
         return title.contains(lowerQuery) || content.contains(lowerQuery);
       }).toList();
 
-      // createdAt desc 정렬
       filtered.sort((a, b) {
         final at = a.data()['createdAt'] as Timestamp?;
         final bt = b.data()['createdAt'] as Timestamp?;
@@ -206,8 +192,6 @@ class _BoardScreenState extends State<BoardScreen> {
 
   Query<Map<String, dynamic>> _baseQuery() {
     Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('posts');
-    // 인기글은 client-side에서 likeCount/likes로 정렬·필터 (legacy 게시글에 likeCount 필드가
-    // 없을 수 있어서 server-side where 필터를 쓰면 누락됨)
     q = q.orderBy('createdAt', descending: true);
     if (_selectedCategory != '전체' && _selectedCategory != '인기글') {
       q = q.where('category', isEqualTo: _selectedCategory);
@@ -215,7 +199,6 @@ class _BoardScreenState extends State<BoardScreen> {
     return q;
   }
 
-  /// likeCount(int) 우선, 없으면 likes Map size로 fallback
   int _docLikeCount(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
     final d = doc.data();
     if (d['likeCount'] is int) return d['likeCount'] as int;
@@ -228,7 +211,6 @@ class _BoardScreenState extends State<BoardScreen> {
   Future<void> _loadPosts() async {
     setState(() { _initialLoading = true; _allDocs = []; _lastDoc = null; _hasMore = true; });
 
-    // 인기글은 createdAt desc로 더 많이 가져온 뒤 client-side filter+sort
     final isPopular = _selectedCategory == '인기글';
     final fetchLimit = isPopular ? 100 : _pageSize;
 
@@ -244,7 +226,6 @@ class _BoardScreenState extends State<BoardScreen> {
     setState(() {
       _allDocs = docs;
       _lastDoc = snap.docs.isNotEmpty ? snap.docs.last : null;
-      // 인기글은 client-side 정렬이라 page 추가 시 정렬이 깨지므로 페이지네이션 비활성
       _hasMore = !isPopular && snap.docs.length == _pageSize;
       _initialLoading = false;
     });
@@ -388,8 +369,6 @@ class _BoardScreenState extends State<BoardScreen> {
     );
   }
 
-  /// PageView 각 페이지 body. 현재 선택된 카테고리 page만 실제 데이터 렌더링,
-  /// 인접 page는 동일 데이터를 임시로 보여주어 swipe 중 빈 화면 방지 (onPageChanged 후 reload).
   Widget _buildCategoryBody(BuildContext context, int pageIndex) {
     if (_initialLoading && pageIndex == _selectedIndex) {
       return const Center(child: CircularProgressIndicator());
@@ -459,7 +438,6 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 
   Widget _buildSearchBody(BuildContext context) {
-    // 검색어 비어있음 → 최근 검색어
     if (_searchQuery.isEmpty) {
       if (_searchHistory.isEmpty) {
         return Center(
@@ -590,7 +568,6 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 }
 
-/// 게시글 요약 카드 위젯 (카테고리, 제목, 댓글 수, 좋아요 등 표시)
 class PostCard extends StatelessWidget {
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
   final VoidCallback onTap;
@@ -616,7 +593,6 @@ class PostCard extends StatelessWidget {
     final commentCount = data['commentCount'] ?? 0;
     final rawLikes = data['likes'];
     final rawDislikes = data['dislikes'];
-    // 비정규화 카운터(likeCount/dislikeCount) 우선, 없으면 Map/int fallback
     final likeCount = data['likeCount'] is int
         ? data['likeCount'] as int
         : (rawLikes is int ? rawLikes : (rawLikes is Map ? rawLikes.length : 0));

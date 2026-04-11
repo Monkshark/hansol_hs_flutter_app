@@ -9,7 +9,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'nies_api_keys.dart';
 
-/// 다가오는 학사 이벤트 데이터 모델
 class UpcomingEvent {
   final String name;
   final DateTime date;
@@ -18,10 +17,6 @@ class UpcomingEvent {
   UpcomingEvent({required this.name, required this.date, required this.dDay});
 }
 
-/// NEIS 학사일정 API 연동
-///
-/// - 날짜 범위별 학사일정 조회 및 예정 이벤트 조회
-/// - 12시간 캐시 적용
 class NoticeDataApi {
   static const _tag = 'NoticeDataApi';
 
@@ -221,13 +216,11 @@ class NoticeDataApi {
     return events;
   }
 
-  /// 월별 학사일정 맵 반환: { DateTime(날짜): "일정명" }
   Future<Map<DateTime, String>> getMonthEvents(DateTime month) async {
     final prefs = await _prefs;
     final monthKey = DateFormat('yyyyMM').format(month);
     final cacheKey = 'month_events_v2_$monthKey';
 
-    // 캐시 확인 (12시간)
     if (prefs.containsKey(cacheKey)) {
       final ts = prefs.getInt('$cacheKey-timestamp') ?? 0;
       if (DateTime.now().millisecondsSinceEpoch - ts < 12 * 60 * 60 * 1000) {
@@ -272,7 +265,6 @@ class NoticeDataApi {
       }
     }
 
-    // 캐시 저장
     final cacheMap = result.map((k, v) => MapEntry(k.toIso8601String(), v));
     prefs.setString(cacheKey, jsonEncode(cacheMap));
     prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);

@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:table_calendar/table_calendar.dart';
 
-/// 급식 화면 주간 캘린더 스트립
-/// - TableCalendar를 주간(week) 포맷으로 표시
-/// - 월요일 시작, 한국어 로케일 적용
-/// - 선택된 날짜와 오늘 날짜를 시각적으로 구분
-/// - 날짜 선택 시 콜백으로 부모에 전달
 class WeeklyCalendar extends StatefulWidget {
   final Color backgroundColor;
   final Function(DateTime) onDaySelected;

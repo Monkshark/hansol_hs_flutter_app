@@ -2,12 +2,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// 게시글 본문 인라인 이미지 리스트
-///
-/// - 각 이미지를 [CachedNetworkImage]로 lazy load
-/// - placeholder는 [Shimmer] skeleton
-/// - 탭하면 [FullscreenImageViewer]로 swipe + pinch-zoom 제공
-/// - Hero animation으로 본문 ↔ 풀스크린 부드럽게 전환
 class PostImageGallery extends StatelessWidget {
   final List<String> imageUrls;
   final String heroTagPrefix;
@@ -60,7 +54,6 @@ class PostImageGallery extends StatelessWidget {
   }
 }
 
-/// 풀스크린 이미지 뷰어 (PageView로 swipe, InteractiveViewer로 pinch-zoom)
 class FullscreenImageViewer extends StatefulWidget {
   final List<String> imageUrls;
   final int initialIndex;

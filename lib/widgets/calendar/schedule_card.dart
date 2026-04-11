@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-/// 개인일정 카드 위젯
-/// - 왼쪽 컬러바 (일정 색상)
-/// - 일정 내용, 시간, 연속일정 날짜 표시
 class ScheduleCard extends StatelessWidget {
   final int startTimeInMinutes;
   final int endTimeInMinutes;

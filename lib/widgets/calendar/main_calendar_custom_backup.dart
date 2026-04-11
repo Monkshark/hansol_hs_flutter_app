@@ -4,10 +4,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 커스텀 월간 캘린더
-/// - 스와이프로 월 이동
-/// - 연속 학사일정 바가 끊김 없이 이어짐
-/// - 주 수에 따라 세로 높이 유동적
 class MainCalendar extends StatefulWidget {
   final void Function(DateTime, DateTime) onDaySelected;
   final DateTime selectedDate;
@@ -26,7 +22,7 @@ class MainCalendar extends StatefulWidget {
 
 class _MainCalendarState extends State<MainCalendar> {
   late DateTime _focusedMonth;
-  late DateTime _baseMonth; // 초기 기준 월 (변하지 않음)
+  late DateTime _baseMonth;
   late PageController _pageController;
   static const _initialPage = 1200;
   final NoticeDataApi _noticeApi = NoticeDataApi();
@@ -132,7 +128,6 @@ class _MainCalendarState extends State<MainCalendar> {
       padding: const EdgeInsets.symmetric(horizontal: 8),
       child: Column(
         children: [
-          // 헤더
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 12),
             child: Row(
@@ -155,16 +150,14 @@ class _MainCalendarState extends State<MainCalendar> {
               ],
             ),
           ),
-          // 요일 헤더
           Row(
             children: weekdays.map((d) => Expanded(
               child: Center(child: Text(d, style: TextStyle(color: subColor, fontSize: 13, fontWeight: FontWeight.w600))),
             )).toList(),
           ),
           const SizedBox(height: 4),
-          // 스와이프 캘린더
           SizedBox(
-            height: 6 * 48.0, // 최대 6주
+            height: 6 * 48.0,
             child: PageView.builder(
               controller: _pageController,
               onPageChanged: (page) {
@@ -200,7 +193,6 @@ class _MainCalendarState extends State<MainCalendar> {
           height: rowCount * cellHeight,
           child: Stack(
             children: [
-              // 이벤트 바
               ...eventBars.map((bar) => Positioned(
                 top: bar.row * cellHeight + barTop,
                 left: bar.startCol * cellWidth + (bar.isStart ? 3 : 0),
@@ -222,7 +214,6 @@ class _MainCalendarState extends State<MainCalendar> {
                       : null,
                 ),
               )),
-              // 날짜 그리드
               GridView.builder(
                 physics: const NeverScrollableScrollPhysics(),
                 gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -268,7 +259,6 @@ class _MainCalendarState extends State<MainCalendar> {
                             )),
                           ),
                         ),
-                        // 점
                         Positioned(
                           bottom: 2,
                           child: Row(

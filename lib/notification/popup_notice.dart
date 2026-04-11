@@ -4,11 +4,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 긴급 팝업 공지
-///
-/// - Firestore app_config/popup에서 활성 팝업 조회
-/// - 오늘 안 보기 지원 (SharedPreferences)
-/// - 타입별 색상: emergency(빨강), notice(파랑), event(초록)
 class PopupNotice {
   static Future<void> check(BuildContext context) async {
     try {

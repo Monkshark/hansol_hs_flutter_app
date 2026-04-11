@@ -3,9 +3,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 게시글에 첨부된 일정 카드
-///
-/// 사용자가 "내 일정에 추가" 버튼을 누르면 콜백 호출.
 class EventAttachCard extends StatelessWidget {
   final DateTime eventDate;
   final String eventContent;

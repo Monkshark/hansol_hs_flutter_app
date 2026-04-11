@@ -3,10 +3,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/data/secure_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 과목별 점수 데이터 모델
-///
-/// 내신(원점수/평균/등급/성취도)과 모의고사(백분위/표준점수/등급)를
-/// 하나의 구조체로 통합 관리한다.
 class SubjectScore {
   final String subject;
   final int? rawScore;
@@ -14,7 +10,7 @@ class SubjectScore {
   final double? percentile;
   final double? standardScore;
   final double? average;
-  final String? achievement; // 성취도 A~E (내신 5등급제 병기)
+  final String? achievement;
 
   SubjectScore({
     required this.subject,
@@ -46,19 +42,17 @@ class SubjectScore {
     achievement: json['achievement'],
   );
 
-  /// 내신 등급 비율 (5등급제)
   static const rankCutoffs = {1: '상위 10%', 2: '상위 34%', 3: '상위 66%', 4: '상위 90%', 5: '하위 10%'};
   static const achievements = ['A', 'B', 'C', 'D', 'E'];
 }
 
-/// 시험 데이터 모델 (중간/기말/모의/사설모의)
 class Exam {
   final String id;
-  final String type;        // 'midterm', 'final', 'mock', 'private_mock'
+  final String type;
   final int year;
-  final int semester;       // 1 or 2
-  final int grade;          // 1, 2, 3
-  final String? mockLabel;  // 모의: '3월', '6월' 등 / 사설: 직접 입력
+  final int semester;
+  final int grade;
+  final String? mockLabel;
   final List<SubjectScore> scores;
   final DateTime createdAt;
 
@@ -73,7 +67,6 @@ class Exam {
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
-  /// Korean display name (for backward compat)
   String get displayName {
     switch (type) {
       case 'midterm': return '$year ${semester}학기 중간고사';
@@ -84,7 +77,6 @@ class Exam {
     }
   }
 
-  /// Localized display name (for UI)
   String localizedDisplayName(AppLocalizations l) {
     switch (type) {
       case 'midterm': return '$year ${l.data_midterm(semester.toString())}';
@@ -118,17 +110,11 @@ class Exam {
   );
 }
 
-/// 성적 관리 (로컬 전용)
-///
-/// - 모의고사/내신 성적 CRUD
-/// - 과목별 목표 등급 관리
-/// - SharedPreferences JSON 저장 (서버 저장 안 함)
 class GradeManager {
   static const _examsKey = 'grade_exams';
   static const _goalsKey = 'grade_goals';
   static const _goalsJeongsiKey = 'grade_goals_jeongsi';
 
-  /// 수능 등급컷 (백분위 → 등급)
   static int percentileToRank(double percentile) {
     if (percentile >= 96) return 1;
     if (percentile >= 89) return 2;
@@ -141,14 +127,12 @@ class GradeManager {
     return 9;
   }
 
-  /// 2022 개정 교육과정 수능 과목 (2028학년도~)
   static const mockSubjects = {
     '공통': ['국어', '수학', '영어', '한국사', '통합사회', '통합과학'],
     '직업탐구': ['성공적인 직업생활'],
     '제2외국어/한문 (택 1)': ['독일어', '프랑스어', '스페인어', '중국어', '일본어', '러시아어', '아랍어', '베트남어', '한문'],
   };
 
-  /// 과목별 고정 색상
   static const subjectColors = <String, int>{
     '국어': 0xFFE53935,
     '수학': 0xFF1E88E5,
@@ -173,7 +157,6 @@ class GradeManager {
   }
 
   static Future<List<Exam>> loadExams() async {
-    // SharedPreferences → SecureStorage 일회성 마이그레이션
     final prefs = await SharedPreferences.getInstance();
     await SecureStorageService.migrateFromPlain(
       key: SecureStorageService.keyGradeExams,
@@ -215,7 +198,6 @@ class GradeManager {
     await saveExams(exams);
   }
 
-  /// 과목별 목표 등급
   static Future<Map<String, double>> loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
     await SecureStorageService.migrateFromPlain(
@@ -233,7 +215,6 @@ class GradeManager {
     await SecureStorageService.write(SecureStorageService.keyGradeGoals, jsonEncode(goals));
   }
 
-  /// 정시 목표 (백분위 기준, 정수)
   static Future<Map<String, double>> loadJeongsiGoals() async {
     final prefs = await SharedPreferences.getInstance();
     await SecureStorageService.migrateFromPlain(

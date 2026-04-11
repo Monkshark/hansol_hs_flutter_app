@@ -4,9 +4,6 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'theme_provider.g.dart';
 
-/// 테마 모드 관리 (라이트/다크/시스템)
-///
-/// SettingData의 themeModeIndex와 동기화. riverpod_generator 기반.
 @Riverpod(keepAlive: true)
 class Theme extends _$Theme {
   @override

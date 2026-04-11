@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 삭제 확인 다이얼로그
-/// - 제목과 안내 메시지를 표시하는 확인 다이얼로그
-/// - '취소'(false) / '삭제'(true) 버튼으로 반환
-/// - 다크/라이트 테마 자동 대응
 class DeleteAlertDialog extends StatelessWidget {
   const DeleteAlertDialog({
     Key? key,

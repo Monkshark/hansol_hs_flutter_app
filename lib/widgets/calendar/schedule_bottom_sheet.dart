@@ -7,9 +7,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 일정 만들기 바텀시트
-/// - 시작일/종료일 DatePicker (같으면 하루, 다르면 연속)
-/// - 색상 6종 선택
 class ScheduleBottomSheet extends StatefulWidget {
   final DateTime selectedDate;
   final VoidCallback onScheduleCreated;
@@ -233,7 +230,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
     double hue = HSLColor.fromColor(_customColor).hue;
     double lightness = HSLColor.fromColor(_customColor).lightness.clamp(0.2, 0.8);
 
-    String? _dragZone; // 'inner' or 'outer' — 드래그 시작 영역 잠금
+    String? _dragZone;
 
     showDialog(
       context: context,
@@ -316,7 +313,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                         onPressed: () {
                           setState(() {
                             _customColor = previewColor;
-                            // 기존 커스텀 색 제거 후 추가
                             _colors.removeWhere((c) => !const [
                               Color(0xFF3F72AF), Color(0xFF4CAF50), Color(0xFFFF9800),
                               Color(0xFFEF5350), Color(0xFF9C27B0), Color(0xFF00BCD4),
@@ -368,7 +364,6 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
   }
 }
 
-/// 원형 색상환 + 중앙 밝기 그라데이션을 그리는 커스텀 페인터
 class _CircleColorPainter extends CustomPainter {
   final double selectedHue;
   final double lightness;
@@ -380,7 +375,6 @@ class _CircleColorPainter extends CustomPainter {
     final radius = size.width / 2;
     final innerR = radius * 0.38;
 
-    // 외곽 색상환
     for (double angle = 0; angle < 360; angle += 1) {
       final paint = Paint()
         ..color = HSLColor.fromAHSL(1, angle, 0.7, lightness).toColor()
@@ -394,7 +388,6 @@ class _CircleColorPainter extends CustomPainter {
       );
     }
 
-    // 중앙 밝기 그라데이션 (위=밝게, 아래=어둡게)
     final selectedColor = HSLColor.fromAHSL(1, selectedHue, 0.7, 0.5);
     final gradient = LinearGradient(
       begin: Alignment.topCenter,
@@ -412,7 +405,6 @@ class _CircleColorPainter extends CustomPainter {
     canvas.drawRect(rect, Paint()..shader = gradient.createShader(rect));
     canvas.restore();
 
-    // 밝기 인디케이터 (가로 선)
     final lY = center.dy - innerR + (1 - lightness) * innerR * 2;
     canvas.drawLine(
       Offset(center.dx - innerR * 0.6, lY),
@@ -420,7 +412,6 @@ class _CircleColorPainter extends CustomPainter {
       Paint()..color = Colors.white..strokeWidth = 2..strokeCap = StrokeCap.round,
     );
 
-    // 색상환 선택 표시
     final indicatorRad = selectedHue * math.pi / 180;
     final ix = center.dx + radius * 0.82 * math.cos(indicatorRad);
     final iy = center.dy + radius * 0.82 * math.sin(indicatorRad);

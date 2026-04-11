@@ -5,12 +5,6 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/secure_storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// D-day CRUD 및 SharedPreferences JSON 저장
-///
-/// - D-day 항목 생성/조회/수정/삭제
-/// - 핀 된 D-day 조회 지원
-/// - SharedPreferences에 JSON 형태로 저장
-/// - Firestore 동기화 (로그인 시 자동 불러오기)
 class DDay {
   final String title;
   final DateTime date;
@@ -37,13 +31,11 @@ class DDay {
   }
 }
 
-/// D-day 목록 저장/조회 및 핀 된 D-day 관리
 class DDayManager {
   static const _key = 'dday_list';
 
   static Future<List<DDay>> loadAll() async {
     final prefs = await SharedPreferences.getInstance();
-    // SharedPreferences → SecureStorage 일회성 마이그레이션
     await SecureStorageService.migrateFromPlain(
       key: SecureStorageService.keyDdays,
       oldValue: prefs.getString(_key),

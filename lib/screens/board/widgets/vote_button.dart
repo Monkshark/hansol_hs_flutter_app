@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 게시글 추천/비추천 버튼
 class VoteButton extends StatelessWidget {
   final IconData icon;
   final IconData activeIcon;

@@ -45,11 +45,6 @@ import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSdk;
 
-/// 앱 진입점, Firebase/알림/테마 초기화, 메인 네비게이션
-///
-/// - Firebase, 타임존, 알림 권한 등 앱 초기화
-/// - 급식/홈/일정 3탭 하단 네비게이션 구성
-/// - 앱 리프레시 및 업데이트 체크 지원
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 final ValueNotifier<Locale?> localeNotifier = ValueNotifier(null);
 final ValueNotifier<int> appRefreshNotifier = ValueNotifier(0);
@@ -60,7 +55,6 @@ final StreamController<String?> notificationStream =
 
 void onNotificationTap(NotificationResponse notificationResponse) {
   notificationStream.add(notificationResponse.payload);
-  // FCM 포그라운드 로컬 알림 탭 → 딥링크 라우팅
   FcmService.handleLocalNotificationTap(notificationResponse.payload);
 }
 
@@ -71,19 +65,13 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
   ]);
   try {
-    // google-services.json 자동 초기화와 중복 호출되는 경우 무시
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
     }
   } catch (e, st) {
-    // Firebase 초기화 실패는 치명적이지만 앱 자체는 실행되어야 하므로
-    // 디버그 로그 + 앞으로의 Crashlytics 호출은 무시되도록 둠
     log('Firebase init failed: $e\n$st', name: 'main');
   }
 
-  // Firebase App Check: Android만 Play Integrity로 enforce
-  // (iOS는 Apple Developer 계정 등록 후 appAttest로 전환 예정)
-  // 개발 빌드는 debug provider 사용. 콘솔에서 enforce 활성화 필요.
   try {
     await FirebaseAppCheck.instance.activate(
       androidProvider: const bool.fromEnvironment('dart.vm.product')
@@ -95,15 +83,12 @@ Future<void> main() async {
     log('AppCheck activate failed: $e', name: 'main');
   }
 
-  // Firebase Performance Monitoring (자동 HTTP/네트워크 트레이스)
   try {
     await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
   } catch (e) {
     log('Performance enable failed: $e', name: 'main');
   }
 
-  // Firebase Analytics: 사용자 이벤트/화면 추적
-  // 디버그 빌드는 disable, 릴리스만 collection on
   try {
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
       const bool.fromEnvironment('dart.vm.product'),
@@ -237,11 +222,6 @@ final _darkTheme = ThemeData(
   ),
 );
 
-/// 앱 루트 위젯 (테마 모드 전환 및 MaterialApp 구성)
-///
-/// `ConsumerStatefulWidget`으로 Riverpod `themeProvider`를 구독한다.
-/// 기존의 전역 `ValueNotifier<ThemeMode> themeNotifier`도 호환성을 위해
-/// 유지되며, 양쪽이 동기화된다 (점진적 마이그레이션).
 class HansolHighSchool extends ConsumerStatefulWidget {
   const HansolHighSchool({Key? key}) : super(key: key);
 
@@ -272,7 +252,6 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
     final isDark = _resolveIsDark(newMode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
     AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
-    // Riverpod 상태와 동기화
     final idx = newMode == ThemeMode.dark
         ? 1
         : (newMode == ThemeMode.system ? 2 : 0);
@@ -314,7 +293,6 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
   }
 }
 
-/// 메인 화면 (급식/홈/일정 3탭 하단 네비게이션 + 온보딩·로그인 체크)
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
 

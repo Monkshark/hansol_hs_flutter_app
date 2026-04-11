@@ -7,11 +7,6 @@ import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 알림 설정 화면
-///
-/// - 급식 알림: 조식/중식/석식 시간 설정 + on/off
-/// - 푸시 알림: 댓글/대댓글/새글/채팅/계정 카테고리별 on/off
-/// - Firestore users/{uid}에 설정값 저장, Cloud Functions에서 체크
 class NotificationSettingScreen extends StatefulWidget {
   const NotificationSettingScreen({Key? key}) : super(key: key);
 
@@ -20,7 +15,6 @@ class NotificationSettingScreen extends StatefulWidget {
 }
 
 class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
-  // 급식 알림 (로컬)
   late bool _breakfast;
   late bool _lunch;
   late bool _dinner;
@@ -28,7 +22,6 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
   late TimeOfDay _lunchTime;
   late TimeOfDay _dinnerTime;
 
-  // 푸시 알림 (Firestore)
   bool _notiComment = true;
   bool _notiReply = true;
   bool _notiMention = true;
@@ -92,7 +85,6 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
         });
       }
     } catch (_) {}
-    // 카테고리별 + 인기글 구독 상태 (로컬)
     for (final cat in FcmService.boardCategories) {
       _notiCategory[cat] = SettingData().getBool('noti_board_$cat', defaultValue: true);
     }
@@ -105,7 +97,6 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
     final uid = AuthService.currentUser!.uid;
     await FirebaseFirestore.instance.collection('users').doc(uid).update({field: value});
 
-    // 새 글 알림은 토픽 구독으로도 제어
     if (field == 'notiNewPost') {
       await FcmService.toggleBoardNotification(value);
     }

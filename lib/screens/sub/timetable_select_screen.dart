@@ -6,13 +6,7 @@ import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 선택과목 설정 화면 (TimetableSelectScreen)
-///
-/// - 학년별 선택과목 목록에서 수강 과목 선택
-/// - 선택 과목 간 시간표 충돌 자동 감지 및 경고
-/// - 변경사항 저장 시 확인 다이얼로그 표시
 
-/// 과목의 요일·교시 정보를 담는 데이터 클래스
 class SubjectScheduleInfo {
   final String dayName;
   final int period;
@@ -146,7 +140,7 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
                   _getConflictMsg(aInfo.dayName, aInfo.period, b.subjectName);
               conflictMap[b.subjectName] =
                   _getConflictMsg(bInfo.dayName, bInfo.period, a.subjectName);
-              return; // 첫 번째 충돌만 표시
+              return;
             }
           }
         }

@@ -11,12 +11,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// 1:1 채팅방 화면
-///
-/// - Firestore 실시간 메시지 스트림 (limit 30)
-/// - 읽음 표시 (unreadCount 기반)
-/// - 메시지 삭제 (나만/같이), 채팅방 나가기 (시스템 메시지)
-/// - 시스템 메시지 렌더링
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
   final String otherName;
@@ -183,7 +177,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
   Future<void> _deleteForAll(DocumentReference ref) async {
     await ref.update({'content': AppLocalizations.of(context)!.chat_deletedMessage, 'deleted': true});
-    // 채팅 목록 미리보기 업데이트
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
     await chatRef.update({'lastMessage': AppLocalizations.of(context)!.chat_deletedMessage});
   }
@@ -226,7 +219,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
     });
   }
 
-  /// 갤러리에서 사진 1장 선택 → 압축 → Storage 업로드 → 메시지 전송
   Future<void> _sendImage() async {
     if (_uploadingImage) return;
     final picker = ImagePicker();
@@ -238,7 +230,6 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
     setState(() => _uploadingImage = true);
     try {
-      // 압축 (긴 변 1280px, 품질 80)
       final tempDir = await getTemporaryDirectory();
       final targetPath =
           '${tempDir.path}/chat_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -248,14 +239,12 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       );
       final fileToUpload = compressed != null ? File(compressed.path) : File(picked.path);
 
-      // 업로드
       final ref = FirebaseStorage.instance.ref(
         'chats/${widget.chatId}/${DateTime.now().millisecondsSinceEpoch}_$uid.jpg',
       );
       await ref.putFile(fileToUpload);
       final url = await ref.getDownloadURL();
 
-      // Firestore 메시지
       final profile = await AuthService.getCachedProfile();
       final name = profile?.displayName ?? '';
       final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);

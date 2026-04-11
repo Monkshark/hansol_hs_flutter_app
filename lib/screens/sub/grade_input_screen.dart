@@ -6,7 +6,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
 
-/// 시험 추가/수정 화면
 class GradeInputScreen extends StatefulWidget {
   final Exam? exam;
   final bool isMock;
@@ -89,7 +88,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     super.dispose();
   }
 
-  /// 시간표에서 과목 불러오기
   Future<void> _loadFromTimetable() async {
     final prefs = await SharedPreferences.getInstance();
     final gridData = prefs.getStringList('widget_timetable_grid');
@@ -102,7 +100,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       return;
     }
 
-    // 모든 요일에서 과목 추출 → 중복 제거
     final allSubjects = <String>{};
     for (final dayStr in gridData) {
       for (final subj in dayStr.split(',')) {
@@ -133,7 +130,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
   }
 
-  /// 모의고사 과목 선택
   Future<void> _loadMockSubjects() async {
     final existing = _subjects.map((s) => s.name).toSet();
     final available = <String>[];
@@ -161,7 +157,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
   }
 
-  /// 과목 선택 다이얼로그 (내신용)
   Future<List<String>?> _showSubjectPicker(List<String> available, String title) async {
     final checked = <String, bool>{for (final s in available) s: false};
     return showDialog<List<String>>(
@@ -234,7 +229,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     );
   }
 
-  /// 모의고사 과목 선택 (카테고리별)
   Future<List<String>?> _showMockSubjectPicker(Set<String> existing) async {
     final checked = <String, bool>{};
     for (final list in GradeManager.mockSubjects.values) {
@@ -335,7 +329,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     );
   }
 
-  /// 수동 과목 추가
   Future<void> _addManualSubject() async {
     final ctrl = TextEditingController();
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -421,7 +414,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
   }
 
-  /// 시험 저장
   Future<void> _save() async {
     if (_subjects.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -503,7 +495,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
         child: ListView(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           children: [
-            // ── 시험 유형 ──
             _sectionLabel(AppLocalizations.of(context)!.gradeInput_typeSection),
             const SizedBox(height: 8),
             Wrap(
@@ -533,7 +524,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             ),
             const SizedBox(height: 20),
 
-            // ── 시험 정보 ──
             _sectionLabel(AppLocalizations.of(context)!.gradeInput_infoSection),
             const SizedBox(height: 8),
             Container(
@@ -544,7 +534,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
               ),
               child: Column(
                 children: [
-                  // 연도 / 학기 / 학년
                   Row(children: [
                     Expanded(child: _dropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_year,
@@ -573,7 +562,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       fillColor: fieldFill,
                     )),
                   ]),
-                  // 모의: 월 선택
                   if (_type == 'mock') ...[
                     const SizedBox(height: 12),
                     _dropdown<String>(
@@ -585,7 +573,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       fillColor: fieldFill,
                     ),
                   ],
-                  // 사설: 직접 입력
                   if (_type == 'private_mock') ...[
                     const SizedBox(height: 12),
                     TextField(
@@ -607,7 +594,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             ),
             const SizedBox(height: 20),
 
-            // ── 과목 추가 버튼 ──
             _sectionLabel(AppLocalizations.of(context)!.gradeInput_subjectSection),
             const SizedBox(height: 8),
             Wrap(
@@ -635,13 +621,11 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
             ),
             const SizedBox(height: 12),
 
-            // ── 점수 입력 ──
             if (_subjects.isNotEmpty) ...[
-              // 헤더
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: Row(children: [
-                  const SizedBox(width: 36), // dot + gap
+                  const SizedBox(width: 36),
                   Expanded(flex: 3, child: Text(AppLocalizations.of(context)!.gradeInput_subjectCol, style: _headerStyle)),
                   if (!_isMock) ...[
                     Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_rawScore, style: _headerStyle, textAlign: TextAlign.center)),
@@ -654,7 +638,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_standard, style: _headerStyle, textAlign: TextAlign.center)),
                     Expanded(flex: 2, child: Text(AppLocalizations.of(context)!.gradeInput_rank, style: _headerStyle, textAlign: TextAlign.center)),
                   ],
-                  const SizedBox(width: 32), // delete button
+                  const SizedBox(width: 32),
                 ]),
               ),
               const Divider(height: 1),
@@ -672,7 +656,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         margin: const EdgeInsets.only(right: 8),
                         decoration: BoxDecoration(color: color, shape: BoxShape.circle),
                       ),
-                      // 과목명 (18px 여유)
                       Expanded(
                         flex: 3,
                         child: Text(
@@ -844,7 +827,6 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   }
 }
 
-/// 과목별 점수 입력 상태
 class _SubjectEntry {
   final String name;
   final TextEditingController rawScoreCtrl;
@@ -852,7 +834,7 @@ class _SubjectEntry {
   final TextEditingController rankCtrl;
   final TextEditingController standardScoreCtrl;
   final TextEditingController percentileCtrl;
-  String? achievement; // 성취도 A~E
+  String? achievement;
 
   _SubjectEntry({
     required this.name,

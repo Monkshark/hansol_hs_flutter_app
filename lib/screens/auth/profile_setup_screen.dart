@@ -5,11 +5,6 @@ import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 프로필 설정 화면
-///
-/// - 신분 선택 (재학생/졸업생/교사/학부모)
-/// - 신분별 추가 정보 입력
-/// - 새 학기 프로필 업데이트에도 사용
 class ProfileSetupScreen extends StatefulWidget {
   final bool isUpdate;
 
@@ -60,7 +55,6 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     super.dispose();
   }
 
-  /// 학번 검증: 5자��� (학년1~3 + 반01~12 + 번호01~30)
   String? _validateStudentId(String id, String msg) {
     if (id.isEmpty || id.length != 5 || int.tryParse(id) == null) return msg;
     final grade = int.parse(id[0]);

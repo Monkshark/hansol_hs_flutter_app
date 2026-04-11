@@ -1,15 +1,11 @@
-/// 개인일정 데이터 모델
-///
-/// - 시작/종료 시간, 내용, 날짜, 종료 날짜(연속일정), 색상 포함
-/// - Map 변환 (toMap/fromMap)으로 DB 저장/조회 지원
 class Schedule {
   final int? id;
   final int startTime;
   final int endTime;
   final String content;
   final String date;
-  final String? endDate; // 연속일정 종료 날짜 (null이면 하루일정)
-  final int color; // 0xFFRRGGBB
+  final String? endDate;
+  final int color;
 
   Schedule({
     this.id,

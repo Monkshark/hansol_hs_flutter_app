@@ -6,12 +6,8 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 건의사항 목록 조회 화면 (관리자 전용)
-///
-/// - 상태별 뱃지 (대기중/확인됨/해결됨)
-/// - 탭하면 바텀시트 상세 (이미지 포함, 상태 변경 버튼)
 class FeedbackListScreen extends StatelessWidget {
-  final String type; // 'app' or 'council'
+  final String type;
   final bool showAppBar;
 
   const FeedbackListScreen({Key? key, required this.type, this.showAppBar = false}) : super(key: key);

@@ -12,11 +12,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:http/http.dart' as http;
 
-/// Google 로그인/로그아웃, Firestore 프로필 CRUD
-///
-/// - Google 로그인 및 Firebase 인증 처리
-/// - Firestore 사용자 프로필 생성/조회/수정
-/// - 승인 여부 및 매니저 권한 체크, 5분 캐시
 class UserProfile {
   final String uid;
   final String name;
@@ -62,7 +57,6 @@ class UserProfile {
   bool get isTeacher => userType == 'teacher';
   bool get isParent => userType == 'parent';
 
-  /// Korean display name (for Firestore storage)
   String get displayName {
     switch (userType) {
       case 'graduate':
@@ -76,7 +70,6 @@ class UserProfile {
     }
   }
 
-  /// Localized display name (for UI)
   String localizedDisplayName(AppLocalizations l) {
     switch (userType) {
       case 'graduate':
@@ -138,10 +131,6 @@ class UserProfile {
   );
 }
 
-/// Firebase 인증 서비스 (Google/Apple/카카오/GitHub 로그인)
-///
-/// - 다중 소셜 로그인 및 로그아웃 처리
-/// - Firestore 사용자 프로필 CRUD 및 권한 체크
 class AuthService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
   static final GoogleSignIn _googleSignIn = GoogleSignIn();
@@ -305,7 +294,6 @@ class AuthService {
     return profile.approved || profile.isManager;
   }
 
-  /// Returns suspend remaining duration, or null if not suspended.
   static Future<Duration?> getSuspendedDuration() async {
     final profile = await getCachedProfile();
     if (profile == null || !profile.isSuspended) return null;
@@ -321,7 +309,6 @@ class AuthService {
   static UserProfile? _cachedProfile;
   static DateTime? _cacheTime;
 
-  /// 테스트 전용: cachedProfile을 직접 주입 (예: golden test에서 manager view 검증)
   @visibleForTesting
   static void setCachedProfileForTest(UserProfile? profile) {
     _cachedProfile = profile;
@@ -343,9 +330,6 @@ class AuthService {
     _cacheTime = null;
   }
 
-  /// ID 토큰을 강제 갱신해 최신 custom claims (role/approved) 을 가져옴.
-  /// Cloud Function `onUserUpdated` 가 setCustomUserClaims 호출 후
-  /// 클라이언트에서 호출해야 변경된 권한이 즉시 반영된다.
   static Future<Map<String, dynamic>?> refreshCustomClaims() async {
     final user = currentUser;
     if (user == null) return null;

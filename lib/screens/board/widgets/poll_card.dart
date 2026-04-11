@@ -2,10 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 게시글 투표 카드
-///
-/// `voters`: `{uid: optionIndex}` 매핑.
-/// 사용자가 이미 투표했으면 결과 그래프 표시, 아니면 옵션 선택 가능.
 class PollCard extends StatelessWidget {
   final List<String> options;
   final Map<String, dynamic> voters;
