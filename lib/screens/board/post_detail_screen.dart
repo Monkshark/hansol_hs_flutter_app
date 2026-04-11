@@ -790,7 +790,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     _commentController.clear();
 
     final l = AppLocalizations.of(context)!;
-    String displayName = anonymous ? l.post_anonymous : profile.displayName;
+    String displayName = anonymous ? l.post_anonymous : profile.name;
 
     if (anonymous) {
       final myUid = AuthService.currentUser!.uid;
