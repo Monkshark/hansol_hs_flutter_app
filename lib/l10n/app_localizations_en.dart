@@ -40,6 +40,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileSetup_nameRequired => 'Please enter your name';
 
   @override
+  String get profileSetup_nameNoSpace => 'Name cannot contain spaces';
+
+  @override
   String get profileSetup_studentIdError =>
       'Please enter the student ID correctly';
 

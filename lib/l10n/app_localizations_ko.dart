@@ -39,6 +39,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileSetup_nameRequired => '이름을 입력해주세요';
 
   @override
+  String get profileSetup_nameNoSpace => '이름에 띄어쓰기를 포함할 수 없습니다';
+
+  @override
   String get profileSetup_studentIdError => '학번을 정확히 입력해주세요';
 
   @override
