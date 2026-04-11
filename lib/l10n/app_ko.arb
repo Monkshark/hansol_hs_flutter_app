@@ -13,6 +13,7 @@
   "login_skipButton": "나중에 하기",
 
   "profileSetup_nameRequired": "이름을 입력해주세요",
+  "profileSetup_nameNoSpace": "이름에 띄어쓰기를 포함할 수 없습니다",
   "profileSetup_studentIdError": "학번을 정확히 입력해주세요",
   "profileSetup_saveFailed": "저장에 실패했습니다. 다시 시도해주세요.",
   "profileSetup_signupRequest": "가입 요청",

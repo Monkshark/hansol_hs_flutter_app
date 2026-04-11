@@ -71,6 +71,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         SnackBar(content: Text(AppLocalizations.of(context)!.profileSetup_nameRequired)));
       return;
     }
+    if (name.contains(' ')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(AppLocalizations.of(context)!.profileSetup_nameNoSpace)));
+      return;
+    }
 
     if (_userType == 'student') {
       final error = _validateStudentId(_studentIdController.text.trim(), AppLocalizations.of(context)!.profileSetup_studentIdError);

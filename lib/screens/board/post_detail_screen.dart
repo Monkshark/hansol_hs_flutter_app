@@ -822,7 +822,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       }
     }
 
-    final mentionPattern = RegExp(r'@([\w가-힣]+(?: [\w가-힣]+)*)');
+    final mentionPattern = RegExp(r'@([\w가-힣]+)');
     final mentionNames = mentionPattern
         .allMatches(text)
         .map((m) => m.group(1))

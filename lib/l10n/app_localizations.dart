@@ -158,6 +158,12 @@ abstract class AppLocalizations {
   /// **'이름을 입력해주세요'**
   String get profileSetup_nameRequired;
 
+  /// No description provided for @profileSetup_nameNoSpace.
+  ///
+  /// In ko, this message translates to:
+  /// **'이름에 띄어쓰기를 포함할 수 없습니다'**
+  String get profileSetup_nameNoSpace;
+
   /// No description provided for @profileSetup_studentIdError.
   ///
   /// In ko, this message translates to:

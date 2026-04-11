@@ -95,7 +95,7 @@ class PostCommentItem extends StatelessWidget {
   }
 
   Widget _buildMentionText(String content, Color? textColor) {
-    final pattern = RegExp(r'@([\w가-힣]+(?: [\w가-힣]+)*)');
+    final pattern = RegExp(r'@[\w가-힣]+');
     final matches = pattern.allMatches(content);
     if (matches.isEmpty) {
       return Text(content,
