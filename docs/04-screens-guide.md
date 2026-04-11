@@ -290,9 +290,9 @@ chats.where('participants', arrayContains: uid)
 **기능**:
 - 실시간 메시지 스트림 (limit 30)
 - 이미지 전송 (압축 + Storage 업로드)
-- 메시지 삭제 (나만/양쪽)
-- 읽음 처리 (unreadCount 업데이트)
-- 자동 스크롤
+- 메시지 삭제: 나만 삭제 (`deletedFor` 배열) / 같이 삭제 (1시간 이내 + 안 읽음)
+- 읽음 표시: per-message 카운터 방식 — 상대방 `unreadCount` 로 `myUnreadRemaining` 초기화 후 최신 메시지부터 차감, 카운터 소진 후 메시지에 "읽음" 표시
+- 채팅방 나가기: 시스템 메시지 추가 + `participants` 에서 제거
 
 ---
 
