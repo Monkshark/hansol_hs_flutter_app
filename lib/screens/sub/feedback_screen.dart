@@ -8,12 +8,8 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// 건의사항 작성 화면 (앱 건의/버그 + 학생회 건의)
-///
-/// - 텍스트(1000자) + 사진 첨부(최대 3장, 640px 압축)
-/// - type에 따라 app_feedbacks / council_feedbacks 컬렉션에 저장
 class FeedbackScreen extends StatefulWidget {
-  final String type; // 'app' or 'council'
+  final String type;
 
   const FeedbackScreen({Key? key, required this.type}) : super(key: key);
 
@@ -102,7 +98,7 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         'authorUid': AuthService.currentUser?.uid ?? '',
         'authorName': profile?.displayName ?? '',
         'createdAt': FieldValue.serverTimestamp(),
-        'status': 'pending', // pending / reviewed / resolved
+        'status': 'pending',
       });
 
       if (mounted) {

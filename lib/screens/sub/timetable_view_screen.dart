@@ -15,12 +15,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
 import 'dart:convert';
 
-/// 시간표 그리드 뷰 화면 (TimetableViewScreen)
-///
-/// - 요일별 교시 그리드로 주간 시간표 표시
-/// - 과목별 커스텀 컬러 설정 및 저장
-/// - 선택과목 충돌 시 해결 다이얼로그 제공
-/// - 학년/반 변경 시 시간표 자동 갱신
 class TimetableViewScreen extends StatefulWidget {
   const TimetableViewScreen({Key? key}) : super(key: key);
 
@@ -46,7 +40,6 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     _loadConflictResolutions();
     _loadSubjectColors();
 
-    // 캐시된 프로필로 동기적 체크
     final cached = AuthService.cachedProfile;
     if (cached?.isTeacher == true) {
       _isTeacher = true;
@@ -59,7 +52,6 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         conflicts: {},
       ));
     }
-    // 비동기 재확인
     _checkTeacher();
   }
 
@@ -420,7 +412,6 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 설정에서 학년/반 변경 후 돌아왔을 때 자동 새로고침
     if (!_isTeacher && SettingData().isGradeSet &&
         (_grade != SettingData().grade || _classNum != SettingData().classNum)) {
       _grade = SettingData().grade;

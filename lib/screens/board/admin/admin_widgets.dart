@@ -76,7 +76,6 @@ class AdminTileState extends State<AdminTile> {
   }
 
   void _toggle() {
-    // 스크롤 직후 탭 무시 (빠른 스크롤 중 오작동 방지)
     if (DateTime.now().difference(_lastScrollTime).inMilliseconds < 150) return;
     setState(() => _expanded = !_expanded);
   }

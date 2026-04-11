@@ -20,12 +20,6 @@ import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 글 상세 화면 (PostDetailScreen)
-///
-/// - 게시글 본문, 이미지, 투표 항목을 표시
-/// - 추천/비추천 기능 및 일정 공유(내 캘린더 추가) 지원
-/// - 댓글 및 대댓글 작성, 익명 댓글 옵션 제공
-/// - 부적절한 게시글/댓글 신고 기능
 class PostDetailScreen extends StatefulWidget {
   final String postId;
 
@@ -647,7 +641,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final updates = <String, dynamic>{};
     if (data['likes'] == null || data['likes'] is int) updates['likes'] = {};
     if (data['dislikes'] == null || data['dislikes'] is int) updates['dislikes'] = {};
-    // 비정규화 카운터: 인기글 정렬용
     if (data['likeCount'] is! int) {
       final raw = data['likes'];
       updates['likeCount'] = raw is Map ? raw.length : 0;
@@ -1023,7 +1016,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  /// 답글 버튼 클릭 시: 부모 댓글 ID/이름 저장 + 본문 앞에 @닉네임 자동 삽입
   void _onReplyTap(String parentId, String parentName) {
     setState(() {
       _replyToCommentId = parentId;

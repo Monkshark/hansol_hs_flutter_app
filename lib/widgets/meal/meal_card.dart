@@ -10,11 +10,6 @@ import 'dart:io';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 급식 메뉴 카드 위젯
-/// - 탭하면 공유/영양정보 액션 버튼 오버레이 표시
-/// - 카드 스크린샷을 이미지로 캡처하여 공유 기능 제공
-/// - 영양정보 바텀시트에서 칼로리, 메뉴, 알레르기 유발 식품 표시
-/// - 18종 알레르기 번호 자동 파싱 및 매핑
 class MealCard extends StatefulWidget {
   final String? meal;
   final DateTime date;

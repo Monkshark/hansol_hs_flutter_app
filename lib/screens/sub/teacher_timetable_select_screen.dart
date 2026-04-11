@@ -8,11 +8,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// 교사용 시간표 설정 화면
-///
-/// - 학생 선택과목 UI와 동일한 카드 스와이프 방식
-/// - 상단 학년 탭 (1/2/3학년)
-/// - 과목 카드 스와이프로 반 전환, 탭하면 토글 (중복 선택 가능)
 class TeacherTimetableSelectScreen extends StatefulWidget {
   const TeacherTimetableSelectScreen({Key? key}) : super(key: key);
 
@@ -28,13 +23,10 @@ class _TeacherTimetableSelectScreenState
   bool _isLoading = true;
   bool _hasChanges = false;
 
-  // 학년별 { 과목명: [Subject, Subject, ...] }
   final Map<int, Map<String, List<Subject>>> _gradeSubjectGroups = {};
 
-  // 선택된 항목: Set<"학년_과목명_반">
   final Set<String> _selected = {};
 
-  // 스케줄 맵: "과목명_반" → [요일 교시 정보]
   final Map<int, Map<String, List<_ScheduleInfo>>> _scheduleMap = {};
 
   @override

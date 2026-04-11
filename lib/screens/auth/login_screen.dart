@@ -9,11 +9,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' as kakao;
 
-/// 로그인 화면
-///
-/// - Google / Apple / Kakao / GitHub 소셜 로그인 (SVG 브랜드 로고)
-/// - 로그인 성공 시 FCM 토큰 갱신 + getIdToken 재시도
-/// - 프로필 미설정 사용자는 프로필 설정 화면으로 자동 이동
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
 
@@ -41,7 +36,6 @@ class _LoginScreenState extends State<LoginScreen> {
 
     FcmService.onUserLogin();
 
-    // auth 토큰 강제 갱신 후 프로필 확인 (최대 3회 재시도)
     await user.getIdToken(true);
     bool hasProfile = false;
     for (int i = 0; i < 3; i++) {

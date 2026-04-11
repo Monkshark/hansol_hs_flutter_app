@@ -8,11 +8,6 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// NEIS 시간표 API 연동
-///
-/// - 시간표 데이터 조회 및 7일 캐시
-/// - 선택과목 조합 및 PERIO 기반 교시 배치
-/// - 과목 목록 추출 지원
 class TimetableDataApi {
   static const _tag = 'TimetableDataApi';
   static const _subjectCacheKeyPrefix = 'subjects_grade_';

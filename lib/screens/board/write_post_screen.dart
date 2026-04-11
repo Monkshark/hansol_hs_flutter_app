@@ -19,12 +19,6 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
 
-/// 글쓰기/수정 화면 (WritePostScreen)
-///
-/// - 카테고리(자유/질문/정보공유) 선택 후 글 작성
-/// - 투표 항목 및 일정 첨부(날짜/시간) 기능
-/// - 사진 촬영 또는 갤러리에서 이미지 첨부 (압축 후 업로드)
-/// - 익명 게시 옵션 및 기존 글 수정 모드 지원
 class WritePostScreen extends StatefulWidget {
   final String? postId;
   final String? initialTitle;
@@ -44,7 +38,6 @@ class WritePostScreen extends StatefulWidget {
 }
 
 class _WritePostScreenState extends State<WritePostScreen> {
-  // DB category keys (never localized – used for Firestore queries)
   static const _categoryKeys = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
   late String _category;
   late final TextEditingController _titleController;
@@ -517,14 +510,11 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
   Future<File?> _compressImage(File file) async {
     final dir = await getTemporaryDirectory();
-    // 항상 .jpg 확장자로 강제 (HEIC 등 호환성 문제 회피)
     final targetPath = p.join(
       dir.path,
       'compressed_${DateTime.now().millisecondsSinceEpoch}_${p.basenameWithoutExtension(file.path)}.jpg',
     );
 
-    // minWidth만 지정하여 종횡비 유지 (minHeight 지정 시 portrait 사진이 왜곡됨)
-    // keepExif: false → GPS/카메라 정보 제거 (개인정보 보호)
     final result = await FlutterImageCompress.compressAndGetFile(
       file.absolute.path,
       targetPath,
@@ -671,7 +661,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       return;
     }
 
-    // Rate limiting: 30 seconds between posts
     if (!_isEdit) {
       final prefs = await SharedPreferences.getInstance();
       final lastPostTime = prefs.getInt('last_post_time') ?? 0;
@@ -740,7 +729,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
       'authorRealName': profile.displayName,
       'isAnonymous': _isAnonymous,
       'isPinned': _isPinned,
-      // 검색 인덱스: 제목+본문 2-gram (Firestore array-contains-any 매칭용)
       'searchTokens': SearchTokens.forDocument(title, content),
     };
 

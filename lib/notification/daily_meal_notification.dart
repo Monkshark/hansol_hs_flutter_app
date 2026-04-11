@@ -10,11 +10,6 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:intl/intl.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-/// 급식 로컬 알림 스케줄링
-/// - 조식/중식/석식 각각 평일(월~금) 반복 알림 등록
-/// - SettingData의 알림 ON/OFF 및 시간 설정에 따라 스케줄 생성
-/// - iOS/Android 권한 요청 및 플랫폼별 알림 채널 설정
-/// - 테스트 알림(5초 후) 전송 기능 제공
 class DailyMealNotification {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();

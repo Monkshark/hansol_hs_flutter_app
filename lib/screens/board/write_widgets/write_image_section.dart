@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 글쓰기 화면의 이미지 첨부 섹션
 class WriteImageSection extends StatelessWidget {
   final List<File> images;
   final void Function(int oldIndex, int newIndex) onReorder;

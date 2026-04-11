@@ -14,11 +14,6 @@ import 'package:hansol_high_school/screens/board/notification_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
 
-/// FCM(Firebase Cloud Messaging) 서비스
-/// - FCM 초기화 및 알림 권한 요청
-/// - Firestore에 FCM 토큰 저장 및 갱신 리스너 등록
-/// - board_new_post 토픽 구독/해제로 게시판 알림 제어
-/// - 포그라운드 메시지 수신 시 로컬 알림으로 표시
 class FcmService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _localNotifications =
@@ -39,7 +34,6 @@ class FcmService {
   static Future<void> initialize() async {
     await _initChannel();
 
-    // 로컬 알림 플러그인 초기화 (포그라운드 FCM 알림 탭 콜백 등록)
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosSettings = DarwinInitializationSettings();
     await _localNotifications.initialize(
@@ -105,7 +99,6 @@ class FcmService {
 
   static const boardCategories = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
 
-  /// 한글 카테고리명 → FCM 토픽용 영문 키
   static const _categoryTopicKey = {
     '자유': 'free',
     '질문': 'question',
@@ -123,14 +116,12 @@ class FcmService {
       await _messaging.subscribeToTopic('board_new_post');
       log('FcmService: subscribed to board_new_post');
     }
-    // 카테고리별 토픽
     for (final cat in boardCategories) {
       final key = 'noti_board_$cat';
       if (SettingData().getBool(key, defaultValue: true)) {
         await _messaging.subscribeToTopic(_topicName(cat));
       }
     }
-    // 인기글 토픽
     if (SettingData().getBool('noti_board_popular', defaultValue: true)) {
       await _messaging.subscribeToTopic('board_popular');
     }
@@ -191,10 +182,6 @@ class FcmService {
     _handleDeepLink(message.data);
   }
 
-  /// 푸시 알림 data payload 기반 딥링크 라우팅
-  /// - type=comment / new_post → 게시글 상세
-  /// - type=chat → 채팅방 (chat 문서에서 상대 정보 로드)
-  /// - type=account → 무시 (앱만 열림)
   static Future<void> _handleDeepLink(Map<String, dynamic> data) async {
     final navigator = rootNavigatorKey.currentState;
     if (navigator == null) return;
@@ -254,12 +241,10 @@ class FcmService {
     }
   }
 
-  /// 포그라운드 로컬 알림용 payload 인코딩 (key=value;key=value)
   static String _encodePayload(Map<String, dynamic> data) {
     return data.entries.map((e) => '${e.key}=${e.value}').join(';');
   }
 
-  /// 로컬 알림 payload → Map 디코딩
   static Map<String, dynamic> decodePayload(String payload) {
     final map = <String, dynamic>{};
     for (final pair in payload.split(';')) {
@@ -271,7 +256,6 @@ class FcmService {
     return map;
   }
 
-  /// 로컬 알림(포그라운드) 탭 시 호출
   static void handleLocalNotificationTap(String? payload) {
     if (payload == null || payload.isEmpty) return;
     _handleDeepLink(decodePayload(payload));

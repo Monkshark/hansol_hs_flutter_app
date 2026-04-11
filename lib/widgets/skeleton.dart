@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
-/// 스켈레톤 로딩용 단색 박스 위젯
 class SkeletonBox extends StatelessWidget {
   final double width;
   final double height;
@@ -28,7 +27,6 @@ class SkeletonBox extends StatelessWidget {
   }
 }
 
-/// Shimmer 애니메이션을 적용하는 래퍼 위젯
 class SkeletonShimmer extends StatelessWidget {
   final Widget child;
 
@@ -45,7 +43,6 @@ class SkeletonShimmer extends StatelessWidget {
   }
 }
 
-/// 게시글 카드 스켈레톤
 class PostCardSkeleton extends StatelessWidget {
   const PostCardSkeleton({super.key});
 
@@ -88,7 +85,6 @@ class PostCardSkeleton extends StatelessWidget {
   }
 }
 
-/// 게시판 목록 스켈레톤
 class PostListSkeleton extends StatelessWidget {
   final int count;
   const PostListSkeleton({super.key, this.count = 5});
@@ -105,7 +101,6 @@ class PostListSkeleton extends StatelessWidget {
   }
 }
 
-/// 홈 화면 스켈레톤
 class HomeSkeleton extends StatelessWidget {
   const HomeSkeleton({super.key});
 
@@ -143,7 +138,6 @@ class HomeSkeleton extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 16),
-            // 최근 글
             ...List.generate(3, (_) => Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: Container(
@@ -161,7 +155,6 @@ class HomeSkeleton extends StatelessWidget {
   }
 }
 
-/// 채팅 목록 스켈레톤
 class ChatListSkeleton extends StatelessWidget {
   const ChatListSkeleton({super.key});
 

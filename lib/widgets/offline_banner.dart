@@ -3,10 +3,6 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 
-/// 오프라인 상태 배너
-///
-/// - 네트워크 연결 끊기면 상단에 빨간 배너 표시
-/// - 재연결 시 자동으로 사라짐
 class OfflineBanner extends StatefulWidget {
   const OfflineBanner({Key? key}) : super(key: key);
 

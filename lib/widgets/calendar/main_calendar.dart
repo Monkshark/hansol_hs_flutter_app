@@ -4,16 +4,11 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 커스텀 월간 캘린더 (TableCalendar 로직 기반)
-///
-/// - PageView 스와이프로 월 이동
-/// - Table 위젯으로 유동적 주 수
-/// - Stack 오버레이로 연속 학사일정 바
 class MainCalendar extends StatefulWidget {
   final void Function(DateTime, DateTime) onDaySelected;
   final DateTime selectedDate;
   final Map<String, List<int>>? personalEvents;
-  final List<PersonalEventBar>? personalBars; // 연속 개인일정
+  final List<PersonalEventBar>? personalBars;
 
   const MainCalendar({
     Key? key,
@@ -67,10 +62,9 @@ class _MainCalendarState extends State<MainCalendar> {
     if (mounted) setState(() => _monthEvents = mapped);
   }
 
-  // 해당 월에 보이는 날짜 리스트 (이전달 꼬리 ~ 다음달 머리)
   List<DateTime> _visibleDays(DateTime month) {
     final first = DateTime.utc(month.year, month.month, 1);
-    final before = first.weekday % 7; // 일=0
+    final before = first.weekday % 7;
     final start = first.subtract(Duration(days: before));
     final last = DateTime.utc(month.year, month.month + 1, 0);
     final after = (7 - (last.weekday + 1) % 7) % 7;
@@ -79,7 +73,6 @@ class _MainCalendarState extends State<MainCalendar> {
     return List.generate(count, (i) => DateTime.utc(start.year, start.month, start.day + i));
   }
 
-  // 연속 이벤트 바 계산
   List<_Bar> _buildBars(List<DateTime> days) {
     final bars = <_Bar>[];
     String? cur;
@@ -187,7 +180,6 @@ class _MainCalendarState extends State<MainCalendar> {
 
                       return Stack(
                         children: [
-                          // 날짜 Table (먼저 렌더링)
                           Table(
                             children: List.generate(rowCount, (row) => TableRow(
                               children: List.generate(7, (col) {
@@ -248,7 +240,6 @@ class _MainCalendarState extends State<MainCalendar> {
                               }),
                             )),
                           ),
-                          // 학사일정 바 (터치 무시)
                           IgnorePointer(child: Stack(children: [
                           ...bars.map((b) => Positioned(
                             top: b.row * cellH + barTop,
@@ -269,7 +260,6 @@ class _MainCalendarState extends State<MainCalendar> {
                                 overflow: TextOverflow.ellipsis, maxLines: 1) : null,
                             ),
                           )),
-                          // 개인 연속일정 바
                           ...pBars.map((b) => Positioned(
                             top: b.row * cellH + barTop,
                             left: b.sc * cellW + (b.isS ? 3 : 0),
@@ -307,15 +297,13 @@ class _MainCalendarState extends State<MainCalendar> {
     if (widget.personalBars == null || widget.personalBars!.isEmpty) return [];
     final result = <_PBar>[];
     for (final pb in widget.personalBars!) {
-      // 이 페이지에 해당하는 날짜 범위 찾기
       int si = -1, ei = -1;
       for (int i = 0; i < days.length; i++) {
         final dk = _dayKey(days[i]);
         if (dk == pb.startDate) si = i;
         if (dk == pb.endDate) ei = i;
       }
-      if (si < 0 || ei < 0 || si == ei) continue; // 단일 날짜는 점으로
-      // 주 단위 분할
+      if (si < 0 || ei < 0 || si == ei) continue;
       int i = si;
       while (i <= ei) {
         final row = i ~/ 7;
@@ -328,7 +316,6 @@ class _MainCalendarState extends State<MainCalendar> {
   }
 }
 
-/// 학사일정 연속 바의 주 단위 분할 정보를 담는 내부 모델
 class _Bar {
   final String name;
   final int row, sc, ec;
@@ -336,7 +323,6 @@ class _Bar {
   _Bar({required this.name, required this.row, required this.sc, required this.ec, required this.isS, required this.isE});
 }
 
-/// 개인일정 연속 바의 주 단위 분할 정보를 담는 내부 모델
 class _PBar {
   final String name;
   final int row, sc, ec, color;
@@ -344,10 +330,9 @@ class _PBar {
   _PBar({required this.name, required this.row, required this.sc, required this.ec, required this.isS, required this.isE, required this.color});
 }
 
-/// 개인 연속일정의 날짜 범위와 색상 정보를 담는 데이터 모델
 class PersonalEventBar {
   final String name;
-  final String startDate; // "2026-04-20"
+  final String startDate;
   final String endDate;
   final int color;
   PersonalEventBar({required this.name, required this.startDate, required this.endDate, required this.color});

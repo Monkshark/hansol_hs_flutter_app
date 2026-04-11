@@ -2,11 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/dark_app_colors.dart';
 import 'package:hansol_high_school/styles/light_app_colors.dart';
 
-/// 앱 테마 컬러 추상 클래스
-/// - 라이트/다크 테마에서 사용할 색상 속성을 추상으로 정의
-/// - AnimatedAppColors 싱글턴을 통해 다크/라이트 간 색상 보간(lerp) 지원
-/// - _light, _dark 인스턴스로 각 테마의 고정 색상 참조 가능
-/// - AppColors.theme으로 현재 보간된 색상에 접근
 abstract class AppColors {
   Color get transparent => Colors.transparent;
   Color get black;

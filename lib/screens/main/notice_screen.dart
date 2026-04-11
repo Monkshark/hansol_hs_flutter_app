@@ -11,12 +11,6 @@ import 'package:hansol_high_school/widgets/calendar/today_banner.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 일정 화면 (NoticeScreen)
-///
-/// - 월간 캘린더에서 날짜를 선택하여 일정 조회
-/// - 개인 일정과 NEIS 학사일정을 함께 표시
-/// - 바텀시트를 통한 개인 일정 추가 기능
-/// - 스와이프 제스처로 개인 일정 삭제 지원
 class NoticeScreen extends StatefulWidget {
   const NoticeScreen({Key? key}) : super(key: key);
 
@@ -51,7 +45,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
       DateTime(selectedDate.year, selectedDate.month, 1), 31);
     final map = <String, Set<int>>{};
     for (final s in allSchedules) {
-      if (s.endDate != null) continue; // 연속일정은 바로 표시, 점은 생략
+      if (s.endDate != null) continue;
       map.putIfAbsent(s.date.substring(0, 10), () => {}).add(s.color);
     }
     final barList = <PersonalEventBar>[];
@@ -245,14 +239,13 @@ class _NoticeScreenState extends State<NoticeScreen> {
         if (result == null) return false;
 
         if (result == 'all') {
-          return true; // onDismissed에서 전체 삭제
+          return true;
         }
 
-        // 이 날만 제외: 연속일정 분할
         await _excludeDateFromSchedule(schedule, selectedDate);
         _loadData();
         _loadPersonalEvents();
-        return false; // Dismissible 자체 삭제 안 함
+        return false;
       },
       onDismissed: (_) {
         setState(() => _schedules.removeAt(index));
@@ -288,7 +281,6 @@ class _NoticeScreenState extends State<NoticeScreen> {
 
     await db.deleteSchedule(schedule);
 
-    // 제외일 앞쪽 (start ~ 제외일-1)
     final beforeEnd = excludeDate.subtract(const Duration(days: 1));
     if (!beforeEnd.isBefore(start)) {
       final bEndStr = beforeEnd.toIso8601String().substring(0, 10);
@@ -301,7 +293,6 @@ class _NoticeScreenState extends State<NoticeScreen> {
       ));
     }
 
-    // 제외일 뒤쪽 (제외일+1 ~ end)
     final afterStart = excludeDate.add(const Duration(days: 1));
     if (!afterStart.isAfter(end)) {
       final aStartStr = afterStart.toIso8601String().substring(0, 10);

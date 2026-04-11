@@ -9,11 +9,6 @@ import 'package:path/path.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
-/// sqflite 기반 일정 데이터베이스
-///
-/// - 개인 일정 CRUD (생성/조회/수정/삭제)
-/// - SharedPreferences에서 sqflite로 마이그레이션 지원
-/// - Firestore 동기화 (로그인 시 자동 불러오기)
 class LocalDataBase {
   Database? _db;
 

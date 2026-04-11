@@ -5,12 +5,6 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
-/// 게시글 댓글 1개
-///
-/// - `data`: Firestore 댓글 doc 데이터
-/// - `isAuthor`: 현재 사용자가 작성자인지 (삭제 버튼 표시)
-/// - `isReply`: 대댓글 여부 (들여쓰기/배경)
-/// - `isPostAuthor`: 게시글 작성자가 단 댓글인지 (글쓴이 배지)
 class PostCommentItem extends StatelessWidget {
   final Map<String, dynamic> data;
   final bool isAuthor;
@@ -37,7 +31,6 @@ class PostCommentItem extends StatelessWidget {
     final isManagerView = AuthService.cachedProfile?.isManager ?? false;
     final realName = data['authorRealName'] as String?;
     final rawName = (data['authorName'] ?? AppLocalizations.of(context)!.post_anonymous) as String;
-    // 익명이면 per-post 익명N(또는 익명(글쓴이)) 번호 + manager view에선 실명 append
     final name = (isAnon && isManagerView && realName != null)
         ? '$rawName ($realName)'
         : rawName;
@@ -101,8 +94,6 @@ class PostCommentItem extends StatelessWidget {
     );
   }
 
-  /// 댓글 본문 텍스트에서 `@nickname` 패턴을 primary color로 강조
-  /// (한글/영문/숫자/언더바 + 익명숫자 형식 지원, 공백/마침표 등에서 종료)
   Widget _buildMentionText(String content, Color? textColor) {
     final pattern = RegExp(r'@([\w가-힣]+(?: [\w가-힣]+)*)');
     final matches = pattern.allMatches(content);

@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
-/// 커스텀 텍스트 필드 위젯
-/// - 라벨 + 입력 필드 구성의 재사용 가능한 폼 위젯
-/// - isTime 플래그로 시간 선택 전용 모드(readOnly + 시계 아이콘) 지원
-/// - 다크/라이트 테마에 따른 fillColor 자동 전환
 class CustomTextField extends StatelessWidget {
   final String label;
   final bool isTime;

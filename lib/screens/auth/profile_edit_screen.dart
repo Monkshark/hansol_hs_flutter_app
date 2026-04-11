@@ -13,11 +13,6 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
-/// 내 계정 화면
-///
-/// - 프로필 사진 변경
-/// - 내 정보 카드 (읽기 전용)
-/// - 회원 탈퇴
 class ProfileEditScreen extends StatefulWidget {
   const ProfileEditScreen({Key? key}) : super(key: key);
 
@@ -230,14 +225,12 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       if (user == null) return;
       final uid = user.uid;
 
-      // Firestore 데이터 먼저 삭제 (인증 상태 유지 중)
       await FirebaseFirestore.instance.collection('users').doc(uid).delete();
 
       try {
         await user.delete();
       } on FirebaseAuthException catch (e) {
         if (e.code == 'requires-recent-login') {
-          // Google 재인증 후 재시도
           try {
             final googleUser = await GoogleSignIn().signIn();
             if (googleUser != null) {

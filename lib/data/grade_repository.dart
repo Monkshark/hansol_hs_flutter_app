@@ -1,11 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
 
-/// 성적 관리 Repository (인스턴스 기반)
-///
-/// `GradeManager`의 정적 메서드를 인스턴스 메서드로 감싸 GetIt에 등록한다.
-/// 테스트에서 `MockGradeRepository`로 교체 가능 — Riverpod Provider 테스트에서
-/// `ProviderScope.overrides`와 결합해 sqflite/SharedPreferences 의존을 제거한다.
 abstract class GradeRepository {
   Future<List<Exam>> loadExams();
   Future<void> saveExams(List<Exam> exams);

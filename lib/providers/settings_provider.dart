@@ -1,12 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 
-/// 사용자 설정 Riverpod Provider
-///
-/// SettingData 싱글톤을 Riverpod Notifier로 래핑하여:
-/// - 변경 시 UI 자동 갱신 (`ref.watch`)
-/// - 테스트에서 ProviderScope.overrides로 mock 주입 가능
-/// - SettingData 직접 접근 패턴을 점진적으로 대체
 
 class GradeClassState {
   final int grade;
@@ -46,7 +40,6 @@ class GradeClassNotifier extends Notifier<GradeClassState> {
 final gradeClassProvider =
     NotifierProvider<GradeClassNotifier, GradeClassState>(GradeClassNotifier.new);
 
-/// 알림 설정 통합 상태
 class NotificationSettings {
   final bool breakfast;
   final String breakfastTime;
