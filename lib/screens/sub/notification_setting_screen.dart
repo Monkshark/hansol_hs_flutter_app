@@ -6,6 +6,8 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/notification_permission_sheet.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class NotificationSettingScreen extends StatefulWidget {
   const NotificationSettingScreen({Key? key}) : super(key: key);
@@ -14,7 +16,7 @@ class NotificationSettingScreen extends StatefulWidget {
   State<NotificationSettingScreen> createState() => _NotificationSettingScreenState();
 }
 
-class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
+class _NotificationSettingScreenState extends State<NotificationSettingScreen> with WidgetsBindingObserver {
   late bool _breakfast;
   late bool _lunch;
   late bool _dinner;
@@ -31,17 +33,46 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
   bool _notiPopular = true;
   final Map<String, bool> _notiCategory = {};
   bool _isLoading = true;
+  bool _hasPermission = true;
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) _checkPermission();
+  }
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _breakfast = SettingData().isBreakfastNotificationOn;
     _lunch = SettingData().isLunchNotificationOn;
     _dinner = SettingData().isDinnerNotificationOn;
     _breakfastTime = _parseTime(SettingData().breakfastTime);
     _lunchTime = _parseTime(SettingData().lunchTime);
     _dinnerTime = _parseTime(SettingData().dinnerTime);
+    _checkPermission();
     _loadPushSettings();
+  }
+
+  Future<void> _checkPermission() async {
+    final status = await Permission.notification.status;
+    if (mounted) setState(() => _hasPermission = status.isGranted);
+  }
+
+  Future<bool> _ensurePermission() async {
+    if (_hasPermission) return true;
+    final allowed = await NotificationPermissionSheet.show(context, openSettings: true);
+    if (allowed && mounted) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      await _checkPermission();
+    }
+    return _hasPermission;
   }
 
   TimeOfDay _parseTime(String time) {
@@ -236,6 +267,7 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
   Widget _divider() => Divider(height: 1, indent: 16, endIndent: 16, color: AppColors.theme.lightGreyColor);
 
   Widget _pushRow(String title, String subtitle, bool value, ValueChanged<bool> onChanged) {
+    final displayValue = _hasPermission && value;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       child: Row(
@@ -248,9 +280,15 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
             ],
           )),
           Switch.adaptive(
-            value: value,
+            value: displayValue,
             activeColor: AppColors.theme.primaryColor,
-            onChanged: onChanged,
+            onChanged: (v) async {
+              if (!_hasPermission) {
+                await _ensurePermission();
+                return;
+              }
+              onChanged(v);
+            },
           ),
         ],
       ),
@@ -259,21 +297,32 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> {
 
   Widget _mealRow(String name, TimeOfDay time, bool enabled,
       ValueChanged<TimeOfDay> onTime, ValueChanged<bool> onSwitch) {
+    final displayEnabled = _hasPermission && enabled;
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
       child: Row(
         children: [
           Expanded(child: Text(name, style: TextStyle(fontSize: 15, color: Theme.of(context).textTheme.bodyLarge?.color))),
           GestureDetector(
-            onTap: enabled ? () async {
+            onTap: displayEnabled ? () async {
               final picked = await showTimePicker(context: context, initialTime: time);
               if (picked != null) onTime(picked);
             } : null,
             child: Text(time.format(context), style: TextStyle(
-              fontSize: 14, color: enabled ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor)),
+              fontSize: 14, color: displayEnabled ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor)),
           ),
           const SizedBox(width: 12),
-          Switch.adaptive(value: enabled, activeColor: AppColors.theme.primaryColor, onChanged: onSwitch),
+          Switch.adaptive(
+            value: displayEnabled,
+            activeColor: AppColors.theme.primaryColor,
+            onChanged: (v) async {
+              if (!_hasPermission) {
+                await _ensurePermission();
+                return;
+              }
+              onSwitch(v);
+            },
+          ),
         ],
       ),
     );

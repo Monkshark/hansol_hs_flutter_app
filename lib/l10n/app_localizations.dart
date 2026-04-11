@@ -3050,6 +3050,42 @@ abstract class AppLocalizations {
   /// **'시작하기'**
   String get onboarding_start;
 
+  /// No description provided for @notiPermission_title.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림 허용'**
+  String get notiPermission_title;
+
+  /// No description provided for @notiPermission_desc.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 허용하면 급식 메뉴 등\n다양한 알림을 받을 수 있어요'**
+  String get notiPermission_desc;
+
+  /// No description provided for @notiPermission_allow.
+  ///
+  /// In ko, this message translates to:
+  /// **'허용'**
+  String get notiPermission_allow;
+
+  /// No description provided for @notiPermission_later.
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에'**
+  String get notiPermission_later;
+
+  /// No description provided for @notiPermission_settingsDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림을 받으려면 설정에서\n알림 권한을 허용해 주세요'**
+  String get notiPermission_settingsDesc;
+
+  /// No description provided for @notiPermission_openSettings.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정으로 이동'**
+  String get notiPermission_openSettings;
+
   /// No description provided for @settings_title.
   ///
   /// In ko, this message translates to:

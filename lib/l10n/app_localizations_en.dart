@@ -1624,6 +1624,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get onboarding_start => 'Get Started';
 
   @override
+  String get notiPermission_title => 'Enable Notifications';
+
+  @override
+  String get notiPermission_desc =>
+      'Allow notifications to receive\nmeal menus and other updates';
+
+  @override
+  String get notiPermission_allow => 'Allow';
+
+  @override
+  String get notiPermission_later => 'Later';
+
+  @override
+  String get notiPermission_settingsDesc =>
+      'Please allow notification\npermission in settings';
+
+  @override
+  String get notiPermission_openSettings => 'Open Settings';
+
+  @override
   String get settings_title => 'Settings';
 
   @override

@@ -517,6 +517,13 @@
   "onboarding_next": "Next",
   "onboarding_start": "Get Started",
 
+  "notiPermission_title": "Enable Notifications",
+  "notiPermission_desc": "Allow notifications to receive\nmeal menus and other updates",
+  "notiPermission_allow": "Allow",
+  "notiPermission_later": "Later",
+  "notiPermission_settingsDesc": "Please allow notification\npermission in settings",
+  "notiPermission_openSettings": "Open Settings",
+
   "settings_title": "Settings",
   "settings_schoolSection": "School Information",
   "settings_gradeClass": "Grade/Class Settings",
