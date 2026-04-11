@@ -47,6 +47,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   bool _sending = false;
   bool _commentAnonymous = false;
   int _refreshTick = 0;
+  String _prevCommentText = '';
 
   String? _replyToCommentId;
   String? _replyToName;
@@ -55,9 +56,36 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       FirebaseFirestore.instance.collection('posts').doc(widget.postId);
 
   @override
+  void initState() {
+    super.initState();
+    _commentController.addListener(_onCommentChanged);
+  }
+
+  @override
   void dispose() {
+    _commentController.removeListener(_onCommentChanged);
     _commentController.dispose();
     super.dispose();
+  }
+
+  void _onCommentChanged() {
+    final text = _commentController.text;
+    final prev = _prevCommentText;
+    _prevCommentText = text;
+    if (text.length >= prev.length) return;
+    final mentionPattern = RegExp(r'@[\w가-힣]+');
+    for (final m in mentionPattern.allMatches(prev)) {
+      final cursorPos = _commentController.selection.baseOffset;
+      if (cursorPos > m.start && cursorPos <= m.end && !text.contains(m.group(0)!)) {
+        final newText = prev.substring(0, m.start) + prev.substring(m.end);
+        _commentController.removeListener(_onCommentChanged);
+        _commentController.text = newText;
+        _commentController.selection = TextSelection.collapsed(offset: m.start);
+        _prevCommentText = newText;
+        _commentController.addListener(_onCommentChanged);
+        return;
+      }
+    }
   }
 
   Future<void> _refresh() async {
