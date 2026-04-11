@@ -12,7 +12,7 @@
 static Future<List<Subject>> loadSelectedSubjects(int grade)
 ```
 
-**설명**: 학년별 선택과목 목록을 로드한다
+**설명**: 학년별 선택과목 목록을 로드함
 
 1. SharedPreferences에서 로컬 데이터 확인:
    ```dart
@@ -43,7 +43,7 @@ static Future<List<Subject>> loadSelectedSubjects(int grade)
 static Future<void> saveSelectedSubjects(int grade, List<Subject> selectedSubjects)
 ```
 
-**설명**: 선택과목을 로컬과 Firestore 양쪽에 저장한다
+**설명**: 선택과목을 로컬과 Firestore 양쪽에 저장함
 
 1. 로컬 SharedPreferences에 즉시 저장:
    ```dart

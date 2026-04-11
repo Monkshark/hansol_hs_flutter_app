@@ -12,7 +12,7 @@
 static Future<void> initialize()
 ```
 
-**설명**: FCM 서비스를 초기화한다. `main()` 에서 한 번 호출
+**설명**: FCM 서비스를 초기화함. `main()` 에서 한 번 호출
 
 1. Android 알림 채널 생성 (`_initChannel`)
 
@@ -73,7 +73,7 @@ FCM 토큰을 Firestore `users/{uid}` 문서의 `fcmToken` 필드에 저장. Clo
 static Future<void> _subscribeTopics()
 ```
 
-[SettingData](../data/setting_data.md) 설정에 따라 토픽을 구독한다:
+[SettingData](../data/setting_data.md) 설정에 따라 토픽을 구독함:
 
 - `board_new_post`: 전체 게시판 알림
 - 카테고리별: `board_free`, `board_question`, `board_info`, `board_lost`, `board_council`, `board_club`
@@ -122,7 +122,7 @@ static Future<void> togglePopularNotification(bool enabled)
 static void _onForegroundMessage(RemoteMessage message)
 ```
 
-**설명**: 포그라운드에서 FCM 메시지 수신 시 로컬 알림으로 표시한다
+**설명**: 포그라운드에서 FCM 메시지 수신 시 로컬 알림으로 표시함
 
 ```dart
 _localNotifications.show(
@@ -142,7 +142,7 @@ _localNotifications.show(
 static Future<void> _handleDeepLink(Map<String, dynamic> data)
 ```
 
-**설명**: 알림 탭 시 data payload 기반으로 화면을 라우팅한다
+**설명**: 알림 탭 시 data payload 기반으로 화면을 라우팅함
 
 ```dart
 switch (type) {

@@ -17,7 +17,7 @@ static void init(BuildContext context) {
 }
 ```
 
-**설명**: 디바이스 크기를 초기화한다
+**설명**: 디바이스 크기를 초기화함
 
 `MainScreen.build`에서 매 빌드마다 호출:
 ```dart
@@ -37,7 +37,7 @@ static double getWidth(double percent) {
 }
 ```
 
-**설명**: 화면 너비의 퍼센트를 픽셀로 변환한다
+**설명**: 화면 너비의 퍼센트를 픽셀로 변환함
 
 ```dart
 // 예: 화면 너비가 400px일 때

@@ -12,7 +12,6 @@ const path = require('path');
 const docsDir = path.resolve(__dirname);
 const outFile = path.join(docsDir, 'index.html');
 
-// 1. Collect all .md files
 const mdFiles = {};
 function walk(dir, prefix) {
   for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -30,7 +29,6 @@ walk(docsDir, '');
 const fileCount = Object.keys(mdFiles).length;
 const jsonData = JSON.stringify(mdFiles);
 
-// 2. Read template and inject data
 const templateFile = path.join(docsDir, '_viewer_template.html');
 const template = fs.readFileSync(templateFile, 'utf8');
 const html = template.replace('/*__MD_DATA__*/', 'const MD_DATA = ' + jsonData + ';');

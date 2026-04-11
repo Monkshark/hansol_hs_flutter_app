@@ -2,7 +2,7 @@
 
 > `lib/api/notice_data_api.dart` — NEIS 학사일정 API 연동
 
-인스턴스 메서드 (singleton이 아님). NEIS 학사일정 API에서 학교 일정을 조회한다
+인스턴스 메서드 (singleton이 아님). NEIS 학사일정 API에서 학교 일정을 조회함
 
 ---
 
@@ -12,7 +12,7 @@
 Future<String?> getNotice({required DateTime date})
 ```
 
-**설명**: 특정 날짜의 학사일정 이름을 반환한다
+**설명**: 특정 날짜의 학사일정 이름을 반환함
 
 1. 캐시 확인 (12시간 TTL):
    ```dart
@@ -41,7 +41,7 @@ Future<String?> getNotice({required DateTime date})
 Future<UpcomingEvent?> getUpcomingEvent()
 ```
 
-**설명**: 가장 가까운 미래 학사 이벤트를 반환한다
+**설명**: 가장 가까운 미래 학사 이벤트를 반환함
 
 1. 캐시 확인 (6시간 TTL). D-day가 0 이상인지 재계산:
    ```dart
@@ -69,7 +69,7 @@ Future<UpcomingEvent?> getUpcomingEvent()
 Future<List<UpcomingEvent>> getEventsInRange({int days = 30})
 ```
 
-**설명**: 오늘부터 `days`일 범위 내 모든 학사 이벤트를 반환한다
+**설명**: 오늘부터 `days`일 범위 내 모든 학사 이벤트를 반환함
 
 캐시 없이 매번 API 호출. D-day 기준 정렬된 리스트 반환
 D-day 화면에서 "일정에서 D-day 추가" 기능에 사용
@@ -82,7 +82,7 @@ D-day 화면에서 "일정에서 D-day 추가" 기능에 사용
 Future<Map<DateTime, String>> getMonthEvents(DateTime month)
 ```
 
-**설명**: 월별 학사일정 맵을 반환한다 (캘린더 마커용)
+**설명**: 월별 학사일정 맵을 반환함 (캘린더 마커용)
 
 1. 캐시 확인 (12시간 TTL, `month_events_v2_` 키):
    ```dart

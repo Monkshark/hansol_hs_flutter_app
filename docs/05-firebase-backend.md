@@ -406,7 +406,7 @@ Release: AppAttest
 ## 에러 로깅
 
 ### function_logs 컬렉션
-모든 Cloud Function 에러가 기록된다:
+모든 Cloud Function 에러가 기록됨:
 
 ```javascript
 await logError("functionName", error, { extra: "context" });
@@ -415,7 +415,7 @@ await logError("functionName", error, { extra: "context" });
 ```
 
 ### crash_logs 컬렉션
-클라이언트 Flutter 에러가 기록된다 (로그인 상태일 때만):
+클라이언트 Flutter 에러가 기록됨 (로그인 상태일 때만):
 
 ```dart
 // main.dart

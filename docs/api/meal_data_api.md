@@ -2,7 +2,7 @@
 
 > `lib/api/meal_data_api.dart` — NEIS 급식 API 연동
 
-모든 메서드가 `static`. NEIS 교육정보 API에서 급식 데이터를 조회하고, SharedPreferences에 캐싱한다
+모든 메서드가 `static`. NEIS 교육정보 API에서 급식 데이터를 조회하고, SharedPreferences에 캐싱함
 
 ---
 
@@ -26,11 +26,11 @@ static Future<Meal?> getMeal({
 })
 ```
 
-**설명**: 특정 날짜·식사 유형의 급식 데이터를 반환한다
+**설명**: 특정 날짜·식사 유형의 급식 데이터를 반환함
 
 **흐름**:
 
-1. 캐시 키를 생성한다:
+1. 캐시 키를 생성함:
    ```dart
    final cacheKey = _cacheKey(date, mealType);
    // → "meal_20260410_2" 형태
@@ -75,7 +75,7 @@ static Future<Meal> _fetchSingleMeal(
   DateTime date, int mealType, SharedPreferences prefs, String cacheKey)
 ```
 
-**설명**: 단일 날짜·식사의 급식을 NEIS API로 직접 요청한다
+**설명**: 단일 날짜·식사의 급식을 NEIS API로 직접 요청함
 
 1. NEIS API URL을 구성:
    ```dart
@@ -107,7 +107,7 @@ static Future<Meal> _fetchSingleMeal(
 static Future<void> _prefetchMonth(DateTime date)
 ```
 
-**설명**: 해당 월의 전체 급식을 한 번의 API 호출로 프리페치한다
+**설명**: 해당 월의 전체 급식을 한 번의 API 호출로 프리페치함
 
 1. 같은 월이 이미 프리페치 중이면 그 Future를 대기:
    ```dart
@@ -141,7 +141,7 @@ static Future<void> _prefetchMonth(DateTime date)
 static Future<void> prefetchWeek(DateTime baseDate)
 ```
 
-**설명**: 주간 뷰 진입 시 해당 주의 급식을 프리페치한다
+**설명**: 주간 뷰 진입 시 해당 주의 급식을 프리페치함
 
 - 월~금이 같은 달이면 `_prefetchMonth` 1회
 - 달이 걸치면 2개월 병렬 프리페치:
@@ -157,7 +157,7 @@ static Future<void> prefetchWeek(DateTime baseDate)
 static Meal? _getFromCache(SharedPreferences prefs, String key)
 ```
 
-**설명**: 캐시에서 급식 데이터를 읽되, 만료된 데이터는 null 반환한다
+**설명**: 캐시에서 급식 데이터를 읽되, 만료된 데이터는 null 반환함
 
 **캐시 전략 (차등 TTL)**:
 - 정상 급식 데이터 → **24시간** 캐시
@@ -189,7 +189,7 @@ static void _saveToCache(SharedPreferences prefs, String key, Meal meal)
 static Future<void> clearCacheForDate(DateTime date)
 ```
 
-특정 날짜의 조식/중식/석식 캐시를 모두 삭제한다
+특정 날짜의 조식/중식/석식 캐시를 모두 삭제함
 
 ---
 
@@ -199,7 +199,7 @@ static Future<void> clearCacheForDate(DateTime date)
 static Future<Map<String, dynamic>?> _fetchData(String url)
 ```
 
-**설명**: HTTP GET 요청을 수행한다
+**설명**: HTTP GET 요청을 수행함
 
 - **타임아웃**: 10초
 - NEIS `INFO-200` (데이터 없음) 응답은 `null` 반환
@@ -213,6 +213,6 @@ static Future<Map<String, dynamic>?> _fetchData(String url)
 static Future<bool> isAllMealEmpty(DateTime date)
 ```
 
-**설명**: 특정 날짜에 급식이 하나도 없는지 확인한다
+**설명**: 특정 날짜에 급식이 하나도 없는지 확인함
 NEIS `INFO-200` 응답이면 `true` (급식 없음)
 홈 위젯에서 "급식 없음" 표시 여부 판단에 사용

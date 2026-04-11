@@ -60,7 +60,7 @@ class Exam {
 static int percentileToRank(double percentile)
 ```
 
-**설명**: 수능 백분위를 등급으로 변환한다 (9등급제)
+**설명**: 수능 백분위를 등급으로 변환함 (9등급제)
 
 ```dart
 if (percentile >= 96) return 1;
@@ -78,7 +78,7 @@ return 9;
 static Future<List<Exam>> loadExams()
 ```
 
-**설명**: 저장된 시험 목록을 로드한다
+**설명**: 저장된 시험 목록을 로드함
 
 1. SharedPreferences → SecureStorage 일회성 마이그레이션:
    ```dart
@@ -129,7 +129,7 @@ static Future<void> deleteExam(String id)
 static Future<Map<String, double>> loadGoals()
 ```
 
-**설명**: 수시 목표 등급(과목명 → 등급)을 로드한다
+**설명**: 수시 목표 등급(과목명 → 등급)을 로드함
 
 `loadExams`와 동일한 마이그레이션 + SecureStorage 패턴. 키: `SecureStorageService.keyGradeGoals`
 

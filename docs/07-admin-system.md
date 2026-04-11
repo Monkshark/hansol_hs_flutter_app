@@ -23,7 +23,7 @@ admin 또는 manager가 승인해야 게시판 등 주요 기능 이용 가능
 
 ### 정지 (suspendedUntil)
 
-관리자가 특정 기간 동안 사용자를 정지할 수 있다
+관리자가 특정 기간 동안 사용자를 정지할 수 있음
 
 ```
 정지 설정 → suspendedUntil: timestamp → 기능 제한
@@ -68,7 +68,7 @@ TabBar 기반 관리 대시보드
 
 ### 탭 간 상태 동기화
 
-`GlobalKey` 패턴으로 한 탭에서의 액션이 다른 탭에도 반영된다:
+`GlobalKey` 패턴으로 한 탭에서의 액션이 다른 탭에도 반영됨:
 
 ```dart
 // admin_screen.dart

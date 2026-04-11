@@ -2,7 +2,7 @@
 
 > `lib/widgets/home_widget/widget_service.dart` — 홈 화면 위젯 데이터 갱신
 
-`home_widget` 패키지를 사용해 Android/iOS 홈 화면 위젯에 급식/시간표 데이터를 전달한다
+`home_widget` 패키지를 사용해 Android/iOS 홈 화면 위젯에 급식/시간표 데이터를 전달함
 
 ---
 
@@ -12,7 +12,7 @@
 static Future<void> initialize()
 ```
 
-App Group ID를 설정한다 (`group.com.monkshark.hansol_high_school`). iOS 위젯 공유에 필요
+App Group ID를 설정함 (`group.com.monkshark.hansol_high_school`). iOS 위젯 공유에 필요
 
 ---
 
@@ -35,7 +35,7 @@ await Future.wait([updateMealWidget(), updateTimetableWidget()]);
 static Future<void> updateMealWidget()
 ```
 
-**설명**: 오늘의 급식 데이터를 위젯에 전달한다
+**설명**: 오늘의 급식 데이터를 위젯에 전달함
 
 1. 조식/중식/석식 병렬 조회:
    ```dart
@@ -68,7 +68,7 @@ static Future<void> updateMealWidget()
 static Future<void> updateTimetableWidget()
 ```
 
-**설명**: 오늘의 시간표 데이터를 위젯에 전달한다
+**설명**: 오늘의 시간표 데이터를 위젯에 전달함
 
 1. 학년/반 미설정 시 안내 메시지:
    ```dart
@@ -110,7 +110,7 @@ static String _cleanMealText(String? text)
 static int _getCurrentPeriod(DateTime now)
 ```
 
-**설명**: 현재 교시를 계산한다
+**설명**: 현재 교시를 계산함
 
 ```dart
 const starts = [500, 560, 620, 680, 750, 810, 870];  // 08:20, 09:20, ...
