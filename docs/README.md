@@ -44,7 +44,7 @@
 - [light_app_colors](styles/light_app_colors.md) — 라이트 테마 색상 구현체
 
 ## 변경 이력
-- [08-phase4-i18n-notifications](08-phase4-i18n-notifications.md) — i18n 완성, 인앱 언어 전환, 알림 딥링크, 버그 수정
+- [08-i18n-notifications](08-i18n-notifications.md) — i18n 완성, 인앱 언어 전환, 알림 딥링크, 버그 수정
 
 ## 유틸
 - [widget_service](widgets/home_widget/widget_service.md) — 홈 화면 위젯 데이터 갱신
