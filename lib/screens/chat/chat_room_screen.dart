@@ -299,6 +299,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                     final docs = snapshot.data?.docs ?? [];
                     if (docs.isEmpty) return Center(child: Text(AppLocalizations.of(context)!.chat_firstMessage, style: TextStyle(color: AppColors.theme.darkGreyColor)));
 
+                    int myUnreadRemaining = (otherUnread as int?) ?? 0;
+
                     return ListView.builder(
                       controller: _scrollController, reverse: true,
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -331,6 +333,15 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                         final timeStr = createdAt != null
                             ? '${createdAt.toDate().hour}:${createdAt.toDate().minute.toString().padLeft(2, '0')}' : '';
 
+                        bool showRead = false;
+                        if (isMe && !isDeleted) {
+                          if (myUnreadRemaining > 0) {
+                            myUnreadRemaining--;
+                          } else {
+                            showRead = true;
+                          }
+                        }
+
                         return Padding(
                           padding: const EdgeInsets.only(bottom: 6),
                           child: GestureDetector(
@@ -341,7 +352,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                               children: [
                                 if (isMe) ...[
                                   Column(crossAxisAlignment: CrossAxisAlignment.end, mainAxisSize: MainAxisSize.min, children: [
-                                    if (!isDeleted && (otherUnread as int) == 0)
+                                    if (showRead)
                                       Text(AppLocalizations.of(context)!.chat_read, style: TextStyle(fontSize: 9, color: AppColors.theme.primaryColor, fontWeight: FontWeight.w600)),
                                     Text(timeStr, style: TextStyle(fontSize: 10, color: AppColors.theme.darkGreyColor)),
                                   ]),
