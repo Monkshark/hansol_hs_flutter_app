@@ -353,7 +353,7 @@ graph LR
 - **공지 시스템** (최대 3개, 상단 고정, 관리자 전용)
 - **댓글 + 대댓글** (들여쓰기), 글쓴이 댓글 구분 (파란 배경 + 뱃지)
 - **익명 번호제**: 익명1/익명2/익명(글쓴이), Firestore Transaction
-- **@멘션**: 댓글에서 `@닉네임` 하이라이트 (띄어쓰기 포함 이름 지원), 멘션 대상에게 푸시 알림
+- **@멘션**: 댓글에서 `@이름` 하이라이트, 멘션 대상에게 푸시 알림, 백스페이스 시 멘션 통째 삭제
 - **투표** 첨부 (최대 6선택지, 실시간 결과 바)
 - **추천/비추천**: `Map<uid,bool>` + `likeCount` int counter, rules 단계 ±1 delta 검증
 - **이미지 첨부**: 1080px 압축 + EXIF/GPS 제거, PageView swipe viewer + Hero animation + pinch-zoom
@@ -370,7 +370,7 @@ graph LR
 
 - **유저 검색**으로 새 채팅 시작 (이름/학번 검색, 관리자 기본 표시) ([ChatUtils](docs/screens/chat/chat_utils.md))
 - **실시간 메시지** (Firestore onSnapshot, limit 30)
-- **읽음 표시** + 읽지 않은 메시지 수 뱃지
+- **읽음 표시** (per-message 카운터 기반) + 읽지 않은 메시지 수 뱃지
 - **메시지 삭제**: 나만 삭제 / 같이 삭제 (안 읽었고 1시간 이내)
 - **채팅방 나가기**: 시스템 메시지 + 상대방 채팅 유지
 - 스켈레톤 로딩 UI
@@ -385,7 +385,7 @@ graph LR
 - [**FCM 푸시**](docs/notification/fcm_service.md): 댓글, 대댓글, 새 글, 가입/승인/거절/정지/정지 해제/역할변경, 채팅
 - **딥링크 라우팅**: 알림 탭 시 해당 화면으로 자동 이동 — 게시글 상세, 채팅방, 관리자 화면(가입 요청), 알림 화면(계정 승인)
 - **중복 알림 방지**: 대댓글 알림을 보낸 대상에게 게시글 댓글 알림 중복 발송 스킵
-- **권한 요청 타이밍**: 앱 최초 실행 시가 아닌 온보딩 완료 후 요청하여 사용자 경험 개선
+- **권한 요청 바텀시트**: 온보딩 완료 후 바텀시트로 알림 허용 유도 (pre-permission 패턴), 설정에서 토글 시 권한 없으면 바텀시트 재호출 → OS 설정 이동
 - **정지 만료 자동 해제**: Cloud Functions 스케줄러 (매시간)
 </details>
 
@@ -415,7 +415,7 @@ graph LR
 - **승인 플로우**: 가입 요청 → 관리자 승인
 - **3단계 역할**: user → manager → admin
 - **계정 정지** (1시간~30일, 자동 해제) + **회원 탈퇴** (이중 확인, 완전 삭제)
-- **프로필 사진**, 개인정보 동의, 온보딩 → 로그인 플로우
+- **프로필 사진**, 개인정보 동의, 이름 띄어쓰기 검사, 온보딩 → 로그인 플로우
 </details>
 
 <details>
@@ -735,6 +735,15 @@ erDiagram
 1. **delegate.load()**: 알림·위젯 서비스에서 `AppLocalizations.delegate.load(Locale('ko'))`로 context 없이 번역 객체 획득
 2. **key 반환 + UI 번역**: `getMealType()` → `getMealTypeKey()` (key 문자열 반환), UI 계층에서 `meal_breakfast`/`meal_lunch`/`meal_dinner` ARB 키로 변환
 3. **dual getter**: `displayName` (한국어, Firestore 저장용) + `localizedDisplayName(l)` (UI 표시용) 분리하여 기존 데이터 호환성 유지
+</details>
+
+<details>
+<summary><b>채팅 읽음 표시 전체 소실 (Global Counter Bug)</b></summary>
+<br>
+
+**문제:** 새 메시지를 전송하면 상대방의 `unreadCount`가 1로 증가하면서, 글로벌 `otherUnread == 0` 조건으로 읽음을 판정하던 기존 로직이 모든 메시지의 "읽음" 표시를 일괄 제거
+
+**해결:** 글로벌 비교 대신 per-message 카운터(`myUnreadRemaining`) 도입. `otherUnread` 값으로 초기화 후 최신 메시지부터 역순 순회하며 1씩 차감 — 카운터가 0이 된 이후의 메시지만 "읽음" 표시. 기존 단일 문서 스트림 구조를 유지하면서 정확한 per-message 읽음 판정 달성
 </details>
 
 <details>
