@@ -1,13 +1,13 @@
 # 외부 API 연동 가이드
 
-> 각 클래스의 함수별 상세 설명은 [API Reference](api/README.md)를 참조한다
+> 각 클래스의 함수별 상세 설명은 [API Reference](api/README.md)를 참조함
 
 ---
 
 ## NEIS 교육정보 API
 
-교육부 [NEIS 교육정보 개방 포털](https://open.neis.go.kr/)에서 제공하는 공개 API이다
-급식, 시간표, 학사일정 데이터를 조회한다
+교육부 [NEIS 교육정보 개방 포털](https://open.neis.go.kr/)에서 제공하는 공개 API임
+급식, 시간표, 학사일정 데이터를 조회함
 
 ### API 키
 
@@ -102,7 +102,7 @@ class KakaoKeys {
 
 ### UID 형식
 
-Kakao 사용자는 Firebase에서 `kakao:{kakaoUserId}` 형태의 UID를 사용한다
+Kakao 사용자는 Firebase에서 `kakao:{kakaoUserId}` 형태의 UID를 사용함
 
 ### 주의사항
 

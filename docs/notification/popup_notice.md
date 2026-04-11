@@ -12,7 +12,7 @@ Firestore `app_config/popup` 문서 기반 긴급/이벤트 팝업
 static Future<void> check(BuildContext context)
 ```
 
-**설명**: 활성 팝업이 있으면 다이얼로그를 표시한다. `MainScreen.initState`에서 호출
+**설명**: 활성 팝업이 있으면 다이얼로그를 표시함. `MainScreen.initState`에서 호출
 
 1. Firestore에서 팝업 설정 조회:
    ```dart

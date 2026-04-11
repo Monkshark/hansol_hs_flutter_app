@@ -12,7 +12,7 @@
 static Future<List<String>> load()
 ```
 
-**설명**: 저장된 검색 기록을 로드한다
+**설명**: 저장된 검색 기록을 로드함
 
 ```dart
 final raw = prefs.getString(_key);  // 'board_search_history'
@@ -30,7 +30,7 @@ return decoded.whereType<String>().toList();
 static Future<void> add(String query)
 ```
 
-**설명**: 검색어를 기록에 추가한다. 중복 제거 + FIFO
+**설명**: 검색어를 기록에 추가함. 중복 제거 + FIFO
 
 ```dart
 final trimmed = query.trim();

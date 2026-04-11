@@ -44,11 +44,11 @@
 
 ## 상태 관리 전략
 
-이 프로젝트는 **Riverpod 2.5**를 핵심 상태 관리 도구로 사용하되, 레거시 호환을 위해 일부 패턴이 공존한다
+이 프로젝트는 **Riverpod 2.5**를 핵심 상태 관리 도구로 사용하되, 레거시 호환을 위해 일부 패턴이 공존함
 
 ### 1. Riverpod AsyncNotifier / Notifier
 
-가장 권장되는 패턴. 비동기 데이터를 `AsyncValue<T>`로 래핑해 로딩/에러/데이터 상태를 자동 관리한다
+가장 권장되는 패턴. 비동기 데이터를 `AsyncValue<T>`로 래핑해 로딩/에러/데이터 상태를 자동 관리함
 
 ```dart
 // providers/grade_provider.dart
@@ -69,7 +69,7 @@ class ExamsNotifier extends AsyncNotifier<List<Exam>> {
 
 ### 2. StreamProvider
 
-Firebase 실시간 데이터에 사용한다
+Firebase 실시간 데이터에 사용함
 
 ```dart
 // providers/auth_provider.dart
@@ -80,7 +80,7 @@ final authStateProvider = StreamProvider<User?>((ref) {
 
 ### 3. 파생 Provider
 
-다른 Provider에서 계산된 값을 도출한다
+다른 Provider에서 계산된 값을 도출함
 
 ```dart
 final isManagerProvider = Provider<bool>((ref) {
@@ -90,8 +90,8 @@ final isManagerProvider = Provider<bool>((ref) {
 
 ### 4. StreamBuilder (위젯 내 직접 사용)
 
-Firestore 실시간 스트림은 대부분 위젯에서 직접 `StreamBuilder`로 소비한다
-게시글 목록, 댓글, 채팅 메시지, 알림 등이 이 패턴이다
+Firestore 실시간 스트림은 대부분 위젯에서 직접 `StreamBuilder`로 소비함
+게시글 목록, 댓글, 채팅 메시지, 알림 등이 이 패턴임
 
 ```dart
 // board/post_detail_screen.dart
@@ -103,7 +103,7 @@ StreamBuilder<DocumentSnapshot>(
 
 ### 5. FutureBuilder
 
-1회성 비동기 데이터 로드에 사용한다
+1회성 비동기 데이터 로드에 사용함
 
 ```dart
 // meal_screen.dart
@@ -115,7 +115,7 @@ FutureBuilder<Meal?>(
 
 ### 6. 레거시: ValueNotifier + setState
 
-일부 화면은 아직 `setState` 기반이다. `themeNotifier`는 Riverpod `themeProvider`와 양방향 동기화된다
+일부 화면은 아직 `setState` 기반임. `themeNotifier`는 Riverpod `themeProvider`와 양방향 동기화됨
 
 ```dart
 // main.dart (레거시 ↔ Riverpod 동기화)
@@ -143,7 +143,7 @@ void _onThemeChanged() {
 
 ### GetIt 서비스 로케이터
 
-`service_locator.dart`에서 앱 시작 시 싱글톤 서비스를 등록한다
+`service_locator.dart`에서 앱 시작 시 싱글톤 서비스를 등록함
 
 ```dart
 Future<void> setupServiceLocator() async {
@@ -246,7 +246,7 @@ AppColors (abstract)
   └── AnimatedAppColors (싱글톤) - 색상 보간(lerp) 애니메이션
 ```
 
-[`AnimatedAppColors`](styles/app_colors.md)는 라이트/다크 색상 사이를 0.0~1.0 progress로 보간한다:
+[`AnimatedAppColors`](styles/app_colors.md)는 라이트/다크 색상 사이를 0.0~1.0 progress로 보간함:
 
 ```dart
 AppColors.theme.primaryColor    // 현재 테마의 primary 색상
@@ -283,7 +283,7 @@ SettingData.themeModeIndex (SharedPreferences)
 
 ### 데이터 동기화 패턴
 
-여러 데이터는 **로컬 우선 + Firestore 백업** 전략을 사용한다:
+여러 데이터는 **로컬 우선 + Firestore 백업** 전략을 사용함:
 
 ```
 앱 시작
@@ -303,7 +303,7 @@ SettingData.themeModeIndex (SharedPreferences)
 
 ### Freezed 모델
 
-불변(immutable) 데이터 클래스를 자동 생성한다:
+불변(immutable) 데이터 클래스를 자동 생성함:
 
 ```dart
 // data/meal.dart
@@ -321,11 +321,11 @@ class Meal with _$Meal {
 }
 ```
 
-`build_runner`가 `meal.freezed.dart` + `meal.g.dart`를 생성한다
+`build_runner`가 `meal.freezed.dart` + `meal.g.dart`를 생성함
 
 ### Riverpod Generator
 
-`@Riverpod` 어노테이션으로 Provider를 자동 생성한다:
+`@Riverpod` 어노테이션으로 Provider를 자동 생성함:
 
 ```dart
 // providers/theme_provider.dart
@@ -364,4 +364,4 @@ Flutter 에러 발생
 
 ### Firebase 초기화 실패
 
-main.dart에서 Firebase 초기화를 try/catch로 감싸 앱 자체는 항상 실행되도록 한다
+main.dart에서 Firebase 초기화를 try/catch로 감싸 앱 자체는 항상 실행되도록 함

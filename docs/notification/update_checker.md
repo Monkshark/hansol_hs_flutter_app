@@ -10,7 +10,7 @@
 static Future<void> check(BuildContext context)
 ```
 
-**설명**: 앱 버전을 체크하고 업데이트 다이얼로그를 표시한다. `MainScreen.initState`에서 호출
+**설명**: 앱 버전을 체크하고 업데이트 다이얼로그를 표시함. `MainScreen.initState`에서 호출
 
 1. Firestore에서 버전 정보 조회:
    ```dart
@@ -53,7 +53,7 @@ static Future<void> check(BuildContext context)
 static int _compareVersions(String a, String b)
 ```
 
-**설명**: 시맨틱 버전을 비교한다 (major.minor.patch)
+**설명**: 시맨틱 버전을 비교함 (major.minor.patch)
 
 ```dart
 final aParts = a.split('.').map(int.parse).toList();

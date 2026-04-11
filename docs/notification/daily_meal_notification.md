@@ -12,7 +12,7 @@
 Future<void> initializeNotifications()
 ```
 
-**설명**: 로컬 알림 플러그인을 초기화한다
+**설명**: 로컬 알림 플러그인을 초기화함
 
 1. Android/iOS 초기화 설정:
    ```dart
@@ -43,7 +43,7 @@ Future<void> initializeNotifications()
 Future<void> scheduleDailyNotifications()
 ```
 
-**설명**: [SettingData](../data/setting_data.md) 설정에 따라 평일(월~금) 반복 알림을 등록한다
+**설명**: [SettingData](../data/setting_data.md) 설정에 따라 평일(월~금) 반복 알림을 등록함
 
 ```dart
 if (settings.isBreakfastNotificationOn) {
@@ -70,7 +70,7 @@ Future<void> _scheduleWeeklyNotification({
 })
 ```
 
-**설명**: 특정 식사의 요일별 반복 알림을 등록한다
+**설명**: 특정 식사의 요일별 반복 알림을 등록함
 
 1. 오늘의 급식 메뉴를 미리 조회해 알림 본문에 포함:
    ```dart

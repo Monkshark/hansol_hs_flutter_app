@@ -36,7 +36,7 @@ int get dDay {
 static Future<List<DDay>> loadAll()
 ```
 
-**설명**: 전체 D-day 목록을 로드한다
+**설명**: 전체 D-day 목록을 로드함
 
 1. SharedPreferences → SecureStorage 일회성 마이그레이션:
    ```dart
@@ -70,7 +70,7 @@ static Future<List<DDay>> loadAll()
 static Future<void> saveAll(List<DDay> list)
 ```
 
-**설명**: D-day 목록 전체를 저장하고 Firestore에 동기화한다
+**설명**: D-day 목록 전체를 저장하고 Firestore에 동기화함
 
 ```dart
 await SecureStorageService.write(
@@ -90,7 +90,7 @@ Firestore 동기화는 비동기로 실행 (실패해도 로컬은 저장됨)
 static Future<DDay?> getPinned()
 ```
 
-**설명**: 핀 된 D-day 중 가장 가까운 미래 항목을 반환한다
+**설명**: 핀 된 D-day 중 가장 가까운 미래 항목을 반환함
 
 ```dart
 final pinned = list.where((d) => d.isPinned && d.dDay >= 0).toList();
@@ -108,7 +108,7 @@ return pinned.first;
 static Future<List<DDay>> _loadFromFirestore()
 ```
 
-**설명**: Firestore `users/{uid}/sync/ddays` 문서에서 D-day 목록을 복원한다
+**설명**: Firestore `users/{uid}/sync/ddays` 문서에서 D-day 목록을 복원함
 
 ```dart
 final doc = await FirebaseFirestore.instance
@@ -127,7 +127,7 @@ final doc = await FirebaseFirestore.instance
 static Future<void> _syncToFirestore(List<DDay> list)
 ```
 
-**설명**: D-day 목록을 Firestore에 동기화한다
+**설명**: D-day 목록을 Firestore에 동기화함
 
 ```dart
 await FirebaseFirestore.instance

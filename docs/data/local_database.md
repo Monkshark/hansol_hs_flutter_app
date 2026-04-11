@@ -46,7 +46,7 @@ Lazy singleton 패턴. 최초 호출 시 DB 생성/열기
 Future<Database> _initDB()
 ```
 
-**설명**: SQLite DB를 열고 스키마를 생성한다
+**설명**: SQLite DB를 열고 스키마를 생성함
 
 ```dart
 return openDatabase(
@@ -72,7 +72,7 @@ v1→v2 마이그레이션: `endDate`, `color` 컬럼 추가
 Future<void> migrateFromPrefs()
 ```
 
-**설명**: SharedPreferences의 레거시 일정 데이터를 SQLite로 마이그레이션한다
+**설명**: SharedPreferences의 레거시 일정 데이터를 SQLite로 마이그레이션함
 
 ```dart
 final old = prefs.getStringList('schedules');
@@ -104,7 +104,7 @@ Future<int> insertSchedule(Schedule schedule)
 Future<void> deleteSchedule(Schedule schedule)
 ```
 
-**설명**: 일정을 삭제한다. ID가 있으면 ID로, 없으면 복합 조건으로 매칭한다
+**설명**: 일정을 삭제함. ID가 있으면 ID로, 없으면 복합 조건으로 매칭함
 
 ```dart
 if (schedule.id != null) {
@@ -127,7 +127,7 @@ if (schedule.id != null) {
 Stream<List<Schedule>> watchSchedules(DateTime date)
 ```
 
-**설명**: 특정 날짜의 일정 목록을 스트림으로 반환한다
+**설명**: 특정 날짜의 일정 목록을 스트림으로 반환함
 
 ```dart
 final results = await db.query(
@@ -160,7 +160,7 @@ Future<List<Schedule>> getSchedulesForDateRange(DateTime start, int days)
 Future<void> syncToFirestore()
 ```
 
-**설명**: 전체 일정 목록을 Firestore에 동기화한다
+**설명**: 전체 일정 목록을 Firestore에 동기화함
 
 ```dart
 final all = await _getAllSchedules();
@@ -183,7 +183,7 @@ await FirebaseFirestore.instance
 Future<void> loadFromFirestore()
 ```
 
-**설명**: Firestore에서 일정을 복원한다 (로컬 DB가 비어있을 때만)
+**설명**: Firestore에서 일정을 복원함 (로컬 DB가 비어있을 때만)
 
 ```dart
 final existing = await db.query('schedules');
