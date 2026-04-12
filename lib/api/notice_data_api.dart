@@ -31,8 +31,14 @@ class NoticeDataApi {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
       const halfDay = 12 * 60 * 60 * 1000;
+      const maxStale = 2 * 24 * 60 * 60 * 1000; // SWR: 2일까지 stale 허용
 
-      if (currentTime - cachedTimestamp < halfDay) {
+      final age = currentTime - cachedTimestamp;
+      if (age < halfDay) {
+        return prefs.getString(cacheKey);
+      } else if (age < maxStale) {
+        // SWR: stale 캐시 즉시 반환
+        log('$_tag: getNotice stale cache for $cacheKey');
         return prefs.getString(cacheKey);
       } else {
         prefs.remove(cacheKey);

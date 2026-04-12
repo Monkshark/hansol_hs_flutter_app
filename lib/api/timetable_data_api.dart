@@ -29,10 +29,12 @@ class TimetableDataApi {
       final cachedTimestamp = prefs.getInt('$cacheKey-timestamp') ?? 0;
       final currentTime = DateTime.now().millisecondsSinceEpoch;
       const oneDay = 12 * 60 * 60 * 1000;
+      const maxStale = 3 * 24 * 60 * 60 * 1000; // SWR: 3일까지 stale 허용
 
-      if (currentTime - cachedTimestamp < oneDay) {
-        final cachedData = prefs.getString(cacheKey);
-        if (cachedData != null) {
+      final cachedData = prefs.getString(cacheKey);
+      if (cachedData != null) {
+        final age = currentTime - cachedTimestamp;
+        if (age < oneDay) {
           log('$_tag: getTimeTable cache HIT');
           final decoded = jsonDecode(cachedData) as Map<String, dynamic>;
           return decoded.map((key, value) => MapEntry(
@@ -40,10 +42,19 @@ class TimetableDataApi {
                 (value as Map<String, dynamic>)
                     .map((k, v) => MapEntry(k, List<String>.from(v))),
               ));
+        } else if (age < maxStale) {
+          // SWR: stale 캐시 즉시 반환, 백그라운드 갱신은 다음 호출에서 처리
+          log('$_tag: getTimeTable stale cache (${(age / 3600000).toStringAsFixed(1)}h old)');
+          final decoded = jsonDecode(cachedData) as Map<String, dynamic>;
+          return decoded.map((key, value) => MapEntry(
+                key,
+                (value as Map<String, dynamic>)
+                    .map((k, v) => MapEntry(k, List<String>.from(v))),
+              ));
+        } else {
+          prefs.remove(cacheKey);
+          prefs.remove('$cacheKey-timestamp');
         }
-      } else {
-        prefs.remove(cacheKey);
-        prefs.remove('$cacheKey-timestamp');
       }
     }
 
