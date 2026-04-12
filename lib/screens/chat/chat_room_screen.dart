@@ -372,6 +372,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                         imageUrl: imageUrl,
                                         width: MediaQuery.of(context).size.width * 0.55,
                                         fit: BoxFit.cover,
+                                        memCacheWidth: 600,
                                         placeholder: (_, __) => Container(
                                           width: MediaQuery.of(context).size.width * 0.55,
                                           height: 180,
