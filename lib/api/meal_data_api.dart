@@ -35,7 +35,13 @@ class MealDataApi {
 
     final cached = _getFromCache(prefs, cacheKey);
     if (cached != null && cached.meal != null && cached.meal != '급식 정보가 없습니다.' && cached.meal != '급식 정보가 없습니다') {
-      log('MealDataApi: getMeal cache hit: ${cached.meal?.substring(0, cached.meal!.length > 20 ? 20 : cached.meal!.length)}');
+      if (_isCacheStale(prefs, cacheKey)) {
+        // SWR: 만료된 캐시를 즉시 반환하고 백그라운드에서 갱신
+        log('MealDataApi: getMeal stale cache, revalidating in background');
+        _prefetchMonth(date);
+      } else {
+        log('MealDataApi: getMeal cache hit: ${cached.meal?.substring(0, cached.meal!.length > 20 ? 20 : cached.meal!.length)}');
+      }
       return cached;
     }
     log('MealDataApi: getMeal cache miss');
@@ -215,11 +221,18 @@ class MealDataApi {
 
     if (meal.meal == '급식 정보가 없습니다.') {
       if (age > 5 * 60 * 1000) return null;
-    } else {
-      if (age > 24 * 60 * 60 * 1000) return null;
+    } else if (age > 24 * 60 * 60 * 1000) {
+      // SWR: 3일 이내면 stale 캐시 반환 (isCacheStale로 확인)
+      if (age > 3 * 24 * 60 * 60 * 1000) return null;
     }
 
     return meal;
+  }
+
+  static bool _isCacheStale(SharedPreferences prefs, String key) {
+    final ts = prefs.getInt('$key-ts') ?? 0;
+    final age = DateTime.now().millisecondsSinceEpoch - ts;
+    return age > 24 * 60 * 60 * 1000;
   }
 
   static void _saveToCache(SharedPreferences prefs, String key, Meal meal) {
