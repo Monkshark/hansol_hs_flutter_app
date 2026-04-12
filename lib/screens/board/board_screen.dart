@@ -416,6 +416,7 @@ class _BoardScreenState extends State<BoardScreen> {
       onRefresh: _loadPosts,
       child: ListView.separated(
         controller: isCurrent ? _scrollController : null,
+        cacheExtent: 500,
         padding: EdgeInsets.fromLTRB(16, 0, 16, MediaQuery.of(context).padding.bottom + 80),
         itemCount: docs.length + (_loadingMore && isCurrent ? 1 : 0),
         separatorBuilder: (_, __) => const SizedBox(height: 8),
@@ -614,7 +615,8 @@ class PostCard extends StatelessWidget {
     final createdAt = data['createdAt'] as Timestamp?;
     final timeStr = createdAt != null ? _formatTime(context, createdAt.toDate()) : '';
 
-    return GestureDetector(
+    return RepaintBoundary(
+      child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
@@ -700,6 +702,8 @@ class PostCard extends StatelessWidget {
                           CachedNetworkImage(
                             imageUrl: firstImage,
                             fit: BoxFit.cover,
+                            memCacheWidth: 400,
+                            memCacheHeight: 400,
                             placeholder: (_, __) => Container(
                               color: isDark ? const Color(0xFF252830) : const Color(0xFFEAEAEA),
                             ),
@@ -751,7 +755,7 @@ class PostCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 
   String _localizedCategoryName(BuildContext context, String key) {

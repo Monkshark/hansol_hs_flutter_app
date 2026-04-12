@@ -45,6 +45,7 @@ class PostImageGallery extends StatelessWidget {
                       imageUrl: imageUrls[i],
                       width: double.infinity,
                       fit: BoxFit.fitWidth,
+                      memCacheWidth: 800,
                       placeholder: (_, __) => const _ShimmerBox(height: 200),
                       errorWidget: (_, __, ___) => const _ErrorBox(height: 200),
                     ),
