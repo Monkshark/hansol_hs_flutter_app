@@ -45,7 +45,7 @@ class LightAppColors extends AppColors {
   Color get mealCardBackgroundColor => const Color(0xffDBE2EF);
 
   @override
-  Color get mealTypeTextColor => const Color(0xff848484);
+  Color get mealTypeTextColor => const Color(0xFF666666);
 
   @override
   Color get mealHeaderIconColor => const Color(0xffDBE2EF);

@@ -59,7 +59,8 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     final now = DateTime.now();
-    final dateStr = DateFormat(AppLocalizations.of(context)!.common_dateMdEEEE, Localizations.localeOf(context).toString()).format(now);
+    final l = AppLocalizations.of(context)!;
+    final dateStr = DateFormat(l.common_dateMdEEEE, Localizations.localeOf(context).toString()).format(now);
     final grade = SettingData().grade;
     final classNum = SettingData().classNum;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -108,6 +109,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 ),
                                 icon: const Icon(Icons.shield_outlined),
                                 color: Colors.white,
+                                tooltip: l.home_admin,
                               );
                             }
                             return const SizedBox.shrink();
@@ -131,6 +133,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     ),
                                     icon: const Icon(Icons.notifications_outlined),
                                     color: Colors.white,
+                                    tooltip: l.home_notification,
                                   ),
                                   if (unread > 0)
                                     Positioned(
@@ -157,6 +160,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ),
                           icon: const Icon(Icons.settings_outlined),
                           color: Colors.white,
+                          tooltip: l.home_settings,
                         ),
                       ],
                     ),
@@ -203,7 +207,10 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               children: [
                   const CurrentSubjectCard(),
                   const SizedBox(height: 16),
-                  GestureDetector(
+                  Semantics(
+                    button: true,
+                    label: l.home_timetableTitle,
+                    child: GestureDetector(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const TimetableViewScreen()),
                     ),
@@ -240,9 +247,12 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
-                  ),
+                  )),
                   const SizedBox(height: 8),
-                  GestureDetector(
+                  Semantics(
+                    button: true,
+                    label: l.home_gradesTitle,
+                    child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(builder: (_) => const GradeScreen()),
@@ -280,7 +290,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ],
                       ),
                     ),
-                  ),
+                  )),
                   const SizedBox(height: 16),
                   Container(
                     width: double.infinity,
@@ -290,7 +300,10 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     ),
                     child: Column(
                       children: [
-                        GestureDetector(
+                        Semantics(
+                          button: true,
+                          label: l.home_boardTitle,
+                          child: GestureDetector(
                           onTap: () => Navigator.push(context,
                             MaterialPageRoute(builder: (_) => const BoardScreen())),
                           child: Padding(
@@ -321,7 +334,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               ],
                             ),
                           ),
-                        ),
+                        )),
                         Divider(height: 1, color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFEEEEEE)),
                         _RecentPosts(),
                       ],
@@ -329,7 +342,10 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
                   const SizedBox(height: 16),
                   if (AuthService.isLoggedIn)
-                    GestureDetector(
+                    Semantics(
+                      button: true,
+                      label: l.home_chatTitle,
+                      child: GestureDetector(
                       onTap: () => Navigator.push(context,
                         MaterialPageRoute(builder: (_) => const ChatListScreen())),
                       child: Container(
@@ -365,7 +381,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           ],
                         ),
                       ),
-                    ),
+                    )),
                   const SizedBox(height: 16),
                   Row(
                     children: [
