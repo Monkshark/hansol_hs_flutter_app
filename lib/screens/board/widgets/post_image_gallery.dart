@@ -34,16 +34,20 @@ class PostImageGallery extends StatelessWidget {
                   ),
                 ),
               ),
-              child: Hero(
-                tag: '$heroTagPrefix-$i',
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: CachedNetworkImage(
-                    imageUrl: imageUrls[i],
-                    width: double.infinity,
-                    fit: BoxFit.fitWidth,
-                    placeholder: (_, __) => const _ShimmerBox(height: 200),
-                    errorWidget: (_, __, ___) => const _ErrorBox(height: 200),
+              child: Semantics(
+                label: '${i + 1}/${imageUrls.length}',
+                image: true,
+                child: Hero(
+                  tag: '$heroTagPrefix-$i',
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: CachedNetworkImage(
+                      imageUrl: imageUrls[i],
+                      width: double.infinity,
+                      fit: BoxFit.fitWidth,
+                      placeholder: (_, __) => const _ShimmerBox(height: 200),
+                      errorWidget: (_, __, ___) => const _ErrorBox(height: 200),
+                    ),
                   ),
                 ),
               ),

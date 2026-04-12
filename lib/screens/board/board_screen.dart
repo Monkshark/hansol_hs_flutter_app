@@ -279,6 +279,7 @@ class _BoardScreenState extends State<BoardScreen> {
         actions: [
           IconButton(
             icon: Icon(_isSearching ? Icons.close : Icons.search),
+            tooltip: AppLocalizations.of(context)!.home_search,
             onPressed: () => setState(() {
               _isSearching = !_isSearching;
               if (!_isSearching) {
@@ -292,6 +293,7 @@ class _BoardScreenState extends State<BoardScreen> {
           if (!_isSearching && AuthService.isLoggedIn)
             IconButton(
               icon: const Icon(Icons.person_outline),
+              tooltip: AppLocalizations.of(context)!.home_myPosts,
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const MyPostsScreen()),
@@ -302,6 +304,7 @@ class _BoardScreenState extends State<BoardScreen> {
       floatingActionButton: FloatingActionButton(
         backgroundColor: AppColors.theme.primaryColor,
         onPressed: _onWrite,
+        tooltip: AppLocalizations.of(context)!.home_writePost,
         child: const Icon(Icons.edit, color: Colors.white),
       ),
       body: Column(
@@ -317,7 +320,10 @@ class _BoardScreenState extends State<BoardScreen> {
                 separatorBuilder: (_, __) => const SizedBox(width: 8),
                 itemBuilder: (context, index) {
                   final selected = _selectedIndex == index;
-                  return GestureDetector(
+                  return Semantics(
+                    selected: selected,
+                    button: true,
+                    child: GestureDetector(
                     onTap: () {
                       if (_selectedIndex == index) return;
                       _pageController.animateToPage(
@@ -344,7 +350,7 @@ class _BoardScreenState extends State<BoardScreen> {
                         ),
                       ),
                     ),
-                  );
+                  ));
                 },
               ),
             ),

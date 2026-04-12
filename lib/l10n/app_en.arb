@@ -86,6 +86,13 @@
   "home_chatSubtitle": "1:1 Conversation",
   "home_linkRiroschool": "RiroSchool",
   "home_linkOfficial": "Hansol Official",
+  "home_admin": "Admin",
+  "home_notification": "Notifications",
+  "home_settings": "Settings",
+  "home_writePost": "Write post",
+  "home_search": "Search",
+  "home_myPosts": "My posts",
+  "home_postImage": "Post image",
 
   "meal_noInfo": "No meal info",
   "meal_noInfoEmpty": "No meal information",

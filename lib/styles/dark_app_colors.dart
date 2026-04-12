@@ -18,6 +18,6 @@ class DarkAppColors extends AppColors {
   @override Color get textFiledFillColor => const Color(0xFF2A2D35);
   @override Color get settingScreenBackgroundColor => const Color(0xFF17191E);
   @override Color get mealCardBackgroundColor => const Color(0xFF1E2028);
-  @override Color get mealTypeTextColor => const Color(0xFF8B8F99);
+  @override Color get mealTypeTextColor => const Color(0xFF9EA2AC);
   @override Color get mealHeaderIconColor => const Color(0xFF2A2D35);
 }

@@ -91,6 +91,13 @@
   "home_chatSubtitle": "1:1 대화하기",
   "home_linkRiroschool": "리로스쿨",
   "home_linkOfficial": "한솔 공식",
+  "home_admin": "관리자",
+  "home_notification": "알림",
+  "home_settings": "설정",
+  "home_writePost": "글 쓰기",
+  "home_search": "검색",
+  "home_myPosts": "내 글",
+  "home_postImage": "게시글 이미지",
 
   "meal_noInfo": "급식 정보 없음",
   "meal_noInfoEmpty": "급식 정보가 없습니다",
