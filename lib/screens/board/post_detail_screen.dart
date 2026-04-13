@@ -33,18 +33,6 @@ class PostDetailScreen extends StatefulWidget {
   State<PostDetailScreen> createState() => _PostDetailScreenState();
 }
 
-String _formatSuspendDuration(AppLocalizations l, Duration diff) {
-  final days = diff.inDays;
-  final hours = diff.inHours % 24;
-  final minutes = diff.inMinutes % 60;
-  final seconds = diff.inSeconds % 60;
-  final parts = <String>[];
-  if (days > 0) parts.add(l.data_suspendDays(days));
-  if (hours > 0) parts.add(l.data_suspendHours(hours));
-  if (minutes > 0) parts.add(l.data_suspendMinutes(minutes));
-  if (parts.isEmpty) parts.add(l.data_suspendSeconds(seconds));
-  return parts.join(' ');
-}
 
 class _PostDetailScreenState extends State<PostDetailScreen> {
   final _commentController = TextEditingController();
@@ -728,7 +716,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     if (suspendDuration != null) {
       if (mounted) {
         final l = AppLocalizations.of(context)!;
-        final formatted = _formatSuspendDuration(l, suspendDuration);
+        final formatted = BoardCategories.formatSuspendDuration(l, suspendDuration);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('${l.board_accountSuspended}\n${l.board_suspendedRemaining(formatted)}')),
         );
