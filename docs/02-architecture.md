@@ -448,6 +448,8 @@ if (cached.meal != ApiStrings.mealNoData) { ... }
          ├──────────┤
          │   Unit   │ ← 258개: 모델/유틸/파서, 외부 의존 0
          ├──────────┤
+         │   API    │ ← 39개: MockClient 주입, NEIS 파싱/캐시/오프라인
+         ├──────────┤
          │Repository│ ← 8개: GetIt Mock 주입 패턴
          └──────────┘
          + Firestore Rules 34개 (에뮬레이터)
@@ -458,6 +460,7 @@ if (cached.meal != ApiStrings.mealNoData) { ... }
 | 계층 | Mock 방식 | 검증 대상 |
 |------|----------|----------|
 | **Unit** | 없음 (순수 함수) | 직렬화, 등급 변환, 파싱, 토크나이저, 버전 비교 |
+| **API** | `MockClient` + `NetworkStatus.testOverride` | NEIS 급식/시간표/학사일정 파싱, 캐시 TTL, 오프라인 폴백 |
 | **Provider** | `ProviderContainer` + override | AsyncNotifier 상태 전이 (loading → data → error) |
 | **Widget** | `ProviderScope.overrides` + Mock Notifier | 로딩 스피너, 에러 메시지, 빈 상태, 데이터 렌더링 |
 | **Golden** | `fake_cloud_firestore` | PostCard 5종 변종 (기본/좋아요/공지/+N/익명) PNG 비교 |
@@ -484,7 +487,7 @@ state = AsyncData([...current, exam]);  // 동기적 state 교체
 ```
 GitHub Actions push/PR
   ├── flutter analyze (정적 분석)
-  ├── flutter test (305 tests, ~10초)
+  ├── flutter test (344 tests, ~10초)
   ├── Codecov 커버리지 업로드
   └── master push 시 Android APK 빌드
 
