@@ -201,6 +201,8 @@ android/key.properties
 android/app/release-key.jks
 .claude/
 scripts/service-account.json
+scripts/node_modules/
+tests/firestore-rules/node_modules/
 
 # Golden test failure diffs
 test/failures/
