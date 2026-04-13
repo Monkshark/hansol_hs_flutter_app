@@ -54,8 +54,8 @@
 
 | 지표 | 수치 | 비고 |
 |------|------|------|
-| **총 코드 라인** | **39,000+** | Dart 32,061 (lib) + 3,268 (test) + TypeScript 2,092 + Java/XML 1,167 + Swift 387 + JS 485 |
-| **소스 파일** | **108개** (lib) + **27개** (test) + **12페이지** (Admin Web) + **5개** (Android Widget) + **1개** (iOS Widget) | 26 screens, 16 추출 위젯, 50+ models/utils/services + i18n 7 |
+| **총 코드 라인** | **40,000+** | Dart 32,096 (lib) + 4,216 (test) + TypeScript 2,092 + Java/XML 1,167 + Swift 387 + JS 485 |
+| **소스 파일** | **108개** (lib) + **30개** (test) + **12페이지** (Admin Web) + **5개** (Android Widget) + **1개** (iOS Widget) | 26 screens, 16 추출 위젯, 50+ models/utils/services + i18n 7 |
 | **Cloud Functions** | **8개** | 푸시 알림, OAuth, 스케줄러, 계정 삭제 |
 | **OAuth 로그인** | **4종** | Google, Apple, Kakao, GitHub |
 | **푸시 알림** | **13종** | FCM 10 + 로컬 3, 카테고리별 개별 on/off |
@@ -75,8 +75,8 @@
 | 항목 | 수치 | 측정 방법 |
 |------|------|----------|
 | **Release APK** | **72 MB** | `build/app/outputs/flutter-apk/app-release.apk` (단일 universal) |
-| **Dart 라인 수** | **35,329** | lib 32,061 + test 3,268 |
-| **Dart 파일 수** | **135개** | lib 108 + test 27 |
+| **Dart 라인 수** | **36,312** | lib 32,096 + test 4,216 |
+| **Dart 파일 수** | **138개** | lib 108 + test 30 |
 | **Unit/Widget test 실행 시간** | **약 10초** | `flutter test` 344 tests, 로컬 머신 기준 |
 | **Rules test 실행 시간** | **약 4초** | `firebase emulators:exec ... npm test` 34 tests |
 | **이미지 압축 후 크기** | **원본 대비 ~30%** | 1080px 폭, JPEG quality 80, EXIF 제거 |
