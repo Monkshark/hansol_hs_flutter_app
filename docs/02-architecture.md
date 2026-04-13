@@ -17,8 +17,8 @@
 ├──────┼───────────┼───────────────────────────────────────┤
 │      │    State Management Layer                         │
 │  ┌───┴───────────┴────────────────────────────────────┐  │
-│  │  Riverpod Providers (auth/grade/settings/theme)    │  │
-│  │  + Legacy ValueNotifier (themeNotifier)            │  │
+│  │  Riverpod Providers (auth/grade/settings/theme/     │  │
+│  │  locale/appRefresh) + global ProviderContainer     │  │
 │  └───┬────────────────────────────────────────────────┘  │
 │      │                                                   │
 ├──────┼───────────────────────────────────────────────────┤
@@ -44,7 +44,7 @@
 
 ## 상태 관리 전략
 
-이 프로젝트는 **Riverpod 2.5**를 핵심 상태 관리 도구로 사용하되, 레거시 호환을 위해 일부 패턴이 공존함
+이 프로젝트는 **Riverpod 2.5**를 핵심 상태 관리 도구로 사용. 글로벌 `ProviderContainer`로 비위젯 코드에서도 provider 접근 가능
 
 ### 1. Riverpod AsyncNotifier / Notifier
 
@@ -113,29 +113,30 @@ FutureBuilder<Meal?>(
 )
 ```
 
-### 6. 레거시: ValueNotifier + setState
+### 6. 비위젯 코드에서 Riverpod 접근
 
-일부 화면은 아직 `setState` 기반임. `themeNotifier`는 Riverpod `themeProvider`와 양방향 동기화됨
+`main.dart`에서 `ProviderContainer`를 전역으로 노출하여, 위젯 트리 밖 코드에서도 provider 접근 가능:
 
 ```dart
-// main.dart (레거시 ↔ Riverpod 동기화)
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
+// main.dart
+late final ProviderContainer providerContainer;
 
-void _onThemeChanged() {
-  final idx = ...;
-  ref.read(themeProvider.notifier).setMode(idx);  // 레거시 → Riverpod
-}
+// 비위젯 코드 (login_screen, setting_screen 등)
+providerContainer.read(appRefreshProvider.notifier).refresh();
+providerContainer.read(localeProvider.notifier).setLocale(Locale('en'));
 ```
+
+`UncontrolledProviderScope(container: providerContainer)`로 위젯 트리와 동일 컨테이너 공유
 
 ### 상태 관리 사용 가이드
 
 | 데이터 유형 | 패턴 | 예시 |
 |------------|------|------|
-| 앱 전역 상태 | Riverpod Notifier/AsyncNotifier | 테마, 인증, 성적 |
+| 앱 전역 상태 | Riverpod Notifier/AsyncNotifier | 테마, 인증, 성적, 언어, 알림설정 |
 | Firebase 실시간 데이터 | StreamBuilder | 게시글, 댓글, 채팅 |
 | 1회성 API 호출 | FutureBuilder | 급식, 시간표 |
 | 화면 로컬 상태 | setState | 입력 폼, 탭 인덱스 |
-| 전역 이벤트 | ValueNotifier / StreamController | 앱 리프레시, 알림 딥링크 |
+| 전역 이벤트 | Riverpod + StreamController | 앱 리프레시 (appRefreshProvider), 알림 딥링크 (notificationStream) |
 
 ---
 
@@ -156,10 +157,13 @@ Future<void> setupServiceLocator() async {
 }
 ```
 
-**등록된 서비스**:
+**등록된 서비스** (GetIt):
 - [`AuthRepository`](data/auth_repository.md) → [`FirebaseAuthRepository`](data/auth_repository.md) (싱글톤)
 - [`GradeRepository`](data/grade_repository.md) → [`LocalGradeRepository`](data/grade_repository.md) (레이지 싱글톤)
 - [`LocalDataBase`](data/local_database.md) (싱글톤, 마이그레이션 후 등록)
+
+**별도 싱글톤** (GetIt 미사용):
+- [`PostRepository`](data/post_repository.md) — `PostRepository.instance`로 접근. 게시판 전용이라 전역 DI 불필요
 
 ### Repository 패턴
 
@@ -258,11 +262,10 @@ AppColors.theme.mealCardColor   // 급식 카드 배경색
 ```
 SettingData.themeModeIndex (SharedPreferences)
          │
-         ├── themeNotifier (ValueNotifier<ThemeMode>) ← 레거시
-         │
-         └── themeProvider (Riverpod) ← 신규
+         └── themeProvider (Riverpod, keepAlive)
                 │
-                └── AnimatedAppColors.setDark() → 컬러 보간
+                └── HansolHighSchool.build()
+                      → AnimatedAppColors.setDark() → 컬러 보간
 ```
 
 ---
@@ -365,3 +368,126 @@ Flutter 에러 발생
 ### Firebase 초기화 실패
 
 main.dart에서 Firebase 초기화를 try/catch로 감싸 앱 자체는 항상 실행되도록 함
+
+### catch 블록 로깅 원칙
+
+모든 `catch` 블록은 `dart:developer`의 `log()`로 에러 메시지를 기록함. `catch (_) {}` (silent swallow)는 금지 — 디버깅 가시성 확보를 위해 최소 로깅 필수
+
+---
+
+## 캐싱 전략 (Stale-While-Revalidate)
+
+API 계층에서 **SWR(Stale-While-Revalidate)** 패턴을 적용하여 체감 응답 속도와 데이터 신선도를 동시에 확보
+
+### 흐름
+
+```
+getMeal(date, mealType) 호출
+  │
+  ├── 캐시 있음 + 유효 (24h 이내)
+  │     └── 즉시 반환 (cache hit)
+  │
+  ├── 캐시 있음 + 만료 (24h ~ 3일)
+  │     ├── 만료된 캐시 즉시 반환 (stale)
+  │     └── 백그라운드에서 _prefetchMonth() 실행 (revalidate)
+  │
+  ├── 캐시 있음 + 매우 오래됨 (3일+)
+  │     └── 캐시 무효화, 새로 fetch
+  │
+  └── 캐시 없음
+        ├── 온라인 → _prefetchMonth() 후 캐시에서 읽기
+        └── 오프라인 → "인터넷에 연결하세요" 센티널 반환
+```
+
+### TTL 정책
+
+| 데이터 | 유효 기간 | Stale 허용 | 빈 결과 TTL |
+|--------|----------|-----------|------------|
+| **급식** ([meal_data_api](api/meal_data_api.md)) | 24시간 | 3일까지 | 5분 |
+| **시간표** ([timetable_data_api](api/timetable_data_api.md)) | 12시간 | — | 없음 |
+| **학사일정** ([notice_data_api](api/notice_data_api.md)) | 12시간 | — | 없음 |
+| **유저 프로필** ([auth_service](data/auth_service.md)) | 5분 | — | 없음 |
+
+### 동시 요청 병합 (Completer 패턴)
+
+```dart
+static final Map<String, Future<void>> _prefetchingMonths = {};
+
+static Future<void> _prefetchMonth(DateTime date) {
+  final key = DateFormat('yyyyMM').format(date);
+  return _prefetchingMonths[key] ??= _doFetch(key).whenComplete(
+    () => _prefetchingMonths.remove(key),
+  );
+}
+```
+
+여러 화면에서 동시에 같은 월의 급식 데이터를 요청해도 API 호출은 1회만 발생. `Completer` 대신 `Map<key, Future>` 패턴 사용
+
+### 센티널 문자열
+
+캐시된 데이터가 "데이터 없음"인지 "실제 데이터"인지 구분하기 위해 [`ApiStrings`](data/api_strings.md) 상수 사용:
+
+```dart
+if (cached.meal != ApiStrings.mealNoData) { ... }
+```
+
+---
+
+## 테스트 전략
+
+### 4계층 테스트 피라미드
+
+```
+         ┌──────────┐
+         │  Golden  │ ← 5개: 시각적 회귀 방지
+         │  (PNG)   │
+         ├──────────┤
+         │  Widget  │ ← 17개: Mock Notifier 주입, 상태 분기 검증
+         ├──────────┤
+         │ Provider │ ← 17개: ProviderContainer, 위젯 없이 로직 검증
+         ├──────────┤
+         │   Unit   │ ← 258개: 모델/유틸/파서, 외부 의존 0
+         ├──────────┤
+         │Repository│ ← 8개: GetIt Mock 주입 패턴
+         └──────────┘
+         + Firestore Rules 34개 (에뮬레이터)
+```
+
+### 계층별 전략
+
+| 계층 | Mock 방식 | 검증 대상 |
+|------|----------|----------|
+| **Unit** | 없음 (순수 함수) | 직렬화, 등급 변환, 파싱, 토크나이저, 버전 비교 |
+| **Provider** | `ProviderContainer` + override | AsyncNotifier 상태 전이 (loading → data → error) |
+| **Widget** | `ProviderScope.overrides` + Mock Notifier | 로딩 스피너, 에러 메시지, 빈 상태, 데이터 렌더링 |
+| **Golden** | `fake_cloud_firestore` | PostCard 5종 변종 (기본/좋아요/공지/+N/익명) PNG 비교 |
+| **Repository** | `GetIt.I.registerSingleton(MockRepo())` | DI 패턴 데모, 인터페이스 계약 |
+| **Firestore Rules** | `@firebase/rules-unit-testing` + 에뮬레이터 | 역할별 접근 제어, 카운터 delta ±1 강제, 필드 위조 차단 |
+
+### Provider 테스트 race condition 회피
+
+`invalidateSelf()` 대신 직접 state 교체 패턴 사용 — race condition 원천 차단:
+
+```dart
+// ❌ 간헐적 실패
+await GradeManager.addExam(exam);
+ref.invalidateSelf();  // 비동기 재조회 → race condition
+
+// ✅ 안정적
+final current = await future;
+await GradeManager.addExam(exam);
+state = AsyncData([...current, exam]);  // 동기적 state 교체
+```
+
+### CI 파이프라인
+
+```
+GitHub Actions push/PR
+  ├── flutter analyze (정적 분석)
+  ├── flutter test (305 tests, ~10초)
+  ├── Codecov 커버리지 업로드
+  └── master push 시 Android APK 빌드
+
+별도 워크플로우:
+  └── firebase emulators:exec → npm test (34 rules tests, ~4초)
+```
