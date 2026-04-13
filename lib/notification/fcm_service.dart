@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -91,16 +92,9 @@ class FcmService {
     }, SetOptions(merge: true));
   }
 
-  static const boardCategories = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+  static const boardCategories = BoardCategories.writeKeys;
 
-  static const _categoryTopicKey = {
-    '자유': 'free',
-    '질문': 'question',
-    '정보공유': 'info',
-    '분실물': 'lost',
-    '학생회': 'council',
-    '동아리': 'club',
-  };
+  static const _categoryTopicKey = BoardCategories.topicKey;
 
   static String _topicName(String category) =>
       'board_${_categoryTopicKey[category] ?? category}';

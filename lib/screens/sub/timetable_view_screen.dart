@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
@@ -555,6 +557,8 @@ class _TimetableResult {
       final encoded = grid.map((row) => row.join(',')).toList();
       await prefs.setStringList('widget_timetable_grid', encoded);
       await WidgetService.updateTimetableWidget();
-    } catch (_) {}
+    } catch (e) {
+      log('TimetableViewScreen: save grid error: $e');
+    }
   }
 }

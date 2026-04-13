@@ -275,6 +275,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get home_linkOfficial => 'Hansol Official';
 
   @override
+  String get home_admin => 'Admin';
+
+  @override
+  String get home_notification => 'Notifications';
+
+  @override
+  String get home_settings => 'Settings';
+
+  @override
+  String get home_writePost => 'Write post';
+
+  @override
+  String get home_search => 'Search';
+
+  @override
+  String get home_myPosts => 'My posts';
+
+  @override
+  String get home_postImage => 'Post image';
+
+  @override
   String get meal_noInfo => 'No meal info';
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -154,7 +156,9 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
           'createdAt': FieldValue.serverTimestamp(),
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      log('ProfileSetupScreen: send notification error: $e');
+    }
   }
 
   @override

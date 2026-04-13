@@ -37,6 +37,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:hansol_high_school/providers/settings_provider.dart';
 import 'package:hansol_high_school/providers/theme_provider.dart';
 import 'package:hansol_high_school/api/kakao_keys.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
@@ -44,9 +45,8 @@ import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:kakao_flutter_sdk_user/kakao_flutter_sdk_user.dart' show KakaoSdk;
 
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
-final ValueNotifier<Locale?> localeNotifier = ValueNotifier(null);
-final ValueNotifier<int> appRefreshNotifier = ValueNotifier(0);
+/// 글로벌 ProviderContainer — main()이나 non-widget 코드에서 Riverpod 접근용
+late final ProviderContainer providerContainer;
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final StreamController<String?> notificationStream =
@@ -97,8 +97,8 @@ Future<void> main() async {
   }
 
   FlutterError.onError = (details) {
-    try { FirebaseCrashlytics.instance.recordFlutterFatalError(details); } catch (_) {}
-    try { _logCrashToFirestore(details); } catch (_) {}
+    try { FirebaseCrashlytics.instance.recordFlutterFatalError(details); } catch (e) { log('Crashlytics report error: $e', name: 'main'); }
+    try { _logCrashToFirestore(details); } catch (e) { log('Firestore crash log error: $e', name: 'main'); }
   };
 
   KakaoSdk.init(nativeAppKey: KakaoKeys.nativeAppKey);
@@ -106,11 +106,8 @@ Future<void> main() async {
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
-  final modeIndex = SettingData().themeModeIndex;
-  themeNotifier.value = _indexToThemeMode(modeIndex);
-
-  final savedLocale = SettingData().localeCode;
-  localeNotifier.value = savedLocale.isEmpty ? null : Locale(savedLocale);
+  // ProviderContainer 초기화 (main()에서 provider 접근용)
+  providerContainer = ProviderContainer();
 
   unawaited(_preloadSubjects(2));
   unawaited(_preloadSubjects(3));
@@ -126,16 +123,11 @@ Future<void> main() async {
     HomeWidget.registerInteractivityCallback(widgetBackgroundCallback);
   }));
 
-  initializeDateFormatting().then((_) => runApp(const ProviderScope(child: HansolHighSchool())));
+  initializeDateFormatting().then((_) => runApp(
+    UncontrolledProviderScope(container: providerContainer, child: const HansolHighSchool()),
+  ));
 }
 
-ThemeMode _indexToThemeMode(int index) {
-  switch (index) {
-    case 1: return ThemeMode.dark;
-    case 2: return ThemeMode.system;
-    default: return ThemeMode.light;
-  }
-}
 
 void _logCrashToFirestore(FlutterErrorDetails details) {
   try {
@@ -147,7 +139,9 @@ void _logCrashToFirestore(FlutterErrorDetails details) {
       'uid': AuthService.currentUser?.uid ?? '',
       'createdAt': FieldValue.serverTimestamp(),
     });
-  } catch (_) {}
+  } catch (e) {
+    log('_logCrashToFirestore error: $e', name: 'main');
+  }
 }
 
 Future<void> _preloadSubjects(int grade) async {
@@ -228,10 +222,10 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
   @override
   void initState() {
     super.initState();
-    final isDark = _resolveIsDark(themeNotifier.value);
+    final mode = ref.read(themeProvider);
+    final isDark = _resolveIsDark(mode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
     AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
-    themeNotifier.addListener(_onThemeChanged);
   }
 
   bool _resolveIsDark(ThemeMode mode) {
@@ -242,48 +236,33 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
     return mode == ThemeMode.dark;
   }
 
-  void _onThemeChanged() {
-    final newMode = themeNotifier.value;
-    final isDark = _resolveIsDark(newMode);
-    AnimatedAppColors.instance.setDark(isDark, animate: false);
-    AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
-    final idx = newMode == ThemeMode.dark
-        ? 1
-        : (newMode == ThemeMode.system ? 2 : 0);
-    ref.read(themeProvider.notifier).setMode(idx);
-  }
-
-  @override
-  void dispose() {
-    themeNotifier.removeListener(_onThemeChanged);
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     final mode = ref.watch(themeProvider);
-    return ValueListenableBuilder<Locale?>(
-      valueListenable: localeNotifier,
-      builder: (_, locale, __) => MaterialApp(
-        navigatorKey: rootNavigatorKey,
-        navigatorObservers: [AnalyticsService.observer],
-        debugShowCheckedModeBanner: false,
-        theme: _lightTheme,
-        darkTheme: _darkTheme,
-        themeMode: mode,
-        locale: locale,
-        supportedLocales: AppLocalizations.supportedLocales,
-        localizationsDelegates: const [
-          AppLocalizations.delegate,
-          GlobalMaterialLocalizations.delegate,
-          GlobalWidgetsLocalizations.delegate,
-          GlobalCupertinoLocalizations.delegate,
-        ],
-        home: ValueListenableBuilder<int>(
-          valueListenable: appRefreshNotifier,
-          builder: (_, value, __) => MainScreen(key: ValueKey(value)),
-        ),
-      ),
+    final locale = ref.watch(localeProvider);
+    final refreshKey = ref.watch(appRefreshProvider);
+
+    // 테마 변경 시 AnimatedAppColors 동기화
+    final isDark = _resolveIsDark(mode);
+    AnimatedAppColors.instance.setDark(isDark, animate: false);
+    AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
+
+    return MaterialApp(
+      navigatorKey: rootNavigatorKey,
+      navigatorObservers: [AnalyticsService.observer],
+      debugShowCheckedModeBanner: false,
+      theme: _lightTheme,
+      darkTheme: _darkTheme,
+      themeMode: mode,
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home: MainScreen(key: ValueKey(refreshKey)),
     );
   }
 }
@@ -355,8 +334,10 @@ class _MainScreenState extends State<MainScreen> {
         MaterialPageRoute(builder: (_) => const ProfileSetupScreen(isUpdate: true)),
       );
       AuthService.clearProfileCache();
-      appRefreshNotifier.value++;
-    } catch (_) {}
+      providerContainer.read(appRefreshProvider.notifier).refresh();
+    } catch (e) {
+      log('_checkProfileUpdate error: $e', name: 'main');
+    }
   }
 
   Future<void> _checkAccountExists() async {
@@ -366,14 +347,16 @@ class _MainScreenState extends State<MainScreen> {
       if (profile == null && mounted) {
         await AuthService.signOut();
         AuthService.clearProfileCache();
-        appRefreshNotifier.value++;
+        providerContainer.read(appRefreshProvider.notifier).refresh();
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(AppLocalizations.of(context)!.main_accountDeleted)),
           );
         }
       }
-    } catch (_) {}
+    } catch (e) {
+      log('_checkAccountExists error: $e', name: 'main');
+    }
   }
 
   @override

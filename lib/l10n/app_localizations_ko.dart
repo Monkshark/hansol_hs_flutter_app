@@ -264,6 +264,27 @@ class AppLocalizationsKo extends AppLocalizations {
   String get home_linkOfficial => '한솔 공식';
 
   @override
+  String get home_admin => '관리자';
+
+  @override
+  String get home_notification => '알림';
+
+  @override
+  String get home_settings => '설정';
+
+  @override
+  String get home_writePost => '글 쓰기';
+
+  @override
+  String get home_search => '검색';
+
+  @override
+  String get home_myPosts => '내 글';
+
+  @override
+  String get home_postImage => '게시글 이미지';
+
+  @override
   String get meal_noInfo => '급식 정보 없음';
 
   @override

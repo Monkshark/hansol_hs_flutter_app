@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
+import 'package:hansol_high_school/data/api_strings.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:path_provider/path_provider.dart';
@@ -69,7 +70,7 @@ class _MealCardState extends State<MealCard>
   }
 
   void _handleTap() {
-    if (mealData.meal == null || mealData.meal == "급식 정보가 없습니다.") return;
+    if (mealData.meal == null || mealData.meal == ApiStrings.mealNoData) return;
     if (_buttonsVisible) {
       _controller.reverse().then((_) {
         setState(() => _buttonsVisible = false);

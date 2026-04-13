@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -378,7 +380,9 @@ class UsersTabState extends State<UsersTab> {
         'read': false,
         'createdAt': FieldValue.serverTimestamp(),
       });
-    } catch (_) {}
+    } catch (e) {
+      log('UsersTab: send notification error: $e');
+    }
   }
 
   Future<bool?> _confirmDialog(BuildContext context, String title, String content) {

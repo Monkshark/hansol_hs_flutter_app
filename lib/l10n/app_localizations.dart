@@ -584,6 +584,48 @@ abstract class AppLocalizations {
   /// **'한솔 공식'**
   String get home_linkOfficial;
 
+  /// No description provided for @home_admin.
+  ///
+  /// In ko, this message translates to:
+  /// **'관리자'**
+  String get home_admin;
+
+  /// No description provided for @home_notification.
+  ///
+  /// In ko, this message translates to:
+  /// **'알림'**
+  String get home_notification;
+
+  /// No description provided for @home_settings.
+  ///
+  /// In ko, this message translates to:
+  /// **'설정'**
+  String get home_settings;
+
+  /// No description provided for @home_writePost.
+  ///
+  /// In ko, this message translates to:
+  /// **'글 쓰기'**
+  String get home_writePost;
+
+  /// No description provided for @home_search.
+  ///
+  /// In ko, this message translates to:
+  /// **'검색'**
+  String get home_search;
+
+  /// No description provided for @home_myPosts.
+  ///
+  /// In ko, this message translates to:
+  /// **'내 글'**
+  String get home_myPosts;
+
+  /// No description provided for @home_postImage.
+  ///
+  /// In ko, this message translates to:
+  /// **'게시글 이미지'**
+  String get home_postImage;
+
   /// No description provided for @meal_noInfo.
   ///
   /// In ko, this message translates to:

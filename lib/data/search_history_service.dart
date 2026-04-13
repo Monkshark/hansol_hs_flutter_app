@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,7 +16,9 @@ class SearchHistoryService {
       if (decoded is List) {
         return decoded.whereType<String>().toList();
       }
-    } catch (_) {}
+    } catch (e) {
+      log('SearchHistoryService: decode error: $e');
+    }
     return [];
   }
 

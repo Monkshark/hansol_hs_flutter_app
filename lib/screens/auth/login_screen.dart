@@ -2,8 +2,9 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
-import 'package:hansol_high_school/main.dart';
+import 'package:hansol_high_school/main.dart' show providerContainer;
 import 'package:hansol_high_school/notification/fcm_service.dart';
+import 'package:hansol_high_school/providers/settings_provider.dart';
 import 'package:hansol_high_school/screens/auth/profile_setup_screen.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -47,7 +48,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     if (hasProfile) {
       AuthService.clearProfileCache();
-      appRefreshNotifier.value++;
+      providerContainer.read(appRefreshProvider.notifier).refresh();
       Navigator.of(context).pop(true);
     } else {
       final result = await Navigator.of(context).push<bool>(
@@ -55,7 +56,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       if (result == true && mounted) {
         AuthService.clearProfileCache();
-        appRefreshNotifier.value++;
+        providerContainer.read(appRefreshProvider.notifier).refresh();
         Navigator.of(context).pop(true);
       }
     }

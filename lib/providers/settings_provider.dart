@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 
@@ -125,3 +127,32 @@ final notificationSettingsProvider =
     NotifierProvider<NotificationSettingsNotifier, NotificationSettings>(
   NotificationSettingsNotifier.new,
 );
+
+// ─── Locale Provider ───
+
+class LocaleNotifier extends Notifier<Locale?> {
+  @override
+  Locale? build() {
+    final code = SettingData().localeCode;
+    return code.isEmpty ? null : Locale(code);
+  }
+
+  void setLocale(Locale? locale) {
+    SettingData().localeCode = locale?.languageCode ?? '';
+    state = locale;
+  }
+}
+
+final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(LocaleNotifier.new);
+
+// ─── App Refresh Provider ───
+
+class AppRefreshNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void refresh() => state++;
+}
+
+final appRefreshProvider =
+    NotifierProvider<AppRefreshNotifier, int>(AppRefreshNotifier.new);

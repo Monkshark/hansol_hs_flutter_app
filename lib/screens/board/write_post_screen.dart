@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -13,6 +14,8 @@ import 'package:hansol_high_school/data/search_tokens.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_event_form_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_image_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_poll_form_section.dart';
+import 'package:hansol_high_school/data/board_categories.dart';
+import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
@@ -38,7 +41,7 @@ class WritePostScreen extends StatefulWidget {
 }
 
 class _WritePostScreenState extends State<WritePostScreen> {
-  static const _categoryKeys = ['자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+  static const _categoryKeys = BoardCategories.writeKeys;
   late String _category;
   late final TextEditingController _titleController;
   late final TextEditingController _contentController;
@@ -63,16 +66,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
   bool get _isEdit => widget.postId != null;
 
   String _localizedCategory(BuildContext context, String key) {
-    final l = AppLocalizations.of(context)!;
-    switch (key) {
-      case '자유': return l.board_categoryFree;
-      case '질문': return l.board_categoryQuestion;
-      case '정보공유': return l.board_categoryInfoShare;
-      case '분실물': return l.board_categoryLostFound;
-      case '학생회': return l.board_categoryStudentCouncil;
-      case '동아리': return l.board_categoryClub;
-      default: return key;
-    }
+    return BoardCategories.localizedName(AppLocalizations.of(context)!, key);
   }
 
   @override
@@ -125,7 +119,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
   Future<void> _loadExistingData() async {
     try {
-      final doc = await FirebaseFirestore.instance.collection('posts').doc(widget.postId).get();
+      final doc = await PostRepository.instance.getPost(widget.postId!);
       if (!doc.exists || !mounted) return;
       final data = doc.data()!;
 
@@ -152,7 +146,9 @@ class _WritePostScreenState extends State<WritePostScreen> {
           if (et != null && et >= 0) _eventEndTime = TimeOfDay(hour: et ~/ 60, minute: et % 60);
         }
       });
-    } catch (_) {}
+    } catch (e) {
+      log('WritePostScreen: load post error: $e');
+    }
   }
 
   @override
@@ -278,7 +274,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   return GestureDetector(
                     onTap: () => setState(() {
                       _category = cat;
-                      if (cat != '정보공유') _attachEvent = false;
+                      if (cat != BoardCategories.info) _attachEvent = false;
                     }),
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
@@ -351,7 +347,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
               ),
             ],
 
-            if (_category == '정보공유') ...[
+            if (_category == BoardCategories.info) ...[
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: () => setState(() => _attachEvent = !_attachEvent),
@@ -703,11 +699,10 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
     final displayName = _isAnonymous ? AppLocalizations.of(context)!.post_anonymous : profile.displayName;
 
+    final _repo = PostRepository.instance;
+
     if (_isPinned) {
-      final pinnedSnap = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('isPinned', isEqualTo: true)
-          .get();
+      final pinnedSnap = await _repo.getPinnedPosts();
       if (pinnedSnap.docs.length >= 3 && mounted) {
         final result = await _showPinnedLimitSheet(pinnedSnap.docs);
         if (result == null) {
@@ -769,10 +764,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
         final urls = await _uploadImages(widget.postId!);
         postData['imageUrls'] = FieldValue.arrayUnion(urls);
       }
-      await FirebaseFirestore.instance
-          .collection('posts')
-          .doc(widget.postId)
-          .update(postData);
+      await _repo.updatePost(widget.postId!, postData);
     } else {
       postData['createdAt'] = FieldValue.serverTimestamp();
       postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
@@ -784,7 +776,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       postData['imageUrls'] = <String>[];
       postData['anonymousCount'] = 0;
       postData['anonymousMapping'] = <String, dynamic>{};
-      final docRef = await FirebaseFirestore.instance.collection('posts').add(postData);
+      final docRef = await _repo.createPost(postData);
 
       if (_images.isNotEmpty) {
         final urls = await _uploadImages(docRef.id);
@@ -840,7 +832,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: GestureDetector(
                     onTap: () async {
-                      await doc.reference.update({'isPinned': false});
+                      await PostRepository.instance.unpinPost(doc.id);
                       if (ctx.mounted) Navigator.pop(ctx, 'unpinned');
                     },
                     child: Container(

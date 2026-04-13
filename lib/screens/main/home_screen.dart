@@ -15,6 +15,7 @@ import 'package:hansol_high_school/screens/sub/setting_screen.dart';
 import 'package:hansol_high_school/screens/sub/timetable_view_screen.dart';
 import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
+import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
@@ -606,14 +607,7 @@ class _RecentPosts extends StatelessWidget {
     });
   }
 
-  Color _catColor(String c) {
-    switch (c) {
-      case '자유': return AppColors.theme.primaryColor;
-      case '질문': return AppColors.theme.secondaryColor;
-      case '정보공유': return AppColors.theme.tertiaryColor;
-      default: return AppColors.theme.darkGreyColor;
-    }
-  }
+  Color _catColor(String c) => BoardCategories.color(c);
 }
 
 class _LinkCard extends StatelessWidget {

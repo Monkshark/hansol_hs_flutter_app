@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -115,6 +117,8 @@ class PopupNotice {
           );
         },
       );
-    } catch (_) {}
+    } catch (e) {
+      log('PopupNotice: check error: $e');
+    }
   }
 }

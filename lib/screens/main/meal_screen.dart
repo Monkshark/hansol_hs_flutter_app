@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/api/meal_data_api.dart';
+import 'package:hansol_high_school/data/api_strings.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/widgets/meal/meal_card.dart';
 import 'package:hansol_high_school/widgets/meal/meal_header.dart';
@@ -103,7 +104,7 @@ class _MealScreenState extends State<MealScreen> {
 
                           final meals = snapshot.data!;
                           final validMeals = meals.where((m) =>
-                            m != null && m.meal != null && m.meal != '급식 정보가 없습니다.' && m.meal != '급식 정보가 없습니다').toList();
+                            m != null && m.meal != null && m.meal != ApiStrings.mealNoData && m.meal != ApiStrings.mealNoDataLegacy).toList();
 
                           if (validMeals.isEmpty) {
                             final isWeekday = selectedDate.weekday <= 5;

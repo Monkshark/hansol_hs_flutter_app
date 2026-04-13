@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -15,6 +17,8 @@ import 'package:hansol_high_school/screens/board/widgets/post_image_gallery.dart
 import 'package:hansol_high_school/screens/board/widgets/vote_button.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
+import 'package:hansol_high_school/data/board_categories.dart';
+import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
@@ -52,8 +56,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   String? _replyToCommentId;
   String? _replyToName;
 
+  final _repo = PostRepository.instance;
+
   DocumentReference<Map<String, dynamic>> get _postRef =>
-      FirebaseFirestore.instance.collection('posts').doc(widget.postId);
+      _repo.postRef(widget.postId);
 
   @override
   void initState() {
@@ -90,11 +96,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   Future<void> _refresh() async {
     try {
-      await _postRef.get(const GetOptions(source: Source.server));
-      await _postRef
-          .collection('comments')
-          .get(const GetOptions(source: Source.server));
-    } catch (_) {}
+      await _repo.refreshFromServer(widget.postId);
+    } catch (e) {
+      log('PostDetailScreen: refresh error: $e');
+    }
     if (mounted) setState(() => _refreshTick++);
   }
 
@@ -316,7 +321,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                       ],
                     ),
 
-                    if (category == '분실물' && AuthService.currentUser?.uid == post['authorUid']) ...[
+                    if (category == BoardCategories.lostFound && AuthService.currentUser?.uid == post['authorUid']) ...[
                       const SizedBox(height: 16),
                       SizedBox(
                         width: double.infinity,
@@ -504,11 +509,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _toggleBookmark(bool isCurrentlyBookmarked) async {
     final uid = AuthService.currentUser?.uid;
     if (uid == null) return;
-    await _postRef.update({
-      'bookmarkedBy': isCurrentlyBookmarked
-          ? FieldValue.arrayRemove([uid])
-          : FieldValue.arrayUnion([uid]),
-    });
+    await _repo.toggleBookmark(widget.postId, uid, isCurrentlyBookmarked);
   }
 
   void _showActionSheet(
@@ -632,12 +633,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (reason == null) return;
 
-    final existingReport = await FirebaseFirestore.instance
-        .collection('reports')
+    final existingReport = await FirebaseFirestore.instance.collection('reports')
         .where('postId', isEqualTo: widget.postId)
         .where('reporterUid', isEqualTo: AuthService.currentUser!.uid)
-        .limit(1)
-        .get();
+        .limit(1).get();
 
     if (existingReport.docs.isNotEmpty) {
       if (mounted) {
@@ -648,12 +647,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       return;
     }
 
-    await FirebaseFirestore.instance.collection('reports').add({
-      'postId': widget.postId,
-      'reporterUid': AuthService.currentUser!.uid,
-      'reason': reason,
-      'createdAt': FieldValue.serverTimestamp(),
-    });
+    await _repo.reportPost(
+      postId: widget.postId,
+      reporterUid: AuthService.currentUser!.uid,
+      reason: reason,
+    );
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -662,47 +660,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
   }
 
-  Future<void> _ensureLikesMap() async {
-    final snap = await _postRef.get();
-    final data = snap.data();
-    if (data == null) return;
-    final updates = <String, dynamic>{};
-    if (data['likes'] == null || data['likes'] is int) updates['likes'] = {};
-    if (data['dislikes'] == null || data['dislikes'] is int) updates['dislikes'] = {};
-    if (data['likeCount'] is! int) {
-      final raw = data['likes'];
-      updates['likeCount'] = raw is Map ? raw.length : 0;
-    }
-    if (data['dislikeCount'] is! int) {
-      final raw = data['dislikes'];
-      updates['dislikeCount'] = raw is Map ? raw.length : 0;
-    }
-    if (updates.isNotEmpty) await _postRef.update(updates);
-  }
-
   Future<void> _toggleLike(bool hasLiked, bool hasDisliked) async {
     if (!AuthService.isLoggedIn) {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       return;
     }
-    await _ensureLikesMap();
     final uid = AuthService.currentUser!.uid;
-    if (hasLiked) {
-      await _postRef.update({
-        'likes.$uid': FieldValue.delete(),
-        'likeCount': FieldValue.increment(-1),
-      });
-    } else {
-      final updates = <String, dynamic>{
-        'likes.$uid': true,
-        'likeCount': FieldValue.increment(1),
-      };
-      if (hasDisliked) {
-        updates['dislikes.$uid'] = FieldValue.delete();
-        updates['dislikeCount'] = FieldValue.increment(-1);
-      }
-      await _postRef.update(updates);
-    }
+    await _repo.toggleLike(widget.postId, uid, hasLiked: hasLiked, hasDisliked: hasDisliked);
   }
 
   Future<void> _toggleDislike(bool hasLiked, bool hasDisliked) async {
@@ -710,24 +674,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       return;
     }
-    await _ensureLikesMap();
     final uid = AuthService.currentUser!.uid;
-    if (hasDisliked) {
-      await _postRef.update({
-        'dislikes.$uid': FieldValue.delete(),
-        'dislikeCount': FieldValue.increment(-1),
-      });
-    } else {
-      final updates = <String, dynamic>{
-        'dislikes.$uid': true,
-        'dislikeCount': FieldValue.increment(1),
-      };
-      if (hasLiked) {
-        updates['likes.$uid'] = FieldValue.delete();
-        updates['likeCount'] = FieldValue.increment(-1);
-      }
-      await _postRef.update(updates);
-    }
+    await _repo.toggleDislike(widget.postId, uid, hasLiked: hasLiked, hasDisliked: hasDisliked);
   }
 
   Future<void> _vote(int optionIndex) async {
@@ -740,7 +688,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     }
 
     final uid = AuthService.currentUser!.uid;
-    await _postRef.update({'pollVoters.$uid': optionIndex});
+    await _repo.votePoll(widget.postId, uid, optionIndex);
   }
 
   Future<void> _addEventToCalendar(DateTime date, String content, int startTime, int endTime) async {
@@ -822,32 +770,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (anonymous) {
       final myUid = AuthService.currentUser!.uid;
-
-      final postSnap = await _postRef.get();
-      final postAuthorUid = postSnap.data()?['authorUid'];
-
-      if (myUid == postAuthorUid) {
-        displayName = l.post_anonymousAuthor;
-      } else {
-        displayName = await FirebaseFirestore.instance.runTransaction<String>((transaction) async {
-          final postDoc = await transaction.get(_postRef);
-          final data = postDoc.data() ?? {};
-          final mapping = Map<String, dynamic>.from(data['anonymousMapping'] ?? {});
-          final count = (data['anonymousCount'] as int?) ?? 0;
-
-          if (mapping.containsKey(myUid)) {
-            return l.post_anonymousNum(mapping[myUid]);
-          } else {
-            final newNum = count + 1;
-            mapping[myUid] = newNum;
-            transaction.update(_postRef, {
-              'anonymousMapping': mapping,
-              'anonymousCount': newNum,
-            });
-            return l.post_anonymousNum(newNum);
-          }
-        });
-      }
+      displayName = await _repo.resolveAnonymousName(
+        widget.postId,
+        myUid,
+        l.post_anonymousAuthor,
+        (num) => l.post_anonymousNum(num),
+      );
     }
 
     final mentionPattern = RegExp(r'@([\w가-힣]+)');
@@ -858,7 +786,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         .toSet();
     final mentionedUids = <String>{};
     if (mentionNames.isNotEmpty) {
-      final commentsSnap = await _postRef.collection('comments').get();
+      final commentsSnap = await _repo.commentsRef(widget.postId).get();
       for (final doc in commentsSnap.docs) {
         final d = doc.data();
         final n = d['authorName']?.toString();
@@ -885,14 +813,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       commentData['replyTo'] = _replyToCommentId;
       commentData['replyToName'] = _replyToName;
     }
-    final newRef = await _postRef.collection('comments').add(commentData);
-    await _postRef.update({'commentCount': FieldValue.increment(1)});
+    await _repo.addComment(widget.postId, commentData);
     unawaited(AnalyticsService.logCommentCreate(
       postId: widget.postId,
       isReply: _replyToCommentId != null,
     ));
 
-    final postSnap = await _postRef.get();
+    final postSnap = await _repo.getPost(widget.postId);
     final postData = postSnap.data();
     if (postData != null) {
       final postAuthorUid = postData['authorUid'] as String?;
@@ -901,48 +828,30 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
       String? replyNotifiedUid;
       if (_replyToCommentId != null) {
-        final origComment = await _postRef.collection('comments').doc(_replyToCommentId).get();
+        final origComment = await _repo.commentsRef(widget.postId).doc(_replyToCommentId).get();
         final origUid = origComment.data()?['authorUid'] as String?;
         if (origUid != null && origUid != myUid) {
           replyNotifiedUid = origUid;
-          await FirebaseFirestore.instance
-              .collection('users').doc(origUid).collection('notifications').add({
-            'type': 'reply',
-            'postId': widget.postId,
-            'postTitle': postTitle,
-            'senderName': displayName,
-            'content': text,
-            'read': false,
-            'createdAt': FieldValue.serverTimestamp(),
-          });
+          await _repo.sendNotification(
+            targetUid: origUid, type: 'reply', postId: widget.postId,
+            postTitle: postTitle, senderName: displayName, content: text,
+          );
         }
       }
 
       if (postAuthorUid != null && postAuthorUid != myUid && postAuthorUid != replyNotifiedUid) {
-        await FirebaseFirestore.instance
-            .collection('users').doc(postAuthorUid).collection('notifications').add({
-          'type': 'comment',
-          'postId': widget.postId,
-          'postTitle': postTitle,
-          'senderName': displayName,
-          'content': text,
-          'read': false,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        await _repo.sendNotification(
+          targetUid: postAuthorUid, type: 'comment', postId: widget.postId,
+          postTitle: postTitle, senderName: displayName, content: text,
+        );
       }
 
       for (final mentionedUid in mentionedUids) {
         if (mentionedUid == postAuthorUid) continue;
-        await FirebaseFirestore.instance
-            .collection('users').doc(mentionedUid).collection('notifications').add({
-          'type': 'mention',
-          'postId': widget.postId,
-          'postTitle': postTitle,
-          'senderName': displayName,
-          'content': text,
-          'read': false,
-          'createdAt': FieldValue.serverTimestamp(),
-        });
+        await _repo.sendNotification(
+          targetUid: mentionedUid, type: 'mention', postId: widget.postId,
+          postTitle: postTitle, senderName: displayName, content: text,
+        );
       }
     }
 
@@ -1066,43 +975,29 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final confirm = await _showConfirmSheet(AppLocalizations.of(context)!.post_confirmDeleteComment, AppLocalizations.of(context)!.post_confirmDeleteCommentMessage, AppLocalizations.of(context)!.common_delete);
 
     if (confirm == true) {
-      await _postRef.collection('comments').doc(commentId).delete();
-      await _postRef.update({'commentCount': FieldValue.increment(-1)});
+      await _repo.deleteComment(widget.postId, commentId);
     }
   }
 
   Future<void> _pinPost() async {
-    final pinnedSnapshot = await FirebaseFirestore.instance
-        .collection('posts')
-        .where('isPinned', isEqualTo: true)
-        .get();
-
-    if (pinnedSnapshot.docs.length >= 3) {
+    try {
+      await _repo.pinPost(widget.postId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.post_pinSuccess)),
+        );
+      }
+    } on StateError {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(AppLocalizations.of(context)!.post_pinMaxed)),
         );
       }
-      return;
-    }
-
-    await _postRef.update({
-      'isPinned': true,
-      'pinnedAt': FieldValue.serverTimestamp(),
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.post_pinSuccess)),
-      );
     }
   }
 
   Future<void> _unpinPost() async {
-    await _postRef.update({
-      'isPinned': false,
-    });
-
+    await _repo.unpinPost(widget.postId);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.post_unpinSuccess)),
@@ -1129,11 +1024,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     if (confirm == true) {
       final uid = AuthService.currentUser?.uid;
-      final postSnap = await _postRef.get();
+      final postSnap = await _repo.getPost(widget.postId);
       final postData = postSnap.data();
       if (postData != null && uid != null && uid != postData['authorUid']) {
         final profile = await AuthService.getCachedProfile();
-        await FirebaseFirestore.instance.collection('admin_logs').add({
+        await _repo.logAdminAction({
           'action': 'delete_post',
           'adminUid': uid,
           'adminName': profile?.displayName ?? '',
@@ -1146,29 +1041,15 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         });
       }
 
-      final comments = await _postRef.collection('comments').get();
-      for (var doc in comments.docs) {
-        await doc.reference.delete();
-      }
-      await _postRef.delete();
+      await _repo.deletePost(widget.postId);
       if (mounted) Navigator.pop(context);
     }
   }
 
-  Color _categoryColor(String category) {
-    switch (category) {
-      case '자유': return AppColors.theme.primaryColor;
-      case '질문': return AppColors.theme.secondaryColor;
-      case '정보공유': return AppColors.theme.tertiaryColor;
-      case '분실물': return const Color(0xFFFF5722);
-      case '학생회': return const Color(0xFF4CAF50);
-      case '동아리': return const Color(0xFF9C27B0);
-      default: return AppColors.theme.darkGreyColor;
-    }
-  }
+  Color _categoryColor(String category) => BoardCategories.color(category);
 
   Future<void> _resolvePost() async {
-    await _postRef.update({'isResolved': true});
+    await _repo.resolvePost(widget.postId);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context)!.post_resolvedMarked)),

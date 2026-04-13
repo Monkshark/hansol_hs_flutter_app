@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:hansol_high_school/data/board_categories.dart';
 
 /// FcmService._encodePayload 순수 로직 복제
 String encodePayload(Map<String, dynamic> data) {
@@ -76,17 +77,9 @@ void main() {
   });
 
   group('FcmService topic names', () {
-    // _categoryTopicKey + _topicName 로직 복제
+    // BoardCategories.topicKey 를 직접 사용
     String topicName(String category) {
-      const categoryTopicKey = {
-        '자유': 'free',
-        '질문': 'question',
-        '정보공유': 'info',
-        '분실물': 'lost',
-        '학생회': 'council',
-        '동아리': 'club',
-      };
-      return 'board_${categoryTopicKey[category] ?? category}';
+      return 'board_${BoardCategories.topicKey[category] ?? category}';
     }
 
     test('known categories map correctly', () {

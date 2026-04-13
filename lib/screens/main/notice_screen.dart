@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
+import 'package:hansol_high_school/data/api_strings.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
 import 'package:hansol_high_school/widgets/calendar/main_calendar.dart';
@@ -83,7 +84,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
   }
 
   bool get _hasSchool =>
-      _schoolSchedule != null && _schoolSchedule != '학사일정이 없습니다';
+      _schoolSchedule != null && _schoolSchedule != ApiStrings.noticeNoData;
 
   @override
   Widget build(BuildContext context) {
