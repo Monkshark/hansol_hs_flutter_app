@@ -2,7 +2,8 @@
 
 > `lib/api/meal_data_api.dart` — NEIS 급식 API 연동
 
-모든 메서드가 `static`. NEIS 교육정보 API에서 급식 데이터를 조회하고, SharedPreferences에 캐싱함
+모든 메서드가 `static`. NEIS 교육정보 API에서 급식 데이터를 조회하고, SharedPreferences에 캐싱함.
+HTTP 클라이언트는 `@visibleForTesting` setter로 교체 가능하여 MockClient 기반 단위 테스트를 지원함
 
 ---
 
@@ -199,11 +200,28 @@ static Future<void> clearCacheForDate(DateTime date)
 static Future<Map<String, dynamic>?> _fetchData(String url)
 ```
 
-**설명**: HTTP GET 요청을 수행함
+**설명**: `_client`를 통해 HTTP GET 요청을 수행함
 
 - **타임아웃**: 10초
 - NEIS `INFO-200` (데이터 없음) 응답은 `null` 반환
 - 에러/타임아웃도 `null` 반환 (silent fail)
+
+---
+
+## 테스트 지원
+
+```dart
+static http.Client _client = http.Client();
+
+@visibleForTesting
+static set client(http.Client c) => _client = c;
+
+@visibleForTesting
+static Future<void> resetCache() async { ... }
+```
+
+- `client` setter로 `MockClient` 주입 → 네트워크 없이 파싱·캐시·SWR 로직 테스트
+- `resetCache()`로 `_prefetchingMonths` + SharedPreferences 초기화
 
 ---
 

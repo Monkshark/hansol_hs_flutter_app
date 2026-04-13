@@ -15,6 +15,7 @@ static Future<bool> isUnconnected()
 **설명**: WiFi/모바일 데이터 미연결 시 `true`를 반환함
 
 ```dart
+if (_testOverride != null) return _testOverride!();
 final results = await Connectivity().checkConnectivity();
 return results.isEmpty || results.contains(ConnectivityResult.none);
 ```
@@ -22,3 +23,17 @@ return results.isEmpty || results.contains(ConnectivityResult.none);
 - `results`가 비어있거나 `none`을 포함하면 오프라인
 - API 호출 전 오프라인 체크에 사용 ([MealDataApi](../api/meal_data_api.md), [TimetableDataApi](../api/timetable_data_api.md), [NoticeDataApi](../api/notice_data_api.md))
 - 오프라인이면 캐시 데이터 반환 또는 안내 메시지 표시
+
+---
+
+## 테스트 지원
+
+```dart
+static Future<bool> Function()? _testOverride;
+
+@visibleForTesting
+static set testOverride(Future<bool> Function()? fn) => _testOverride = fn;
+```
+
+- `testOverride`로 `connectivity_plus` 플러그인 없이 온/오프라인 시나리오 테스트
+- 기본값 `null` → 프로덕션에서는 실제 `Connectivity()` 경로 실행

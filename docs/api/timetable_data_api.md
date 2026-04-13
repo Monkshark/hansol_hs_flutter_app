@@ -2,7 +2,8 @@
 
 > `lib/api/timetable_data_api.dart` — NEIS 시간표 API 연동
 
-모든 메서드가 `static`. 시간표 데이터 조회, 과목 조합 추출, 캐싱을 담당함
+모든 메서드가 `static`. 시간표 데이터 조회, 과목 조합 추출, 캐싱을 담당함.
+HTTP 클라이언트는 `@visibleForTesting` setter로 교체 가능하여 MockClient 기반 단위 테스트를 지원함
 
 ---
 
@@ -197,7 +198,20 @@ Firestore `grade/{grade}/subject/` 컬렉션에서 관리자가 등록한 과목
 
 | 함수 | 설명 |
 |------|------|
-| `_fetchData(url)` | HTTP GET 요청, 에러 시 null |
+| `_fetchData(url)` | `_client`를 통해 HTTP GET 요청, 에러 시 null |
 | `_hasData(timetable)` | 에러가 아니고 과목 데이터가 있는지 |
 | `_loadCachedSubjects(grade)` | 과목 조합 캐시 로드 (1주일 TTL) |
 | `_saveSubjectsToCache(grade, subjects)` | 과목 조합 캐시 저장 |
+
+---
+
+## 테스트 지원
+
+```dart
+static http.Client _client = http.Client();
+
+@visibleForTesting
+static set client(http.Client c) => _client = c;
+```
+
+`client` setter로 `MockClient` 주입 → 네트워크 없이 파싱·캐시·SWR·과목 추출 로직 테스트

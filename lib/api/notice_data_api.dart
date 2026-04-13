@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:hansol_high_school/network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -20,6 +21,14 @@ class UpcomingEvent {
 
 class NoticeDataApi {
   static const _tag = 'NoticeDataApi';
+
+  static http.Client _client = http.Client();
+
+  @visibleForTesting
+  static set client(http.Client c) => _client = c;
+
+  @visibleForTesting
+  static void resetClient() => _client = http.Client();
 
   final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
 
@@ -286,7 +295,7 @@ class NoticeDataApi {
 
   Future<Map<String, dynamic>?> _fetchData(String url) async {
     try {
-      final response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
+      final response = await _client.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
       if (response.statusCode != 200) return null;
       return jsonDecode(response.body);
     } on TimeoutException {

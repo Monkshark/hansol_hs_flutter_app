@@ -1,0 +1,31 @@
+coverage:
+  status:
+    project:
+      default:
+        target: auto
+        threshold: 1%
+    patch:
+      default:
+        target: 50%
+
+ignore:
+  # UI screens & widgets — Firebase·BuildContext 의존
+  - "lib/screens/**"
+  - "lib/widgets/**"
+  # Firebase 연동 서비스
+  - "lib/data/auth_service.dart"
+  - "lib/data/auth_repository.dart"
+  - "lib/data/analytics_service.dart"
+  - "lib/data/local_database.dart"
+  - "lib/data/service_locator.dart"
+  - "lib/data/post_repository.dart"
+  - "lib/notification/**"
+  # Providers (Firebase 의존)
+  - "lib/providers/**"
+  # 생성 파일
+  - "lib/l10n/**"
+  - "lib/firebase_options.dart"
+  - "**/*.freezed.dart"
+  - "**/*.g.dart"
+  # 설정·진입점
+  - "lib/main.dart"

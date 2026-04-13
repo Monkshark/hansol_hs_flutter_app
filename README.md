@@ -4,7 +4,7 @@
 [![Firestore Rules Tests](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml/badge.svg)](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-305%20unit%20%2B%2034%20rules-success)
+![Tests](https://img.shields.io/badge/tests-344%20unit%20%2B%2034%20rules-success)
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
 [![Riverpod Graph](https://img.shields.io/badge/Riverpod%20Graph-인터랙티브-6c5ce7?logo=d3.js&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
@@ -59,7 +59,7 @@
 | **Cloud Functions** | **8개** | 푸시 알림, OAuth, 스케줄러, 계정 삭제 |
 | **OAuth 로그인** | **4종** | Google, Apple, Kakao, GitHub |
 | **푸시 알림** | **13종** | FCM 10 + 로컬 3, 카테고리별 개별 on/off |
-| **테스트** | **305 + 34개** | Flutter Unit/Widget/Provider/Golden 305 + Firestore Rules emulator 34 (총 339) |
+| **테스트** | **344 + 34개** | Flutter Unit/Widget/Provider/Golden 344 + Firestore Rules emulator 34 (총 378) |
 | **상태 관리** | **Riverpod 2.5** | AsyncNotifier / Notifier 기반, GetIt + Repository 패턴 DI |
 | **이미지 압축** | **용량 70% 감소** | 게시글 1080px (EXIF/GPS 제거), 프로필 256px |
 | **검색** | **Firestore n-gram 인덱스** | 제목+본문 2-gram array-contains-any, 350ms debounce |
@@ -77,7 +77,7 @@
 | **Release APK** | **72 MB** | `build/app/outputs/flutter-apk/app-release.apk` (단일 universal) |
 | **Dart 라인 수** | **35,329** | lib 32,061 + test 3,268 |
 | **Dart 파일 수** | **135개** | lib 108 + test 27 |
-| **Unit/Widget test 실행 시간** | **약 10초** | `flutter test` 305 tests, 로컬 머신 기준 |
+| **Unit/Widget test 실행 시간** | **약 10초** | `flutter test` 344 tests, 로컬 머신 기준 |
 | **Rules test 실행 시간** | **약 4초** | `firebase emulators:exec ... npm test` 34 tests |
 | **이미지 압축 후 크기** | **원본 대비 ~30%** | 1080px 폭, JPEG quality 80, EXIF 제거 |
 | **검색 fetch 상한** | **50건 / 350ms debounce** | `array-contains-any` + 클라이언트 substring 필터 |
@@ -317,7 +317,7 @@ graph LR
 | **Auth** | Google, Apple, Kakao, GitHub OAuth ([AuthService](https://monkshark.github.io/hansol_hs_flutter_app/#data/auth_service.md), [AuthRepository](https://monkshark.github.io/hansol_hs_flutter_app/#data/auth_repository.md)) |
 | **i18n** | Flutter ARB (`gen-l10n`) — 한국어(기본) + 영어, 711 키 |
 | **CI** | GitHub Actions — analyze + test (matrix) + Codecov + Android APK 빌드 |
-| **Test** | flutter_test — Unit + Widget + Provider + Golden + Repository (305 tests) + Firestore Rules (34 tests) |
+| **Test** | flutter_test — Unit + Widget + Provider + Golden + Repository + API (344 tests) + Firestore Rules (34 tests) |
 
 ## 주요 기능
 
@@ -528,7 +528,7 @@ graph LR
 | **Golden Test** | PostCard 5종 변종(기본/좋아요/공지/+N badge/익명+매니저뷰) PNG 스냅샷 비교, `fake_cloud_firestore`로 mock 주입 (5개) |
 | **Repository Test** | GetIt 기반 Mock 주입 패턴 데모 (8개) |
 | **Firestore Rules Test** | `@firebase/rules-unit-testing` + 에뮬레이터로 보안 규칙 단위 테스트 (34개) — 권한/카운터 delta/필드 위조 검증 |
-| **합계** | **305 + 34 = 339개**, 전체 통과 |
+| **합계** | **344 + 34 = 378개**, 전체 통과 |
 | **CI** | GitHub Actions matrix — analyze + test 병렬 실행, Codecov 커버리지 업로드, master push 시 Android APK 빌드. Rules 테스트는 별도 워크플로우(Firebase 에뮬레이터) |
 | **정적 분석** | `--no-fatal-infos --no-fatal-warnings` 레벨로 코드 품질 관리 |
 | **더미 데이터** | Node.js 스크립트로 Firestore 더미 데이터 삽입/삭제 자동화 |

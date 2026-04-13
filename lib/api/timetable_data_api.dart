@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:hansol_high_school/api/nies_api_keys.dart';
 import 'package:hansol_high_school/data/api_strings.dart';
 import 'package:hansol_high_school/data/subject.dart';
@@ -11,6 +12,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TimetableDataApi {
   static const _tag = 'TimetableDataApi';
+
+  static http.Client _client = http.Client();
+
+  @visibleForTesting
+  static set client(http.Client c) => _client = c;
+
+  @visibleForTesting
+  static void resetClient() => _client = http.Client();
+
   static const _subjectCacheKeyPrefix = 'subjects_grade_';
 
   static Future<Map<String, Map<String, List<String>>>> getTimeTable({
@@ -101,7 +111,7 @@ class TimetableDataApi {
 
   static Future<Map<String, dynamic>?> _fetchData(String url) async {
     try {
-      final response = await http.get(Uri.parse(url));
+      final response = await _client.get(Uri.parse(url));
       if (response.statusCode != 200) {
         log('$_tag: _fetchData: Failed with status code ${response.statusCode}');
         return null;
