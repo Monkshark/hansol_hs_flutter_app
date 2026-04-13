@@ -56,7 +56,7 @@ Future<void> main() async
 
 12. **FCM** 초기화 + **위젯 서비스** 초기화 (fire-and-forget)
 
-13. `ProviderScope`로 감싼 `HansolHighSchool` 위젯 실행
+13. `providerContainer = ProviderContainer()` 생성 → `UncontrolledProviderScope`로 감싼 `HansolHighSchool` 위젯 실행
 
 ---
 
@@ -64,11 +64,11 @@ Future<void> main() async
 
 | 변수 | 타입 | 용도 |
 |------|------|------|
-| `themeNotifier` | `ValueNotifier<ThemeMode>` | 레거시 테마 전환 (Riverpod으로 점진 마이그레이션) |
-| `localeNotifier` | `ValueNotifier<Locale?>` | 인앱 언어 전환 (null=시스템, `Locale('ko')`, `Locale('en')`) |
-| `appRefreshNotifier` | `ValueNotifier<int>` | 값 변경 시 MainScreen 전체 리빌드 |
+| `providerContainer` | `ProviderContainer` | 비위젯 코드에서 Riverpod provider 접근용 (login_screen, setting_screen 등) |
 | `rootNavigatorKey` | `GlobalKey<NavigatorState>` | FCM 딥링크에서 Navigator 접근용 |
 | `notificationStream` | `StreamController<String?>` | 알림 탭 → MealScreen 전환용 |
+
+> 기존 `themeNotifier`, `localeNotifier`, `appRefreshNotifier` (ValueNotifier 3개)는 Riverpod provider로 통일됨 → [providers 문서](providers/providers.md) 참조
 
 ---
 
@@ -80,26 +80,26 @@ class HansolHighSchool extends ConsumerStatefulWidget
 
 **설명**: 앱의 루트 위젯. 테마 모드 전환과 MaterialApp 설정을 담당
 
-1. `initState`에서 [`AnimatedAppColors`](styles/app_colors.md) 초기화 + `themeNotifier` 리스너 등록
+1. `initState`에서 [`AnimatedAppColors`](styles/app_colors.md) 초기화
 2. `_resolveIsDark`: ThemeMode.system일 때 platformBrightness 확인
-3. `build`: `ref.watch(themeProvider)` → `MaterialApp` 테마 적용
-4. `localeNotifier` 기반 `ValueListenableBuilder<Locale?>` 로 즉시 언어 전환
+3. `build`에서 3개 provider를 watch:
 
 ```dart
-return ValueListenableBuilder<Locale?>(
-  valueListenable: localeNotifier,
-  builder: (_, locale, __) => MaterialApp(
-    navigatorKey: rootNavigatorKey,
-    locale: locale,  // null이면 시스템 로캘 사용
-    theme: _lightTheme,
-    darkTheme: _darkTheme,
-    themeMode: mode,
-    home: ...,
-  ),
+final mode = ref.watch(themeProvider);
+final locale = ref.watch(localeProvider);
+final refreshKey = ref.watch(appRefreshProvider);
+
+return MaterialApp(
+  navigatorKey: rootNavigatorKey,
+  locale: locale,  // null이면 시스템 로캘 사용
+  theme: _lightTheme,
+  darkTheme: _darkTheme,
+  themeMode: mode,
+  home: MainScreen(key: ValueKey(refreshKey)),
 );
 ```
 
-`appRefreshNotifier` 값 변경 → `ValueKey` 변경 → MainScreen 재생성
+`appRefreshProvider` 값 변경 → `ValueKey` 변경 → MainScreen 재생성
 
 ---
 

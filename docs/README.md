@@ -28,6 +28,9 @@
 - [schedule_data](data/schedule_data.md) — Schedule 데이터 모델
 - [subject](data/subject.md) — Subject 데이터 모델 (freezed)
 - [device](data/device.md) — 디바이스 크기 계산 유틸리티
+- [api_strings](data/api_strings.md) — API 센티널 문자열 상수 (데이터 유무 판별용)
+- [board_categories](data/board_categories.md) — 게시판 카테고리 ��수 + l10n/색상/FCM 토픽 헬퍼
+- [post_repository](data/post_repository.md) — 게시판 Firestore CRUD 싱글턴
 
 ## 알림 (lib/notification/)
 - [fcm_service](notification/fcm_service.md) — FCM 푸시 알림, 토픽, 딥링크
