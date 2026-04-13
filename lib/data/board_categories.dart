@@ -58,4 +58,18 @@ class BoardCategories {
       default: return AppColors.theme.darkGreyColor;
     }
   }
+
+  /// 정지 잔여 시간 포맷 (예: "2일 3시간 15분")
+  static String formatSuspendDuration(AppLocalizations l, Duration diff) {
+    final days = diff.inDays;
+    final hours = diff.inHours % 24;
+    final minutes = diff.inMinutes % 60;
+    final seconds = diff.inSeconds % 60;
+    final parts = <String>[];
+    if (days > 0) parts.add(l.data_suspendDays(days));
+    if (hours > 0) parts.add(l.data_suspendHours(hours));
+    if (minutes > 0) parts.add(l.data_suspendMinutes(minutes));
+    if (parts.isEmpty) parts.add(l.data_suspendSeconds(seconds));
+    return parts.join(' ');
+  }
 }

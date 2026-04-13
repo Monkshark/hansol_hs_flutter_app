@@ -12,7 +12,7 @@
 
 > 세종시 한솔고등학교 학생·교사·졸업생·학부모를 위한 통합 학교 플랫폼
 
-Flutter 기반 모바일 앱 + Next.js 관리자 대시보드로 구성된 풀스택 프로젝트입니다. NEIS 공공데이터 API 연동, Firebase 실시간 데이터베이스, 역할 기반 권한 시스템, 푸시 알림, 1:1 채팅 등 실서비스 수준의 기능을 구현했습니다.
+고등학교 재학 중 직접 느낀 불편함 — 급식 확인이 번거롭고, 시간표 관리가 불편하고, 학교 커뮤니티가 없다는 문제를 해결하기 위해 시작한 프로젝트입니다. 기획·개발·배포를 주도하고 (디자인·iOS 배포는 팀원 2명과 협업), Flutter 기반 모바일 앱 + Next.js 관리자 대시보드로 구성된 풀스택 프로젝트입니다. NEIS 공공데이터 API 연동, Firebase 실시간 데이터베이스, 역할 기반 권한 시스템, 푸시 알림, 1:1 채팅 등 실서비스 수준의 기능을 구현했습니다.
 
 ## 스크린샷
 
@@ -270,6 +270,7 @@ graph LR
 
 - **선택 이유**: Riverpod은 위젯 트리 의존, 비위젯 코드(Manager, Cloud Functions 트리거 핸들러)에서 쓰기 어색. GetIt은 service locator로 어디서나 호출 가능
 - **혼용 규칙**: 위젯 → Riverpod, Manager/Repository → GetIt. 테스트는 `setupServiceLocator()` / `resetServiceLocator()` 로 Mock 주입
+- **PostRepository 예외**: Firestore에 강하게 결합된 게시판 전용 계층이라 abstract 인터페이스 없이 concrete 싱글턴으로 운영. 테스트는 `fake_cloud_firestore`로 Firestore 자체를 mock하여 해결
 - **버린 옵션**:
   - *Riverpod Provider 단독* — 비위젯 코드에서 ref 전달이 번거로움
   - *get_it 단독* — 위젯 rebuild가 자동으로 안 됨
@@ -759,4 +760,21 @@ erDiagram
 **해결:** `home_widget` 패키지로 Dart → SharedPreferences → Java 브릿지 구성. 시간표는 앱 내 `timetable_view_screen`에서 완성된 그리드를 저장하고 위젯이 읽기만 수행. 자정 갱신은 `AlarmManager` → `HomeWidgetBackgroundIntent`로 Dart 엔진을 백그라운드 실행하여 API 직접 호출
 </details>
 
+## Known Limitations & 회고
 
+### 현재 한계
+
+| 영역 | 한계 | 이유 / 대안 |
+|------|------|------------|
+| **AuthService** | 여전히 static 메서드 기반 (25+ 호출 사이트) | `AuthRepository` 인터페이스는 만들었지만, 기존 호출 사이트 전환은 점진적으로 진행 중 |
+| **통합 테스트** | 미작성 | Firebase Auth 실로그인 의존 → CI 비용 + 플레이크 고려하여 보류. Unit + Rules 테스트로 커버 |
+| **PostRepository** | abstract 인터페이스 없는 concrete 싱글턴 | Firestore에 강하게 결합된 전용 계층이라 `fake_cloud_firestore`로 충분. AuthRepository처럼 분리하면 오버엔지니어링 |
+| **HomeScreen** | UniqueKey()로 위젯 강제 재생성 | ConsumerWidget 전환 시 연쇄 변경이 크므로 현재 패턴 유지. FutureProvider 전환은 향후 과제 |
+| **네비게이션** | 명시적 라우팅 없음 (MaterialPageRoute 직접 사용) | `go_router` 도입 시 딥링크/가드 정리 가능하지만, 현재 규모에서는 과도 |
+
+### 다시 만든다면
+
+- **`go_router` + Riverpod code generation**을 처음부터 적용 — 딥링크 라우팅과 인증 가드를 선언적으로 관리
+- **모든 Firestore 접근을 Repository 패턴**으로 통일 — AuthService/PostRepository의 일관성 불일치 해소
+- **상태 관리를 Riverpod 단일 체계**로 — ValueNotifier/setState 레거시 없이 시작하면 마이그레이션 비용 제로
+- **통합 테스트 + Firebase Emulator Suite** — 실 Auth 없이 전체 플로우 검증 가능한 CI 구성

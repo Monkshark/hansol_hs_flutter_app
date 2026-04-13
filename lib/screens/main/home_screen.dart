@@ -49,6 +49,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) refresh();
   }
 
+  /// UniqueKey 교체로 FutureBuilder 자식 위젯을 강제 재생성.
+  /// FutureProvider로 전환하면 ref.invalidate()로 대체 가능하지만,
+  /// 현재 HomeScreen이 ConsumerWidget이 아니라 연쇄 변경이 크므로 유지.
   void refresh() {
     if (mounted) setState(() { _ddayKey = UniqueKey(); _refreshKey = UniqueKey(); });
   }
