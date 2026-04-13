@@ -226,6 +226,18 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
     final isDark = _resolveIsDark(mode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
     AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final shortestSide = MediaQuery.of(context).size.shortestSide;
+      if (shortestSide >= 600) {
+        SystemChrome.setPreferredOrientations([
+          DeviceOrientation.portraitUp,
+          DeviceOrientation.portraitDown,
+          DeviceOrientation.landscapeLeft,
+          DeviceOrientation.landscapeRight,
+        ]);
+      }
+    });
   }
 
   bool _resolveIsDark(ThemeMode mode) {
@@ -262,6 +274,18 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) {
+        final size = MediaQuery.of(context).size;
+        final maxWidth = size.width > size.height
+            ? size.height * (9 / 16)
+            : size.width;
+        return Center(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxWidth),
+            child: child,
+          ),
+        );
+      },
       home: MainScreen(key: ValueKey(refreshKey)),
     );
   }
@@ -374,14 +398,14 @@ class _MainScreenState extends State<MainScreen> {
         children: [
           const OfflineBanner(),
           Expanded(child: PageView(
-        controller: _pageController,
-        onPageChanged: (index) {
-          setState(() => _currentIndex = index);
-          if (index == 1) _homeKey.currentState?.refresh();
-        },
-        physics: const PageScrollPhysics(),
-        children: _pages,
-      )),
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() => _currentIndex = index);
+              if (index == 1) _homeKey.currentState?.refresh();
+            },
+            physics: const PageScrollPhysics(),
+            children: _pages,
+          )),
         ],
       ),
       bottomNavigationBar: SizedBox(
