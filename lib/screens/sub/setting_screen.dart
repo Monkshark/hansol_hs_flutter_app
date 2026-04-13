@@ -14,7 +14,7 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/main.dart' show providerContainer;
 import 'package:hansol_high_school/providers/settings_provider.dart';
-import 'package:hansol_high_school/providers/theme_provider.dart';
+import 'package:hansol_high_school/providers/theme_provider.dart' show themeProvider;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
