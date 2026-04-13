@@ -12,5 +12,8 @@
   "type": "commonjs",
   "dependencies": {
     "firebase-admin": "^13.7.0"
+  },
+  "overrides": {
+    "@tootallnate/once": "^3.0.1"
   }
 }
