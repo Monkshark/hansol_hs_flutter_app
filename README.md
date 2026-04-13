@@ -63,6 +63,7 @@
 | **상태 관리** | **Riverpod 2.5** | AsyncNotifier / Notifier 기반, GetIt + Repository 패턴 DI |
 | **이미지 압축** | **용량 70% 감소** | 게시글 1080px (EXIF/GPS 제거), 프로필 256px |
 | **검색** | **Firestore n-gram 인덱스** | 제목+본문 2-gram array-contains-any, 350ms debounce |
+| **태블릿 대응** | **가로 모드 지원** | 폰 세로 잠금, 태블릿 가로 시 9:16 비율 콘텐츠 중앙 배치 |
 | **i18n** | **한국어 + 영어** | Flutter ARB `gen-l10n`, 711 번역 키, 인앱 언어 토글 |
 | **민감 데이터** | **flutter_secure_storage** | 성적은 Android Keystore / iOS Keychain 저장 |
 | **API 최적화** | **호출 30회 → 1회** | 월간 프리페치 + Completer 패턴 |

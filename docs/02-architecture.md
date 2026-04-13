@@ -239,6 +239,25 @@ rootNavigatorKey.currentState?.push(
 
 ---
 
+## 태블릿 가로 대응
+
+폰은 세로 잠금, 태블릿(shortestSide >= 600dp)만 가로 모드를 허용함
+
+### 전략
+
+```
+main() → SystemChrome.setPreferredOrientations([portraitUp, portraitDown])
+  └── HansolHighSchool.initState() → 태블릿이면 landscape 추가 허용
+
+MaterialApp.builder → 가로 모드 시 콘텐츠 폭 제한
+  ├── 세로: maxWidth = 화면 폭 (제한 없음)
+  └── 가로: maxWidth = 화면 높이 × 9/16 (폰 비율 유지)
+```
+
+`MaterialApp.builder`에서 전체 Navigator를 감싸므로 모든 라우트(메인, 서브 화면, 다이얼로그)에 일괄 적용됨
+
+---
+
 ## 테마 시스템
 
 ### 컬러 아키텍처
