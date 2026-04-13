@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -101,7 +103,8 @@ class UpdateChecker {
           );
         },
       );
-    } catch (_) {
+    } catch (e) {
+      log('UpdateChecker: show dialog error: $e');
     }
   }
 

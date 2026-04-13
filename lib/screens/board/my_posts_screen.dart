@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
@@ -81,12 +82,7 @@ class _MyPostsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance
-          .collection('posts')
-          .where('authorUid', isEqualTo: uid)
-          .orderBy('createdAt', descending: true)
-          .limit(50)
-          .snapshots(),
+      stream: PostRepository.instance.myPostsStream(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
@@ -207,9 +203,7 @@ class _BookmarkedPostsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
-      stream: FirebaseFirestore.instance.collection('posts')
-          .where('bookmarkedBy', arrayContains: uid)
-          .orderBy('createdAt', descending: true).limit(50).snapshots(),
+      stream: PostRepository.instance.bookmarkedPostsStream(uid),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting)
           return const Center(child: CircularProgressIndicator());

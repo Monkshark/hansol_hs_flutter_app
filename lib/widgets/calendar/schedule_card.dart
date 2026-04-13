@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -61,7 +63,8 @@ class ScheduleCard extends StatelessWidget {
     try {
       final dt = DateTime.parse(isoDate);
       return DateFormat('M/d').format(dt);
-    } catch (_) {
+    } catch (e) {
+      log('ScheduleCard: date parse error: $e');
       return isoDate;
     }
   }

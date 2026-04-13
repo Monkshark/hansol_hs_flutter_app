@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -137,7 +139,9 @@ class _TeacherTimetableSelectScreenState
             'updatedAt': FieldValue.serverTimestamp(),
           });
         }
-      } catch (_) {}
+      } catch (e) {
+        log('TeacherTimetableSelectScreen: save error: $e');
+      }
     }
 
     setState(() => _hasChanges = false);

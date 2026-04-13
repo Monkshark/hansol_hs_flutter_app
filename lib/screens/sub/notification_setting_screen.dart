@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -88,7 +90,8 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> w
         return TimeOfDay(hour: hour, minute: int.parse(mp[0]));
       }
       return TimeOfDay(hour: int.parse(h), minute: int.parse(m));
-    } catch (_) {
+    } catch (e) {
+      log('NotificationSettingScreen: parse time error: $e');
       return const TimeOfDay(hour: 7, minute: 0);
     }
   }
@@ -115,7 +118,9 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> w
           _notiAccount = data['notiAccount'] ?? true;
         });
       }
-    } catch (_) {}
+    } catch (e) {
+      log('NotificationSettingScreen: load settings error: $e');
+    }
     for (final cat in FcmService.boardCategories) {
       _notiCategory[cat] = SettingData().getBool('noti_board_$cat', defaultValue: true);
     }

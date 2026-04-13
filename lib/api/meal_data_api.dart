@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:hansol_high_school/data/api_strings.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'nies_api_keys.dart';
 
@@ -34,7 +35,7 @@ class MealDataApi {
     log('MealDataApi: getMeal cacheKey=$cacheKey');
 
     final cached = _getFromCache(prefs, cacheKey);
-    if (cached != null && cached.meal != null && cached.meal != '급식 정보가 없습니다.' && cached.meal != '급식 정보가 없습니다') {
+    if (cached != null && cached.meal != null && cached.meal != ApiStrings.mealNoData && cached.meal != ApiStrings.mealNoDataLegacy) {
       if (_isCacheStale(prefs, cacheKey)) {
         // SWR: 만료된 캐시를 즉시 반환하고 백그라운드에서 갱신
         log('MealDataApi: getMeal stale cache, revalidating in background');
@@ -49,7 +50,7 @@ class MealDataApi {
     if (await NetworkStatus.isUnconnected()) {
       if (cached != null) return cached;
       return Meal(
-        meal: "식단 정보를 확인하려면 인터넷에 연결하세요",
+        meal: ApiStrings.mealNoInternet,
         date: date,
         mealType: mealType,
         kcal: '',
@@ -80,7 +81,7 @@ class MealDataApi {
 
     final data = await _fetchData(requestURL);
     if (data == null || !data.containsKey('mealServiceDietInfo')) {
-      final empty = Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
+      final empty = Meal(meal: ApiStrings.mealNoData, date: date, mealType: mealType, kcal: '');
       _saveToCache(prefs, cacheKey, empty);
       return empty;
     }
@@ -101,7 +102,7 @@ class MealDataApi {
       }
     }
 
-    final empty = Meal(meal: '급식 정보가 없습니다.', date: date, mealType: mealType, kcal: '');
+    final empty = Meal(meal: ApiStrings.mealNoData, date: date, mealType: mealType, kcal: '');
     _saveToCache(prefs, cacheKey, empty);
     return empty;
   }
@@ -219,7 +220,7 @@ class MealDataApi {
 
     final meal = Meal.fromJson(jsonDecode(data));
 
-    if (meal.meal == '급식 정보가 없습니다.') {
+    if (meal.meal == ApiStrings.mealNoData) {
       if (age > 5 * 60 * 1000) return null;
     } else if (age > 24 * 60 * 60 * 1000) {
       // SWR: 3일 이내면 stale 캐시 반환 (isCacheStale로 확인)

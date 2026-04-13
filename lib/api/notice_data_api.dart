@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:hansol_high_school/data/api_strings.dart';
 import 'nies_api_keys.dart';
 
 class UpcomingEvent {
@@ -47,7 +48,7 @@ class NoticeDataApi {
     }
 
     if (await NetworkStatus.isUnconnected()) {
-      return "학사일정을 확인하려면 인터넷에 연결하세요";
+      return ApiStrings.noticeNoInternet;
     }
 
     final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
@@ -57,22 +58,22 @@ class NoticeDataApi {
 
     final data = await _fetchData(requestURL);
     if (data == null) {
-      _cache(prefs, cacheKey, '학사일정이 없습니다');
-      return '학사일정이 없습니다';
+      _cache(prefs, cacheKey, ApiStrings.noticeNoData);
+      return ApiStrings.noticeNoData;
     }
 
     if (data.containsKey('RESULT') && data['RESULT']['CODE'] == 'INFO-200') {
-      _cache(prefs, cacheKey, '학사일정이 없습니다');
-      return '학사일정이 없습니다';
+      _cache(prefs, cacheKey, ApiStrings.noticeNoData);
+      return ApiStrings.noticeNoData;
     }
 
     if (!data.containsKey('SchoolSchedule')) {
-      _cache(prefs, cacheKey, '학사일정이 없습니다');
-      return '학사일정이 없습니다';
+      _cache(prefs, cacheKey, ApiStrings.noticeNoData);
+      return ApiStrings.noticeNoData;
     }
 
     final notice = _processSchoolSchedule(data['SchoolSchedule']);
-    _cache(prefs, cacheKey, notice ?? '학사일정이 없습니다');
+    _cache(prefs, cacheKey, notice ?? ApiStrings.noticeNoData);
     return notice;
   }
 

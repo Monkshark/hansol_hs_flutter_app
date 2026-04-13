@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -9,6 +10,8 @@ import 'package:hansol_high_school/data/search_tokens.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/my_posts_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
+import 'package:hansol_high_school/data/board_categories.dart';
+import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -35,7 +38,7 @@ String _formatSuspendDuration(AppLocalizations l, Duration diff) {
 }
 
 class _BoardScreenState extends State<BoardScreen> {
-  static const _categoryKeys = ['전체', '인기글', '자유', '질문', '정보공유', '분실물', '학생회', '동아리'];
+  static const _categoryKeys = BoardCategories.boardKeys;
   static const _pageSize = 20;
   static const _searchLimit = 50;
   int _selectedIndex = 0;
@@ -58,18 +61,7 @@ class _BoardScreenState extends State<BoardScreen> {
   String get _selectedCategory => _categoryKeys[_selectedIndex];
 
   String _localizedCategory(BuildContext context, String key) {
-    final l = AppLocalizations.of(context)!;
-    switch (key) {
-      case '전체': return l.board_categoryAll;
-      case '인기글': return l.board_categoryPopular;
-      case '자유': return l.board_categoryFree;
-      case '질문': return l.board_categoryQuestion;
-      case '정보공유': return l.board_categoryInfoShare;
-      case '분실물': return l.board_categoryLostFound;
-      case '학생회': return l.board_categoryStudentCouncil;
-      case '동아리': return l.board_categoryClub;
-      default: return key;
-    }
+    return BoardCategories.localizedName(AppLocalizations.of(context)!, key);
   }
 
   @override
@@ -133,11 +125,7 @@ class _BoardScreenState extends State<BoardScreen> {
     }
     setState(() => _searchLoading = true);
     try {
-      final snap = await FirebaseFirestore.instance
-          .collection('posts')
-          .where('searchTokens', arrayContainsAny: tokens)
-          .limit(_searchLimit)
-          .get();
+      final snap = await _repo.searchPosts(tokens: tokens, limit: _searchLimit);
 
       final lowerQuery = query.toLowerCase();
       final filtered = snap.docs.where((doc) {
@@ -162,7 +150,8 @@ class _BoardScreenState extends State<BoardScreen> {
           _searchLoading = false;
         });
       }
-    } catch (_) {
+    } catch (e) {
+      log('BoardScreen: search error: $e');
       if (mounted) setState(() => _searchLoading = false);
     }
   }
@@ -190,13 +179,13 @@ class _BoardScreenState extends State<BoardScreen> {
     }
   }
 
+  final _repo = PostRepository.instance;
+
   Query<Map<String, dynamic>> _baseQuery() {
-    Query<Map<String, dynamic>> q = FirebaseFirestore.instance.collection('posts');
-    q = q.orderBy('createdAt', descending: true);
-    if (_selectedCategory != '전체' && _selectedCategory != '인기글') {
-      q = q.where('category', isEqualTo: _selectedCategory);
-    }
-    return q;
+    final category = (_selectedCategory != BoardCategories.all && _selectedCategory != BoardCategories.popular)
+        ? _selectedCategory
+        : null;
+    return _repo.baseQuery(category: category);
   }
 
   int _docLikeCount(QueryDocumentSnapshot<Map<String, dynamic>> doc) {
@@ -211,7 +200,7 @@ class _BoardScreenState extends State<BoardScreen> {
   Future<void> _loadPosts() async {
     setState(() { _initialLoading = true; _allDocs = []; _lastDoc = null; _hasMore = true; });
 
-    final isPopular = _selectedCategory == '인기글';
+    final isPopular = _selectedCategory == BoardCategories.popular;
     final fetchLimit = isPopular ? 100 : _pageSize;
 
     final snap = await _baseQuery().limit(fetchLimit).get();
@@ -644,7 +633,7 @@ class PostCard extends StatelessWidget {
                   child: Text(_localizedCategoryName(context, category),
                     style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: _categoryColor(category))),
                 ),
-                if (data['isResolved'] == true && category == '분실물')
+                if (data['isResolved'] == true && category == BoardCategories.lostFound)
                   Padding(
                     padding: const EdgeInsets.only(left: 6),
                     child: Container(
@@ -759,30 +748,10 @@ class PostCard extends StatelessWidget {
   }
 
   String _localizedCategoryName(BuildContext context, String key) {
-    final l = AppLocalizations.of(context)!;
-    switch (key) {
-      case '자유': return l.board_categoryFree;
-      case '인기글': return l.board_categoryPopular;
-      case '질문': return l.board_categoryQuestion;
-      case '정보공유': return l.board_categoryInfoShare;
-      case '분실물': return l.board_categoryLostFound;
-      case '학생회': return l.board_categoryStudentCouncil;
-      case '동아리': return l.board_categoryClub;
-      default: return key;
-    }
+    return BoardCategories.localizedName(AppLocalizations.of(context)!, key);
   }
 
-  Color _categoryColor(String category) {
-    switch (category) {
-      case '자유': return AppColors.theme.primaryColor;
-      case '질문': return AppColors.theme.secondaryColor;
-      case '정보공유': return AppColors.theme.tertiaryColor;
-      case '분실물': return const Color(0xFFFF5722);
-      case '학생회': return const Color(0xFF4CAF50);
-      case '동아리': return const Color(0xFF9C27B0);
-      default: return AppColors.theme.darkGreyColor;
-    }
-  }
+  Color _categoryColor(String category) => BoardCategories.color(category);
 
   String _formatTime(BuildContext context, DateTime dt) {
     final l = AppLocalizations.of(context)!;

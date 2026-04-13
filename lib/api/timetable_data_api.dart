@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hansol_high_school/api/nies_api_keys.dart';
+import 'package:hansol_high_school/data/api_strings.dart';
 import 'package:hansol_high_school/data/subject.dart';
 import 'package:hansol_high_school/network/network_status.dart';
 import 'package:http/http.dart' as http;
@@ -61,7 +62,7 @@ class TimetableDataApi {
     if (await NetworkStatus.isUnconnected()) {
       return {
         "error": {
-          "error": ["시간표를 확인하려면 인터넷에 연결하세요"]
+          "error": [ApiStrings.timetableNoInternet]
         }
       };
     }
@@ -80,13 +81,13 @@ class TimetableDataApi {
     if (data == null) {
       return {
         "error": {
-          "error": ["정보 없음"]
+          "error": [ApiStrings.timetableNoData]
         }
       };
     }
 
     if (data['hisTimetable'] == null) {
-      return {"error": {"error": ["정보 없음"]}};
+      return {"error": {"error": [ApiStrings.timetableNoData]}};
     }
     final timetable = _processTimetable(data['hisTimetable']);
     if (!timetable.containsKey('error')) {

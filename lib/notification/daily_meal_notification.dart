@@ -119,7 +119,9 @@ class DailyMealNotification {
     try {
       final meal = await MealDataApi.getMeal(date: DateTime.now(), mealType: mealType, type: MealDataApi.MENU);
       menuPreview = _cleanMenu(meal?.meal);
-    } catch (_) {}
+    } catch (e) {
+      log('DailyMealNotification: getMeal error: $e');
+    }
 
     final body = menuPreview.isNotEmpty ? menuPreview : l.noti_mealConfirm(mealLabel);
 

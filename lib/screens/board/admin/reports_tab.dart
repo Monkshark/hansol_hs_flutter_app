@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -96,11 +99,10 @@ class ReportsTabState extends State<ReportsTab> {
                       GestureDetector(
                         onTap: () async {
                           try {
-                            final comments = await FirebaseFirestore.instance
-                                .collection('posts').doc(postId).collection('comments').get();
-                            for (var c in comments.docs) await c.reference.delete();
-                            await FirebaseFirestore.instance.collection('posts').doc(postId).delete();
-                          } catch (_) {}
+                            await PostRepository.instance.deletePost(postId);
+                          } catch (e) {
+                            log('ReportsTab: delete post error: $e');
+                          }
                           await docs[index].reference.delete();
                           _refresh();
                         },

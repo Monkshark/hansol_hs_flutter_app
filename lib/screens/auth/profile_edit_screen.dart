@@ -7,7 +7,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
-import 'package:hansol_high_school/main.dart';
+import 'package:hansol_high_school/main.dart' show providerContainer;
+import 'package:hansol_high_school/providers/settings_provider.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
@@ -248,7 +249,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
               }
               return;
             }
-          } catch (_) {
+          } catch (e) {
+            log('ProfileEditScreen: reauth error: $e');
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(content: Text(l10n.profileEdit_reauthFailed)));
@@ -262,7 +264,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
 
       await AuthService.signOut();
       AuthService.clearProfileCache();
-      appRefreshNotifier.value++;
+      providerContainer.read(appRefreshProvider.notifier).refresh();
       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     } catch (e) {
       log('Account deletion error: $e');

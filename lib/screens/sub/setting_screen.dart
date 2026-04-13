@@ -12,7 +12,9 @@ import 'package:hansol_high_school/screens/sub/notification_setting_screen.dart'
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
-import 'package:hansol_high_school/main.dart';
+import 'package:hansol_high_school/main.dart' show providerContainer;
+import 'package:hansol_high_school/providers/settings_provider.dart';
+import 'package:hansol_high_school/providers/theme_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
@@ -125,21 +127,7 @@ class _SettingScreenState extends State<SettingScreen> {
     themeModeIndex = index;
     SettingData().themeModeIndex = index;
 
-    switch (index) {
-      case 0:
-        SettingData().isDarkMode = false;
-        themeNotifier.value = ThemeMode.light;
-        break;
-      case 1:
-        SettingData().isDarkMode = true;
-        themeNotifier.value = ThemeMode.dark;
-        break;
-      case 2:
-        final isDark = MediaQuery.of(context).platformBrightness == Brightness.dark;
-        SettingData().isDarkMode = isDark;
-        themeNotifier.value = ThemeMode.system;
-        break;
-    }
+    providerContainer.read(themeProvider.notifier).setMode(index);
 
     setState(() {});
   }
@@ -196,8 +184,7 @@ class _SettingScreenState extends State<SettingScreen> {
             ),
             onPressed: () {
               final newCode = SettingData().localeCode == 'en' ? 'ko' : 'en';
-              SettingData().localeCode = newCode;
-              localeNotifier.value = Locale(newCode);
+              providerContainer.read(localeProvider.notifier).setLocale(Locale(newCode));
               setState(() {});
             },
           ),
@@ -463,7 +450,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     onPressed: () async {
                       await AuthService.signOut();
                       AuthService.clearProfileCache();
-                      appRefreshNotifier.value++;
+                      providerContainer.read(appRefreshProvider.notifier).refresh();
                       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
                     },
                     child: Text(AppLocalizations.of(context)!.settings_logout, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
