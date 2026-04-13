@@ -196,7 +196,7 @@ graph LR
 
 ## 의사결정 일지 (Architecture Decision Records)
 
-각 결정은 *왜 다른 후보가 아니라 이 선택인가* 를 짧게 정리합니다.
+각 결정은 **왜 다른 후보가 아니라 이 선택인가** 를 짧게 정리합니다.
 
 <details>
 <summary><b>1. 상태관리: Riverpod 2.5 (vs Provider / BLoC / GetX)</b></summary>
