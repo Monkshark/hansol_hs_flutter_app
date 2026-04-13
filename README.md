@@ -8,6 +8,8 @@
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
 [![Riverpod Graph](https://img.shields.io/badge/Riverpod%20Graph-인터랙티브-6c5ce7?logo=d3.js&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
+[![codecov](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app/branch/master/graph/badge.svg)](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app)
+![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey?logo=android&logoColor=white)
 [![Docs](https://img.shields.io/badge/Docs-45%20문서-00b894?logo=readthedocs&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/)
 
 > 세종시 한솔고등학교 학생·교사·졸업생·학부모를 위한 통합 학교 플랫폼
