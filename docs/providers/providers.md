@@ -182,6 +182,40 @@ class NotificationSettingsNotifier extends Notifier<NotificationSettings> {
 
 알림 설정 통합 상태. 각 setter(`setBreakfast`, `setLunch`, `setDinner`, `setBoard`)가 [SettingData](../data/setting_data.md)와 state를 동시에 갱신
 
+### `LocaleNotifier` / `localeProvider`
+
+```dart
+class LocaleNotifier extends Notifier<Locale?> {
+  @override
+  Locale? build() {
+    final code = SettingData().localeCode;
+    return code.isEmpty ? null : Locale(code);
+  }
+
+  void setLocale(Locale? locale) {
+    SettingData().localeCode = locale?.languageCode ?? '';
+    state = locale;
+  }
+}
+```
+
+인앱 언어 전환. `null` = 시스템 로캘, `Locale('ko')` = 한국어, `Locale('en')` = 영어. `HansolHighSchool` 루트 위젯에서 `ref.watch(localeProvider)` → `MaterialApp.locale`에 전달
+
+### `AppRefreshNotifier` / `appRefreshProvider`
+
+```dart
+class AppRefreshNotifier extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void refresh() => state++;
+}
+```
+
+`refresh()` 호출 시 카운터 증가 → `ValueKey(refreshKey)` 변경 → MainScreen 전체 재생성. 로그인/로그아웃/프로필 변경 후 호출
+
+**비위젯 코드에서 접근**: `providerContainer.read(appRefreshProvider.notifier).refresh()`
+
 ---
 
 ## theme_provider.dart
