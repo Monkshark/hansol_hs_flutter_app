@@ -5,7 +5,7 @@
     "rewrites": [
       {
         "source": "/post/**",
-        "destination": "/post/index.html"
+        "function": "postOgRenderer"
       }
     ],
     "headers": [
