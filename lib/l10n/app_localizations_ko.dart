@@ -2314,4 +2314,16 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_langEn => 'English';
+
+  @override
+  String get error_generic => '문제가 발생했습니다';
+
+  @override
+  String get error_retry => '다시 시도';
+
+  @override
+  String get error_network => '네트워크 연결을 확인해주세요';
+
+  @override
+  String get error_loadFailed => '데이터를 불러올 수 없습니다';
 }

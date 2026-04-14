@@ -746,5 +746,10 @@
   "settings_languageSection": "Language",
   "settings_langSystem": "System",
   "settings_langKo": "한국어",
-  "settings_langEn": "English"
+  "settings_langEn": "English",
+
+  "error_generic": "Something went wrong",
+  "error_retry": "Retry",
+  "error_network": "Please check your network connection",
+  "error_loadFailed": "Failed to load data"
 }

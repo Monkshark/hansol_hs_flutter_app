@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -166,6 +167,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             child: StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
               stream: _postRef.snapshots(),
               builder: (context, postSnapshot) {
+                if (postSnapshot.hasError) {
+                  return ErrorView(
+                    message: AppLocalizations.of(context)!.error_loadFailed,
+                    onRetry: () => setState(() {}),
+                  );
+                }
                 if (!postSnapshot.hasData || !postSnapshot.data!.exists) {
                   return const Center(child: CircularProgressIndicator());
                 }
