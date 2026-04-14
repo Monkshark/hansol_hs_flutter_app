@@ -441,6 +441,64 @@ exports.checkSuspensionExpiry = onSchedule("every 1 hours", async () => {
 });
 
 // 매일 03:00 KST: 4년 지난 비공지 게시글 + 하위 댓글 + Storage 이미지 삭제
+// 게시글 OG 태그 동적 렌더링
+exports.postOgRenderer = onRequest(async (req, res) => {
+  try {
+    const pathMatch = req.path.match(/\/post\/([^/]+)/);
+    const postId = pathMatch ? pathMatch[1] : null;
+
+    let title = "한솔고등학교 앱";
+    let description = "세종시 한솔고등학교 통합 학교 플랫폼";
+    let imageUrl = "";
+
+    if (postId) {
+      const doc = await getFirestore().collection("posts").doc(postId).get();
+      if (doc.exists) {
+        const data = doc.data();
+        title = data.title || title;
+        const content = data.content || "";
+        description = content.length > 100 ? content.substring(0, 100) + "..." : content;
+        if (Array.isArray(data.imageUrls) && data.imageUrls.length > 0) {
+          imageUrl = data.imageUrls[0];
+        }
+      }
+    }
+
+    const url = `https://hansol-high-school-46fc9.web.app/post/${postId || ""}`;
+    const ogTags = `
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="${title.replace(/"/g, "&quot;")}">
+    <meta property="og:description" content="${description.replace(/"/g, "&quot;")}">
+    <meta property="og:url" content="${url}">
+    <meta property="og:site_name" content="한솔고등학교">
+    ${imageUrl ? `<meta property="og:image" content="${imageUrl}">` : ""}
+    <meta name="twitter:card" content="${imageUrl ? "summary_large_image" : "summary"}">
+    <meta name="twitter:title" content="${title.replace(/"/g, "&quot;")}">
+    <meta name="twitter:description" content="${description.replace(/"/g, "&quot;")}">`;
+
+    // 기존 landing page HTML을 읽어서 OG 태그 삽입
+    const fs = require("fs");
+    const path = require("path");
+    let html;
+    const localPath = path.join(__dirname, "..", "hosting", "public", "post", "index.html");
+    if (fs.existsSync(localPath)) {
+      html = fs.readFileSync(localPath, "utf8");
+    } else {
+      // fallback: 최소 HTML
+      html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title></head><body><p>앱에서 열어주세요</p></body></html>`;
+    }
+
+    html = html.replace("</head>", ogTags + "\n</head>");
+    html = html.replace(/<title>[^<]*<\/title>/, `<title>${title.replace(/</g, "&lt;")} - 한솔고등학교</title>`);
+
+    res.set("Cache-Control", "public, max-age=300, s-maxage=600");
+    res.status(200).send(html);
+  } catch (error) {
+    await logError("postOgRenderer", error);
+    res.status(500).send("Internal Server Error");
+  }
+});
+
 exports.cleanupOldPosts = onSchedule("every day 18:00", async () => {
   const db = getFirestore();
   const { getStorage } = require("firebase-admin/storage");
