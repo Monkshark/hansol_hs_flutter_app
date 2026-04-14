@@ -206,3 +206,6 @@ tests/firestore-rules/node_modules/
 
 # Golden test failure diffs
 test/failures/
+
+.firebase/
+admin-web/tsconfig.tsbuildinfo
