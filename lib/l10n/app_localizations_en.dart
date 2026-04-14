@@ -2364,4 +2364,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_langEn => 'English';
+
+  @override
+  String get error_generic => 'Something went wrong';
+
+  @override
+  String get error_retry => 'Retry';
+
+  @override
+  String get error_network => 'Please check your network connection';
+
+  @override
+  String get error_loadFailed => 'Failed to load data';
 }

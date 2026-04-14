@@ -4363,6 +4363,30 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'English'**
   String get settings_langEn;
+
+  /// No description provided for @error_generic.
+  ///
+  /// In ko, this message translates to:
+  /// **'문제가 발생했습니다'**
+  String get error_generic;
+
+  /// No description provided for @error_retry.
+  ///
+  /// In ko, this message translates to:
+  /// **'다시 시도'**
+  String get error_retry;
+
+  /// No description provided for @error_network.
+  ///
+  /// In ko, this message translates to:
+  /// **'네트워크 연결을 확인해주세요'**
+  String get error_network;
+
+  /// No description provided for @error_loadFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'데이터를 불러올 수 없습니다'**
+  String get error_loadFailed;
 }
 
 class _AppLocalizationsDelegate

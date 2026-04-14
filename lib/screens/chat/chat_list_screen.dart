@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/skeleton.dart';
@@ -53,6 +54,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
             .orderBy('lastMessageAt', descending: true)
             .snapshots(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return ErrorView(
+              message: AppLocalizations.of(context)!.error_loadFailed,
+              onRetry: () => setState(() {}),
+            );
+          }
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const ChatListSkeleton();
           }
