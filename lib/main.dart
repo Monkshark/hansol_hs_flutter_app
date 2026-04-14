@@ -72,50 +72,44 @@ Future<void> main() async {
     log('Firebase init failed: $e\n$st', name: 'main');
   }
 
-  try {
-    await FirebaseAppCheck.instance.activate(
-      androidProvider: const bool.fromEnvironment('dart.vm.product')
-          ? AndroidProvider.playIntegrity
-          : AndroidProvider.debug,
-      appleProvider: AppleProvider.debug,
-    );
-  } catch (e) {
-    log('AppCheck activate failed: $e', name: 'main');
-  }
-
-  try {
-    await FirebasePerformance.instance.setPerformanceCollectionEnabled(true);
-  } catch (e) {
-    log('Performance enable failed: $e', name: 'main');
-  }
-
-  try {
-    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
-      const bool.fromEnvironment('dart.vm.product'),
-    );
-  } catch (e) {
-    log('Analytics enable failed: $e', name: 'main');
-  }
-
   FlutterError.onError = (details) {
     try { FirebaseCrashlytics.instance.recordFlutterFatalError(details); } catch (e) { log('Crashlytics report error: $e', name: 'main'); }
     try { _logCrashToFirestore(details); } catch (e) { log('Firestore crash log error: $e', name: 'main'); }
   };
 
   KakaoSdk.init(nativeAppKey: KakaoKeys.nativeAppKey);
-  await SettingData().init();
   tz.initializeTimeZones();
   tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
-
-  // ProviderContainer 초기화 (main()에서 provider 접근용)
   providerContainer = ProviderContainer();
+
+  // 필수: SettingData + ServiceLocator만 await (UI에 필요)
+  await Future.wait([SettingData().init(), setupServiceLocator()]);
+
+  await initializeDateFormatting();
+  runApp(UncontrolledProviderScope(container: providerContainer, child: const HansolHighSchool()));
+
+  // UI가 뜬 후 나머지 초기화를 백그라운드로 실행
+  unawaited(_deferredInit());
+}
+
+Future<void> _deferredInit() async {
+  unawaited(_safeInit('AppCheck', () => FirebaseAppCheck.instance.activate(
+    androidProvider: const bool.fromEnvironment('dart.vm.product')
+        ? AndroidProvider.playIntegrity
+        : AndroidProvider.debug,
+    appleProvider: AppleProvider.debug,
+  )));
+  unawaited(_safeInit('Performance', () => FirebasePerformance.instance.setPerformanceCollectionEnabled(true)));
+  unawaited(_safeInit('Analytics', () => FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
+    const bool.fromEnvironment('dart.vm.product'),
+  )));
 
   unawaited(_preloadSubjects(2));
   unawaited(_preloadSubjects(3));
 
-  await setupServiceLocator();
-  await DailyMealNotification().initializeNotifications();
-  await DailyMealNotification().scheduleDailyNotifications();
+  final meal = DailyMealNotification();
+  await meal.initializeNotifications();
+  await meal.scheduleDailyNotifications();
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   unawaited(FcmService.initialize());
@@ -124,10 +118,6 @@ Future<void> main() async {
     WidgetService.updateAll();
     HomeWidget.registerInteractivityCallback(widgetBackgroundCallback);
   }));
-
-  initializeDateFormatting().then((_) => runApp(
-    UncontrolledProviderScope(container: providerContainer, child: const HansolHighSchool()),
-  ));
 }
 
 
@@ -143,6 +133,14 @@ void _logCrashToFirestore(FlutterErrorDetails details) {
     });
   } catch (e) {
     log('_logCrashToFirestore error: $e', name: 'main');
+  }
+}
+
+Future<void> _safeInit(String name, Future<void> Function() fn) async {
+  try {
+    await fn();
+  } catch (e) {
+    log('$name init failed: $e', name: 'main');
   }
 }
 
