@@ -58,7 +58,7 @@
 |------|------|------|
 | **총 코드 라인** | **40,000+** | Dart 32,096 (lib) + 4,216 (test) + TypeScript 2,092 + Java/XML 1,167 + Swift 387 + JS 485 |
 | **소스 파일** | **108개** (lib) + **30개** (test) + **12페이지** (Admin Web) + **5개** (Android Widget) + **1개** (iOS Widget) | 26 screens, 16 추출 위젯, 50+ models/utils/services + i18n 7 |
-| **Cloud Functions** | **8개** | 푸시 알림, OAuth, 스케줄러, 계정 삭제 |
+| **Cloud Functions** | **9개** | 푸시 알림, OAuth, 스케줄러, 계정 삭제, OG 태그 렌더링 |
 | **OAuth 로그인** | **4종** | Google, Apple, Kakao, GitHub |
 | **푸시 알림** | **13종** | FCM 10 + 로컬 3, 카테고리별 개별 on/off |
 | **테스트** | **344 + 34개** | Flutter Unit/Widget/Provider/Golden 344 + Firestore Rules emulator 34 (총 378) |
@@ -69,6 +69,9 @@
 | **i18n** | **한국어 + 영어** | Flutter ARB `gen-l10n`, 711 번역 키, 인앱 언어 토글 |
 | **민감 데이터** | **flutter_secure_storage** | 성적은 Android Keystore / iOS Keychain 저장 |
 | **API 최적화** | **호출 30회 → 1회** | 월간 프리페치 + Completer 패턴 |
+| **콜드 스타트** | **지연 초기화** | `runApp` 선행, AppCheck/Analytics/FCM/위젯 등 백그라운드 처리 |
+| **딥링크 OG 태그** | **동적 미리보기** | Cloud Function으로 게시글별 og:title/description/image 생성 |
+| **APK 사이즈** | **ABI split** | universal 72MB → arm64-v8a ~40MB (단일 아키텍처 빌드) |
 | **Firestore 절감** | **읽기 30~50% 감소** | 오프라인 캐시 + limit 최적화 |
 | **기술 문서** | **[45개](https://monkshark.github.io/hansol_hs_flutter_app/)** | 화면·위젯·서비스·모델별 MD 문서 + 인터랙티브 뷰어 (GitHub Pages) |
 | **운영 비용** | **$0~3/월** | 1,000명 기준, 무료 한도 내 운영 가능 |
@@ -82,6 +85,7 @@
 | **Dart 파일 수** | **138개** | lib 108 + test 30 |
 | **Unit/Widget test 실행 시간** | **약 10초** | `flutter test` 344 tests, 로컬 머신 기준 |
 | **Rules test 실행 시간** | **약 4초** | `firebase emulators:exec ... npm test` 34 tests |
+| **콜드 스타트 최적화** | **프레임 드롭 30↓** | `runApp` 선행 후 Firebase 초기화 지연 로딩 (`_deferredInit`) |
 | **이미지 압축 후 크기** | **원본 대비 ~30%** | 1080px 폭, JPEG quality 80, EXIF 제거 |
 | **검색 fetch 상한** | **50건 / 350ms debounce** | `array-contains-any` + 클라이언트 substring 필터 |
 | **게시판 페이지** | **20건 cursor pagination** | `startAfterDocument` + `limit(20)` |
