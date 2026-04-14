@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.monkshark.hansol_high_school",
+      "sha256_cert_fingerprints": [
+        "27:7D:0C:7A:40:19:65:05:F4:B0:39:24:53:FA:33:09:2A:F3:4E:5E:FC:85:8C:A0:FA:A2:03:DD:D6:9F:87:57"
+      ]
+    }
+  }
+]
