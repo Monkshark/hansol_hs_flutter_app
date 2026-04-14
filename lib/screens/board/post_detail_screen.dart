@@ -512,7 +512,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     items.add(_ActionItem(Icons.share_outlined, AppLocalizations.of(context)!.post_share, () {
       final title = data['title'] ?? '';
       final content = data['content'] ?? '';
-      Share.share('$title\n\n$content');
+      final deepLink = 'https://hansol-high-school-46fc9.web.app/post/${widget.postId}';
+      Share.share('$title\n\n$content\n\n$deepLink');
     }));
     if (isAuthor) {
       items.add(_ActionItem(Icons.edit_outlined, AppLocalizations.of(context)!.post_edit, () => _editPost(data)));

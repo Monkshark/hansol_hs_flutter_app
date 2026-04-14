@@ -44,6 +44,15 @@
                 <action android:name="FLUTTER_NOTIFICATION_CLICK" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="https"
+                    android:host="hansol-high-school-46fc9.web.app"
+                    android:pathPrefix="/post/" />
+            </intent-filter>
         </activity>
         <receiver android:name="com.dexterous.flutterlocalnotifications.receivers.ActionBroadcastReceiver"
             android:exported="true" />

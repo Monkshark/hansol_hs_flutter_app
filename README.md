@@ -11,6 +11,8 @@
 [![codecov](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app/branch/master/graph/badge.svg)](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app)
 ![Platform](https://img.shields.io/badge/platform-Android%20%7C%20iOS-lightgrey?logo=android&logoColor=white)
 [![Docs](https://img.shields.io/badge/Docs-45%20문서-00b894?logo=readthedocs&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Contributing](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 > 세종시 한솔고등학교 학생·교사·졸업생·학부모를 위한 통합 학교 플랫폼
 

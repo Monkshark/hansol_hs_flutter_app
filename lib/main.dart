@@ -16,6 +16,7 @@ import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/service_locator.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
+import 'package:hansol_high_school/notification/deep_link_service.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/notification/popup_notice.dart';
 import 'package:hansol_high_school/notification/update_checker.dart';
@@ -118,6 +119,7 @@ Future<void> main() async {
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   unawaited(FcmService.initialize());
+  unawaited(DeepLinkService.initialize());
   unawaited(WidgetService.initialize().then((_) {
     WidgetService.updateAll();
     HomeWidget.registerInteractivityCallback(widgetBackgroundCallback);
