@@ -4,7 +4,7 @@
 [![Firestore Rules Tests](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml/badge.svg)](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-344%20unit%20%2B%2034%20rules-success)
+![Tests](https://img.shields.io/badge/tests-344%20unit%20%2B%2034%20rules%20%3D%20378-success)
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
 [![Riverpod Graph](https://img.shields.io/badge/Riverpod%20Graph-인터랙티브-6c5ce7?logo=d3.js&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
@@ -56,8 +56,8 @@
 
 | 지표 | 수치 | 비고 |
 |------|------|------|
-| **총 코드 라인** | **40,000+** | Dart 32,096 (lib) + 4,216 (test) + TypeScript 2,092 + Java/XML 1,167 + Swift 387 + JS 485 |
-| **소스 파일** | **108개** (lib) + **30개** (test) + **12페이지** (Admin Web) + **5개** (Android Widget) + **1개** (iOS Widget) | 26 screens, 16 추출 위젯, 50+ models/utils/services + i18n 7 |
+| **총 코드 라인** | **41,000+** | Dart 32,299 (lib) + 4,204 (test) + TypeScript 2,468 + Java/XML 1,181 + Swift 387 + JS 543 |
+| **소스 파일** | **110개** (lib) + **30개** (test) + **12페이지** (Admin Web) + **5개** (Android Widget) + **1개** (iOS Widget) | 27 screens, 18 추출 위젯, 50+ models/utils/services + i18n 7 |
 | **Cloud Functions** | **9개** | 푸시 알림, OAuth, 스케줄러, 계정 삭제, OG 태그 렌더링 |
 | **OAuth 로그인** | **4종** | Google, Apple, Kakao, GitHub |
 | **푸시 알림** | **13종** | FCM 10 + 로컬 3, 카테고리별 개별 on/off |
@@ -66,7 +66,7 @@
 | **이미지 압축** | **용량 70% 감소** | 게시글 1080px (EXIF/GPS 제거), 프로필 256px |
 | **검색** | **Firestore n-gram 인덱스** | 제목+본문 2-gram array-contains-any, 350ms debounce |
 | **태블릿 대응** | **가로 모드 지원** | 폰 세로 잠금, 태블릿 가로 시 9:16 비율 콘텐츠 중앙 배치 |
-| **i18n** | **한국어 + 영어** | Flutter ARB `gen-l10n`, 711 번역 키, 인앱 언어 토글 |
+| **i18n** | **한국어 + 영어** | Flutter ARB `gen-l10n`, 715 번역 키, 인앱 언어 토글 |
 | **민감 데이터** | **flutter_secure_storage** | 성적은 Android Keystore / iOS Keychain 저장 |
 | **API 최적화** | **호출 30회 → 1회** | 월간 프리페치 + Completer 패턴 |
 | **콜드 스타트** | **지연 초기화** | `runApp` 선행, AppCheck/Analytics/FCM/위젯 등 백그라운드 처리 |
@@ -81,8 +81,8 @@
 | 항목 | 수치 | 측정 방법 |
 |------|------|----------|
 | **Release APK** | **72 MB** | `build/app/outputs/flutter-apk/app-release.apk` (단일 universal) |
-| **Dart 라인 수** | **36,312** | lib 32,096 + test 4,216 |
-| **Dart 파일 수** | **138개** | lib 108 + test 30 |
+| **Dart 라인 수** | **36,503** | lib 32,299 + test 4,204 |
+| **Dart 파일 수** | **140개** | lib 110 + test 30 |
 | **Unit/Widget test 실행 시간** | **약 10초** | `flutter test` 344 tests, 로컬 머신 기준 |
 | **Rules test 실행 시간** | **약 4초** | `firebase emulators:exec ... npm test` 34 tests |
 | **콜드 스타트 최적화** | **프레임 드롭 30↓** | `runApp` 선행 후 Firebase 초기화 지연 로딩 (`_deferredInit`) |
