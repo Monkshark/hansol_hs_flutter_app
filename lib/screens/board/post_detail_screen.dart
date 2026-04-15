@@ -21,6 +21,7 @@ import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -135,7 +136,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         IconButton(
                           icon: Icon(
                             isBookmarked ? Icons.bookmark : Icons.bookmark_border,
-                            size: 22,
+                            size: Responsive.r(context, 22),
                             color: isBookmarked ? AppColors.theme.primaryColor : null,
                           ),
                           tooltip: AppLocalizations.of(context)!.post_bookmark,
@@ -143,12 +144,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                       if (!isAuthor && data['isAnonymous'] != true)
                         IconButton(
-                          icon: const Icon(Icons.chat_bubble_outline, size: 22),
+                          icon: Icon(Icons.chat_bubble_outline, size: Responsive.r(context, 22)),
                           tooltip: AppLocalizations.of(context)!.post_chat,
                           onPressed: () => startChat(context, data['authorUid'], data['authorName'] ?? ''),
                         ),
                       IconButton(
-                        icon: const Icon(Icons.more_vert, size: 22),
+                        icon: Icon(Icons.more_vert, size: Responsive.r(context, 22)),
                         onPressed: () => _showActionSheet(
                           context, data, isAuthor, isManager, isPinned,
                         ),
@@ -236,18 +237,18 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text(category,
-                          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: _categoryColor(category))),
+                          style: TextStyle(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600, color: _categoryColor(category))),
                       ),
                     ),
                     const SizedBox(height: 12),
-                    Text(title, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: textColor)),
+                    Text(title, style: TextStyle(fontSize: Responsive.sp(context, 20), fontWeight: FontWeight.w700, color: textColor)),
                     const SizedBox(height: 8),
                     Text('$authorName · $timeStr',
-                      style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                      style: TextStyle(fontSize: Responsive.sp(context, 13), color: AppColors.theme.darkGreyColor)),
                     const SizedBox(height: 16),
                     Divider(color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFE5E5EA)),
                     const SizedBox(height: 16),
-                    Text(content, style: TextStyle(fontSize: 15, height: 1.7, color: textColor)),
+                    Text(content, style: TextStyle(fontSize: Responsive.sp(context, 15), height: 1.7, color: textColor)),
 
                     if (post['imageUrls'] != null && (post['imageUrls'] as List).isNotEmpty) ...[
                       const SizedBox(height: 16),
@@ -309,7 +310,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                                 borderRadius: BorderRadius.circular(20),
                                 border: Border.all(color: AppColors.theme.darkGreyColor.withAlpha(80)),
                               ),
-                              child: Icon(Icons.flag_outlined, size: 20, color: AppColors.theme.darkGreyColor),
+                              child: Icon(Icons.flag_outlined, size: Responsive.r(context, 20), color: AppColors.theme.darkGreyColor),
                             ),
                           ),
                         ],
@@ -322,7 +323,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         width: double.infinity,
                         child: ElevatedButton.icon(
                           onPressed: post['isResolved'] == true ? null : _resolvePost,
-                          icon: Icon(post['isResolved'] == true ? Icons.check_circle : Icons.check, size: 18),
+                          icon: Icon(post['isResolved'] == true ? Icons.check_circle : Icons.check, size: Responsive.r(context, 18)),
                           label: Text(post['isResolved'] == true ? AppLocalizations.of(context)!.post_resolvedLabel : AppLocalizations.of(context)!.post_found),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: post['isResolved'] == true ? Colors.grey : const Color(0xFF4CAF50),
@@ -347,14 +348,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(AppLocalizations.of(context)!.post_comments(comments.length),
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: textColor)),
+                              style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: textColor)),
                             const SizedBox(height: 12),
                             if (comments.isEmpty)
                               Padding(
                                 padding: const EdgeInsets.symmetric(vertical: 20),
                                 child: Center(
                                   child: Text(AppLocalizations.of(context)!.post_firstComment,
-                                    style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                                    style: TextStyle(fontSize: Responsive.sp(context, 13), color: AppColors.theme.darkGreyColor)),
                                 ),
                               )
                             else
@@ -383,14 +384,14 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     padding: const EdgeInsets.fromLTRB(12, 8, 4, 0),
                     child: Row(
                       children: [
-                        Icon(Icons.reply, size: 14, color: AppColors.theme.primaryColor),
+                        Icon(Icons.reply, size: Responsive.r(context, 14), color: AppColors.theme.primaryColor),
                         const SizedBox(width: 4),
                         Text(AppLocalizations.of(context)!.post_replyTo(_replyToName!),
-                          style: TextStyle(fontSize: 12, color: AppColors.theme.primaryColor)),
+                          style: TextStyle(fontSize: Responsive.sp(context, 12), color: AppColors.theme.primaryColor)),
                         const Spacer(),
                         GestureDetector(
                           onTap: () => setState(() { _replyToCommentId = null; _replyToName = null; }),
-                          child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                          child: Icon(Icons.close, size: Responsive.r(context, 16), color: AppColors.theme.darkGreyColor),
                         ),
                       ],
                     ),
@@ -415,7 +416,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                         ),
                         child: Text(AppLocalizations.of(context)!.post_anonymous,
                           style: TextStyle(
-                            fontSize: 12, fontWeight: FontWeight.w600,
+                            fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600,
                             color: _commentAnonymous
                                 ? AppColors.theme.primaryColor
                                 : AppColors.theme.darkGreyColor,
@@ -427,7 +428,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     Expanded(
                       child: TextField(
                         controller: _commentController,
-                        style: TextStyle(fontSize: 14, color: textColor),
+                        style: TextStyle(fontSize: Responsive.sp(context, 14), color: textColor),
                         decoration: InputDecoration(
                           hintText: _replyToName != null ? '@$_replyToName' : AppLocalizations.of(context)!.post_commentPlaceholder,
                           hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
@@ -473,10 +474,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           Container(width: 36, height: 4, decoration: BoxDecoration(
             color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+          Text(title, style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700,
             color: isDark ? Colors.white : Colors.black87)),
           const SizedBox(height: 8),
-          Text(content, style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor)),
+          Text(content, style: TextStyle(fontSize: Responsive.sp(context, 14), color: AppColors.theme.darkGreyColor)),
           const SizedBox(height: 20),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
             Expanded(child: TextButton(
@@ -559,8 +560,8 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               const SizedBox(height: 12),
               ...items.map((item) => ListTile(
                 leading: Icon(item.icon,
-                  color: item.isDestructive ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black87), size: 22),
-                title: Text(item.label, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
+                  color: item.isDestructive ? Colors.redAccent : (isDark ? Colors.white70 : Colors.black87), size: Responsive.r(context, 22)),
+                title: Text(item.label, style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500,
                   color: item.isDestructive ? Colors.redAccent : (isDark ? Colors.white : Colors.black87))),
                 onTap: () { Navigator.pop(ctx); item.onTap(); },
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -593,7 +594,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             Container(width: 36, height: 4, decoration: BoxDecoration(
               color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
             const SizedBox(height: 16),
-            Text(AppLocalizations.of(context)!.post_reportSelectReason, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+            Text(AppLocalizations.of(context)!.post_reportSelectReason, style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700,
               color: Theme.of(ctx).textTheme.bodyLarge?.color)),
             const SizedBox(height: 12),
             ...[
@@ -605,7 +606,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             ].map((r) =>
               RadioListTile<String>(
                 value: r, groupValue: selected,
-                title: Text(r, style: TextStyle(fontSize: 14, color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                title: Text(r, style: TextStyle(fontSize: Responsive.sp(context, 14), color: Theme.of(ctx).textTheme.bodyLarge?.color)),
                 activeColor: AppColors.theme.primaryColor,
                 onChanged: (v) => setSheetState(() => selected = v),
                 dense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16),

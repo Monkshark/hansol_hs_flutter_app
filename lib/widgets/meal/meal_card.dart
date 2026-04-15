@@ -10,6 +10,7 @@ import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 
 class MealCard extends StatefulWidget {
   final String? meal;
@@ -154,8 +155,8 @@ class _MealCardState extends State<MealCard>
               children: [
                 Center(
                   child: Container(
-                    width: 40,
-                    height: 4,
+                    width: Responsive.w(context, 40),
+                    height: Responsive.h(context, 4),
                     decoration: BoxDecoration(
                       color: AppColors.theme.darkGreyColor,
                       borderRadius: BorderRadius.circular(2),
@@ -166,7 +167,7 @@ class _MealCardState extends State<MealCard>
                 Text(
                   AppLocalizations.of(context)!.meal_nutritionTitle,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: Responsive.sp(context, 18),
                     fontWeight: FontWeight.w700,
                     color: Theme.of(context).textTheme.bodyLarge?.color,
                   ),
@@ -178,7 +179,7 @@ class _MealCardState extends State<MealCard>
                   const SizedBox(height: 12),
                   const Divider(),
                   const SizedBox(height: 12),
-                  Text(AppLocalizations.of(context)!.meal_nutrition, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600,
+                  Text(AppLocalizations.of(context)!.meal_nutrition, style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600,
                     color: Theme.of(context).textTheme.bodyLarge?.color)),
                   const SizedBox(height: 8),
                   ...mealData.ntrInfo.split('\n').where((s) => s.trim().isNotEmpty).map((line) {
@@ -196,7 +197,7 @@ class _MealCardState extends State<MealCard>
                   Text(
                     AppLocalizations.of(context)!.meal_allergy,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: Responsive.sp(context, 15),
                       fontWeight: FontWeight.w600,
                       color: Theme.of(context).textTheme.bodyLarge?.color,
                     ),
@@ -218,7 +219,7 @@ class _MealCardState extends State<MealCard>
                         child: Text(
                           '$num. ${allergyMap[num]}',
                           style: TextStyle(
-                            fontSize: 13,
+                            fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w600,
                             color: AppColors.theme.primaryColor,
                           ),
@@ -252,8 +253,8 @@ class _MealCardState extends State<MealCard>
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(label, style: TextStyle(fontSize: 14, color: AppColors.theme.mealTypeTextColor)),
-          Text(value, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+          Text(label, style: TextStyle(fontSize: Responsive.sp(context, 14), color: AppColors.theme.mealTypeTextColor)),
+          Text(value, style: TextStyle(fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
         ],
       ),
     );
@@ -284,7 +285,7 @@ class _MealCardState extends State<MealCard>
                       child: Text(
                         mealData.meal ?? AppLocalizations.of(context)!.meal_noData,
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: Responsive.sp(context, 14),
                           fontWeight: FontWeight.w500,
                           height: 1.6,
                           color: Theme.of(context).textTheme.bodyLarge?.color,
@@ -329,13 +330,13 @@ class _MealCardState extends State<MealCard>
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: 40,
-        height: 40,
+        width: Responsive.r(context, 40),
+        height: Responsive.r(context, 40),
         decoration: BoxDecoration(
           color: AppColors.theme.primaryColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: Colors.white, size: 20),
+        child: Icon(icon, color: Colors.white, size: Responsive.r(context, 20)),
       ),
     );
   }

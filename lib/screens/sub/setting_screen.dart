@@ -11,6 +11,7 @@ import 'package:hansol_high_school/screens/sub/feedback_screen.dart';
 import 'package:hansol_high_school/screens/sub/notification_setting_screen.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/main.dart' show providerContainer;
 import 'package:hansol_high_school/providers/settings_provider.dart';
@@ -167,7 +168,7 @@ class _SettingScreenState extends State<SettingScreen> {
         foregroundColor: Theme.of(context).textTheme.bodyLarge?.color,
         title: Text(AppLocalizations.of(context)!.settings_title),
         titleTextStyle: TextStyle(
-          fontSize: 20,
+          fontSize: Responsive.sp(context, 20),
           fontWeight: FontWeight.w600,
           color: Theme.of(context).textTheme.bodyLarge?.color,
         ),
@@ -177,7 +178,7 @@ class _SettingScreenState extends State<SettingScreen> {
             icon: Text(
               SettingData().localeCode == 'en' ? 'EN' : '한',
               style: TextStyle(
-                fontSize: 15,
+                fontSize: Responsive.sp(context, 15),
                 fontWeight: FontWeight.w700,
                 color: AppColors.theme.primaryColor,
               ),
@@ -209,7 +210,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     trailing: Text(
                       AppLocalizations.of(context)!.settings_gradeClassLabel(grade, classNum),
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: Responsive.sp(context, 16),
                         color: AppColors.theme.primaryColor,
                         fontWeight: FontWeight.w500,
                       ),
@@ -232,7 +233,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   },
                   child: _buildSettingRow(
                     AppLocalizations.of(context)!.settings_selectiveSubject,
-                    trailing: Icon(Icons.chevron_right, color: grade == 1
+                    trailing: Icon(Icons.chevron_right, size: Responsive.r(context, 24), color: grade == 1
                         ? AppColors.theme.darkGreyColor : AppColors.theme.primaryColor),
                   ),
                 ),
@@ -300,7 +301,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     MaterialPageRoute(builder: (_) => const _PrivacyPolicyScreen())),
                   child: _buildSettingRow(
                     AppLocalizations.of(context)!.settings_privacy,
-                    trailing: Icon(Icons.chevron_right, size: 18, color: AppColors.theme.darkGreyColor),
+                    trailing: Icon(Icons.chevron_right, size: Responsive.r(context, 18), color: AppColors.theme.darkGreyColor),
                   ),
                 ),
                 _buildDivider(),
@@ -340,7 +341,7 @@ class _SettingScreenState extends State<SettingScreen> {
                   AppLocalizations.of(context)!.settings_appVersion,
                   trailing: Text(
                     'v1.0.0',
-                    style: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: 14),
+                    style: TextStyle(color: AppColors.theme.darkGreyColor, fontSize: Responsive.sp(context, 14)),
                   ),
                 ),
               ]),
@@ -358,7 +359,7 @@ class _SettingScreenState extends State<SettingScreen> {
       child: Text(
         title,
         style: TextStyle(
-          fontSize: 13,
+          fontSize: Responsive.sp(context, 13),
           fontWeight: FontWeight.w600,
           color: AppColors.theme.darkGreyColor,
         ),
@@ -385,7 +386,7 @@ class _SettingScreenState extends State<SettingScreen> {
           Text(
             title,
             style: TextStyle(
-              fontSize: 16,
+              fontSize: Responsive.sp(context, 16),
               color: Theme.of(context).textTheme.bodyLarge?.color,
             ),
           ),
@@ -423,7 +424,7 @@ class _SettingScreenState extends State<SettingScreen> {
                     backgroundColor: AppColors.theme.primaryColor,
                     child: Text(
                       name.isNotEmpty ? name[0] : '?',
-                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+                      style: TextStyle(fontSize: Responsive.sp(context, 14), color: Colors.white, fontWeight: FontWeight.w700),
                     ),
                   ),
                   title: Text(name.isNotEmpty ? name : AppLocalizations.of(context)!.settings_nameDefault,
@@ -434,12 +435,12 @@ class _SettingScreenState extends State<SettingScreen> {
                     children: [
                       Text(
                         email.isNotEmpty ? email : _providerLabel(profile?.loginProvider ?? 'google'),
-                        style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+                        style: TextStyle(fontSize: Responsive.sp(context, 12), color: AppColors.theme.mealTypeTextColor)),
                       const SizedBox(height: 2),
                       Text(
                         profile?.approved == true ? AppLocalizations.of(context)!.settings_approved : AppLocalizations.of(context)!.settings_pendingApproval,
                         style: TextStyle(
-                          fontSize: 11,
+                          fontSize: Responsive.sp(context, 11),
                           fontWeight: FontWeight.w600,
                           color: profile?.approved == true ? const Color(0xFF4CAF50) : Colors.orange,
                         ),
@@ -453,15 +454,15 @@ class _SettingScreenState extends State<SettingScreen> {
                       providerContainer.read(appRefreshProvider.notifier).refresh();
                       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
                     },
-                    child: Text(AppLocalizations.of(context)!.settings_logout, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+                    child: Text(AppLocalizations.of(context)!.settings_logout, style: TextStyle(fontSize: Responsive.sp(context, 13), color: AppColors.theme.darkGreyColor)),
                   ),
                 ),
               ]),
               const SizedBox(height: 8),
               _buildGroupedCard([
                 ListTile(
-                  leading: Icon(Icons.edit, size: 20, color: AppColors.theme.primaryColor),
-                  title: Text(AppLocalizations.of(context)!.settings_myAccount, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
+                  leading: Icon(Icons.edit, size: Responsive.r(context, 20), color: AppColors.theme.primaryColor),
+                  title: Text(AppLocalizations.of(context)!.settings_myAccount, style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500,
                     color: Theme.of(context).textTheme.bodyLarge?.color)),
                   trailing: Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
                   onTap: () async {
@@ -497,10 +498,10 @@ class _SettingScreenState extends State<SettingScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(AppLocalizations.of(context)!.settings_login, style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600,
+                    Text(AppLocalizations.of(context)!.settings_login, style: TextStyle(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600,
                         color: Theme.of(context).textTheme.bodyLarge?.color)),
                     Text(AppLocalizations.of(context)!.settings_loginDesc, style: TextStyle(
-                        fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+                        fontSize: Responsive.sp(context, 12), color: AppColors.theme.mealTypeTextColor)),
                   ],
                 ),
               ),
@@ -527,12 +528,12 @@ class _SettingScreenState extends State<SettingScreen> {
           ),
           child: Column(
             children: [
-              Icon(icon, size: 20, color: isSelected ? Colors.white : AppColors.theme.darkGreyColor),
+              Icon(icon, size: Responsive.r(context, 20), color: isSelected ? Colors.white : AppColors.theme.darkGreyColor),
               const SizedBox(height: 4),
               Text(
                 label,
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: Responsive.sp(context, 12),
                   fontWeight: FontWeight.w500,
                   color: isSelected ? Colors.white : AppColors.theme.darkGreyColor,
                 ),
@@ -597,89 +598,89 @@ class _PrivacyPolicyScreen extends StatelessWidget {
       body: SingleChildScrollView(
         padding: EdgeInsets.fromLTRB(24, 16, 24, MediaQuery.of(context).padding.bottom + 32),
         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(l.settings_privacyEffectiveDate, style: TextStyle(fontSize: 12, color: subColor)),
+          Text(l.settings_privacyEffectiveDate, style: TextStyle(fontSize: Responsive.sp(context, 12), color: subColor)),
           const SizedBox(height: 8),
-          _b(l.settings_privacyIntro, subColor),
+          _b(l.settings_privacyIntro, subColor, ctx: context),
 
-          _t(l.settings_privacySection1Title, textColor),
-          _b(l.settings_privacySection1Intro, subColor),
-          _b(l.settings_privacySection1Content, subColor),
+          _t(l.settings_privacySection1Title, textColor, ctx: context),
+          _b(l.settings_privacySection1Intro, subColor, ctx: context),
+          _b(l.settings_privacySection1Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection2Title, textColor),
-          _s(l.settings_privacySection2Required, textColor),
-          _b(l.settings_privacySection2RequiredContent, subColor),
-          _s(l.settings_privacySection2Optional, textColor),
-          _b(l.settings_privacySection2OptionalContent, subColor),
-          _s(l.settings_privacySection2Auto, textColor),
-          _b(l.settings_privacySection2AutoContent, subColor),
-          _s(l.settings_privacySection2AutoCollect, textColor),
-          _b(l.settings_privacySection2AutoCollectContent, subColor),
-          _s(l.settings_privacySection2LocalOnly, textColor),
-          _b(l.settings_privacySection2LocalOnlyContent, subColor),
+          _t(l.settings_privacySection2Title, textColor, ctx: context),
+          _s(l.settings_privacySection2Required, textColor, ctx: context),
+          _b(l.settings_privacySection2RequiredContent, subColor, ctx: context),
+          _s(l.settings_privacySection2Optional, textColor, ctx: context),
+          _b(l.settings_privacySection2OptionalContent, subColor, ctx: context),
+          _s(l.settings_privacySection2Auto, textColor, ctx: context),
+          _b(l.settings_privacySection2AutoContent, subColor, ctx: context),
+          _s(l.settings_privacySection2AutoCollect, textColor, ctx: context),
+          _b(l.settings_privacySection2AutoCollectContent, subColor, ctx: context),
+          _s(l.settings_privacySection2LocalOnly, textColor, ctx: context),
+          _b(l.settings_privacySection2LocalOnlyContent, subColor, ctx: context),
 
-          _t(l.settings_privacySection3Title, textColor),
-          _b(l.settings_privacySection3Content, subColor),
+          _t(l.settings_privacySection3Title, textColor, ctx: context),
+          _b(l.settings_privacySection3Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection4Title, textColor),
-          _b(l.settings_privacySection4Content, subColor),
+          _t(l.settings_privacySection4Title, textColor, ctx: context),
+          _b(l.settings_privacySection4Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection5Title, textColor),
-          _b(l.settings_privacySection5Content, subColor),
+          _t(l.settings_privacySection5Title, textColor, ctx: context),
+          _b(l.settings_privacySection5Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection6Title, textColor),
-          _b(l.settings_privacySection6Content, subColor),
+          _t(l.settings_privacySection6Title, textColor, ctx: context),
+          _b(l.settings_privacySection6Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection7Title, textColor),
-          _b(l.settings_privacySection7Content, subColor),
+          _t(l.settings_privacySection7Title, textColor, ctx: context),
+          _b(l.settings_privacySection7Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection8Title, textColor),
-          _b(l.settings_privacySection8Content, subColor),
+          _t(l.settings_privacySection8Title, textColor, ctx: context),
+          _b(l.settings_privacySection8Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection9Title, textColor),
-          _b(l.settings_privacySection9Content, subColor),
+          _t(l.settings_privacySection9Title, textColor, ctx: context),
+          _b(l.settings_privacySection9Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection10Title, textColor),
-          _b(l.settings_privacySection10Content, subColor),
+          _t(l.settings_privacySection10Title, textColor, ctx: context),
+          _b(l.settings_privacySection10Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection11Title, textColor),
-          _b(l.settings_privacySection11Content, subColor),
+          _t(l.settings_privacySection11Title, textColor, ctx: context),
+          _b(l.settings_privacySection11Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection12Title, textColor),
-          _b(l.settings_privacySection12Content, subColor),
+          _t(l.settings_privacySection12Title, textColor, ctx: context),
+          _b(l.settings_privacySection12Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection13Title, textColor),
-          _b(l.settings_privacySection13Content, subColor),
+          _t(l.settings_privacySection13Title, textColor, ctx: context),
+          _b(l.settings_privacySection13Content, subColor, ctx: context),
 
-          _t(l.settings_privacySection14Title, textColor),
-          _b(l.settings_privacySection14Content, subColor),
+          _t(l.settings_privacySection14Title, textColor, ctx: context),
+          _b(l.settings_privacySection14Content, subColor, ctx: context),
           const SizedBox(height: 8),
-          _link(l.settings_privacySection14Link1, l.settings_privacySection14Phone1, l.settings_privacySection14Url1),
-          _link(l.settings_privacySection14Link2, l.settings_privacySection14Phone2, l.settings_privacySection14Url2),
-          _link(l.settings_privacySection14Link3, l.settings_privacySection14Phone3, l.settings_privacySection14Url3),
-          _link(l.settings_privacySection14Link4, l.settings_privacySection14Phone4, l.settings_privacySection14Url4),
+          _link(l.settings_privacySection14Link1, l.settings_privacySection14Phone1, l.settings_privacySection14Url1, ctx: context),
+          _link(l.settings_privacySection14Link2, l.settings_privacySection14Phone2, l.settings_privacySection14Url2, ctx: context),
+          _link(l.settings_privacySection14Link3, l.settings_privacySection14Phone3, l.settings_privacySection14Url3, ctx: context),
+          _link(l.settings_privacySection14Link4, l.settings_privacySection14Phone4, l.settings_privacySection14Url4, ctx: context),
 
-          _t(l.settings_privacySection15Title, textColor),
-          _b(l.settings_privacySection15Content, subColor),
+          _t(l.settings_privacySection15Title, textColor, ctx: context),
+          _b(l.settings_privacySection15Content, subColor, ctx: context),
         ]),
       ),
     );
   }
 
-  Widget _t(String text, Color? c) => Padding(padding: const EdgeInsets.only(top: 24, bottom: 8),
-    child: Text(text, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: c)));
-  Widget _s(String text, Color? c) => Padding(padding: const EdgeInsets.only(top: 14, bottom: 4),
-    child: Text(text, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: c)));
-  Widget _b(String text, Color c) => Padding(padding: const EdgeInsets.only(bottom: 4),
-    child: Text(text, style: TextStyle(fontSize: 13, color: c, height: 1.7)));
-  Widget _link(String name, String phone, String url) => Padding(
+  Widget _t(String text, Color? c, {required BuildContext ctx}) => Padding(padding: const EdgeInsets.only(top: 24, bottom: 8),
+    child: Text(text, style: TextStyle(fontSize: Responsive.sp(ctx, 15), fontWeight: FontWeight.w700, color: c)));
+  Widget _s(String text, Color? c, {required BuildContext ctx}) => Padding(padding: const EdgeInsets.only(top: 14, bottom: 4),
+    child: Text(text, style: TextStyle(fontSize: Responsive.sp(ctx, 13), fontWeight: FontWeight.w600, color: c)));
+  Widget _b(String text, Color c, {required BuildContext ctx}) => Padding(padding: const EdgeInsets.only(bottom: 4),
+    child: Text(text, style: TextStyle(fontSize: Responsive.sp(ctx, 13), color: c, height: 1.7)));
+  Widget _link(String name, String phone, String url, {required BuildContext ctx}) => Padding(
     padding: const EdgeInsets.only(bottom: 6),
     child: GestureDetector(
       onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
       child: Row(children: [
-        Text('• ', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+        Text('• ', style: TextStyle(fontSize: Responsive.sp(ctx, 13), color: AppColors.theme.darkGreyColor)),
         Expanded(child: Text.rich(TextSpan(children: [
-          TextSpan(text: name, style: TextStyle(fontSize: 13, color: AppColors.theme.primaryColor, decoration: TextDecoration.underline)),
-          TextSpan(text: ' / $phone', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
+          TextSpan(text: name, style: TextStyle(fontSize: Responsive.sp(ctx, 13), color: AppColors.theme.primaryColor, decoration: TextDecoration.underline)),
+          TextSpan(text: ' / $phone', style: TextStyle(fontSize: Responsive.sp(ctx, 13), color: AppColors.theme.darkGreyColor)),
         ]))),
       ]),
     ),

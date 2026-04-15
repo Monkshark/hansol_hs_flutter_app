@@ -5,6 +5,7 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 
 class NotificationScreen extends StatelessWidget {
   const NotificationScreen({Key? key}) : super(key: key);
@@ -37,7 +38,7 @@ class NotificationScreen extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => _markAllRead(uid),
-            child: Text(AppLocalizations.of(context)!.notification_markAllRead, style: TextStyle(fontSize: 13, color: AppColors.theme.primaryColor)),
+            child: Text(AppLocalizations.of(context)!.notification_markAllRead, style: TextStyle(fontSize: Responsive.sp(context, 13), color: AppColors.theme.primaryColor)),
           ),
         ],
       ),
@@ -55,7 +56,7 @@ class NotificationScreen extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.notifications_none, size: 40, color: AppColors.theme.darkGreyColor),
+                  Icon(Icons.notifications_none, size: Responsive.r(context, 40), color: AppColors.theme.darkGreyColor),
                   const SizedBox(height: 8),
                   Text(AppLocalizations.of(context)!.notification_empty, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                 ],
@@ -116,12 +117,12 @@ class NotificationScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Container(
-                        width: 36, height: 36,
+                        width: Responsive.r(context, 36), height: Responsive.r(context, 36),
                         decoration: BoxDecoration(
                           color: AppColors.theme.primaryColor.withAlpha(isRead ? 15 : 30),
                           shape: BoxShape.circle,
                         ),
-                        child: Icon(icon, size: 18, color: AppColors.theme.primaryColor),
+                        child: Icon(icon, size: Responsive.r(context, 18), color: AppColors.theme.primaryColor),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
@@ -129,21 +130,21 @@ class NotificationScreen extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(message, style: TextStyle(
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               fontWeight: isRead ? FontWeight.w400 : FontWeight.w600,
                               color: textColor)),
                             const SizedBox(height: 2),
-                            Text(content, style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor),
+                            Text(content, style: TextStyle(fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor),
                               maxLines: 1, overflow: TextOverflow.ellipsis),
                             const SizedBox(height: 2),
                             Text('$postTitle · $timeStr',
-                              style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor)),
+                              style: TextStyle(fontSize: Responsive.sp(context, 11), color: AppColors.theme.darkGreyColor)),
                           ],
                         ),
                       ),
                       if (!isRead)
                         Container(
-                          width: 8, height: 8,
+                          width: Responsive.r(context, 8), height: Responsive.r(context, 8),
                           margin: const EdgeInsets.only(top: 4),
                           decoration: const BoxDecoration(
                             color: Colors.red,

@@ -4,6 +4,7 @@ import 'package:hansol_high_school/data/dday_manager.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
@@ -88,7 +89,7 @@ class _DDayScreenState extends State<DDayScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(AppLocalizations.of(context)!.dday_addTitle, style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700,
+                    fontSize: Responsive.sp(context, 18), fontWeight: FontWeight.w700,
                     color: Theme.of(ctx).textTheme.bodyLarge?.color)),
                   const SizedBox(height: 20),
                   TextField(
@@ -203,7 +204,7 @@ class _DDayScreenState extends State<DDayScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(Icons.event, size: 48, color: AppColors.theme.darkGreyColor),
+                  Icon(Icons.event, size: Responsive.r(context, 48), color: AppColors.theme.darkGreyColor),
                   const SizedBox(height: 12),
                   Text(AppLocalizations.of(context)!.dday_empty, style: TextStyle(color: AppColors.theme.darkGreyColor)),
                 ],
@@ -220,7 +221,7 @@ class _DDayScreenState extends State<DDayScreen> {
                     return Padding(
                       padding: const EdgeInsets.only(top: 16, bottom: 4),
                       child: Text(AppLocalizations.of(context)!.dday_upcoming, style: TextStyle(
-                        fontSize: 14, fontWeight: FontWeight.w600,
+                        fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w600,
                         color: AppColors.theme.darkGreyColor)),
                     );
                   }
@@ -248,14 +249,14 @@ class _DDayScreenState extends State<DDayScreen> {
                     child: Row(
                       children: [
                         Container(
-                          width: 44, height: 44,
+                          width: Responsive.r(context, 44), height: Responsive.r(context, 44),
                           decoration: BoxDecoration(
                             color: accentColor.withAlpha(30),
                             borderRadius: BorderRadius.circular(10),
                           ),
                           child: Center(child: Text(
                             event.dDay == 0 ? AppLocalizations.of(context)!.dday_today : AppLocalizations.of(context)!.dday_daysPrefix(event.dDay),
-                            style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: accentColor),
+                            style: TextStyle(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w700, color: accentColor),
                           )),
                         ),
                         const SizedBox(width: 12),
@@ -263,11 +264,11 @@ class _DDayScreenState extends State<DDayScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(event.title, style: TextStyle(
-                              fontSize: 15, fontWeight: FontWeight.w500, color: textColor)),
+                              fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w500, color: textColor)),
                             Row(
                               children: [
                                 Text(DateFormat(AppLocalizations.of(context)!.common_dateMdE, Localizations.localeOf(context).toString()).format(event.date),
-                                  style: TextStyle(fontSize: 12, color: AppColors.theme.mealTypeTextColor)),
+                                  style: TextStyle(fontSize: Responsive.sp(context, 12), color: AppColors.theme.mealTypeTextColor)),
                                 if (isSchool) ...[
                                   const SizedBox(width: 6),
                                   Container(
@@ -276,7 +277,7 @@ class _DDayScreenState extends State<DDayScreen> {
                                       color: accentColor.withAlpha(20),
                                       borderRadius: BorderRadius.circular(4),
                                     ),
-                                    child: Text(AppLocalizations.of(context)!.dday_school, style: TextStyle(fontSize: 10, color: accentColor)),
+                                    child: Text(AppLocalizations.of(context)!.dday_school, style: TextStyle(fontSize: Responsive.sp(context, 10), color: accentColor)),
                                   ),
                                 ],
                               ],
@@ -284,9 +285,9 @@ class _DDayScreenState extends State<DDayScreen> {
                           ],
                         )),
                         if (alreadyAdded)
-                          Icon(Icons.check, size: 18, color: AppColors.theme.primaryColor)
+                          Icon(Icons.check, size: Responsive.r(context, 18), color: AppColors.theme.primaryColor)
                         else
-                          Icon(Icons.add_circle_outline, size: 18, color: AppColors.theme.darkGreyColor),
+                          Icon(Icons.add_circle_outline, size: Responsive.r(context, 18), color: AppColors.theme.darkGreyColor),
                       ],
                     ),
                   ),
@@ -339,7 +340,7 @@ class _DDayScreenState extends State<DDayScreen> {
                       child: Row(
                         children: [
                           Container(
-                            width: 56, height: 56,
+                            width: Responsive.r(context, 56), height: Responsive.r(context, 56),
                             decoration: BoxDecoration(
                               color: isPast
                                   ? AppColors.theme.darkGreyColor.withAlpha(30)
@@ -350,7 +351,7 @@ class _DDayScreenState extends State<DDayScreen> {
                               child: Text(
                                 isPast ? AppLocalizations.of(context)!.dday_daysPastPrefix(-days) : days == 0 ? AppLocalizations.of(context)!.dday_dday : AppLocalizations.of(context)!.dday_daysPrefix(days),
                                 style: TextStyle(
-                                  fontSize: days.abs() > 99 ? 12 : 16,
+                                  fontSize: Responsive.sp(context, days.abs() > 99 ? 12 : 16),
                                   fontWeight: FontWeight.w800,
                                   color: isPast ? AppColors.theme.darkGreyColor : AppColors.theme.primaryColor,
                                 ),
@@ -363,17 +364,17 @@ class _DDayScreenState extends State<DDayScreen> {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(dday.title, style: TextStyle(
-                                  fontSize: 16, fontWeight: FontWeight.w600, color: textColor)),
+                                  fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600, color: textColor)),
                                 const SizedBox(height: 4),
                                 Text(
                                   DateFormat(AppLocalizations.of(context)!.common_dateYMdE, Localizations.localeOf(context).toString()).format(dday.date),
-                                  style: TextStyle(fontSize: 13, color: AppColors.theme.mealTypeTextColor),
+                                  style: TextStyle(fontSize: Responsive.sp(context, 13), color: AppColors.theme.mealTypeTextColor),
                                 ),
                               ],
                             ),
                           ),
                           if (dday.isPinned)
-                            Icon(Icons.push_pin, size: 18, color: AppColors.theme.primaryColor),
+                            Icon(Icons.push_pin, size: Responsive.r(context, 18), color: AppColors.theme.primaryColor),
                         ],
                       ),
                     ),
