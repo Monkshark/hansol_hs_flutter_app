@@ -64,11 +64,22 @@ class _MealScreenState extends State<MealScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.theme.primaryColor,
-      body: SafeArea(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topRight,
+            end: Alignment.bottomLeft,
+            colors: [
+              AppColors.theme.primaryColor,
+              AppColors.theme.tertiaryColor,
+            ],
+          ),
+        ),
+        child: SafeArea(
         child: Column(
           children: [
             WeeklyCalendar(
-              backgroundColor: AppColors.theme.primaryColor,
+              backgroundColor: Colors.transparent,
               onDaySelected: (dateTime) {
                 setState(() {
                   selectedDate = dateTime;
@@ -174,6 +185,7 @@ class _MealScreenState extends State<MealScreen> {
             ),
           ],
         ),
+      ),
       ),
     );
   }
