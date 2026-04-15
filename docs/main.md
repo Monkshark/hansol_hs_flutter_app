@@ -10,53 +10,37 @@
 Future<void> main() async
 ```
 
-**설명**: 앱 초기화를 수행함
+**설명**: 앱 초기화를 수행함. 속도 최적화를 위해 `runApp` 전에는 UI에 필수적인 초기화만 수행하고, 나머지는 `_deferredInit()`으로 백그라운드 처리함
 
-1. **Firebase 초기화**: 중복 방지 체크 후 초기화:
+### runApp 전 (필수 초기화)
+
+1. **Firebase 초기화**: 중복 방지 체크 후 초기화
+2. **Crashlytics**: FlutterError 핸들러 + Firestore `crash_logs` 컬렉션에 에러 기록
+3. **Kakao SDK** 초기화
+4. **Timezone** 초기화 (`Asia/Seoul`)
+5. `providerContainer = ProviderContainer()` 생성
+6. **[SettingData](data/setting_data.md)** + **[ServiceLocator](data/service_locator.md)** 병렬 초기화:
    ```dart
-   if (Firebase.apps.isEmpty) {
-     await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-   }
+   await Future.wait([SettingData().init(), setupServiceLocator()]);
    ```
+7. `runApp` → `UncontrolledProviderScope`로 감싼 `HansolHighSchool` 위젯 실행
 
-2. **App Check**: 릴리스 빌드는 Play Integrity, 디버그는 debug provider:
-   ```dart
-   androidProvider: const bool.fromEnvironment('dart.vm.product')
-       ? AndroidProvider.playIntegrity
-       : AndroidProvider.debug,
-   ```
+### runApp 후 (`_deferredInit`)
 
-3. **Performance Monitoring** + **Analytics** 활성화
+UI가 뜬 뒤 `unawaited(_deferredInit())`로 나머지 초기화를 백그라운드 실행:
 
-4. **Crashlytics**: FlutterError 핸들러 + Firestore `crash_logs` 컬렉션에 에러 기록:
-   ```dart
-   FlutterError.onError = (details) {
-     FirebaseCrashlytics.instance.recordFlutterFatalError(details);
-     _logCrashToFirestore(details);
-   };
-   ```
+1. **App Check** / **Performance Monitoring** / **Analytics** — 각각 `_safeInit()`으로 fire-and-forget
+2. **과목 데이터 프리로드** (2학년, 3학년 병렬)
+3. **로컬 급식 알림** 초기화 + 스케줄링
+4. **FCM** 초기화 + **딥링크** 초기화 + **위젯 서비스** 초기화 (fire-and-forget)
 
-5. **Kakao SDK** 초기화
+### `_safeInit`
 
-6. **[SettingData](data/setting_data.md)** 초기화 (알림 권한은 온보딩 완료 시 요청)
+```dart
+Future<void> _safeInit(String name, Future<void> Function() fn) async
+```
 
-7. **Timezone** 초기화 (`Asia/Seoul`)
-
-8. **테마 모드** 복원: `SettingData().themeModeIndex` → `ThemeMode`
-
-9. **과목 데이터 프리로드** (2학년, 3학년 병렬):
-   ```dart
-   unawaited(_preloadSubjects(2));
-   unawaited(_preloadSubjects(3));
-   ```
-
-10. **[ServiceLocator](data/service_locator.md)** 설정 (GetIt DI)
-
-11. **로컬 급식 알림** 초기화 + 스케줄링
-
-12. **FCM** 초기화 + **위젯 서비스** 초기화 (fire-and-forget)
-
-13. `providerContainer = ProviderContainer()` 생성 → `UncontrolledProviderScope`로 감싼 `HansolHighSchool` 위젯 실행
+try/catch 래퍼. 개별 초기화 실패가 앱 전체를 막지 않도록 에러를 로그만 남기고 무시함
 
 ---
 

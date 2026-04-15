@@ -15,7 +15,13 @@
 
 ```dart
 class NiesApiKeys {
-  static const String apiKey = 'YOUR_NEIS_API_KEY';
+  static const _niesApiKey = 'YOUR_NEIS_API_KEY';
+  static const _atptOfcdcScCode = 'YOUR_ATPT_OFCDC_SC_CODE';
+  static const _sdSchulCode = 'YOUR_SD_SCHUL_CODE';
+
+  static String get niesApiKey => _niesApiKey;
+  static String get atptOfcdcScCode => _atptOfcdcScCode;
+  static String get sdSchulCode => _sdSchulCode;
 }
 ```
 
