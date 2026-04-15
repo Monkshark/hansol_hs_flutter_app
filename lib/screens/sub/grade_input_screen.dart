@@ -10,7 +10,7 @@ class GradeInputScreen extends StatefulWidget {
   final Exam? exam;
   final bool isMock;
 
-  const GradeInputScreen({Key? key, this.exam, this.isMock = false}) : super(key: key);
+  const GradeInputScreen({super.key, this.exam, this.isMock = false});
 
   @override
   State<GradeInputScreen> createState() => _GradeInputScreenState();
@@ -120,6 +120,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       return;
     }
 
+    if (!mounted) return;
     final selected = await _showSubjectPicker(available, AppLocalizations.of(context)!.gradeInput_selectSubjects);
     if (selected != null && selected.isNotEmpty) {
       setState(() {
@@ -517,7 +518,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       _type = e.key;
                       if (!_isEdit) _subjects.clear();
                     });
-                    for (final s in old) s.dispose();
+                    for (final s in old) { s.dispose(); }
                   },
                 );
               }).toList(),
@@ -746,7 +747,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     required Color fillColor,
   }) {
     return DropdownButtonFormField<T>(
-      value: value,
+      initialValue: value,
       decoration: InputDecoration(
         labelText: label,
         filled: true,

@@ -8,6 +8,7 @@ class ConflictDialog extends StatelessWidget {
   final List<String> subjects;
 
   const ConflictDialog({
+    super.key,
     required this.dayName,
     required this.period,
     required this.subjects,

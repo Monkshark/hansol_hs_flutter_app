@@ -66,43 +66,42 @@ void main() {
 
   group('Subject equality', () {
     test('same name and class are equal', () {
-      final a = Subject(subjectName: '국어', subjectClass: 1);
-      final b = Subject(subjectName: '국어', subjectClass: 1);
+      const a = Subject(subjectName: '국어', subjectClass: 1);
+      const b = Subject(subjectName: '국어', subjectClass: 1);
       expect(a == b, true);
       expect(a.hashCode, b.hashCode);
     });
 
     test('different name are not equal', () {
-      final a = Subject(subjectName: '국어', subjectClass: 1);
-      final b = Subject(subjectName: '수학', subjectClass: 1);
+      const a = Subject(subjectName: '국어', subjectClass: 1);
+      const b = Subject(subjectName: '수학', subjectClass: 1);
       expect(a == b, false);
     });
 
     test('different class are not equal', () {
-      final a = Subject(subjectName: '국어', subjectClass: 1);
-      final b = Subject(subjectName: '국어', subjectClass: 2);
+      const a = Subject(subjectName: '국어', subjectClass: 1);
+      const b = Subject(subjectName: '국어', subjectClass: 2);
       expect(a == b, false);
     });
 
     test('category and isOriginal do not affect equality', () {
-      final a = Subject(subjectName: '국어', subjectClass: 1, category: 'A', isOriginal: true);
-      final b = Subject(subjectName: '국어', subjectClass: 1, category: 'B', isOriginal: false);
+      const a = Subject(subjectName: '국어', subjectClass: 1, category: 'A', isOriginal: true);
+      const b = Subject(subjectName: '국어', subjectClass: 1, category: 'B', isOriginal: false);
       expect(a == b, true);
     });
 
     test('works in Set for deduplication', () {
-      final set = <Subject>{
-        Subject(subjectName: '국어', subjectClass: 1),
-        Subject(subjectName: '국어', subjectClass: 1),
-        Subject(subjectName: '수학', subjectClass: 2),
-      };
+      final set = <Subject>{};
+      set.add(const Subject(subjectName: '국어', subjectClass: 1));
+      set.add(const Subject(subjectName: '국어', subjectClass: 1));
+      set.add(const Subject(subjectName: '수학', subjectClass: 2));
       expect(set.length, 2);
     });
   });
 
   group('Subject serialization', () {
     test('toJson and fromJson roundtrip', () {
-      final original = Subject(
+      const original = Subject(
         subjectName: '국어',
         subjectClass: 3,
         category: '공통',
@@ -117,12 +116,12 @@ void main() {
     });
 
     test('default isOriginal is false', () {
-      final subject = Subject(subjectName: '수학', subjectClass: 1);
+      const subject = Subject(subjectName: '수학', subjectClass: 1);
       expect(subject.isOriginal, false);
     });
 
     test('default category is null', () {
-      final subject = Subject(subjectName: '수학', subjectClass: 1);
+      const subject = Subject(subjectName: '수학', subjectClass: 1);
       expect(subject.category, null);
     });
   });

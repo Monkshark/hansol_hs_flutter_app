@@ -9,11 +9,11 @@ class GradeAndClassPickerDialog extends StatefulWidget {
   final int classCount;
 
   const GradeAndClassPickerDialog({
-    Key? key,
+    super.key,
     required this.initialGrade,
     required this.initialClass,
     required this.classCount,
-  }) : super(key: key);
+  });
 
   @override
   State<GradeAndClassPickerDialog> createState() =>

@@ -15,7 +15,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileEditScreen extends StatefulWidget {
-  const ProfileEditScreen({Key? key}) : super(key: key);
+  const ProfileEditScreen({super.key});
 
   @override
   State<ProfileEditScreen> createState() => _ProfileEditScreenState();
@@ -209,6 +209,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       builder: (ctx) => _confirmSheet(ctx, isDark, l10n.profileEdit_deleteAccountTitle, l10n.profileEdit_deleteAccountConfirm, l10n.profileEdit_confirm),
     );
     if (confirm1 != true) return;
+    if (!mounted) return;
 
     final userEmail = AuthService.currentUser?.email ?? _email;
     final confirmValue = userEmail.isNotEmpty ? userEmail : _name;

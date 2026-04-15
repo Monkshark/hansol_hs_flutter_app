@@ -10,8 +10,8 @@ class TodayBanner extends StatelessWidget {
   const TodayBanner({
     required this.selectedDate,
     required this.count,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

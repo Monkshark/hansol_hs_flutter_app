@@ -11,7 +11,7 @@ import 'package:image_picker/image_picker.dart';
 class FeedbackScreen extends StatefulWidget {
   final String type;
 
-  const FeedbackScreen({Key? key, required this.type}) : super(key: key);
+  const FeedbackScreen({super.key, required this.type});
 
   @override
   State<FeedbackScreen> createState() => _FeedbackScreenState();

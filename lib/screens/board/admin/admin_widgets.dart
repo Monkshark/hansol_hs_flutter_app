@@ -8,6 +8,7 @@ class AdminSection extends StatelessWidget {
   final List<Widget> children;
 
   const AdminSection({
+    super.key,
     required this.title,
     required this.icon,
     required this.color,
@@ -46,6 +47,7 @@ class AdminTile extends StatefulWidget {
   final Widget child;
 
   const AdminTile({
+    super.key,
     required this.title,
     required this.icon,
     required this.color,

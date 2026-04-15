@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hansol_high_school/api/meal_data_api.dart';
 import 'package:hansol_high_school/data/api_strings.dart';
-import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -33,7 +32,7 @@ void main() {
     NetworkStatus.testOverride = null;
   });
 
-  Map<String, dynamic> _mealResponse({
+  Map<String, dynamic> mealResponse({
     String date = '20260401',
     int mealCode = 2,
     String menu = '김치볶음밥<br/>된장찌개<br/>깍두기',
@@ -62,7 +61,7 @@ void main() {
     };
   }
 
-  Map<String, dynamic> _emptyResponse() {
+  Map<String, dynamic> emptyResponse() {
     return {
       'RESULT': {'CODE': 'INFO-200', 'MESSAGE': '해당하는 데이터가 없습니다.'}
     };
@@ -71,7 +70,7 @@ void main() {
   group('MealDataApi._fetchSingleMeal via getMeal', () {
     test('정상 응답 파싱 — 메뉴, 칼로리, 영양정보', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_mealResponse(), 200);
+        return _utf8Response(mealResponse(), 200);
       });
       MealDataApi.client = mockClient;
 
@@ -91,7 +90,7 @@ void main() {
 
     test('INFO-200 (데이터 없음) → mealNoData 반환', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       MealDataApi.client = mockClient;
 
@@ -127,7 +126,7 @@ void main() {
       int requestCount = 0;
       mockClient = MockClient((req) async {
         requestCount++;
-        return _utf8Response(_mealResponse(), 200);
+        return _utf8Response(mealResponse(), 200);
       });
       MealDataApi.client = mockClient;
 
@@ -149,7 +148,7 @@ void main() {
 
     test('clearCacheForDate 후 캐시 미스', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_mealResponse(), 200);
+        return _utf8Response(mealResponse(), 200);
       });
       MealDataApi.client = mockClient;
 
@@ -169,7 +168,7 @@ void main() {
   group('MealDataApi.isAllMealEmpty', () {
     test('INFO-200 → true', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       MealDataApi.client = mockClient;
 
@@ -178,7 +177,7 @@ void main() {
 
     test('급식 데이터 존재 → false', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_mealResponse(), 200);
+        return _utf8Response(mealResponse(), 200);
       });
       MealDataApi.client = mockClient;
 
@@ -191,7 +190,7 @@ void main() {
       mockClient = MockClient((req) async {
         expect(req.url.toString(), contains('MMEAL_SC_CODE=1'));
         return _utf8Response(
-          _mealResponse(mealCode: 1, menu: '토스트<br/>우유'), 200);
+          mealResponse(mealCode: 1, menu: '토스트<br/>우유'), 200);
       });
       MealDataApi.client = mockClient;
 

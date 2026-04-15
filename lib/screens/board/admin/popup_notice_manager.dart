@@ -5,7 +5,7 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 
 class PopupNoticeManager extends StatefulWidget {
   final Color cardColor;
-  const PopupNoticeManager({required this.cardColor});
+  const PopupNoticeManager({super.key, required this.cardColor});
 
   @override
   State<PopupNoticeManager> createState() => PopupNoticeManagerState();
@@ -111,7 +111,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
               const Spacer(),
               Switch.adaptive(
                 value: _active,
-                activeColor: Colors.red,
+                activeTrackColor: Colors.red,
                 onChanged: (v) => setState(() => _active = v),
               ),
             ],
@@ -201,7 +201,7 @@ class PopupNoticeManagerState extends State<PopupNoticeManager> {
             children: [
               Text(AppLocalizations.of(context)!.admin_popupDismissible, style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor)),
               const Spacer(),
-              Switch.adaptive(value: _dismissible, activeColor: AppColors.theme.primaryColor,
+              Switch.adaptive(value: _dismissible, activeTrackColor: AppColors.theme.primaryColor,
                 onChanged: (v) => setState(() => _dismissible = v)),
             ],
           ),

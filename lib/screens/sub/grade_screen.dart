@@ -10,7 +10,7 @@ import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:intl/intl.dart';
 
 class GradeScreen extends ConsumerStatefulWidget {
-  const GradeScreen({Key? key}) : super(key: key);
+  const GradeScreen({super.key});
 
   @override
   ConsumerState<GradeScreen> createState() => _GradeScreenState();
@@ -342,7 +342,8 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                           } else {
                             await ref.read(goalsProvider.notifier).save(tempGoals);
                           }
-                          if (mounted) Navigator.pop(ctx);
+                          if (!ctx.mounted) return;
+                          Navigator.pop(ctx);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.theme.primaryColor,

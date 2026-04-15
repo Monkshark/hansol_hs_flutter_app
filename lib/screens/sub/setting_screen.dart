@@ -19,7 +19,7 @@ import 'package:hansol_high_school/providers/theme_provider.dart' show themeProv
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingScreen extends StatefulWidget {
-  const SettingScreen({Key? key}) : super(key: key);
+  const SettingScreen({super.key});
 
   @override
   State<SettingScreen> createState() => _SettingScreenState();
@@ -53,9 +53,10 @@ class _SettingScreenState extends State<SettingScreen> {
     int bytes = 0;
     for (var key in keys) {
       final val = prefs.get(key);
-      if (val is String) bytes += val.length * 2;
-      else if (val is List<String>) {
-        for (var s in val) bytes += s.length * 2;
+      if (val is String) {
+        bytes += val.length * 2;
+      } else if (val is List<String>) {
+        for (var s in val) { bytes += s.length * 2; }
       }
       bytes += key.length * 2;
     }
@@ -452,7 +453,8 @@ class _SettingScreenState extends State<SettingScreen> {
                       await AuthService.signOut();
                       AuthService.clearProfileCache();
                       providerContainer.read(appRefreshProvider.notifier).refresh();
-                      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+                      if (!context.mounted) return;
+                      Navigator.of(context).popUntil((r) => r.isFirst);
                     },
                     child: Text(AppLocalizations.of(context)!.settings_logout, style: TextStyle(fontSize: Responsive.sp(context, 13), color: AppColors.theme.darkGreyColor)),
                   ),

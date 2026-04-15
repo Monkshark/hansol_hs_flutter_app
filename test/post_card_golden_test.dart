@@ -1,6 +1,3 @@
-import 'dart:async';
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
@@ -17,8 +14,8 @@ import 'package:hansol_high_school/screens/board/board_screen.dart';
 /// goldens는 Windows 로컬에서 생성되었고 CI는 Ubuntu라 anti-aliasing/font hinting
 /// 차이로 0.3% 정도의 픽셀 diff가 발생함. 실제 시각 차이는 사람 눈에 안 보임.
 class _ToleranceFileComparator extends LocalFileComparator {
-  _ToleranceFileComparator(super.testFile, {this.tolerance = 0.01});
-  final double tolerance;
+  _ToleranceFileComparator(super.testFile);
+  final double tolerance = 0.01;
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {

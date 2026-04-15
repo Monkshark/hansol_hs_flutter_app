@@ -187,7 +187,7 @@ class UsersTabState extends State<UsersTab> {
                                     ],
                                   ],
                                 ),
-                                Text('$studentId · ${grade}학년 ${classNum}반',
+                                Text('$studentId · $grade학년 $classNum반',
                                   style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
                                 if (widget.filter == 'suspended') ...[
                                   const SizedBox(height: 4),
@@ -250,6 +250,7 @@ class UsersTabState extends State<UsersTab> {
                                 if (hours != null) {
                                   final until = DateTime.now().add(Duration(hours: hours));
                                   await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
+                                  if (!context.mounted) return;
                                   await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
                                   await _logAdminAction('정지', uid, name);
                                   _refreshAll();
@@ -258,8 +259,9 @@ class UsersTabState extends State<UsersTab> {
                               const SizedBox(width: 6),
                               _actionBtn(l.admin_usersDelete, Colors.red, () async {
                                 final first = await _confirmDialog(context, l.admin_usersDeleteConfirm, l.admin_usersDeleteConfirmMessage(name));
-                                if (first != true) return;
+                                if (first != true || !context.mounted) return;
                                 final second = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
+                                if (!context.mounted) return;
                                 if (second == true) {
                                   await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
                                   await docs[index].reference.delete();

@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/data/api_strings.dart';
-import 'package:hansol_high_school/data/subject.dart';
 import 'package:hansol_high_school/network/network_status.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
@@ -32,7 +31,7 @@ void main() {
     NetworkStatus.testOverride = null;
   });
 
-  Map<String, dynamic> _timetableResponse({
+  Map<String, dynamic> timetableResponse({
     List<Map<String, dynamic>>? rows,
   }) {
     rows ??= [
@@ -73,7 +72,7 @@ void main() {
     };
   }
 
-  Map<String, dynamic> _emptyResponse() {
+  Map<String, dynamic> emptyResponse() {
     return {
       'RESULT': {'CODE': 'INFO-200', 'MESSAGE': '해당하는 데이터가 없습니다.'}
     };
@@ -82,7 +81,7 @@ void main() {
   group('TimetableDataApi.getTimeTable', () {
     test('정상 시간표 파싱 — 날짜별·반별 과목 배열', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(), 200);
+        return _utf8Response(timetableResponse(), 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -101,7 +100,7 @@ void main() {
 
     test('INFO-200 (데이터 없음) → error 맵', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -134,7 +133,7 @@ void main() {
       int requestCount = 0;
       mockClient = MockClient((req) async {
         requestCount++;
-        return _utf8Response(_timetableResponse(), 200);
+        return _utf8Response(timetableResponse(), 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -156,7 +155,7 @@ void main() {
     test('classNum 필터링 — URL에 CLASS_NM 포함', () async {
       mockClient = MockClient((req) async {
         expect(req.url.toString(), contains('CLASS_NM=3'));
-        return _utf8Response(_timetableResponse(), 200);
+        return _utf8Response(timetableResponse(), 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -172,7 +171,7 @@ void main() {
   group('TimetableDataApi._processTimetable', () {
     test('교시 빈칸 채움 — 3교시만 있으면 1~2교시 빈 문자열', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
             {
               'ALL_TI_YMD': '20260401',
               'CLASS_NM': '1',
@@ -219,7 +218,7 @@ void main() {
 
     test('데이터 없음 → 0', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -231,7 +230,7 @@ void main() {
   group('TimetableDataApi.getSubjects', () {
     test('과목 목록 추출 및 정렬', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
             {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '1', 'ITRT_CNTNT': '수학'},
             {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '2', 'ITRT_CNTNT': '국어'},
             {'ALL_TI_YMD': '20260401', 'CLASS_NM': '2', 'PERIO': '1', 'ITRT_CNTNT': '영어'},
@@ -253,7 +252,7 @@ void main() {
 
     test('토요휴업일·[보강] 필터링', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
             {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '1', 'ITRT_CNTNT': '국어'},
             {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '2', 'ITRT_CNTNT': '토요휴업일'},
             {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '3', 'ITRT_CNTNT': '[보강]수학'},
@@ -272,7 +271,7 @@ void main() {
   group('TimetableDataApi.getTimeTable SWR 캐시', () {
     test('stale 캐시 (12h~3d) → 즉시 반환', () async {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = '20260501-20260505-2';
+      const cacheKey = '20260501-20260505-2';
       final staleData = {
         '20260501': {
           '1': ['stale-math']
@@ -287,7 +286,6 @@ void main() {
 
       mockClient = MockClient((req) async {
         fail('stale 캐시는 HTTP 요청 없이 반환해야 함');
-        return _utf8Response({}, 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -303,7 +301,7 @@ void main() {
 
     test('만료 캐시 (>3d) → 삭제 후 재요청', () async {
       final prefs = await SharedPreferences.getInstance();
-      final cacheKey = '20260601-20260605-2';
+      const cacheKey = '20260601-20260605-2';
       final expiredData = {
         '20260601': {
           '1': ['expired']
@@ -317,7 +315,7 @@ void main() {
       );
 
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
           {'ALL_TI_YMD': '20260601', 'CLASS_NM': '1', 'PERIO': '1', 'ITRT_CNTNT': 'fresh'},
         ]), 200);
       });
@@ -339,7 +337,6 @@ void main() {
       NetworkStatus.testOverride = () async => true; // offline
       mockClient = MockClient((req) async {
         fail('오프라인에서 HTTP 요청하면 안 됨');
-        return _utf8Response({}, 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -365,7 +362,6 @@ void main() {
 
       mockClient = MockClient((req) async {
         fail('캐시 히트 시 HTTP 요청 없어야 함');
-        return _utf8Response({}, 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -377,7 +373,7 @@ void main() {
   group('TimetableDataApi.getAllSubjectCombinations', () {
     test('과목+반 조합 추출 및 캐싱', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '1', 'ITRT_CNTNT': 'Math'},
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '2', 'PERIO': '1', 'ITRT_CNTNT': 'English'},
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': 'special', 'PERIO': '1', 'ITRT_CNTNT': 'Music'},
@@ -415,7 +411,6 @@ void main() {
 
       mockClient = MockClient((req) async {
         fail('캐시 히트 시 HTTP 요청 없어야 함');
-        return _utf8Response({}, 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -426,7 +421,7 @@ void main() {
 
     test('[보강]·토요휴업일 필터링', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '1', 'ITRT_CNTNT': 'OK'},
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '2', 'ITRT_CNTNT': '[보강]Bad'},
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '3', 'ITRT_CNTNT': '토요휴업일'},
@@ -445,7 +440,7 @@ void main() {
 
     test('이름+반으로 정렬', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(rows: [
+        return _utf8Response(timetableResponse(rows: [
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '2', 'PERIO': '1', 'ITRT_CNTNT': 'B'},
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '1', 'ITRT_CNTNT': 'A'},
           {'ALL_TI_YMD': '20260401', 'CLASS_NM': '1', 'PERIO': '2', 'ITRT_CNTNT': 'B'},
@@ -468,7 +463,7 @@ void main() {
   group('TimetableDataApi.getCustomTimeTable', () {
     test('빈 과목 리스트 → 빈 시간표', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_timetableResponse(), 200);
+        return _utf8Response(timetableResponse(), 200);
       });
       TimetableDataApi.client = mockClient;
 
@@ -497,7 +492,6 @@ void main() {
 
       mockClient = MockClient((req) async {
         fail('캐시 히트 시 HTTP 요청 없어야 함');
-        return _utf8Response({}, 200);
       });
       TimetableDataApi.client = mockClient;
 

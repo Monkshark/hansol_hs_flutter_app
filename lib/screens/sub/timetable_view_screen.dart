@@ -19,7 +19,7 @@ import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
 import 'dart:convert';
 
 class TimetableViewScreen extends StatefulWidget {
-  const TimetableViewScreen({Key? key}) : super(key: key);
+  const TimetableViewScreen({super.key});
 
   @override
   State<TimetableViewScreen> createState() => _TimetableViewScreenState();
@@ -504,7 +504,14 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
     final l10n = AppLocalizations.of(context)!;
     final days = [l10n.timetable_dayMon, l10n.timetable_dayTue, l10n.timetable_dayWed, l10n.timetable_dayThu, l10n.timetable_dayFri];
     int maxPeriod = 0;
-    for (int d = 0; d < 5; d++) for (int p = 6; p >= 0; p--) if (result.grid[d][p].isNotEmpty) { if (p + 1 > maxPeriod) maxPeriod = p + 1; break; }
+    for (int d = 0; d < 5; d++) {
+      for (int p = 6; p >= 0; p--) {
+        if (result.grid[d][p].isNotEmpty) {
+          if (p + 1 > maxPeriod) { maxPeriod = p + 1; }
+          break;
+        }
+      }
+    }
     if (maxPeriod == 0) maxPeriod = 7;
 
     return Column(children: [Expanded(child: Padding(

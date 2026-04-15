@@ -16,8 +16,8 @@ class CustomTextField extends StatelessWidget {
     required this.validator,
     required this.controller,
     this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

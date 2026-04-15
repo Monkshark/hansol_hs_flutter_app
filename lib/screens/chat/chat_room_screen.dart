@@ -20,8 +20,8 @@ class ChatRoomScreen extends StatefulWidget {
     required this.chatId,
     required this.otherName,
     required this.otherUid,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ChatRoomScreen> createState() => _ChatRoomScreenState();
@@ -98,6 +98,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       final uid = AuthService.currentUser?.uid;
       if (uid == null) return;
       final profile = await AuthService.getCachedProfile();
+      if (!mounted) return;
       final myName = profile?.displayName ?? AppLocalizations.of(context)!.chat_unknownUser;
       final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
       await chatRef.collection('messages').add({
@@ -105,12 +106,14 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         'content': AppLocalizations.of(context)!.chat_leftMessage(myName),
         'createdAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       await chatRef.update({
         'participants': FieldValue.arrayRemove([uid]),
         'lastMessage': AppLocalizations.of(context)!.chat_leftShort(myName),
         'lastMessageAt': FieldValue.serverTimestamp(),
       });
-      if (mounted) Navigator.of(context).pop();
+      if (!mounted) return;
+      Navigator.of(context).pop();
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftError)));
     }
@@ -178,6 +181,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   Future<void> _deleteForAll(DocumentReference ref) async {
     await ref.update({'content': AppLocalizations.of(context)!.chat_deletedMessage, 'deleted': true});
     final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
+    if (!mounted) return;
     await chatRef.update({'lastMessage': AppLocalizations.of(context)!.chat_deletedMessage});
   }
 
@@ -252,6 +256,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         'content': '', 'imageUrl': url, 'senderUid': uid, 'senderName': name,
         'createdAt': FieldValue.serverTimestamp(), 'deletedFor': [],
       });
+      if (!mounted) return;
       await chatRef.update({
         'lastMessage': AppLocalizations.of(context)!.chat_imageCaption, 'lastMessageAt': FieldValue.serverTimestamp(),
         'unreadCount.${widget.otherUid}': FieldValue.increment(1),

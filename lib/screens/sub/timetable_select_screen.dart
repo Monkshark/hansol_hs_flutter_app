@@ -15,7 +15,7 @@ class SubjectScheduleInfo {
 }
 
 class TimetableSelectScreen extends StatefulWidget {
-  const TimetableSelectScreen({Key? key}) : super(key: key);
+  const TimetableSelectScreen({super.key});
 
   @override
   State<TimetableSelectScreen> createState() => _TimetableSelectScreenState();
@@ -236,11 +236,10 @@ class _TimetableSelectScreenState extends State<TimetableSelectScreen> {
               onPressed: () async {
                 await _saveSelectedSubjects();
                 setState(() => _hasChanges = false);
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(AppLocalizations.of(context)!.timetable_selectSaved)),
-                  );
-                }
+                if (!context.mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(AppLocalizations.of(context)!.timetable_selectSaved)),
+                );
               },
               icon: Icon(Icons.check, color: AppColors.theme.primaryColor, size: 28),
             ),

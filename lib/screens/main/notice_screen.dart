@@ -13,7 +13,7 @@ import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class NoticeScreen extends StatefulWidget {
-  const NoticeScreen({Key? key}) : super(key: key);
+  const NoticeScreen({super.key});
 
   @override
   State<NoticeScreen> createState() => _NoticeScreenState();
@@ -60,10 +60,12 @@ class _NoticeScreenState extends State<NoticeScreen> {
         ));
       }
     }
-    if (mounted) setState(() {
-      _personalEventColors = map.map((k, v) => MapEntry(k, v.toList()));
-      _personalBars = barList;
-    });
+    if (mounted) {
+      setState(() {
+        _personalEventColors = map.map((k, v) => MapEntry(k, v.toList()));
+        _personalBars = barList;
+      });
+    }
   }
 
   Future<void> _loadData() async {

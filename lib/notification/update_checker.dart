@@ -16,6 +16,7 @@ class UpdateChecker {
           .get();
 
       if (!doc.exists) return;
+      if (!context.mounted) return;
 
       final data = doc.data()!;
       final latestVersion = data['latest'] as String? ?? '';

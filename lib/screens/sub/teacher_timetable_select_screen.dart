@@ -11,7 +11,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class TeacherTimetableSelectScreen extends StatefulWidget {
-  const TeacherTimetableSelectScreen({Key? key}) : super(key: key);
+  const TeacherTimetableSelectScreen({super.key});
 
   @override
   State<TeacherTimetableSelectScreen> createState() =>
@@ -87,7 +87,7 @@ class _TeacherTimetableSelectScreenState
             final name = subjectsList[p];
             if (name.isEmpty ||
                 name.contains('[보강]') ||
-                name == '토요휴업일') continue;
+                name == '토요휴업일') { continue; }
             final key = '${name}_$classInt';
             sMap.putIfAbsent(key, () => []).add(
               _ScheduleInfo(dayName: dayName, period: p + 1),

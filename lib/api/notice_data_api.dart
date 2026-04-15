@@ -60,9 +60,9 @@ class NoticeDataApi {
       return ApiStrings.noticeNoInternet;
     }
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
-        '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${NiesApiKeys.niesApiKey}'
+        '&Type=json&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&AA_YMD=$formattedDate';
 
     final data = await _fetchData(requestURL);
@@ -88,7 +88,7 @@ class NoticeDataApi {
 
   Future<UpcomingEvent?> getUpcomingEvent() async {
     final prefs = await _prefs;
-    final cacheKey = 'upcoming_event';
+    const cacheKey = 'upcoming_event';
     final now = DateTime.now();
 
     if (prefs.containsKey(cacheKey)) {
@@ -117,10 +117,10 @@ class NoticeDataApi {
     final fromDate = DateFormat('yyyyMMdd').format(tomorrow);
     final toDate = DateFormat('yyyyMMdd').format(endDate);
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${NiesApiKeys.niesApiKey}'
         '&Type=json&pIndex=1&pSize=100'
-        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&AA_FROM_YMD=$fromDate'
         '&AA_TO_YMD=$toDate';
 
@@ -188,10 +188,10 @@ class NoticeDataApi {
     final fromDate = DateFormat('yyyyMMdd').format(now);
     final toDate = DateFormat('yyyyMMdd').format(endDate);
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${NiesApiKeys.niesApiKey}'
         '&Type=json&pIndex=1&pSize=100'
-        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&AA_FROM_YMD=$fromDate'
         '&AA_TO_YMD=$toDate';
 
@@ -252,10 +252,10 @@ class NoticeDataApi {
     final fromDate = DateFormat('yyyyMMdd').format(firstDay);
     final toDate = DateFormat('yyyyMMdd').format(lastDay);
 
-    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${niesApiKeys.NIES_API_KEY}'
+    final requestURL = 'https://open.neis.go.kr/hub/SchoolSchedule?key=${NiesApiKeys.niesApiKey}'
         '&Type=json&pIndex=1&pSize=100'
-        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&AA_FROM_YMD=$fromDate'
         '&AA_TO_YMD=$toDate';
 
