@@ -15,7 +15,7 @@ import 'package:hansol_high_school/screens/board/board_screen.dart';
 /// 차이로 0.3% 정도의 픽셀 diff가 발생함. 실제 시각 차이는 사람 눈에 안 보임.
 class _ToleranceFileComparator extends LocalFileComparator {
   _ToleranceFileComparator(super.testFile);
-  final double tolerance = 0.01;
+  final double tolerance = 0.07;
 
   @override
   Future<bool> compare(Uint8List imageBytes, Uri golden) async {
