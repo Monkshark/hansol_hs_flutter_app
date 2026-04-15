@@ -19,6 +19,7 @@ import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -88,7 +89,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(24, 8, 12, 16),
+                padding: EdgeInsets.fromLTRB(Responsive.w(context, 24), Responsive.h(context, 8), Responsive.w(context, 12), Responsive.h(context, 16)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -99,7 +100,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             dateStr,
                             style: TextStyle(
                               color: Colors.white.withAlpha(200),
-                              fontSize: 14,
+                              fontSize: Responsive.sp(context, 14),
                             ),
                           ),
                         ),
@@ -141,9 +142,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                   ),
                                   if (unread > 0)
                                     Positioned(
-                                      right: 8, top: 8,
+                                      right: Responsive.r(context, 8), top: Responsive.r(context, 8),
                                       child: Container(
-                                        width: 16, height: 16,
+                                        width: Responsive.r(context, 16), height: Responsive.r(context, 16),
                                         decoration: const BoxDecoration(
                                           color: Colors.red,
                                           shape: BoxShape.circle,
@@ -179,15 +180,15 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          const Icon(Icons.school, color: Colors.white, size: 16),
+                          Icon(Icons.school, color: Colors.white, size: Responsive.r(context, 16)),
                           const SizedBox(width: 6),
                           Text(
                             SettingData().isGradeSet
                                 ? AppLocalizations.of(context)!.home_schoolInfo(grade, classNum)
                                 : AppLocalizations.of(context)!.home_schoolName,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 13,
+                              fontSize: Responsive.sp(context, 13),
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -228,12 +229,12 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: Row(
                         children: [
                           Container(
-                            width: 40, height: 40,
+                            width: Responsive.r(context, 40), height: Responsive.r(context, 40),
                             decoration: BoxDecoration(
                               color: AppColors.theme.tertiaryColor.withAlpha(25),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: Icon(Icons.calendar_view_week, color: AppColors.theme.tertiaryColor, size: 22),
+                            child: Icon(Icons.calendar_view_week, color: AppColors.theme.tertiaryColor, size: Responsive.r(context, 22)),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -241,9 +242,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(AppLocalizations.of(context)!.home_timetableTitle, style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: textColor)),
                                 Text(AppLocalizations.of(context)!.home_timetableSubtitle, style: TextStyle(
-                                  fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                  fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor)),
                               ],
                             ),
                           ),
@@ -271,12 +272,12 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       child: Row(
                         children: [
                           Container(
-                            width: 40, height: 40,
+                            width: Responsive.r(context, 40), height: Responsive.r(context, 40),
                             decoration: BoxDecoration(
                               color: const Color(0xFFE53935).withAlpha(25),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.trending_up, color: Color(0xFFE53935), size: 22),
+                            child: Icon(Icons.trending_up, color: const Color(0xFFE53935), size: Responsive.r(context, 22)),
                           ),
                           const SizedBox(width: 12),
                           Expanded(
@@ -284,9 +285,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(AppLocalizations.of(context)!.home_gradesTitle, style: TextStyle(
-                                  fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: textColor)),
                                 Text(AppLocalizations.of(context)!.home_gradesSubtitle, style: TextStyle(
-                                  fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                  fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor)),
                               ],
                             ),
                           ),
@@ -315,12 +316,12 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                             child: Row(
                               children: [
                                 Container(
-                                  width: 40, height: 40,
+                                  width: Responsive.r(context, 40), height: Responsive.r(context, 40),
                                   decoration: BoxDecoration(
                                     color: AppColors.theme.primaryColor.withAlpha(25),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Icon(Icons.forum_outlined, color: AppColors.theme.primaryColor, size: 22),
+                                  child: Icon(Icons.forum_outlined, color: AppColors.theme.primaryColor, size: Responsive.r(context, 22)),
                                 ),
                                 const SizedBox(width: 12),
                                 Expanded(
@@ -328,9 +329,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
                                       Text(AppLocalizations.of(context)!.home_boardTitle, style: TextStyle(
-                                        fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                        fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: textColor)),
                                       Text(AppLocalizations.of(context)!.home_boardSubtitle, style: TextStyle(
-                                        fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                        fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor)),
                                     ],
                                   ),
                                 ),
@@ -362,12 +363,12 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         child: Row(
                           children: [
                             Container(
-                              width: 40, height: 40,
+                              width: Responsive.r(context, 40), height: Responsive.r(context, 40),
                               decoration: BoxDecoration(
                                 color: AppColors.theme.secondaryColor.withAlpha(25),
                                 borderRadius: BorderRadius.circular(10),
                               ),
-                              child: Icon(Icons.chat_outlined, color: AppColors.theme.secondaryColor, size: 22),
+                              child: Icon(Icons.chat_outlined, color: AppColors.theme.secondaryColor, size: Responsive.r(context, 22)),
                             ),
                             const SizedBox(width: 12),
                             Expanded(
@@ -375,9 +376,9 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(AppLocalizations.of(context)!.home_chatTitle, style: TextStyle(
-                                    fontSize: 15, fontWeight: FontWeight.w600, color: textColor)),
+                                    fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: textColor)),
                                   Text(AppLocalizations.of(context)!.home_chatSubtitle, style: TextStyle(
-                                    fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                                    fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor)),
                                 ],
                               ),
                             ),
@@ -419,7 +420,7 @@ class _UpcomingEventDDay extends StatelessWidget {
         if (snapshot.connectionState != ConnectionState.done) {
           return Text(
             AppLocalizations.of(context)!.home_scheduleLoading,
-            style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.w700),
+            style: TextStyle(color: Colors.white, fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w700),
           );
         }
 
@@ -432,11 +433,11 @@ class _UpcomingEventDDay extends StatelessWidget {
             ).then((_) => onRefresh()),
             child: Row(
               children: [
-                Icon(Icons.add_circle_outline, color: Colors.white.withAlpha(200), size: 20),
+                Icon(Icons.add_circle_outline, color: Colors.white.withAlpha(200), size: Responsive.r(context, 20)),
                 const SizedBox(width: 8),
                 Text(
                   AppLocalizations.of(context)!.home_ddaySet,
-                  style: TextStyle(color: Colors.white.withAlpha(200), fontSize: 16, fontWeight: FontWeight.w500),
+                  style: TextStyle(color: Colors.white.withAlpha(200), fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500),
                 ),
               ],
             ),
@@ -457,8 +458,8 @@ class _UpcomingEventDDay extends StatelessWidget {
             children: [
               Text(
                 dDayText,
-                style: const TextStyle(
-                  color: Colors.white, fontSize: 28,
+                style: TextStyle(
+                  color: Colors.white, fontSize: Responsive.sp(context, 28),
                   fontWeight: FontWeight.w800, letterSpacing: 1),
               ),
               const SizedBox(width: 10),
@@ -467,7 +468,7 @@ class _UpcomingEventDDay extends StatelessWidget {
                   titleText,
                   style: TextStyle(
                     color: Colors.white.withAlpha(220),
-                    fontSize: 16, fontWeight: FontWeight.w600),
+                    fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -503,7 +504,7 @@ class _TodayLunchPreview extends StatelessWidget {
           preview,
           style: TextStyle(
             color: Colors.white.withAlpha(180),
-            fontSize: 12,
+            fontSize: Responsive.sp(context, 12),
           ),
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
@@ -568,18 +569,18 @@ class _RecentPosts extends StatelessWidget {
                         borderRadius: BorderRadius.circular(4),
                       ),
                       child: Text(category,
-                        style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: _catColor(category))),
+                        style: TextStyle(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: _catColor(category))),
                     ),
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(title,
-                        style: TextStyle(fontSize: 13, color: textColor),
+                        style: TextStyle(fontSize: Responsive.sp(context, 13), color: textColor),
                         maxLines: 1, overflow: TextOverflow.ellipsis),
                     ),
                     if (commentCount > 0) ...[
                       const SizedBox(width: 6),
                       Text('[$commentCount]',
-                        style: TextStyle(fontSize: 11, color: AppColors.theme.primaryColor)),
+                        style: TextStyle(fontSize: Responsive.sp(context, 11), color: AppColors.theme.primaryColor)),
                     ],
                   ],
                 ),
@@ -637,12 +638,12 @@ class _LinkCard extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                width: 44, height: 44,
+                width: Responsive.r(context, 44), height: Responsive.r(context, 44),
                 decoration: BoxDecoration(color: color.withAlpha(30), shape: BoxShape.circle),
-                child: Icon(icon, color: color, size: 24),
+                child: Icon(icon, color: color, size: Responsive.r(context, 24)),
               ),
-              const SizedBox(height: 8),
-              Text(label, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+              SizedBox(height: Responsive.h(context, 8)),
+              Text(label, style: TextStyle(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
             ],
           ),
         ),

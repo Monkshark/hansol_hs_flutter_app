@@ -288,7 +288,7 @@ class _BoardScreenState extends State<BoardScreen> {
         children: [
           if (!_isSearching) ...[
             SizedBox(
-              height: 40,
+              height: MediaQuery.of(context).size.height * 0.045,
               child: ListView.separated(
                 controller: _categoryScrollController,
                 scrollDirection: Axis.horizontal,
@@ -671,8 +671,8 @@ class PostCard extends StatelessWidget {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(8),
                     child: SizedBox(
-                      width: 56,
-                      height: 56,
+                      width: MediaQuery.of(context).size.width * 0.136,
+                      height: MediaQuery.of(context).size.width * 0.136,
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
