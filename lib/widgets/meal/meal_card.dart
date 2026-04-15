@@ -25,8 +25,8 @@ class MealCard extends StatefulWidget {
     required this.mealType,
     required this.kcal,
     this.ntrInfo = '',
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<MealCard> createState() => _MealCardState();
@@ -206,7 +206,7 @@ class _MealCardState extends State<MealCard>
                   Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: (allergyNumbers.toList()..sort((a, b) => int.parse(a).compareTo(int.parse(b)))).map((num) {
+                    children: (allergyNumbers.toList()..sort((a, b) => int.parse(a).compareTo(int.parse(b)))).map((number) {
                       return Container(
                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                         decoration: BoxDecoration(
@@ -217,7 +217,7 @@ class _MealCardState extends State<MealCard>
                           ),
                         ),
                         child: Text(
-                          '$num. ${allergyMap[num]}',
+                          '$number. ${allergyMap[number]}',
                           style: TextStyle(
                             fontSize: Responsive.sp(context, 13),
                             fontWeight: FontWeight.w600,

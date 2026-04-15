@@ -32,13 +32,13 @@ jobs:
         shell: bash
         run: |
           cat > lib/api/nies_api_keys.dart << 'DART'
-          class niesApiKeys {
-            static const _NIES_API_KEY = 'dummy';
-            static const _ATPT_OFCDC_SC_CODE = 'dummy';
-            static const _SD_SCHUL_CODE = 'dummy';
-            static String get NIES_API_KEY => _NIES_API_KEY;
-            static String get ATPT_OFCDC_SC_CODE => _ATPT_OFCDC_SC_CODE;
-            static String get SD_SCHUL_CODE => _SD_SCHUL_CODE;
+          class NiesApiKeys {
+            static const _niesApiKey = 'dummy';
+            static const _atptOfcdcScCode = 'dummy';
+            static const _sdSchulCode = 'dummy';
+            static String get niesApiKey => _niesApiKey;
+            static String get atptOfcdcScCode => _atptOfcdcScCode;
+            static String get sdSchulCode => _sdSchulCode;
           }
           DART
           cat > lib/firebase_options.dart << 'DART'
@@ -109,13 +109,13 @@ jobs:
         shell: bash
         run: |
           cat > lib/api/nies_api_keys.dart << 'DART'
-          class niesApiKeys {
-            static const _NIES_API_KEY = 'dummy';
-            static const _ATPT_OFCDC_SC_CODE = 'dummy';
-            static const _SD_SCHUL_CODE = 'dummy';
-            static String get NIES_API_KEY => _NIES_API_KEY;
-            static String get ATPT_OFCDC_SC_CODE => _ATPT_OFCDC_SC_CODE;
-            static String get SD_SCHUL_CODE => _SD_SCHUL_CODE;
+          class NiesApiKeys {
+            static const _niesApiKey = 'dummy';
+            static const _atptOfcdcScCode = 'dummy';
+            static const _sdSchulCode = 'dummy';
+            static String get niesApiKey => _niesApiKey;
+            static String get atptOfcdcScCode => _atptOfcdcScCode;
+            static String get sdSchulCode => _sdSchulCode;
           }
           DART
           cat > lib/firebase_options.dart << 'DART'

@@ -23,7 +23,7 @@ import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => HomeScreenState();
@@ -390,7 +390,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      Expanded(child: _LinkCard(icon: Icons.school_outlined, label: 'NEIS+', color: const Color(0xFF4CAF50), url: 'https://neisplus.kr/')),
+                      const Expanded(child: _LinkCard(icon: Icons.school_outlined, label: 'NEIS+', color: Color(0xFF4CAF50), url: 'https://neisplus.kr/')),
                       const SizedBox(width: 12),
                       Expanded(child: _LinkCard(icon: Icons.language_outlined, label: AppLocalizations.of(context)!.home_linkRiroschool, color: const Color(0xFF2196F3), url: 'https://sjhansol.riroschool.kr/')),
                       const SizedBox(width: 12),

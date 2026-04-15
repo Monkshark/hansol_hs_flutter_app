@@ -10,7 +10,7 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 class ProfileSetupScreen extends StatefulWidget {
   final bool isUpdate;
 
-  const ProfileSetupScreen({Key? key, this.isUpdate = false}) : super(key: key);
+  const ProfileSetupScreen({super.key, this.isUpdate = false});
 
   @override
   State<ProfileSetupScreen> createState() => _ProfileSetupScreenState();
@@ -121,6 +121,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
       await AuthService.saveUserProfile(profile);
       AuthService.clearProfileCache();
+      if (!mounted) return;
 
       if (!widget.isUpdate) {
         final signupTitle = AppLocalizations.of(context)!.profileSetup_signupRequest;

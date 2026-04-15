@@ -9,6 +9,7 @@ class TimetableCell extends StatelessWidget {
   final VoidCallback? onLongPress;
 
   const TimetableCell({
+    super.key,
     required this.subject,
     required this.isConflict,
     required this.isDark,

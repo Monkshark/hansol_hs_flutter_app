@@ -9,7 +9,7 @@ import 'package:get_it/get_it.dart';
 import 'package:intl/intl.dart';
 
 class DDayScreen extends StatefulWidget {
-  const DDayScreen({Key? key}) : super(key: key);
+  const DDayScreen({super.key});
 
   @override
   State<DDayScreen> createState() => _DDayScreenState();
@@ -236,6 +236,7 @@ class _DDayScreenState extends State<DDayScreen> {
                       _list.sort((a, b) => a.date.compareTo(b.date));
                       await _save();
                       setState(() {});
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(AppLocalizations.of(context)!.dday_added(event.title))),
                       );

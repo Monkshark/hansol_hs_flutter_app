@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 
 class OfflineBanner extends StatefulWidget {
-  const OfflineBanner({Key? key}) : super(key: key);
+  const OfflineBanner({super.key});
 
   @override
   State<OfflineBanner> createState() => _OfflineBannerState();

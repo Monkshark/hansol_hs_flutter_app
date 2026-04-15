@@ -8,6 +8,8 @@ import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class ReportsTab extends StatefulWidget {
+  const ReportsTab({super.key});
+
   @override
   State<ReportsTab> createState() => ReportsTabState();
 }

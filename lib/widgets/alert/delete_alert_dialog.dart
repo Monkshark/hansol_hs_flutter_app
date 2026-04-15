@@ -4,10 +4,10 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 
 class DeleteAlertDialog extends StatelessWidget {
   const DeleteAlertDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
-  }) : super(key: key);
+  });
 
   final String title;
   final String content;

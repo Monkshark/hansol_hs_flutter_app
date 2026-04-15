@@ -11,12 +11,12 @@ class MainCalendar extends StatefulWidget {
   final List<PersonalEventBar>? personalBars;
 
   const MainCalendar({
-    Key? key,
+    super.key,
     required this.onDaySelected,
     required this.selectedDate,
     this.personalEvents,
     this.personalBars,
-  }) : super(key: key);
+  });
 
   @override
   State<MainCalendar> createState() => _MainCalendarState();
@@ -191,9 +191,13 @@ class _MainCalendarState extends State<MainCalendar> {
                                 final key = _dayKey(day);
 
                                 Color dc = textColor;
-                                if (!cur) dc = textColor.withAlpha(80);
-                                else if (day.weekday == DateTime.saturday) dc = const Color(0xFF5B8DEF);
-                                else if (day.weekday == DateTime.sunday) dc = const Color(0xFFEF5B5B);
+                                if (!cur) {
+                                  dc = textColor.withAlpha(80);
+                                } else if (day.weekday == DateTime.saturday) {
+                                  dc = const Color(0xFF5B8DEF);
+                                } else if (day.weekday == DateTime.sunday) {
+                                  dc = const Color(0xFFEF5B5B);
+                                }
 
                                 return GestureDetector(
                                   onTap: () {
@@ -224,7 +228,7 @@ class _MainCalendarState extends State<MainCalendar> {
                                           child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              if (single) Container(width: 5, height: 5, decoration: BoxDecoration(color: eventColor, shape: BoxShape.circle)),
+                                              if (single) Container(width: 5, height: 5, decoration: const BoxDecoration(color: eventColor, shape: BoxShape.circle)),
                                               if (widget.personalEvents != null && widget.personalEvents!.containsKey(key))
                                                 ...widget.personalEvents![key]!.take(3).map((c) => Padding(
                                                   padding: const EdgeInsets.only(left: 2),
@@ -256,7 +260,7 @@ class _MainCalendarState extends State<MainCalendar> {
                               ),
                               alignment: Alignment.centerLeft,
                               padding: const EdgeInsets.only(left: 4),
-                              child: b.isS ? Text(b.name, style: TextStyle(fontSize: 9, color: eventColor, fontWeight: FontWeight.w700),
+                              child: b.isS ? Text(b.name, style: const TextStyle(fontSize: 9, color: eventColor, fontWeight: FontWeight.w700),
                                 overflow: TextOverflow.ellipsis, maxLines: 1) : null,
                             ),
                           )),

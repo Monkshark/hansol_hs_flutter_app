@@ -10,7 +10,7 @@ import 'package:hansol_high_school/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 
 class ChatListScreen extends StatefulWidget {
-  const ChatListScreen({Key? key}) : super(key: key);
+  const ChatListScreen({super.key});
 
   @override
   State<ChatListScreen> createState() => _ChatListScreenState();
@@ -335,16 +335,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
       final uid = AuthService.currentUser?.uid;
       if (uid == null) return;
       final profile = await AuthService.getCachedProfile();
+      if (!mounted) return;
       final myName = profile?.displayName ?? AppLocalizations.of(context)!.chat_unknownUser;
       final chatRef = FirebaseFirestore.instance.collection('chats').doc(chatId);
       await chatRef.collection('messages').add({
         'type': 'system', 'content': AppLocalizations.of(context)!.chat_leftMessage(myName), 'createdAt': FieldValue.serverTimestamp(),
       });
+      if (!mounted) return;
       await chatRef.update({
         'participants': FieldValue.arrayRemove([uid]),
         'lastMessage': AppLocalizations.of(context)!.chat_leftShort(myName), 'lastMessageAt': FieldValue.serverTimestamp(),
       });
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftSuccess)));
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftSuccess)));
     } catch (e) {
       if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftError)));
     }

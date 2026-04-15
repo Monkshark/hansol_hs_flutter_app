@@ -12,7 +12,7 @@ import 'package:hansol_high_school/widgets/notification_permission_sheet.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class NotificationSettingScreen extends StatefulWidget {
-  const NotificationSettingScreen({Key? key}) : super(key: key);
+  const NotificationSettingScreen({super.key});
 
   @override
   State<NotificationSettingScreen> createState() => _NotificationSettingScreenState();
@@ -286,7 +286,7 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> w
           )),
           Switch.adaptive(
             value: displayValue,
-            activeColor: AppColors.theme.primaryColor,
+            activeTrackColor: AppColors.theme.primaryColor,
             onChanged: (v) async {
               if (!_hasPermission) {
                 await _ensurePermission();
@@ -319,7 +319,7 @@ class _NotificationSettingScreenState extends State<NotificationSettingScreen> w
           const SizedBox(width: 12),
           Switch.adaptive(
             value: displayEnabled,
-            activeColor: AppColors.theme.primaryColor,
+            activeTrackColor: AppColors.theme.primaryColor,
             onChanged: (v) async {
               if (!_hasPermission) {
                 await _ensurePermission();

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 class MealHeader extends StatelessWidget {
   final DateTime selectedDate;
 
-  const MealHeader({required this.selectedDate, Key? key}) : super(key: key);
+  const MealHeader({required this.selectedDate, super.key});
 
   @override
   Widget build(BuildContext context) {

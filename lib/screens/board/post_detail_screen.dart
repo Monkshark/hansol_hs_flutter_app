@@ -23,13 +23,13 @@ import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:share_plus/share_plus.dart' show SharePlus, ShareParams;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PostDetailScreen extends StatefulWidget {
   final String postId;
 
-  const PostDetailScreen({required this.postId, Key? key}) : super(key: key);
+  const PostDetailScreen({required this.postId, super.key});
 
   @override
   State<PostDetailScreen> createState() => _PostDetailScreenState();
@@ -520,18 +520,21 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     items.add(_ActionItem(Icons.share_outlined, AppLocalizations.of(context)!.post_share, () {
       final title = data['title'] ?? '';
       final deepLink = 'https://hansol-high-school-46fc9.web.app/post/${widget.postId}';
-      Share.share('[한솔고] $title\n$deepLink');
+      SharePlus.instance.share(ShareParams(text: '[한솔고] $title\n$deepLink'));
     }));
     if (isAuthor) {
       items.add(_ActionItem(Icons.edit_outlined, AppLocalizations.of(context)!.post_edit, () => _editPost(data)));
       items.add(_ActionItem(Icons.delete_outline, AppLocalizations.of(context)!.post_delete, _deletePost, isDestructive: true));
     }
-    if (!isAuthor && isManager)
+    if (!isAuthor && isManager) {
       items.add(_ActionItem(Icons.delete_outline, AppLocalizations.of(context)!.post_deleteByAdmin, _deletePost, isDestructive: true));
-    if (isManager && !isPinned)
+    }
+    if (isManager && !isPinned) {
       items.add(_ActionItem(Icons.push_pin_outlined, AppLocalizations.of(context)!.post_pinAsNotice, _pinPost));
-    if (isManager && isPinned)
+    }
+    if (isManager && isPinned) {
       items.add(_ActionItem(Icons.push_pin, AppLocalizations.of(context)!.post_unpinNotice, _unpinPost));
+    }
     if (!isAuthor) {
       items.add(_ActionItem(Icons.flag_outlined, AppLocalizations.of(context)!.post_report, _reportPost, isDestructive: true));
     }
@@ -597,19 +600,25 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
             Text(AppLocalizations.of(context)!.post_reportSelectReason, style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700,
               color: Theme.of(ctx).textTheme.bodyLarge?.color)),
             const SizedBox(height: 12),
-            ...[
-              AppLocalizations.of(context)!.post_reportReasonSwearing,
-              AppLocalizations.of(context)!.post_reportReasonAdult,
-              AppLocalizations.of(context)!.post_reportReasonSpam,
-              AppLocalizations.of(context)!.post_reportReasonPrivacy,
-              AppLocalizations.of(context)!.post_reportReasonOther,
-            ].map((r) =>
-              RadioListTile<String>(
-                value: r, groupValue: selected,
-                title: Text(r, style: TextStyle(fontSize: Responsive.sp(context, 14), color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-                activeColor: AppColors.theme.primaryColor,
-                onChanged: (v) => setSheetState(() => selected = v),
-                dense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+            RadioGroup<String>(
+              groupValue: selected,
+              onChanged: (v) => setSheetState(() => selected = v),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  AppLocalizations.of(context)!.post_reportReasonSwearing,
+                  AppLocalizations.of(context)!.post_reportReasonAdult,
+                  AppLocalizations.of(context)!.post_reportReasonSpam,
+                  AppLocalizations.of(context)!.post_reportReasonPrivacy,
+                  AppLocalizations.of(context)!.post_reportReasonOther,
+                ].map((r) =>
+                  RadioListTile<String>(
+                    value: r,
+                    title: Text(r, style: TextStyle(fontSize: Responsive.sp(context, 14), color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                    activeColor: AppColors.theme.primaryColor,
+                    dense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ).toList(),
               ),
             ),
             Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 12), child: SizedBox(
@@ -756,6 +765,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
     final profile = await AuthService.getUserProfile();
     if (profile == null) return;
+    if (!mounted) return;
 
     setState(() => _sending = true);
     final anonymous = _commentAnonymous;
@@ -770,7 +780,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         widget.postId,
         myUid,
         l.post_anonymousAuthor,
-        (num) => l.post_anonymousNum(num),
+        (value) => l.post_anonymousNum(value),
       );
     }
 

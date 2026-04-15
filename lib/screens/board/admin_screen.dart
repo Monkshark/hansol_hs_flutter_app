@@ -9,7 +9,7 @@ import 'package:hansol_high_school/screens/sub/feedback_list_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class AdminScreen extends StatefulWidget {
-  const AdminScreen({Key? key}) : super(key: key);
+  const AdminScreen({super.key});
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -60,7 +60,7 @@ class _AdminScreenState extends State<AdminScreen> {
           const SizedBox(height: 16),
 
           AdminSection(title: AppLocalizations.of(context)!.admin_boardManagement, icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, cardColor: cardColor, child: ReportsTab()),
+            AdminTile(title: AppLocalizations.of(context)!.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, cardColor: cardColor, child: const ReportsTab()),
             const SizedBox(height: 8),
             AdminTile(title: AppLocalizations.of(context)!.admin_deleteLogs, icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
               cardColor: cardColor, child: const DeleteLogsTab()),

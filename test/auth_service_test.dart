@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 void main() {
   group('UserProfile', () {

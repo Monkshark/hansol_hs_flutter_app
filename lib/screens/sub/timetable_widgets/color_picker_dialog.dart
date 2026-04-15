@@ -10,6 +10,7 @@ class TimetableColorPickerDialog extends StatefulWidget {
   final ValueChanged<Color> onColorSelected;
 
   const TimetableColorPickerDialog({
+    super.key,
     required this.subjectName,
     required this.currentColor,
     required this.onColorSelected,
@@ -50,14 +51,14 @@ class TimetableColorPickerDialogState extends State<TimetableColorPickerDialog> 
     const radius = size / 2;
     const innerR = radius * 0.38;
 
-    String? _dragZone;
+    String? dragZone;
 
     void startDrag(Offset pos) {
       final dx = pos.dx - center.dx;
       final dy = pos.dy - center.dy;
       final dist = math.sqrt(dx * dx + dy * dy);
       if (dist > radius) return;
-      _dragZone = dist <= innerR ? 'inner' : 'outer';
+      dragZone = dist <= innerR ? 'inner' : 'outer';
     }
 
     void updateFromPos(Offset pos) {
@@ -66,9 +67,9 @@ class TimetableColorPickerDialogState extends State<TimetableColorPickerDialog> 
       final dist = math.sqrt(dx * dx + dy * dy);
       if (dist > radius) return;
       setState(() {
-        if (_dragZone == 'inner') {
+        if (dragZone == 'inner') {
           _lightness = (1 - (pos.dy / size)).clamp(0.2, 0.8);
-        } else if (_dragZone == 'outer') {
+        } else if (dragZone == 'outer') {
           _hue = (180 / math.pi * math.atan2(dy, dx) + 360) % 360;
         }
       });
@@ -99,7 +100,7 @@ class TimetableColorPickerDialogState extends State<TimetableColorPickerDialog> 
                 behavior: HitTestBehavior.opaque,
                 onPanStart: (d) { startDrag(d.localPosition); updateFromPos(d.localPosition); },
                 onPanUpdate: (d) => updateFromPos(d.localPosition),
-                onPanEnd: (_) => _dragZone = null,
+                onPanEnd: (_) => dragZone = null,
                 onTapDown: (d) { startDrag(d.localPosition); updateFromPos(d.localPosition); },
                 child: CustomPaint(
                   size: const Size(size, size),

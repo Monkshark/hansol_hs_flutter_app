@@ -33,8 +33,8 @@ class WritePostScreen extends StatefulWidget {
     this.initialTitle,
     this.initialContent,
     this.initialCategory,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<WritePostScreen> createState() => _WritePostScreenState();
@@ -197,7 +197,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
                   Expanded(child: TextButton(
                     onPressed: () => Navigator.pop(ctx, 'discard'),
-                    child: Text(AppLocalizations.of(context)!.write_draftDelete, style: TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
+                    child: Text(AppLocalizations.of(context)!.write_draftDelete, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
                   )),
                   const SizedBox(width: 10),
                   Expanded(child: ElevatedButton(
@@ -215,7 +215,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
           if (action == 'discard') await _clearDraft();
           if (action == null) return;
         }
-        if (mounted) Navigator.of(context).pop();
+        if (context.mounted) Navigator.of(context).pop();
       },
       child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -230,7 +230,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
             IconButton(
               onPressed: _saving ? null : () async {
                 await _saveDraft();
-                if (mounted) {
+                if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text(AppLocalizations.of(context)!.write_draftSaved)));
                 }
@@ -674,10 +674,12 @@ class _WritePostScreenState extends State<WritePostScreen> {
     setState(() => _saving = true);
 
     if (!AuthService.isLoggedIn) {
-      if (mounted) setState(() => _saving = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l.write_errorLoginRequired)),
-      );
+      if (mounted) {
+        setState(() => _saving = false);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l.write_errorLoginRequired)),
+        );
+      }
       return;
     }
 
@@ -696,13 +698,14 @@ class _WritePostScreenState extends State<WritePostScreen> {
       }
       return;
     }
+    if (!mounted) return;
 
     final displayName = _isAnonymous ? AppLocalizations.of(context)!.post_anonymous : profile.displayName;
 
-    final _repo = PostRepository.instance;
+    final repo = PostRepository.instance;
 
     if (_isPinned) {
-      final pinnedSnap = await _repo.getPinnedPosts();
+      final pinnedSnap = await repo.getPinnedPosts();
       if (pinnedSnap.docs.length >= 3 && mounted) {
         final result = await _showPinnedLimitSheet(pinnedSnap.docs);
         if (result == null) {
@@ -764,7 +767,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
         final urls = await _uploadImages(widget.postId!);
         postData['imageUrls'] = FieldValue.arrayUnion(urls);
       }
-      await _repo.updatePost(widget.postId!, postData);
+      await repo.updatePost(widget.postId!, postData);
     } else {
       postData['createdAt'] = FieldValue.serverTimestamp();
       postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
@@ -776,7 +779,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
       postData['imageUrls'] = <String>[];
       postData['anonymousCount'] = 0;
       postData['anonymousMapping'] = <String, dynamic>{};
-      final docRef = await _repo.createPost(postData);
+      final docRef = await repo.createPost(postData);
 
       if (_images.isNotEmpty) {
         final urls = await _uploadImages(docRef.id);
@@ -848,7 +851,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
                             fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
                             maxLines: 1, overflow: TextOverflow.ellipsis)),
                           const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.write_pinUnpinAction, style: TextStyle(
+                          Text(AppLocalizations.of(context)!.write_pinUnpinAction, style: const TextStyle(
                             fontSize: 13, fontWeight: FontWeight.w600, color: Colors.red)),
                         ],
                       ),

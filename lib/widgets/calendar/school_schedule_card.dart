@@ -11,8 +11,8 @@ class SchoolScheduleCard extends StatelessWidget {
     required this.startTime,
     required this.endTime,
     required this.content,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

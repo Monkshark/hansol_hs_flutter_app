@@ -33,7 +33,7 @@ void main() {
     NetworkStatus.testOverride = null;
   });
 
-  Map<String, dynamic> _scheduleResponse(String eventName) {
+  Map<String, dynamic> scheduleResponse(String eventName) {
     return {
       'SchoolSchedule': [
         {
@@ -53,7 +53,7 @@ void main() {
     };
   }
 
-  Map<String, dynamic> _multiEventResponse(List<Map<String, String>> events) {
+  Map<String, dynamic> multiEventResponse(List<Map<String, String>> events) {
     return {
       'SchoolSchedule': [
         {
@@ -70,7 +70,7 @@ void main() {
     };
   }
 
-  Map<String, dynamic> _emptyResponse() {
+  Map<String, dynamic> emptyResponse() {
     return {
       'RESULT': {'CODE': 'INFO-200', 'MESSAGE': '해당하는 데이터가 없습니다.'}
     };
@@ -79,7 +79,7 @@ void main() {
   group('NoticeDataApi.getNotice', () {
     test('정상 학사일정 파싱', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_scheduleResponse('중간고사'), 200);
+        return _utf8Response(scheduleResponse('중간고사'), 200);
       });
       NoticeDataApi.client = mockClient;
 
@@ -89,7 +89,7 @@ void main() {
 
     test('INFO-200 → noticeNoData', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       NoticeDataApi.client = mockClient;
 
@@ -99,7 +99,7 @@ void main() {
 
     test('토요휴업일 → null', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_scheduleResponse('토요휴업일'), 200);
+        return _utf8Response(scheduleResponse('토요휴업일'), 200);
       });
       NoticeDataApi.client = mockClient;
 
@@ -121,7 +121,7 @@ void main() {
       int requestCount = 0;
       mockClient = MockClient((req) async {
         requestCount++;
-        return _utf8Response(_scheduleResponse('개교기념일'), 200);
+        return _utf8Response(scheduleResponse('개교기념일'), 200);
       });
       NoticeDataApi.client = mockClient;
 
@@ -143,7 +143,7 @@ void main() {
           '${dayAfter.year}${dayAfter.month.toString().padLeft(2, '0')}${dayAfter.day.toString().padLeft(2, '0')}';
 
       mockClient = MockClient((req) async {
-        return _utf8Response(_multiEventResponse([
+        return _utf8Response(multiEventResponse([
             {'date': dayAfterStr, 'name': '체육대회'},
             {'date': tomorrowStr, 'name': '중간고사'},
           ]), 200);
@@ -158,7 +158,7 @@ void main() {
 
     test('데이터 없음 → null', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       NoticeDataApi.client = mockClient;
 
@@ -170,7 +170,7 @@ void main() {
   group('NoticeDataApi.getMonthEvents', () {
     test('월간 이벤트 맵 반환', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_multiEventResponse([
+        return _utf8Response(multiEventResponse([
             {'date': '20260401', 'name': '중간고사'},
             {'date': '20260415', 'name': '현장학습'},
           ]), 200);
@@ -185,7 +185,7 @@ void main() {
 
     test('빈 월 → 빈 맵', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_emptyResponse(), 200);
+        return _utf8Response(emptyResponse(), 200);
       });
       NoticeDataApi.client = mockClient;
 
@@ -195,7 +195,7 @@ void main() {
 
     test('토요휴업일 필터링', () async {
       mockClient = MockClient((req) async {
-        return _utf8Response(_multiEventResponse([
+        return _utf8Response(multiEventResponse([
             {'date': '20260404', 'name': '토요휴업일'},
             {'date': '20260405', 'name': '어린이날'},
           ]), 200);
@@ -212,11 +212,11 @@ void main() {
     test('범위 내 이벤트 정렬 반환', () async {
       final d1 = DateTime.now().add(const Duration(days: 5));
       final d2 = DateTime.now().add(const Duration(days: 2));
-      final fmt = (DateTime d) =>
+      String fmt(DateTime d) =>
           '${d.year}${d.month.toString().padLeft(2, '0')}${d.day.toString().padLeft(2, '0')}';
 
       mockClient = MockClient((req) async {
-        return _utf8Response(_multiEventResponse([
+        return _utf8Response(multiEventResponse([
             {'date': fmt(d1), 'name': '체육대회'},
             {'date': fmt(d2), 'name': '중간고사'},
           ]), 200);

@@ -89,10 +89,10 @@ class MealDataApi {
       DateTime date, int mealType, SharedPreferences prefs, String cacheKey) async {
     final formattedDate = DateFormat('yyyyMMdd').format(date);
     final requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
-        'key=${niesApiKeys.NIES_API_KEY}'
+        'key=${NiesApiKeys.niesApiKey}'
         '&Type=json&MMEAL_SC_CODE=$mealType'
-        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&MLSV_YMD=$formattedDate';
 
     final data = await _fetchData(requestURL);
@@ -143,10 +143,10 @@ class MealDataApi {
       final toDate = DateFormat('yyyyMMdd').format(lastDay);
 
       final requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
-          'key=${niesApiKeys.NIES_API_KEY}'
+          'key=${NiesApiKeys.niesApiKey}'
           '&Type=json&pIndex=1&pSize=100'
-          '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-          '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+          '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+          '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
           '&MLSV_FROM_YMD=$fromDate'
           '&MLSV_TO_YMD=$toDate';
 
@@ -292,8 +292,8 @@ class MealDataApi {
       final formattedDate = DateFormat('yyyyMMdd').format(date);
       final requestURL = 'https://open.neis.go.kr/hub/mealServiceDietInfo?'
           '&Type=json'
-          '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-          '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+          '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+          '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
           '&MLSV_YMD=$formattedDate';
 
       final response = await _client.get(Uri.parse(requestURL)).timeout(const Duration(seconds: 10));

@@ -78,10 +78,10 @@ class TimetableDataApi {
     }
 
     final requestURL = 'https://open.neis.go.kr/hub/hisTimetable?'
-        'key=${niesApiKeys.NIES_API_KEY}'
+        'key=${NiesApiKeys.niesApiKey}'
         '&Type=json&pIndex=1&pSize=1000'
-        '&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        '&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&TI_FROM_YMD=$formattedStartDate'
         '&TI_TO_YMD=$formattedEndDate'
         '&GRADE=$grade'
@@ -294,9 +294,9 @@ class TimetableDataApi {
     }
 
     final requestURL = 'https://open.neis.go.kr/hub/classInfo?'
-        'key=${niesApiKeys.NIES_API_KEY}'
-        '&Type=json&ATPT_OFCDC_SC_CODE=${niesApiKeys.ATPT_OFCDC_SC_CODE}'
-        '&SD_SCHUL_CODE=${niesApiKeys.SD_SCHUL_CODE}'
+        'key=${NiesApiKeys.niesApiKey}'
+        '&Type=json&ATPT_OFCDC_SC_CODE=${NiesApiKeys.atptOfcdcScCode}'
+        '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&AY=${DateTime.now().year}'
         '&GRADE=$grade';
 

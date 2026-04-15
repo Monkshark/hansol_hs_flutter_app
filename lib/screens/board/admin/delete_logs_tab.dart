@@ -4,7 +4,7 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class DeleteLogsTab extends StatefulWidget {
-  const DeleteLogsTab();
+  const DeleteLogsTab({super.key});
 
   @override
   State<DeleteLogsTab> createState() => DeleteLogsTabState();

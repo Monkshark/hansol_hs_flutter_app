@@ -18,8 +18,8 @@ class ScheduleCard extends StatelessWidget {
     this.color = 0xFF3F72AF,
     this.endDate,
     this.date,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

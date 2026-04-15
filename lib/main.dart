@@ -212,7 +212,7 @@ final _darkTheme = ThemeData(
 );
 
 class HansolHighSchool extends ConsumerStatefulWidget {
-  const HansolHighSchool({Key? key}) : super(key: key);
+  const HansolHighSchool({super.key});
 
   @override
   ConsumerState<HansolHighSchool> createState() => _HansolHighSchoolState();
@@ -292,7 +292,7 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
 }
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({Key? key}) : super(key: key);
+  const MainScreen({super.key});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -353,10 +353,12 @@ class _MainScreenState extends State<MainScreen> {
         }
       }
 
+      if (!mounted) return;
       await Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => const ProfileSetupScreen(isUpdate: true)),
       );
+      if (!mounted) return;
       AuthService.clearProfileCache();
       providerContainer.read(appRefreshProvider.notifier).refresh();
     } catch (e) {

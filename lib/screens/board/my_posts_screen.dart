@@ -8,7 +8,7 @@ import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class MyPostsScreen extends StatefulWidget {
-  const MyPostsScreen({Key? key}) : super(key: key);
+  const MyPostsScreen({super.key});
 
   @override
   State<MyPostsScreen> createState() => _MyPostsScreenState();
@@ -205,14 +205,17 @@ class _BookmarkedPostsList extends StatelessWidget {
     return StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
       stream: PostRepository.instance.bookmarkedPostsStream(uid),
       builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting)
+        if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
         final docs = snapshot.data?.docs ?? [];
-        if (docs.isEmpty) return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
+        if (docs.isEmpty) {
+          return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.bookmark_border, size: 40, color: AppColors.theme.darkGreyColor),
           const SizedBox(height: 8),
           Text(AppLocalizations.of(context)!.bookmarks_empty, style: TextStyle(color: AppColors.theme.darkGreyColor)),
         ]));
+        }
         return ListView.separated(
           padding: EdgeInsets.fromLTRB(16, 12, 16, MediaQuery.of(context).padding.bottom + 16),
           itemCount: docs.length, separatorBuilder: (_, __) => const SizedBox(height: 8),

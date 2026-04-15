@@ -4,7 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
-import 'package:hansol_high_school/providers/theme_provider.dart';
 import 'package:hansol_high_school/providers/settings_provider.dart';
 
 /// 하단 네비게이션 + 페이지 전환 통합 테스트
@@ -136,11 +135,11 @@ class _LocaleHarness extends ConsumerWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text(locale.languageCode),
+              Text(locale?.languageCode ?? ''),
               ElevatedButton(
                 key: const Key('toggle-locale'),
                 onPressed: () {
-                  final next = locale.languageCode == 'ko'
+                  final next = locale?.languageCode == 'ko'
                       ? const Locale('en')
                       : const Locale('ko');
                   ref.read(localeProvider.notifier).setLocale(next);

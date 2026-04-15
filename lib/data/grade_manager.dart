@@ -69,8 +69,8 @@ class Exam {
 
   String get displayName {
     switch (type) {
-      case 'midterm': return '$year ${semester}학기 중간고사';
-      case 'final': return '$year ${semester}학기 기말고사';
+      case 'midterm': return '$year $semester학기 중간고사';
+      case 'final': return '$year $semester학기 기말고사';
       case 'mock': return '$year $mockLabel 모의고사';
       case 'private_mock': return '$year $mockLabel';
       default: return '$year 시험';

@@ -10,7 +10,7 @@ class FeedbackListScreen extends StatelessWidget {
   final String type;
   final bool showAppBar;
 
-  const FeedbackListScreen({Key? key, required this.type, this.showAppBar = false}) : super(key: key);
+  const FeedbackListScreen({super.key, required this.type, this.showAppBar = false});
 
   String _title(BuildContext context) {
     final l = AppLocalizations.of(context)!;

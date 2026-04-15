@@ -14,8 +14,8 @@ class ScheduleBottomSheet extends StatefulWidget {
   const ScheduleBottomSheet({
     required this.selectedDate,
     required this.onScheduleCreated,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ScheduleBottomSheet> createState() => _ScheduleBottomSheetState();
@@ -230,7 +230,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
     double hue = HSLColor.fromColor(_customColor).hue;
     double lightness = HSLColor.fromColor(_customColor).lightness.clamp(0.2, 0.8);
 
-    String? _dragZone;
+    String? dragZone;
 
     showDialog(
       context: context,
@@ -248,7 +248,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
             final dy = pos.dy - center.dy;
             final dist = math.sqrt(dx * dx + dy * dy);
             if (dist > radius) return;
-            _dragZone = dist <= innerRadius ? 'inner' : 'outer';
+            dragZone = dist <= innerRadius ? 'inner' : 'outer';
           }
 
           void updateFromPos(Offset pos) {
@@ -257,11 +257,11 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
             final dist = math.sqrt(dx * dx + dy * dy);
             if (dist > radius) return;
 
-            if (_dragZone == 'inner') {
+            if (dragZone == 'inner') {
               setDialogState(() {
                 lightness = (1 - (pos.dy / size)).clamp(0.2, 0.8);
               });
-            } else if (_dragZone == 'outer') {
+            } else if (dragZone == 'outer') {
               setDialogState(() {
                 hue = (180 / math.pi * math.atan2(dy, dx) + 360) % 360;
               });
@@ -293,7 +293,7 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
                       behavior: HitTestBehavior.opaque,
                       onPanStart: (d) { startDrag(d.localPosition); updateFromPos(d.localPosition); },
                       onPanUpdate: (d) => updateFromPos(d.localPosition),
-                      onPanEnd: (_) => _dragZone = null,
+                      onPanEnd: (_) => dragZone = null,
                       onTapDown: (d) { startDrag(d.localPosition); updateFromPos(d.localPosition); },
                       child: CustomPaint(
                         size: const Size(size, size),
@@ -355,10 +355,11 @@ class _ScheduleBottomSheetState extends State<ScheduleBottomSheet> {
       content: contentController.text.trim(),
       date: dateStr,
       endDate: endDateStr,
-      color: _colors[_selectedColorIdx].value,
+      color: _colors[_selectedColorIdx].toARGB32(),
     );
 
     await GetIt.I<LocalDataBase>().insertSchedule(schedule);
+    if (!mounted) return;
     Navigator.of(context).pop();
     widget.onScheduleCreated();
   }

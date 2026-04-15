@@ -8,7 +8,7 @@ import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class BookmarkedPostsScreen extends StatelessWidget {
-  const BookmarkedPostsScreen({Key? key}) : super(key: key);
+  const BookmarkedPostsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

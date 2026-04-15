@@ -18,7 +18,7 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 
 class BoardScreen extends StatefulWidget {
-  const BoardScreen({Key? key}) : super(key: key);
+  const BoardScreen({super.key});
 
   @override
   State<BoardScreen> createState() => _BoardScreenState();
@@ -541,6 +541,7 @@ class _BoardScreenState extends State<BoardScreen> {
       }
       return;
     }
+    if (!mounted) return;
 
     final result = await Navigator.push<bool>(
       context,
@@ -556,7 +557,7 @@ class PostCard extends StatelessWidget {
   final QueryDocumentSnapshot<Map<String, dynamic>> doc;
   final VoidCallback onTap;
 
-  const PostCard({required this.doc, required this.onTap, Key? key}) : super(key: key);
+  const PostCard({required this.doc, required this.onTap, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -723,9 +724,9 @@ class PostCard extends StatelessWidget {
                 ],
                 if (dislikeCount > 0) ...[
                   const SizedBox(width: 8),
-                  Icon(Icons.thumb_down, size: 12, color: Colors.redAccent),
+                  const Icon(Icons.thumb_down, size: 12, color: Colors.redAccent),
                   const SizedBox(width: 2),
-                  Text('$dislikeCount', style: TextStyle(fontSize: 11, color: Colors.redAccent)),
+                  Text('$dislikeCount', style: const TextStyle(fontSize: 11, color: Colors.redAccent)),
                 ],
               ],
             ),

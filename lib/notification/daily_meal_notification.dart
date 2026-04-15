@@ -16,14 +16,14 @@ class DailyMealNotification {
   Future<void> initializeNotifications() async {
     const androidSettings =
         AndroidInitializationSettings('@mipmap/ic_launcher');
-    final iosSettings = DarwinInitializationSettings(
+    const iosSettings = DarwinInitializationSettings(
       requestAlertPermission: false,
       requestBadgePermission: false,
       requestSoundPermission: false,
     );
 
     await _localNotificationsPlugin.initialize(
-      InitializationSettings(android: androidSettings, iOS: iosSettings),
+      const InitializationSettings(android: androidSettings, iOS: iosSettings),
       onDidReceiveNotificationResponse: _onNotificationTap,
       onDidReceiveBackgroundNotificationResponse: _onBackgroundNotification,
     );

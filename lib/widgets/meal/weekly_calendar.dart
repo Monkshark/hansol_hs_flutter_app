@@ -7,10 +7,10 @@ class WeeklyCalendar extends StatefulWidget {
   final Function(DateTime) onDaySelected;
 
   const WeeklyCalendar({
-    Key? key,
+    super.key,
     required this.backgroundColor,
     required this.onDaySelected,
-  }) : super(key: key);
+  });
 
   @override
   State<WeeklyCalendar> createState() => _WeeklyCalendarState();

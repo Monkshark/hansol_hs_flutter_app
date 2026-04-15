@@ -56,25 +56,25 @@ class PostCardSkeleton extends StatelessWidget {
           color: isDark ? const Color(0xFF1E2028) : Colors.white,
           borderRadius: BorderRadius.circular(14),
         ),
-        child: Column(
+        child: const Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 SkeletonBox(width: 48, height: 18, borderRadius: 10),
-                const SizedBox(width: 8),
+                SizedBox(width: 8),
                 SkeletonBox(width: 60, height: 14, borderRadius: 6),
               ],
             ),
-            const SizedBox(height: 10),
-            const SkeletonBox(height: 16, borderRadius: 6),
-            const SizedBox(height: 6),
+            SizedBox(height: 10),
+            SkeletonBox(height: 16, borderRadius: 6),
+            SizedBox(height: 6),
             SkeletonBox(width: 200, height: 14, borderRadius: 6),
-            const SizedBox(height: 10),
+            SizedBox(height: 10),
             Row(
               children: [
                 SkeletonBox(width: 40, height: 12, borderRadius: 6),
-                const SizedBox(width: 12),
+                SizedBox(width: 12),
                 SkeletonBox(width: 40, height: 12, borderRadius: 6),
               ],
             ),
@@ -175,17 +175,17 @@ class ChatListSkeleton extends StatelessWidget {
             color: cardColor,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Row(
+          child: const Row(
             children: [
-              const CircleAvatar(radius: 22),
-              const SizedBox(width: 12),
+              CircleAvatar(radius: 22),
+              SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     SkeletonBox(width: 80, height: 14, borderRadius: 6),
-                    const SizedBox(height: 6),
-                    const SkeletonBox(height: 12, borderRadius: 6),
+                    SizedBox(height: 6),
+                    SkeletonBox(height: 12, borderRadius: 6),
                   ],
                 ),
               ),

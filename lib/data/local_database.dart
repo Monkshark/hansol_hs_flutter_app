@@ -97,7 +97,7 @@ class LocalDataBase {
     final results = await db.query(
       'schedules',
       where: "date LIKE ? OR (endDate IS NOT NULL AND date <= ? AND endDate >= ?)",
-      whereArgs: ['$dateStr%', '$dateStr', '$dateStr'],
+      whereArgs: ['$dateStr%', dateStr, dateStr],
       orderBy: 'startTime ASC',
     );
 
