@@ -565,25 +565,28 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                               ),
                               child: Center(
                                 child: avgRank != null
-                                    ? Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          Text(
-                                            avgRank.toStringAsFixed(1),
-                                            style: TextStyle(
-                                              fontSize: Responsive.sp(context, 16),
-                                              fontWeight: FontWeight.w800,
-                                              color: AppColors.theme.primaryColor,
+                                    ? FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
+                                          children: [
+                                            Text(
+                                              avgRank.toStringAsFixed(1),
+                                              style: TextStyle(
+                                                fontSize: Responsive.sp(context, 16),
+                                                fontWeight: FontWeight.w800,
+                                                color: AppColors.theme.primaryColor,
+                                              ),
                                             ),
-                                          ),
-                                          Text(
-                                            AppLocalizations.of(context)!.grade_averageLabel,
-                                            style: TextStyle(
-                                              fontSize: Responsive.sp(context, 10),
-                                              color: AppColors.theme.primaryColor,
+                                            Text(
+                                              AppLocalizations.of(context)!.grade_averageLabel,
+                                              style: TextStyle(
+                                                fontSize: Responsive.sp(context, 10),
+                                                color: AppColors.theme.primaryColor,
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       )
                                     : Icon(
                                         Icons.edit_note,
