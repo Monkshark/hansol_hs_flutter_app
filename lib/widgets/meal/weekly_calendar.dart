@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class WeeklyCalendar extends StatefulWidget {
@@ -32,9 +33,9 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
               alignment: Alignment.centerLeft,
               child: Text(
                 '${_focusedDay.year}년 ${_focusedDay.month}월',
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 18,
+                  fontSize: Responsive.sp(context, 18),
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -55,29 +56,30 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
             },
             calendarFormat: CalendarFormat.week,
             startingDayOfWeek: StartingDayOfWeek.sunday,
-            rowHeight: 48,
-            daysOfWeekHeight: 24,
+            rowHeight: Responsive.h(context, 48),
+            daysOfWeekHeight: Responsive.h(context, 24),
             calendarStyle: CalendarStyle(
               todayDecoration: BoxDecoration(
                 color: Colors.white.withAlpha(40),
                 shape: BoxShape.circle,
               ),
-              todayTextStyle: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700),
+              todayTextStyle: TextStyle(color: Colors.white, fontSize: Responsive.sp(context, 14), fontWeight: FontWeight.w700),
               selectedDecoration: const BoxDecoration(
                 color: Colors.white,
                 shape: BoxShape.circle,
               ),
               selectedTextStyle: TextStyle(
                 color: AppColors.theme.primaryColor,
+                fontSize: Responsive.sp(context, 14),
                 fontWeight: FontWeight.w700,
               ),
-              weekendTextStyle: TextStyle(color: Colors.white.withAlpha(200)),
-              defaultTextStyle: const TextStyle(color: Colors.white),
+              weekendTextStyle: TextStyle(color: Colors.white.withAlpha(200), fontSize: Responsive.sp(context, 14)),
+              defaultTextStyle: TextStyle(color: Colors.white, fontSize: Responsive.sp(context, 14)),
               outsideDaysVisible: false,
             ),
             daysOfWeekStyle: DaysOfWeekStyle(
-              weekendStyle: TextStyle(color: Colors.white.withAlpha(160), fontSize: 13),
-              weekdayStyle: TextStyle(color: Colors.white.withAlpha(160), fontSize: 13),
+              weekendStyle: TextStyle(color: Colors.white.withAlpha(160), fontSize: Responsive.sp(context, 13)),
+              weekdayStyle: TextStyle(color: Colors.white.withAlpha(160), fontSize: Responsive.sp(context, 13)),
             ),
             headerVisible: false,
             onPageChanged: (focusedDay) {

@@ -6,6 +6,7 @@ import 'package:hansol_high_school/providers/grade_provider.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/screens/sub/grade_input_screen.dart';
 import 'package:hansol_high_school/widgets/grade/grade_chart.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:intl/intl.dart';
 
 class GradeScreen extends ConsumerStatefulWidget {
@@ -52,14 +53,14 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
         ),
         child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
           const SizedBox(height: 8),
-          Container(width: 36, height: 4, decoration: BoxDecoration(
+          Container(width: Responsive.w(context, 36), height: 4, decoration: BoxDecoration(
             color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
           const SizedBox(height: 16),
-          Text(AppLocalizations.of(context)!.grade_deleteTitle, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
+          Text(AppLocalizations.of(context)!.grade_deleteTitle, style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700,
             color: Theme.of(ctx).textTheme.bodyLarge?.color)),
           const SizedBox(height: 8),
           Text(AppLocalizations.of(context)!.grade_deleteMsg(exam.localizedDisplayName(AppLocalizations.of(context)!)),
-            style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor)),
+            style: TextStyle(fontSize: Responsive.sp(context, 14), color: AppColors.theme.darkGreyColor)),
           const SizedBox(height: 20),
           Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
             Expanded(child: TextButton(
@@ -142,7 +143,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                 children: [
                   Container(
                     margin: const EdgeInsets.only(top: 12),
-                    width: 40,
+                    width: Responsive.w(context, 40),
                     height: 4,
                     decoration: BoxDecoration(
                       color: isDark ? Colors.white24 : Colors.black12,
@@ -154,7 +155,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                     child: Text(
                       isJeongsi ? AppLocalizations.of(context)!.grade_targetTitle : AppLocalizations.of(context)!.grade_targetGradeTitle,
                       style: TextStyle(
-                        fontSize: 18,
+                        fontSize: Responsive.sp(context, 18),
                         fontWeight: FontWeight.w700,
                         color: textColor,
                       ),
@@ -175,8 +176,8 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                         return Row(
                           children: [
                             Container(
-                              width: 10,
-                              height: 10,
+                              width: Responsive.r(context, 10),
+                              height: Responsive.r(context, 10),
                               decoration: BoxDecoration(
                                 color: color,
                                 shape: BoxShape.circle,
@@ -187,7 +188,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                               child: Text(
                                 subject,
                                 style: TextStyle(
-                                  fontSize: 15,
+                                  fontSize: Responsive.sp(context, 15),
                                   fontWeight: FontWeight.w500,
                                   color: textColor,
                                 ),
@@ -205,7 +206,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                         tempGoals[subject] = (currentGoal - 1).clamp(0, 100);
                                       }
                                     }),
-                                    child: Icon(Icons.remove_circle_outline, size: 22,
+                                    child: Icon(Icons.remove_circle_outline, size: Responsive.r(context, 22),
                                       color: currentGoal != null && currentGoal > 0
                                           ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
                                   ),
@@ -224,7 +225,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                             decoration: BoxDecoration(
                                               color: sheetColor, borderRadius: BorderRadius.circular(16)),
                                             child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                              Text('$subject 목표 백분위', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: textColor)),
+                                              Text('$subject 목표 백분위', style: TextStyle(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: textColor)),
                                               const SizedBox(height: 12),
                                               TextField(
                                                 controller: ctrl, autofocus: true, keyboardType: TextInputType.number,
@@ -250,10 +251,10 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                       if (val != null) setSheetState(() => tempGoals[subject] = val);
                                     },
                                     child: Container(
-                                      width: 60, alignment: Alignment.center,
+                                      width: Responsive.w(context, 60), alignment: Alignment.center,
                                       child: Text(
                                         currentGoal != null ? '${currentGoal.toInt()}%' : '-',
-                                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                                        style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700,
                                           color: currentGoal != null ? textColor : AppColors.theme.darkGreyColor),
                                       ),
                                     ),
@@ -266,7 +267,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                         tempGoals[subject] = (currentGoal + 1).clamp(0, 100);
                                       }
                                     }),
-                                    child: Icon(Icons.add_circle_outline, size: 22,
+                                    child: Icon(Icons.add_circle_outline, size: Responsive.r(context, 22),
                                       color: currentGoal != null && currentGoal < 100
                                           ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
                                   ),
@@ -274,7 +275,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                   const SizedBox(width: 4),
                                   GestureDetector(
                                     onTap: () => setSheetState(() => tempGoals.remove(subject)),
-                                    child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                                    child: Icon(Icons.close, size: Responsive.r(context, 16), color: AppColors.theme.darkGreyColor),
                                   ),
                                 ],
                               ],
@@ -291,15 +292,15 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                         tempGoals[subject] = ((currentGoal - 0.1) * 10).round() / 10;
                                       }
                                     }),
-                                    child: Icon(Icons.remove_circle_outline, size: 22,
+                                    child: Icon(Icons.remove_circle_outline, size: Responsive.r(context, 22),
                                       color: currentGoal != null && currentGoal > 1.0
                                           ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
                                   ),
                                   Container(
-                                    width: 52, alignment: Alignment.center,
+                                    width: Responsive.w(context, 52), alignment: Alignment.center,
                                     child: Text(
                                       currentGoal != null ? currentGoal.toStringAsFixed(1) : '-',
-                                      style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700,
+                                      style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700,
                                         color: currentGoal != null ? textColor : AppColors.theme.darkGreyColor),
                                     ),
                                   ),
@@ -311,7 +312,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                         tempGoals[subject] = ((currentGoal + 0.1) * 10).round() / 10;
                                       }
                                     }),
-                                    child: Icon(Icons.add_circle_outline, size: 22,
+                                    child: Icon(Icons.add_circle_outline, size: Responsive.r(context, 22),
                                       color: currentGoal != null && currentGoal < 5.0
                                           ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor),
                                   ),
@@ -319,7 +320,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                     const SizedBox(width: 4),
                                     GestureDetector(
                                       onTap: () => setSheetState(() => tempGoals.remove(subject)),
-                                      child: Icon(Icons.close, size: 16, color: AppColors.theme.darkGreyColor),
+                                      child: Icon(Icons.close, size: Responsive.r(context, 16), color: AppColors.theme.darkGreyColor),
                                     ),
                                   ],
                                 ],
@@ -352,7 +353,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                         ),
                         child: Text(
                           AppLocalizations.of(context)!.common_save,
-                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                          style: TextStyle(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
@@ -414,13 +415,13 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, size: 16, color: AppColors.theme.primaryColor),
+                  Icon(Icons.info_outline, size: Responsive.r(context, 16), color: AppColors.theme.primaryColor),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       AppLocalizations.of(context)!.grade_notice,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: Responsive.sp(context, 12),
                         color: AppColors.theme.primaryColor,
                         fontWeight: FontWeight.w500,
                       ),
@@ -511,7 +512,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.assignment_outlined, size: 48, color: AppColors.theme.darkGreyColor),
+            Icon(Icons.assignment_outlined, size: Responsive.r(context, 48), color: AppColors.theme.darkGreyColor),
             const SizedBox(height: 12),
             Text(AppLocalizations.of(context)!.grade_addPrompt, style: TextStyle(color: AppColors.theme.darkGreyColor)),
           ],
@@ -555,8 +556,8 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                         child: Row(
                           children: [
                             Container(
-                              width: 56,
-                              height: 56,
+                              width: Responsive.r(context, 56),
+                              height: Responsive.r(context, 56),
                               decoration: BoxDecoration(
                                 color: AppColors.theme.primaryColor.withAlpha(30),
                                 borderRadius: BorderRadius.circular(12),
@@ -569,7 +570,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                           Text(
                                             avgRank.toStringAsFixed(1),
                                             style: TextStyle(
-                                              fontSize: 16,
+                                              fontSize: Responsive.sp(context, 16),
                                               fontWeight: FontWeight.w800,
                                               color: AppColors.theme.primaryColor,
                                             ),
@@ -577,7 +578,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                           Text(
                                             AppLocalizations.of(context)!.grade_averageLabel,
                                             style: TextStyle(
-                                              fontSize: 10,
+                                              fontSize: Responsive.sp(context, 10),
                                               color: AppColors.theme.primaryColor,
                                             ),
                                           ),
@@ -585,7 +586,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                       )
                                     : Icon(
                                         Icons.edit_note,
-                                        size: 24,
+                                        size: Responsive.r(context, 24),
                                         color: AppColors.theme.primaryColor,
                                       ),
                               ),
@@ -598,7 +599,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                   Text(
                                     exam.localizedDisplayName(AppLocalizations.of(context)!),
                                     style: TextStyle(
-                                      fontSize: 16,
+                                      fontSize: Responsive.sp(context, 16),
                                       fontWeight: FontWeight.w600,
                                       color: textColor,
                                     ),
@@ -609,15 +610,15 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                       Text(
                                         '${exam.scores.length}과목',
                                         style: TextStyle(
-                                          fontSize: 13,
+                                          fontSize: Responsive.sp(context, 13),
                                           color: AppColors.theme.mealTypeTextColor,
                                         ),
                                       ),
                                       if (avgRank != null) ...[
                                         const SizedBox(width: 8),
                                         Container(
-                                          width: 4,
-                                          height: 4,
+                                          width: Responsive.r(context, 4),
+                                          height: Responsive.r(context, 4),
                                           decoration: BoxDecoration(
                                             color: AppColors.theme.darkGreyColor.withAlpha(80),
                                             shape: BoxShape.circle,
@@ -627,7 +628,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                         Text(
                                           AppLocalizations.of(context)!.grade_averageRank(avgRank.toStringAsFixed(1)),
                                           style: TextStyle(
-                                            fontSize: 13,
+                                            fontSize: Responsive.sp(context, 13),
                                             color: AppColors.theme.mealTypeTextColor,
                                           ),
                                         ),
@@ -659,7 +660,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                           child: Text(
                                             '${s.subject} ${s.achievement}',
                                             style: TextStyle(
-                                              fontSize: 11,
+                                              fontSize: Responsive.sp(context, 11),
                                               fontWeight: FontWeight.w600,
                                               color: isDark ? color.shade300 : color.shade700,
                                             ),
@@ -674,7 +675,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                             Text(
                               DateFormat('yy.M.d').format(exam.createdAt),
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: Responsive.sp(context, 12),
                                 color: AppColors.theme.darkGreyColor,
                               ),
                             ),
@@ -703,7 +704,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
           child: Center(child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 200),
             style: TextStyle(
-              fontSize: 14,
+              fontSize: Responsive.sp(context, 14),
               fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
               color: selected
                   ? (isDark ? Colors.white : Colors.black87)

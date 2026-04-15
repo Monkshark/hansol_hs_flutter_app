@@ -9,6 +9,7 @@ import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
 import 'package:hansol_high_school/screens/sub/teacher_timetable_select_screen.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/screens/sub/timetable_widgets/color_picker_dialog.dart';
 import 'package:hansol_high_school/screens/sub/timetable_widgets/conflict_dialog.dart';
@@ -351,11 +352,11 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.edit_calendar_outlined, size: 56,
+            Icon(Icons.edit_calendar_outlined, size: Responsive.r(context, 56),
                 color: AppColors.theme.darkGreyColor),
             const SizedBox(height: 16),
             Text(title,
-              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w600,
+              style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w600,
                   color: Theme.of(context).textTheme.bodyLarge?.color),
               textAlign: TextAlign.center),
             const SizedBox(height: 24),
@@ -510,21 +511,21 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
       padding: EdgeInsets.fromLTRB(10, 8, 10, MediaQuery.of(context).padding.bottom + 12),
       child: Column(children: [
         Row(children: [
-          const SizedBox(width: 30),
+          SizedBox(width: Responsive.w(context, 30)),
           ...List.generate(5, (i) {
             final isToday = todayWeekday == i + 1;
             return Expanded(child: Center(child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: isToday ? BoxDecoration(color: AppColors.theme.primaryColor, borderRadius: BorderRadius.circular(12)) : null,
-              child: Text(days[i], style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700,
+              child: Text(days[i], style: TextStyle(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w700,
                 color: isToday ? Colors.white : AppColors.theme.darkGreyColor)),
             )));
           }),
         ]),
         const SizedBox(height: 8),
         Expanded(child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-          SizedBox(width: 30, child: Column(children: List.generate(maxPeriod, (p) => Expanded(
-            child: Center(child: Text('${p + 1}', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor))))))),
+          SizedBox(width: Responsive.w(context, 30), child: Column(children: List.generate(maxPeriod, (p) => Expanded(
+            child: Center(child: Text('${p + 1}', style: TextStyle(fontSize: Responsive.sp(context, 12), fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor))))))),
           ...List.generate(5, (day) {
             final isToday = todayWeekday == day + 1;
             return Expanded(child: Container(
