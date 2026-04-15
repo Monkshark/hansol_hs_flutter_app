@@ -375,13 +375,13 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                                         memCacheWidth: 600,
                                         placeholder: (_, __) => Container(
                                           width: MediaQuery.of(context).size.width * 0.55,
-                                          height: 180,
+                                          height: MediaQuery.of(context).size.height * 0.2,
                                           color: isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0),
                                           child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
                                         ),
                                         errorWidget: (_, __, ___) => Container(
                                           width: MediaQuery.of(context).size.width * 0.55,
-                                          height: 100,
+                                          height: MediaQuery.of(context).size.height * 0.12,
                                           color: isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0),
                                           child: const Icon(Icons.broken_image),
                                         ),

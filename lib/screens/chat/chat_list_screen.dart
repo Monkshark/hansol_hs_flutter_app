@@ -111,7 +111,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   child: Row(
                     children: [
                       CircleAvatar(
-                        radius: 22,
+                        radius: MediaQuery.of(context).size.width * 0.053,
                         backgroundColor: AppColors.theme.primaryColor,
                         child: Text(otherName.isNotEmpty ? otherName[0] : '?',
                           style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
