@@ -102,7 +102,7 @@ Managers / admins get extra:
 - **Flutter Admin screen**: Settings → Admin
 - **Admin Web**: separate web dashboard (URL provided by ops)
 
-Details → [docs/features/admin-features_en.md](./docs/index.html#features/admin-features_en.md).
+Details → [docs/features/admin-features_en.md](./docs/features/admin-features_en.md).
 
 ## Account Management
 
@@ -153,7 +153,7 @@ A. Regular users see only the anonymous number. Admins can reveal identity for m
 Use the in-app Feedback / Bug report menu — admins will see it. For anything urgent, go through the school's official channel.
 
 ## Related Docs
-- [Public Features](./docs/index.html#features/public-features_en.md)
-- [Community Features](./docs/index.html#features/community-features_en.md)
-- [Personal Features](./docs/index.html#features/personal-features_en.md)
-- [Account & Access](./docs/index.html#guides/account-and-access_en.md)
+- [Public Features](./docs/features/public-features_en.md)
+- [Community Features](./docs/features/community-features_en.md)
+- [Personal Features](./docs/features/personal-features_en.md)
+- [Account & Access](./docs/guides/account-and-access_en.md)
