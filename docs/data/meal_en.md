@@ -73,5 +73,5 @@ factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
 | [`MealDataApi`](../api/meal_data_api.md)`.getMeal` | Converts API response into Meal objects and returns them |
 | [`MealDataApi`](../api/meal_data_api.md)`._saveToCache` | Serializes Meal as JSON and caches it in SharedPreferences |
 | `MealScreen` | Splits Meal.meal by newline to display the menu list |
-| [`WidgetService`](../widgets/home_widget/widget_service.md)`.updateMealWidget` | Strips allergy info from Meal.meal before passing to the home widget |
+| `WidgetService.updateMealWidget` | Strips allergy info from Meal.meal before passing to the home widget |
 | [`DailyMealNotification`](../notification/daily_meal_notification.md) | Joins Meal.meal into a single line for the notification body |

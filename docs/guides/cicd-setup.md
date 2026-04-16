@@ -44,7 +44,7 @@ CI는 실제 NEIS / Firebase / Kakao 키 없이 빌드/테스트만 수행합니
 - 테스트는 네트워크 호출 없이 로직 검증
 - APK도 dummy config로 생성 (실제 실행용 아님)
 
-로컬 개발에서는 실제 키 파일을 생성해야 합니다. [DEPLOY.md](../../DEPLOY.md) 참조.
+로컬 개발에서는 실제 키 파일을 생성해야 합니다. [DEPLOY.md](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY.md) 참조.
 
 ## firestore-rules.yml 파이프라인
 
@@ -113,5 +113,5 @@ flutter build apk --debug --target-platform android-arm64
 
 ## 관련 문서
 - [테스트 전략](./testing.md)
-- [배포 가이드](../../DEPLOY.md)
-- [기여 가이드](../../CONTRIBUTING.md)
+- [배포 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY.md)
+- [기여 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/CONTRIBUTING.md)

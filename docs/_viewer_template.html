@@ -359,18 +359,25 @@ var FILES = [
       if(hashIdx !== -1){ hashPart = href.substring(hashIdx); href = href.substring(0, hashIdx); }
       if(!href.endsWith('.md')) return;
 
-      var resolved = href;
-      if(dir && href.indexOf('/') !== 0 && href.indexOf('..') !== 0){
-        resolved = dir + '/' + href;
-      } else if(href.indexOf('./') === 0){
-        resolved = (dir ? dir + '/' : '') + href.substring(2);
-      } else if(href.indexOf('../') === 0){
-        var parts = dir.split('/');
-        while(resolved.indexOf('../') === 0){ parts.pop(); resolved = resolved.substring(3); }
-        resolved = (parts.length ? parts.join('/') + '/' : '') + resolved;
+      // Normalize ./ prefix before joining
+      if(href.indexOf('./') === 0) href = href.substring(2);
+
+      var resolved;
+      if(href.indexOf('../') === 0){
+        var parts = dir ? dir.split('/') : [];
+        var h = href;
+        while(h.indexOf('../') === 0){ parts.pop(); h = h.substring(3); }
+        resolved = (parts.length ? parts.join('/') + '/' : '') + h;
+      } else if(href.indexOf('/') === 0){
+        resolved = href.substring(1);
+      } else {
+        resolved = dir ? dir + '/' + href : href;
       }
       if(MD_DATA[resolved]){
         a.onclick = function(e){ e.preventDefault(); loadFile(resolved); };
+      } else {
+        // Intercept anyway to avoid the browser navigating to a 404 relative URL
+        a.onclick = function(e){ e.preventDefault(); console.warn('Doc not found in viewer:', resolved); };
       }
     });
 
