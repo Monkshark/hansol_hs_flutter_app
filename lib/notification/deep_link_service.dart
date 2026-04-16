@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/main.dart' show rootNavigatorKey;
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 
@@ -30,6 +31,7 @@ class DeepLinkService {
 
   static void _handleUri(Uri uri) {
     log('DeepLinkService: received $uri');
+    AnalyticsService.logAppOpen(source: 'deep_link');
     final path = uri.path;
     if (path.startsWith(_postPrefix)) {
       final postId = path.substring(_postPrefix.length).replaceAll('/', '');

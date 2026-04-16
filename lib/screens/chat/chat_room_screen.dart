@@ -1,11 +1,14 @@
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:image_picker/image_picker.dart';
@@ -176,14 +179,24 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   Future<void> _deleteForMe(DocumentReference ref) async {
     final uid = AuthService.currentUser?.uid;
     if (uid == null) return;
-    await ref.update({'deletedFor': FieldValue.arrayUnion([uid])});
+    try {
+      await ref.update({'deletedFor': FieldValue.arrayUnion([uid])});
+    } catch (e) {
+      log('ChatRoomScreen: deleteForMe error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   Future<void> _deleteForAll(DocumentReference ref) async {
-    await ref.update({'content': AppLocalizations.of(context)!.chat_deletedMessage, 'deleted': true});
-    final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
-    if (!mounted) return;
-    await chatRef.update({'lastMessage': AppLocalizations.of(context)!.chat_deletedMessage});
+    try {
+      await ref.update({'content': AppLocalizations.of(context)!.chat_deletedMessage, 'deleted': true});
+      final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
+      if (!mounted) return;
+      await chatRef.update({'lastMessage': AppLocalizations.of(context)!.chat_deletedMessage});
+    } catch (e) {
+      log('ChatRoomScreen: deleteForAll error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   void _showImageViewer(String url) {
@@ -206,22 +219,27 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   }
 
   Future<void> _sendMessage() async {
-    final text = _controller.text.trim();
+    final text = InputSanitizer.sanitize(_controller.text.trim());
     if (text.isEmpty) return;
     final uid = AuthService.currentUser?.uid;
     if (uid == null) return;
     final profile = await AuthService.getCachedProfile();
     final name = profile?.displayName ?? '';
     _controller.clear();
-    final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
-    await chatRef.collection('messages').add({
-      'content': text, 'senderUid': uid, 'senderName': name,
-      'createdAt': FieldValue.serverTimestamp(), 'deletedFor': [],
-    });
-    await chatRef.update({
-      'lastMessage': text, 'lastMessageAt': FieldValue.serverTimestamp(),
-      'unreadCount.${widget.otherUid}': FieldValue.increment(1),
-    });
+    try {
+      final chatRef = FirebaseFirestore.instance.collection('chats').doc(widget.chatId);
+      await chatRef.collection('messages').add({
+        'content': text, 'senderUid': uid, 'senderName': name,
+        'createdAt': FieldValue.serverTimestamp(), 'deletedFor': [],
+      });
+      await chatRef.update({
+        'lastMessage': text, 'lastMessageAt': FieldValue.serverTimestamp(),
+        'unreadCount.${widget.otherUid}': FieldValue.increment(1),
+      });
+    } catch (e) {
+      log('ChatRoomScreen: sendMessage error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   Future<void> _sendImage() async {
