@@ -73,6 +73,6 @@ Details → [architecture-overview_en.md](./architecture-overview_en.md).
 ## See Also
 - [Architecture Overview](./architecture-overview_en.md)
 - [Architecture Decisions](./architecture-decisions_en.md)
-- [Contributing Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/CONTRIBUTING_en.md)
-- [Deployment Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY_en.md)
-- [User Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/USER_GUIDE_en.md)
+- [Contributing Guide](../CONTRIBUTING_en.md)
+- [Deployment Guide](../DEPLOY_en.md)
+- [User Guide](../USER_GUIDE_en.md)

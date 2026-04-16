@@ -134,4 +134,4 @@ function validCounterDelta(field) {
 - [데이터 모델](./data-model.md)
 - [아키텍처 의사결정 일지](./architecture-decisions.md)
 - [인증 & 접근](./account-and-access.md)
-- [배포 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY.md) — 규칙 배포 명령
+- [배포 가이드](../DEPLOY.md) — 규칙 배포 명령
