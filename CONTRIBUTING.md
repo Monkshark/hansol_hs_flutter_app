@@ -8,11 +8,11 @@
 
 새 기여자라면 이 순서로 문서를 훑으면 맥락이 잡힙니다.
 
-1. [제품 개요](./docs/guides/product-overview.md)
-2. [아키텍처 개요](./docs/guides/architecture-overview.md)
-3. [아키텍처 의사결정 일지](./docs/guides/architecture-decisions.md)
-4. 작업할 피처의 상세: [공개](./docs/features/public-features.md) / [커뮤니티](./docs/features/community-features.md) / [개인](./docs/features/personal-features.md) / [관리자](./docs/features/admin-features.md)
-5. [테스트 전략](./docs/guides/testing.md)
+1. [제품 개요](https://monkshark.github.io/hansol_hs_flutter_app/#guides/product-overview.md)
+2. [아키텍처 개요](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview.md)
+3. [아키텍처 의사결정 일지](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions.md)
+4. 작업할 피처의 상세: [공개](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features.md) / [커뮤니티](https://monkshark.github.io/hansol_hs_flutter_app/#features/community-features.md) / [개인](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features.md) / [관리자](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features.md)
+5. [테스트 전략](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing.md)
 
 ## 개발 환경 준비
 
@@ -118,7 +118,7 @@ firebase emulators:exec --only firestore,auth --project hansol-test "npm test"
 - 새 rules 분기 → Rules test
 - 재사용 UI → Widget / Golden
 
-자세한 전략: [testing.md](./docs/guides/testing.md).
+자세한 전략: [testing.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing.md).
 
 ## 문서 업데이트
 
@@ -148,5 +148,5 @@ firebase emulators:exec --only firestore,auth --project hansol-test "npm test"
 ## 관련 문서
 - [배포 가이드](./DEPLOY.md)
 - [엔드유저 가이드](./USER_GUIDE.md)
-- [테스트 전략](./docs/guides/testing.md)
-- [CI/CD 설정](./docs/guides/cicd-setup.md)
+- [테스트 전략](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing.md)
+- [CI/CD 설정](https://monkshark.github.io/hansol_hs_flutter_app/#guides/cicd-setup.md)
