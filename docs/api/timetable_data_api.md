@@ -198,7 +198,7 @@ Firestore `grade/{grade}/subject/` 컬렉션에서 관리자가 등록한 과목
 
 | 함수 | 설명 |
 |------|------|
-| `_fetchData(url)` | `_client`를 통해 HTTP GET 요청, 에러 시 null |
+| `_fetchData(url)` | `_client`를 통해 HTTP GET 요청, 에러 시 `NetworkException` throw |
 | `_hasData(timetable)` | 에러가 아니고 과목 데이터가 있는지 |
 | `_loadCachedSubjects(grade)` | 과목 조합 캐시 로드 (1주일 TTL) |
 | `_saveSubjectsToCache(grade, subjects)` | 과목 조합 캐시 저장 |

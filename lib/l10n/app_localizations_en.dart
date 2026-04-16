@@ -693,6 +693,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get write_pinUnpinAction => 'Unpin';
 
   @override
+  String get write_unpinFailed => 'Failed to unpin';
+
+  @override
   String get write_registerWithoutPin => 'Register without pinning';
 
   @override

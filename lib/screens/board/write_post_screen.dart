@@ -835,8 +835,16 @@ class _WritePostScreenState extends State<WritePostScreen> {
                   padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
                   child: GestureDetector(
                     onTap: () async {
-                      await PostRepository.instance.unpinPost(doc.id);
-                      if (ctx.mounted) Navigator.pop(ctx, 'unpinned');
+                      try {
+                        await PostRepository.instance.unpinPost(doc.id);
+                        if (ctx.mounted) Navigator.pop(ctx, 'unpinned');
+                      } catch (e) {
+                        if (ctx.mounted) {
+                          ScaffoldMessenger.of(ctx).showSnackBar(
+                            SnackBar(content: Text(AppLocalizations.of(ctx)!.write_unpinFailed)),
+                          );
+                        }
+                      }
                     },
                     child: Container(
                       width: double.infinity,

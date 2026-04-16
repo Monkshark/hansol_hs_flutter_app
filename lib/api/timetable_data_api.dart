@@ -4,6 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:hansol_high_school/api/nies_api_keys.dart';
 import 'package:hansol_high_school/data/api_strings.dart';
+import 'package:hansol_high_school/data/exceptions.dart';
 import 'package:hansol_high_school/data/subject.dart';
 import 'package:hansol_high_school/network/network_status.dart';
 import 'package:http/http.dart' as http;
@@ -87,8 +88,10 @@ class TimetableDataApi {
         '&GRADE=$grade'
         '${classNum != null ? '&CLASS_NM=$classNum' : ''}';
 
-    final data = await _fetchData(requestURL);
-    if (data == null) {
+    late final Map<String, dynamic> data;
+    try {
+      data = await _fetchData(requestURL);
+    } on NetworkException {
       return {
         "error": {
           "error": [ApiStrings.timetableNoData]
@@ -109,18 +112,19 @@ class TimetableDataApi {
     return timetable;
   }
 
-  static Future<Map<String, dynamic>?> _fetchData(String url) async {
+  static Future<Map<String, dynamic>> _fetchData(String url) async {
     try {
       final response = await _client.get(Uri.parse(url));
       if (response.statusCode != 200) {
-        log('$_tag: _fetchData: Failed with status code ${response.statusCode}');
-        return null;
+        throw NetworkException('HTTP ${response.statusCode}');
       }
       final data = jsonDecode(response.body);
       return data;
+    } on NetworkException {
+      rethrow;
     } catch (e) {
       log('$_tag: _fetchData error: $e');
-      return null;
+      throw NetworkException('API 요청 실패', e);
     }
   }
 
@@ -300,8 +304,10 @@ class TimetableDataApi {
         '&AY=${DateTime.now().year}'
         '&GRADE=$grade';
 
-    final data = await _fetchData(requestURL);
-    if (data == null) {
+    late final Map<String, dynamic> data;
+    try {
+      data = await _fetchData(requestURL);
+    } on NetworkException {
       return 0;
     }
 

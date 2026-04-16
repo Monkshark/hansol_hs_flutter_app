@@ -237,6 +237,7 @@
   "write_pinLimitExceeded": "공지가 이미 3개입니다",
   "write_pinLimitMessage": "기존 공지를 해제하거나, 이 글을 일반 글로 등록하세요.",
   "write_pinUnpinAction": "해제",
+  "write_unpinFailed": "공지 해제 실패",
   "write_registerWithoutPin": "공지 없이 등록",
   "write_noTitle": "제목 없음",
   "write_eventContentHint": "일정 내용 (예: 중간고사, 체육대회)",

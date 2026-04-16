@@ -203,8 +203,8 @@ static Future<Map<String, dynamic>?> _fetchData(String url)
 **설명**: `_client`를 통해 HTTP GET 요청을 수행함
 
 - **타임아웃**: 10초
-- NEIS `INFO-200` (데이터 없음) 응답은 `null` 반환
-- 에러/타임아웃도 `null` 반환 (silent fail)
+- NEIS `INFO-200` (데이터 없음) 응답은 정상 반환 (빈 데이터)
+- 에러/타임아웃 시 `NetworkException` throw (호출측에서 캐시 fallback 처리)
 
 ---
 

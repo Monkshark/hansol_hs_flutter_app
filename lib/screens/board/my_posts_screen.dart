@@ -87,6 +87,9 @@ class _MyPostsList extends StatelessWidget {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
         }
+        if (snapshot.hasError) {
+          return const Center(child: Text('오류가 발생했습니다'));
+        }
 
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {
@@ -128,6 +131,9 @@ class _MyCommentsList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text('오류가 발생했습니다'));
         }
 
         final docs = snapshot.data?.docs ?? [];
@@ -207,6 +213,9 @@ class _BookmarkedPostsList extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return const Center(child: Text('오류가 발생했습니다'));
         }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {

@@ -223,6 +223,7 @@
   "write_pinLimitExceeded": "Maximum 3 pinned posts",
   "write_pinLimitMessage": "Unpin an existing notice or register as a regular post.",
   "write_pinUnpinAction": "Unpin",
+  "write_unpinFailed": "Failed to unpin",
   "write_registerWithoutPin": "Register without pinning",
   "write_noTitle": "No title",
   "write_eventContentHint": "Event content (e.g. midterm, sports day)",
