@@ -716,6 +716,12 @@ abstract class AppLocalizations {
   /// **'석식'**
   String get meal_dinner;
 
+  /// No description provided for @meal_yearMonthHeader.
+  ///
+  /// In ko, this message translates to:
+  /// **'{year}년 {month}월'**
+  String meal_yearMonthHeader(int year, int month);
+
   /// No description provided for @notice_noSchedule.
   ///
   /// In ko, this message translates to:
@@ -2149,6 +2155,18 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'목표 등급'**
   String get grade_goalGrade;
+
+  /// No description provided for @grade_goalSettingTooltip.
+  ///
+  /// In ko, this message translates to:
+  /// **'목표 설정'**
+  String get grade_goalSettingTooltip;
+
+  /// No description provided for @grade_goalPercentileTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'{subject} 목표 백분위'**
+  String grade_goalPercentileTitle(Object subject);
 
   /// No description provided for @gradeInput_screenTitle.
   ///
