@@ -8,11 +8,11 @@ Thanks for contributing to the Hansol HS app. This document covers branching, PR
 
 New contributors should skim these in order to build context:
 
-1. [Product Overview](./docs/guides/product-overview_en.md)
-2. [Architecture Overview](./docs/guides/architecture-overview_en.md)
-3. [Architecture Decisions (ADRs)](./docs/guides/architecture-decisions_en.md)
-4. Target feature detail: [Public](./docs/features/public-features_en.md) / [Community](./docs/features/community-features_en.md) / [Personal](./docs/features/personal-features_en.md) / [Admin](./docs/features/admin-features_en.md)
-5. [Testing Strategy](./docs/guides/testing_en.md)
+1. [Product Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/product-overview_en.md)
+2. [Architecture Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)
+3. [Architecture Decisions (ADRs)](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md)
+4. Target feature detail: [Public](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md) / [Community](https://monkshark.github.io/hansol_hs_flutter_app/#features/community-features_en.md) / [Personal](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features_en.md) / [Admin](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md)
+5. [Testing Strategy](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md)
 
 ## Dev Environment
 
@@ -118,7 +118,7 @@ For every new feature, add at least one of:
 - Rules test (for any new rule branch)
 - Widget / Golden (for reusable UI)
 
-Full strategy: [testing_en.md](./docs/guides/testing_en.md).
+Full strategy: [testing_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md).
 
 ## Documentation Updates
 
@@ -148,5 +148,5 @@ If you update a Korean file, sync the paired `_en.md`. Updating a "Last sync: YY
 ## Related Docs
 - [Deployment Guide](./DEPLOY_en.md)
 - [User Guide](./USER_GUIDE_en.md)
-- [Testing Strategy](./docs/guides/testing_en.md)
-- [CI/CD Setup](./docs/guides/cicd-setup_en.md)
+- [Testing Strategy](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md)
+- [CI/CD Setup](https://monkshark.github.io/hansol_hs_flutter_app/#guides/cicd-setup_en.md)
