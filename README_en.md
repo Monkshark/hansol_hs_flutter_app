@@ -21,40 +21,40 @@ A full-stack project with a Flutter mobile app + Next.js admin dashboard. Featur
 Documentation is split by topic. Jump in based on your purpose.
 
 ### First-time Contributors
-1. [Product Overview](./docs/guides/product-overview_en.md)
-2. [Architecture Overview](./docs/guides/architecture-overview_en.md)
-3. [Architecture Decisions (ADRs)](./docs/guides/architecture-decisions_en.md)
-4. Feature deep-dives: [Public](./docs/features/public-features_en.md) / [Community](./docs/features/community-features_en.md) / [Personal](./docs/features/personal-features_en.md) / [Admin](./docs/features/admin-features_en.md)
+1. [Product Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/product-overview_en.md)
+2. [Architecture Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)
+3. [Architecture Decisions (ADRs)](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md)
+4. Feature deep-dives: [Public](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md) / [Community](https://monkshark.github.io/hansol_hs_flutter_app/#features/community-features_en.md) / [Personal](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features_en.md) / [Admin](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md)
 5. [Contributing Guide](./CONTRIBUTING_en.md)
 
 ### End Users (Students / Teachers / Alumni / Parents)
 - [User Guide](./USER_GUIDE_en.md)
-- [Public Features](./docs/features/public-features_en.md)
-- [Account & Access](./docs/guides/account-and-access_en.md)
+- [Public Features](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md)
+- [Account & Access](https://monkshark.github.io/hansol_hs_flutter_app/#guides/account-and-access_en.md)
 
 ### Operations / Deployment
 - [Deployment Guide](./DEPLOY_en.md)
-- [CI/CD Setup](./docs/guides/cicd-setup_en.md)
-- [Security Model](./docs/guides/security_en.md)
-- [Architecture Overview](./docs/guides/architecture-overview_en.md)
+- [CI/CD Setup](https://monkshark.github.io/hansol_hs_flutter_app/#guides/cicd-setup_en.md)
+- [Security Model](https://monkshark.github.io/hansol_hs_flutter_app/#guides/security_en.md)
+- [Architecture Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)
 
 ### Further Reading
-- [Data Model](./docs/guides/data-model_en.md)
-- [Testing Strategy](./docs/guides/testing_en.md) — 524 Flutter + 34 Rules tests
-- [Technical Challenges (14 cases)](./docs/guides/technical-challenges_en.md)
-- [Screenshots Gallery](./docs/guides/screenshots-gallery_en.md)
+- [Data Model](https://monkshark.github.io/hansol_hs_flutter_app/#guides/data-model_en.md)
+- [Testing Strategy](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md) — 524 Flutter + 34 Rules tests
+- [Technical Challenges (14 cases)](https://monkshark.github.io/hansol_hs_flutter_app/#guides/technical-challenges_en.md)
+- [Screenshots Gallery](https://monkshark.github.io/hansol_hs_flutter_app/#guides/screenshots-gallery_en.md)
 
 ### Per-File Technical Reference
 > Detailed per-file docs for service / model / API / notification layers (for editing a specific file or tracing a flow)
 
-- [📚 Full API Reference Index](./docs/README.md) — consolidated index for the items below
-- [`main.md`](./docs/main.md) — app entry point, MainScreen, global state
-- **API layer** (`docs/api/`): [meal_data_api](./docs/api/meal_data_api.md) · [timetable_data_api](./docs/api/timetable_data_api.md) · [notice_data_api](./docs/api/notice_data_api.md)
-- **Data layer** (`docs/data/`): [auth_service](./docs/data/auth_service.md) · [grade_manager](./docs/data/grade_manager.md) · [local_database](./docs/data/local_database.md) · [post_repository](./docs/data/post_repository.md) · [search_tokens](./docs/data/search_tokens.md) · [service_locator](./docs/data/service_locator.md) · [setting_data](./docs/data/setting_data.md) · etc.
-- **Notifications** (`docs/notification/`): [fcm_service](./docs/notification/fcm_service.md) · [daily_meal_notification](./docs/notification/daily_meal_notification.md) · [popup_notice](./docs/notification/popup_notice.md) · [update_checker](./docs/notification/update_checker.md)
-- **State Management** (`docs/providers/`): [providers](./docs/providers/providers.md) — all Riverpod Notifier/AsyncNotifier
-- **Network** (`docs/network/`): [network_status](./docs/network/network_status.md) · [offline_queue_manager](./docs/network/offline_queue_manager.md)
-- **Styles** (`docs/styles/`): [app_colors](./docs/styles/app_colors.md) · [dark_app_colors](./docs/styles/dark_app_colors.md) · [light_app_colors](./docs/styles/light_app_colors.md)
+- [📚 Full API Reference Index](https://monkshark.github.io/hansol_hs_flutter_app/#README.md) — consolidated index for the items below
+- [`main.md`](https://monkshark.github.io/hansol_hs_flutter_app/#main.md) — app entry point, MainScreen, global state
+- **API layer** (`docs/api/`): [meal_data_api](https://monkshark.github.io/hansol_hs_flutter_app/#api/meal_data_api.md) · [timetable_data_api](https://monkshark.github.io/hansol_hs_flutter_app/#api/timetable_data_api.md) · [notice_data_api](https://monkshark.github.io/hansol_hs_flutter_app/#api/notice_data_api.md)
+- **Data layer** (`docs/data/`): [auth_service](https://monkshark.github.io/hansol_hs_flutter_app/#data/auth_service.md) · [grade_manager](https://monkshark.github.io/hansol_hs_flutter_app/#data/grade_manager.md) · [local_database](https://monkshark.github.io/hansol_hs_flutter_app/#data/local_database.md) · [post_repository](https://monkshark.github.io/hansol_hs_flutter_app/#data/post_repository.md) · [search_tokens](https://monkshark.github.io/hansol_hs_flutter_app/#data/search_tokens.md) · [service_locator](https://monkshark.github.io/hansol_hs_flutter_app/#data/service_locator.md) · [setting_data](https://monkshark.github.io/hansol_hs_flutter_app/#data/setting_data.md) · etc.
+- **Notifications** (`docs/notification/`): [fcm_service](https://monkshark.github.io/hansol_hs_flutter_app/#notification/fcm_service.md) · [daily_meal_notification](https://monkshark.github.io/hansol_hs_flutter_app/#notification/daily_meal_notification.md) · [popup_notice](https://monkshark.github.io/hansol_hs_flutter_app/#notification/popup_notice.md) · [update_checker](https://monkshark.github.io/hansol_hs_flutter_app/#notification/update_checker.md)
+- **State Management** (`docs/providers/`): [providers](https://monkshark.github.io/hansol_hs_flutter_app/#providers/providers.md) — all Riverpod Notifier/AsyncNotifier
+- **Network** (`docs/network/`): [network_status](https://monkshark.github.io/hansol_hs_flutter_app/#network/network_status.md) · [offline_queue_manager](https://monkshark.github.io/hansol_hs_flutter_app/#network/offline_queue_manager.md)
+- **Styles** (`docs/styles/`): [app_colors](https://monkshark.github.io/hansol_hs_flutter_app/#styles/app_colors.md) · [dark_app_colors](https://monkshark.github.io/hansol_hs_flutter_app/#styles/dark_app_colors.md) · [light_app_colors](https://monkshark.github.io/hansol_hs_flutter_app/#styles/light_app_colors.md)
 
 ## Screenshots (Summary)
 
@@ -66,7 +66,7 @@ Documentation is split by topic. Jump in based on your purpose.
 |:--:|:--:|:--:|:--:|
 | ![Meal](screenshots/meal.png) | ![Search](screenshots/board_search_results.png) | ![Grades](screenshots/susi.png) | ![Web](screenshots/admin_web.png) |
 
-Full gallery → [Screenshots Gallery](./docs/guides/screenshots-gallery_en.md)
+Full gallery → [Screenshots Gallery](https://monkshark.github.io/hansol_hs_flutter_app/#guides/screenshots-gallery_en.md)
 
 ## Metrics
 
@@ -139,8 +139,8 @@ graph TD
     I -->|hourly suspension expiry| D
 ```
 
-- **Riverpod provider dependency graph** and **layered data-flow model** → [architecture-overview_en.md](./docs/guides/architecture-overview_en.md)
-- Storage allocation rationale (sqflite / Firestore / SecureStorage / Cloud Storage) → [ADR-06](./docs/guides/architecture-decisions_en.md)
+- **Riverpod provider dependency graph** and **layered data-flow model** → [architecture-overview_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)
+- Storage allocation rationale (sqflite / Firestore / SecureStorage / Cloud Storage) → [ADR-06](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md)
 
 ### 🔗 [Interactive Riverpod Graph (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
@@ -159,7 +159,7 @@ D3.js-based zoom/drag graph. Source HTML at `docs/riverpod_graph.html`.
 | 07 | DI = GetIt + abstract repository | [link](./docs/guides/architecture-decisions_en.md#adr-07-di-getit--abstract-repository) |
 | 08 | Test strategy = 4 layers (Unit/Provider/Widget/Rules) | [link](./docs/guides/architecture-decisions_en.md#adr-08-test-strategy-unit--provider--widget--rules) |
 
-Full details → [architecture-decisions_en.md](./docs/guides/architecture-decisions_en.md).
+Full details → [architecture-decisions_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md).
 
 ## Tech Stack
 
@@ -181,10 +181,10 @@ Full details → [architecture-decisions_en.md](./docs/guides/architecture-decis
 
 | Category | Highlights | Deep dive |
 |---|---|---|
-| **Public** | Meals, timetable, academic calendar, urgent popup, home widgets (Android/iOS), offline | [public-features_en.md](./docs/features/public-features_en.md) |
-| **Community** | Board (6 categories + popular + n-gram search), 1:1 chat, notifications, feedback | [community-features_en.md](./docs/features/community-features_en.md) |
-| **Personal** | Grades (susi/jeongsi, local-only), schedules, D-day, profile | [personal-features_en.md](./docs/features/personal-features_en.md) |
-| **Admin** | Flutter admin + Next.js Admin Web, approval/suspension/report/feedback/audit logs | [admin-features_en.md](./docs/features/admin-features_en.md) |
+| **Public** | Meals, timetable, academic calendar, urgent popup, home widgets (Android/iOS), offline | [public-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md) |
+| **Community** | Board (6 categories + popular + n-gram search), 1:1 chat, notifications, feedback | [community-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/community-features_en.md) |
+| **Personal** | Grades (susi/jeongsi, local-only), schedules, D-day, profile | [personal-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features_en.md) |
+| **Admin** | Flutter admin + Next.js Admin Web, approval/suspension/report/feedback/audit logs | [admin-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md) |
 
 ## Security & Privacy
 
@@ -194,7 +194,7 @@ Full details → [architecture-decisions_en.md](./docs/guides/architecture-decis
 - **On deletion**: Firestore → Storage → Auth order for complete erasure.
 - **OAuth only**: no passwords stored.
 
-Details → [security_en.md](./docs/guides/security_en.md).
+Details → [security_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/security_en.md).
 
 ## Testing & CI/CD
 
@@ -203,7 +203,7 @@ Details → [security_en.md](./docs/guides/security_en.md).
 - Two GitHub Actions workflows: [flutter.yml](./.github/workflows/flutter.yml), [firestore-rules.yml](./.github/workflows/firestore-rules.yml)
 - Codecov upload, debug APK artifact on master push
 
-Details → [testing_en.md](./docs/guides/testing_en.md), [cicd-setup_en.md](./docs/guides/cicd-setup_en.md).
+Details → [testing_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md), [cicd-setup_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/cicd-setup_en.md).
 
 ## Data Model (Summary)
 
@@ -217,7 +217,7 @@ erDiagram
     users }o--o{ chats : "participates"
 ```
 
-Collection schema, indexes, and rule mappings → [data-model_en.md](./docs/guides/data-model_en.md).
+Collection schema, indexes, and rule mappings → [data-model_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/data-model_en.md).
 
 ## Technical Challenges (Highlights)
 
@@ -247,7 +247,7 @@ Async `ref.invalidateSelf()` made provider tests flaky. Fixed by replacing state
 → [technical-challenges_en.md#11](./docs/guides/technical-challenges_en.md#11-riverpod-asyncnotifier-race-condition-invalidateself)
 </details>
 
-**All 14 cases** → [technical-challenges_en.md](./docs/guides/technical-challenges_en.md)
+**All 14 cases** → [technical-challenges_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/technical-challenges_en.md)
 
 ## License
 
