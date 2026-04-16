@@ -3,9 +3,11 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
+import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/schedule_data.dart';
@@ -174,7 +176,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   Future<void> _toggleBookmark(bool isCurrentlyBookmarked) async {
     final uid = AuthService.currentUser?.uid;
     if (uid == null) return;
-    await _repo.toggleBookmark(widget.postId, uid, isCurrentlyBookmarked);
+    try {
+      await _repo.toggleBookmark(widget.postId, uid, isCurrentlyBookmarked);
+    } catch (e) {
+      log('PostDetailScreen: toggleBookmark error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   Future<void> _toggleLike(bool hasLiked, bool hasDisliked) async {
@@ -182,8 +189,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       return;
     }
-    final uid = AuthService.currentUser!.uid;
-    await _repo.toggleLike(widget.postId, uid, hasLiked: hasLiked, hasDisliked: hasDisliked);
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await _repo.toggleLike(widget.postId, uid, hasLiked: hasLiked, hasDisliked: hasDisliked);
+    } catch (e) {
+      log('PostDetailScreen: toggleLike error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   Future<void> _toggleDislike(bool hasLiked, bool hasDisliked) async {
@@ -191,8 +203,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
       return;
     }
-    final uid = AuthService.currentUser!.uid;
-    await _repo.toggleDislike(widget.postId, uid, hasLiked: hasLiked, hasDisliked: hasDisliked);
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await _repo.toggleDislike(widget.postId, uid, hasLiked: hasLiked, hasDisliked: hasDisliked);
+    } catch (e) {
+      log('PostDetailScreen: toggleDislike error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   Future<void> _vote(int optionIndex) async {
@@ -204,8 +221,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (result != true) return;
     }
 
-    final uid = AuthService.currentUser!.uid;
-    await _repo.votePoll(widget.postId, uid, optionIndex);
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await _repo.votePoll(widget.postId, uid, optionIndex);
+    } catch (e) {
+      log('PostDetailScreen: vote error: $e');
+      if (mounted) showErrorSnackbar(context, e);
+    }
   }
 
   Future<void> _addEventToCalendar(DateTime date, String content, int startTime, int endTime) async {
@@ -224,7 +246,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
 
   Future<void> _submitComment() async {
     FocusScope.of(context).unfocus();
-    final text = _commentController.text.trim();
+    final text = InputSanitizer.sanitize(_commentController.text.trim());
     if (text.isEmpty) return;
     if (text.length > 1000) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -283,97 +305,102 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final anonymous = _commentAnonymous;
     _commentController.clear();
 
-    final l = AppLocalizations.of(context)!;
-    String displayName = anonymous ? l.post_anonymous : profile.name;
+    try {
+      final l = AppLocalizations.of(context)!;
+      String displayName = anonymous ? l.post_anonymous : profile.name;
 
-    if (anonymous) {
-      final myUid = AuthService.currentUser!.uid;
-      displayName = await _repo.resolveAnonymousName(
-        widget.postId,
-        myUid,
-        l.post_anonymousAuthor,
-        (value) => l.post_anonymousNum(value),
-      );
-    }
-
-    final mentionPattern = RegExp(r'@([\w가-힣]+)');
-    final mentionNames = mentionPattern
-        .allMatches(text)
-        .map((m) => m.group(1))
-        .whereType<String>()
-        .toSet();
-    final mentionedUids = <String>{};
-    if (mentionNames.isNotEmpty) {
-      final commentsSnap = await _repo.commentsRef(widget.postId).get();
-      for (final doc in commentsSnap.docs) {
-        final d = doc.data();
-        final n = d['authorName']?.toString();
-        final u = d['authorUid']?.toString();
-        if (n != null && u != null && mentionNames.contains(n)) {
-          mentionedUids.add(u);
-        }
+      if (anonymous) {
+        final myUid = AuthService.currentUser!.uid;
+        displayName = await _repo.resolveAnonymousName(
+          widget.postId,
+          myUid,
+          l.post_anonymousAuthor,
+          (value) => l.post_anonymousNum(value),
+        );
       }
-      mentionedUids.remove(AuthService.currentUser!.uid);
-    }
 
-    final commentData = <String, dynamic>{
-      'content': text,
-      'authorUid': AuthService.currentUser!.uid,
-      'authorName': displayName,
-      'authorRealName': profile.displayName,
-      'isAnonymous': anonymous,
-      'createdAt': FieldValue.serverTimestamp(),
-      if (mentionedUids.isNotEmpty) 'mentions': mentionedUids.toList(),
-    };
+      final mentionPattern = RegExp(r'@([\w가-힣]+)');
+      final mentionNames = mentionPattern
+          .allMatches(text)
+          .map((m) => m.group(1))
+          .whereType<String>()
+          .toSet();
+      final mentionedUids = <String>{};
+      if (mentionNames.isNotEmpty) {
+        final commentsSnap = await _repo.commentsRef(widget.postId).get();
+        for (final doc in commentsSnap.docs) {
+          final d = doc.data();
+          final n = d['authorName']?.toString();
+          final u = d['authorUid']?.toString();
+          if (n != null && u != null && mentionNames.contains(n)) {
+            mentionedUids.add(u);
+          }
+        }
+        mentionedUids.remove(AuthService.currentUser!.uid);
+      }
 
-    if (_replyToCommentId != null) {
-      commentData['parentId'] = _replyToCommentId;
-      commentData['replyTo'] = _replyToCommentId;
-      commentData['replyToName'] = _replyToName;
-    }
-    await _repo.addComment(widget.postId, commentData);
-    unawaited(AnalyticsService.logCommentCreate(
-      postId: widget.postId,
-      isReply: _replyToCommentId != null,
-    ));
+      final commentData = <String, dynamic>{
+        'content': text,
+        'authorUid': AuthService.currentUser!.uid,
+        'authorName': displayName,
+        'authorRealName': profile.displayName,
+        'isAnonymous': anonymous,
+        'createdAt': FieldValue.serverTimestamp(),
+        if (mentionedUids.isNotEmpty) 'mentions': mentionedUids.toList(),
+      };
 
-    final postSnap = await _repo.getPost(widget.postId);
-    final postData = postSnap.data();
-    if (postData != null) {
-      final postAuthorUid = postData['authorUid'] as String?;
-      final postTitle = postData['title'] as String? ?? '';
-      final myUid = AuthService.currentUser!.uid;
-
-      String? replyNotifiedUid;
       if (_replyToCommentId != null) {
-        final origComment = await _repo.commentsRef(widget.postId).doc(_replyToCommentId).get();
-        final origUid = origComment.data()?['authorUid'] as String?;
-        if (origUid != null && origUid != myUid) {
-          replyNotifiedUid = origUid;
+        commentData['parentId'] = _replyToCommentId;
+        commentData['replyTo'] = _replyToCommentId;
+        commentData['replyToName'] = _replyToName;
+      }
+      await _repo.addComment(widget.postId, commentData);
+      unawaited(AnalyticsService.logCommentCreate(
+        postId: widget.postId,
+        isReply: _replyToCommentId != null,
+      ));
+
+      final postSnap = await _repo.getPost(widget.postId);
+      final postData = postSnap.data();
+      if (postData != null) {
+        final postAuthorUid = postData['authorUid'] as String?;
+        final postTitle = postData['title'] as String? ?? '';
+        final myUid = AuthService.currentUser!.uid;
+
+        String? replyNotifiedUid;
+        if (_replyToCommentId != null) {
+          final origComment = await _repo.commentsRef(widget.postId).doc(_replyToCommentId).get();
+          final origUid = origComment.data()?['authorUid'] as String?;
+          if (origUid != null && origUid != myUid) {
+            replyNotifiedUid = origUid;
+            await _repo.sendNotification(
+              targetUid: origUid, type: 'reply', postId: widget.postId,
+              postTitle: postTitle, senderName: displayName, content: text,
+            );
+          }
+        }
+
+        if (postAuthorUid != null && postAuthorUid != myUid && postAuthorUid != replyNotifiedUid) {
           await _repo.sendNotification(
-            targetUid: origUid, type: 'reply', postId: widget.postId,
+            targetUid: postAuthorUid, type: 'comment', postId: widget.postId,
+            postTitle: postTitle, senderName: displayName, content: text,
+          );
+        }
+
+        for (final mentionedUid in mentionedUids) {
+          if (mentionedUid == postAuthorUid) continue;
+          await _repo.sendNotification(
+            targetUid: mentionedUid, type: 'mention', postId: widget.postId,
             postTitle: postTitle, senderName: displayName, content: text,
           );
         }
       }
 
-      if (postAuthorUid != null && postAuthorUid != myUid && postAuthorUid != replyNotifiedUid) {
-        await _repo.sendNotification(
-          targetUid: postAuthorUid, type: 'comment', postId: widget.postId,
-          postTitle: postTitle, senderName: displayName, content: text,
-        );
-      }
-
-      for (final mentionedUid in mentionedUids) {
-        if (mentionedUid == postAuthorUid) continue;
-        await _repo.sendNotification(
-          targetUid: mentionedUid, type: 'mention', postId: widget.postId,
-          postTitle: postTitle, senderName: displayName, content: text,
-        );
-      }
+      await prefs.setInt('last_comment_time', DateTime.now().millisecondsSinceEpoch);
+    } catch (e) {
+      log('PostDetailScreen: submitComment error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     }
-
-    await prefs.setInt('last_comment_time', DateTime.now().millisecondsSinceEpoch);
 
     if (mounted) {
       setState(() {
@@ -409,7 +436,12 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final confirm = await showConfirmSheet(context, title: AppLocalizations.of(context)!.post_confirmDeleteComment, content: AppLocalizations.of(context)!.post_confirmDeleteCommentMessage, confirmLabel: AppLocalizations.of(context)!.common_delete);
 
     if (confirm == true) {
-      await _repo.deleteComment(widget.postId, commentId);
+      try {
+        await _repo.deleteComment(widget.postId, commentId);
+      } catch (e) {
+        log('PostDetailScreen: deleteComment error: $e');
+        if (mounted) showErrorSnackbar(context, e);
+      }
     }
   }
 
@@ -457,35 +489,45 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     final confirm = await showConfirmSheet(context, title: AppLocalizations.of(context)!.post_deleteConfirm, content: AppLocalizations.of(context)!.post_deleteConfirmMessage, confirmLabel: AppLocalizations.of(context)!.common_delete);
 
     if (confirm == true) {
-      final uid = AuthService.currentUser?.uid;
-      final postSnap = await _repo.getPost(widget.postId);
-      final postData = postSnap.data();
-      if (postData != null && uid != null && uid != postData['authorUid']) {
-        final profile = await AuthService.getCachedProfile();
-        await _repo.logAdminAction({
-          'action': 'delete_post',
-          'adminUid': uid,
-          'adminName': profile?.displayName ?? '',
-          'postId': widget.postId,
-          'postTitle': postData['title'] ?? '',
-          'postAuthorUid': postData['authorUid'] ?? '',
-          'postAuthorName': postData['authorName'] ?? '',
-          'createdAt': FieldValue.serverTimestamp(),
-          'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
-        });
-      }
+      try {
+        final uid = AuthService.currentUser?.uid;
+        final postSnap = await _repo.getPost(widget.postId);
+        final postData = postSnap.data();
+        if (postData != null && uid != null && uid != postData['authorUid']) {
+          final profile = await AuthService.getCachedProfile();
+          await _repo.logAdminAction({
+            'action': 'delete_post',
+            'adminUid': uid,
+            'adminName': profile?.displayName ?? '',
+            'postId': widget.postId,
+            'postTitle': postData['title'] ?? '',
+            'postAuthorUid': postData['authorUid'] ?? '',
+            'postAuthorName': postData['authorName'] ?? '',
+            'createdAt': FieldValue.serverTimestamp(),
+            'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+          });
+        }
 
-      await _repo.deletePost(widget.postId);
-      if (mounted) Navigator.pop(context);
+        await _repo.deletePost(widget.postId);
+        if (mounted) Navigator.pop(context);
+      } catch (e) {
+        log('PostDetailScreen: deletePost error: $e');
+        if (mounted) showErrorSnackbar(context, e);
+      }
     }
   }
 
   Future<void> _resolvePost() async {
-    await _repo.resolvePost(widget.postId);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.post_resolvedMarked)),
-      );
+    try {
+      await _repo.resolvePost(widget.postId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(AppLocalizations.of(context)!.post_resolvedMarked)),
+        );
+      }
+    } catch (e) {
+      log('PostDetailScreen: resolvePost error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     }
   }
 }

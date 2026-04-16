@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 
 class UsersTab extends StatefulWidget {
   final String filter;
@@ -211,42 +212,67 @@ class UsersTabState extends State<UsersTab> {
                         children: [
                           if (widget.filter == 'pending') ...[
                             _actionBtn(l.admin_usersApprove, AppColors.theme.primaryColor, () async {
-                              await docs[index].reference.update({'approved': true});
-                              await _sendAccountNotification(uid, l.admin_usersAccountApproved, l.admin_usersApprovedMessage);
-                              await _logAdminAction('승인', uid, name);
-                              _refreshAll();
+                              try {
+                                await docs[index].reference.update({'approved': true});
+                                await _sendAccountNotification(uid, l.admin_usersAccountApproved, l.admin_usersApprovedMessage);
+                                await _logAdminAction('승인', uid, name);
+                                _refreshAll();
+                              } catch (e) {
+                                log('UsersTab: approve error: $e');
+                                if (context.mounted) showErrorSnackbar(context, e);
+                              }
                             }),
                             const SizedBox(width: 6),
                             _actionBtn(l.admin_usersReject, Colors.red, () async {
-                              await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
-                              await docs[index].reference.delete();
-                              await _logAdminAction('거절', uid, name);
-                              _refreshAll();
+                              try {
+                                await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
+                                await docs[index].reference.delete();
+                                await _logAdminAction('거절', uid, name);
+                                _refreshAll();
+                              } catch (e) {
+                                log('UsersTab: reject error: $e');
+                                if (context.mounted) showErrorSnackbar(context, e);
+                              }
                             }),
                           ],
                           if (widget.filter == 'approved') ...[
                             if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
                               _actionBtn(l.admin_usersRemoveAdmin, AppColors.theme.darkGreyColor, () async {
-                                await docs[index].reference.update({'role': 'user'});
-                                AuthService.clearProfileCache();
-                                _refreshAll();
+                                try {
+                                  await docs[index].reference.update({'role': 'user'});
+                                  AuthService.clearProfileCache();
+                                  _refreshAll();
+                                } catch (e) {
+                                  log('UsersTab: removeAdmin error: $e');
+                                  if (context.mounted) showErrorSnackbar(context, e);
+                                }
                               }),
                             if (isAdmin && role != 'admin') ...[
                               _actionBtn(
                                 role == 'manager' ? l.admin_usersRemoveManager : l.admin_usersMakeManager,
                                 role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
                                 () async {
-                                  final newRole = role == 'manager' ? 'user' : 'manager';
-                                  await docs[index].reference.update({'role': newRole});
-                                  await _logAdminAction('역할 변경: $newRole', uid, name);
-                                  _refreshAll();
+                                  try {
+                                    final newRole = role == 'manager' ? 'user' : 'manager';
+                                    await docs[index].reference.update({'role': newRole});
+                                    await _logAdminAction('역할 변경: $newRole', uid, name);
+                                    _refreshAll();
+                                  } catch (e) {
+                                    log('UsersTab: roleChange error: $e');
+                                    if (context.mounted) showErrorSnackbar(context, e);
+                                  }
                                 },
                               ),
                               const SizedBox(width: 6),
                               _actionBtn('Admin', Colors.red, () async {
-                                await docs[index].reference.update({'role': 'admin'});
-                                await _logAdminAction('역할 변경: admin', uid, name);
-                                _refreshAll();
+                                try {
+                                  await docs[index].reference.update({'role': 'admin'});
+                                  await _logAdminAction('역할 변경: admin', uid, name);
+                                  _refreshAll();
+                                } catch (e) {
+                                  log('UsersTab: makeAdmin error: $e');
+                                  if (context.mounted) showErrorSnackbar(context, e);
+                                }
                               }),
                             ],
                             if (uid != AuthService.currentUser?.uid && role == 'user') ...[
@@ -254,12 +280,17 @@ class UsersTabState extends State<UsersTab> {
                               _actionBtn(l.admin_usersSuspend, Colors.orange, () async {
                                 final hours = await _showSuspendDialog(context, name);
                                 if (hours != null) {
-                                  final until = DateTime.now().add(Duration(hours: hours));
-                                  await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
-                                  if (!context.mounted) return;
-                                  await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
-                                  await _logAdminAction('정지', uid, name);
-                                  _refreshAll();
+                                  try {
+                                    final until = DateTime.now().add(Duration(hours: hours));
+                                    await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
+                                    if (!context.mounted) return;
+                                    await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
+                                    await _logAdminAction('정지', uid, name);
+                                    _refreshAll();
+                                  } catch (e) {
+                                    log('UsersTab: suspend error: $e');
+                                    if (context.mounted) showErrorSnackbar(context, e);
+                                  }
                                 }
                               }),
                               const SizedBox(width: 6),
@@ -269,20 +300,30 @@ class UsersTabState extends State<UsersTab> {
                                 final second = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
                                 if (!context.mounted) return;
                                 if (second == true) {
-                                  await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
-                                  await docs[index].reference.delete();
-                                  await _logAdminAction('삭제', uid, name);
-                                  _refreshAll();
+                                  try {
+                                    await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
+                                    await docs[index].reference.delete();
+                                    await _logAdminAction('삭제', uid, name);
+                                    _refreshAll();
+                                  } catch (e) {
+                                    log('UsersTab: delete error: $e');
+                                    if (context.mounted) showErrorSnackbar(context, e);
+                                  }
                                 }
                               }),
                             ],
                           ],
                           if (widget.filter == 'suspended') ...[
                             _actionBtn(l.admin_usersUnsuspend, AppColors.theme.primaryColor, () async {
-                              await docs[index].reference.update({'suspendedUntil': null});
-                              await _sendAccountNotification(uid, l.admin_usersSuspendRemoved, l.admin_usersSuspendRemovedMessage);
-                              await _logAdminAction('정지 해제', uid, name);
-                              _refreshAll();
+                              try {
+                                await docs[index].reference.update({'suspendedUntil': null});
+                                await _sendAccountNotification(uid, l.admin_usersSuspendRemoved, l.admin_usersSuspendRemovedMessage);
+                                await _logAdminAction('정지 해제', uid, name);
+                                _refreshAll();
+                              } catch (e) {
+                                log('UsersTab: unsuspend error: $e');
+                                if (context.mounted) showErrorSnackbar(context, e);
+                              }
                             }),
                           ],
                         ],

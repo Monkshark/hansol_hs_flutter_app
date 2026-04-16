@@ -93,6 +93,7 @@ Future<void> main() async {
 }
 
 Future<void> _deferredInit() async {
+  unawaited(AnalyticsService.logAppOpen(source: 'organic'));
   unawaited(_safeInit('AppCheck', () => FirebaseAppCheck.instance.activate(
     androidProvider: const bool.fromEnvironment('dart.vm.product')
         ? AndroidProvider.playIntegrity

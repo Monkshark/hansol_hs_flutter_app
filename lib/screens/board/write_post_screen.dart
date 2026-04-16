@@ -2,12 +2,15 @@ import 'dart:async';
 import 'dart:developer';
 import 'dart:io';
 
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
+import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/search_tokens.dart';
@@ -79,6 +82,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
     if (_isEdit) {
       _loadExistingData();
     } else {
+      unawaited(AnalyticsService.logPostStart(boardType: _category));
       _loadDraft();
     }
   }
@@ -108,6 +112,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
     await prefs.setString('draft_title', title);
     await prefs.setString('draft_content', content);
     await prefs.setString('draft_category', _category);
+    unawaited(AnalyticsService.logPostDraft());
   }
 
   Future<void> _clearDraft() async {
@@ -469,8 +474,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
   }
 
   Future<void> _onSubmit() async {
-    final title = _titleController.text.trim();
-    final content = _contentController.text.trim();
+    final title = InputSanitizer.sanitize(_titleController.text.trim());
+    final content = InputSanitizer.sanitize(_contentController.text.trim());
 
     final l = AppLocalizations.of(context)!;
 
@@ -597,82 +602,90 @@ class _WritePostScreenState extends State<WritePostScreen> {
       }
     }
 
-    final postData = <String, dynamic>{
-      'title': title,
-      'content': content,
-      'category': _category,
-      'authorUid': AuthService.currentUser!.uid,
-      'authorName': displayName,
-      'authorRealName': profile.displayName,
-      'isAnonymous': _isAnonymous,
-      'isPinned': _isPinned,
-      'searchTokens': SearchTokens.forDocument(title, content),
-    };
+    try {
+      final postData = <String, dynamic>{
+        'title': title,
+        'content': content,
+        'category': _category,
+        'authorUid': AuthService.currentUser!.uid,
+        'authorName': displayName,
+        'authorRealName': profile.displayName,
+        'isAnonymous': _isAnonymous,
+        'isPinned': _isPinned,
+        'searchTokens': SearchTokens.forDocument(title, content),
+      };
 
-    if (_isPinned) {
-      postData['pinnedAt'] = FieldValue.serverTimestamp();
-    }
-
-    if (_attachPoll) {
-      final options = _pollControllers
-          .map((c) => c.text.trim())
-          .where((t) => t.isNotEmpty)
-          .toList();
-      postData['pollOptions'] = options;
-      postData['pollVoters'] = <String, dynamic>{};
-    } else {
-      postData['pollOptions'] = null;
-      postData['pollVoters'] = null;
-    }
-
-    if (_attachEvent && _eventDate != null) {
-      postData['eventDate'] = _eventDate!.toIso8601String();
-      postData['eventContent'] = _eventContentController.text.trim();
-      postData['eventStartTime'] = _eventStartTime != null
-          ? _eventStartTime!.hour * 60 + _eventStartTime!.minute
-          : -1;
-      postData['eventEndTime'] = _eventEndTime != null
-          ? _eventEndTime!.hour * 60 + _eventEndTime!.minute
-          : -1;
-    } else {
-      postData['eventDate'] = null;
-      postData['eventContent'] = null;
-      postData['eventStartTime'] = null;
-      postData['eventEndTime'] = null;
-    }
-
-    if (_isEdit) {
-      if (_images.isNotEmpty) {
-        final urls = await _uploadImages(widget.postId!);
-        postData['imageUrls'] = FieldValue.arrayUnion(urls);
+      if (_isPinned) {
+        postData['pinnedAt'] = FieldValue.serverTimestamp();
       }
-      await repo.updatePost(widget.postId!, postData);
-    } else {
-      postData['createdAt'] = FieldValue.serverTimestamp();
-      postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
-      postData['commentCount'] = 0;
-      postData['likeCount'] = 0;
-      postData['dislikeCount'] = 0;
-      postData['likes'] = <String, dynamic>{};
-      postData['dislikes'] = <String, dynamic>{};
-      postData['imageUrls'] = <String>[];
-      postData['anonymousCount'] = 0;
-      postData['anonymousMapping'] = <String, dynamic>{};
-      final docRef = await repo.createPost(postData);
 
-      if (_images.isNotEmpty) {
-        final urls = await _uploadImages(docRef.id);
-        await docRef.update({'imageUrls': urls});
+      if (_attachPoll) {
+        final options = _pollControllers
+            .map((c) => c.text.trim())
+            .where((t) => t.isNotEmpty)
+            .toList();
+        postData['pollOptions'] = options;
+        postData['pollVoters'] = <String, dynamic>{};
+      } else {
+        postData['pollOptions'] = null;
+        postData['pollVoters'] = null;
       }
-      unawaited(AnalyticsService.logPostCreate(boardType: _category, isAnonymous: _isAnonymous));
-    }
 
-    if (!_isEdit) {
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt('last_post_time', DateTime.now().millisecondsSinceEpoch);
-      await _clearDraft();
-    }
+      if (_attachEvent && _eventDate != null) {
+        postData['eventDate'] = _eventDate!.toIso8601String();
+        postData['eventContent'] = _eventContentController.text.trim();
+        postData['eventStartTime'] = _eventStartTime != null
+            ? _eventStartTime!.hour * 60 + _eventStartTime!.minute
+            : -1;
+        postData['eventEndTime'] = _eventEndTime != null
+            ? _eventEndTime!.hour * 60 + _eventEndTime!.minute
+            : -1;
+      } else {
+        postData['eventDate'] = null;
+        postData['eventContent'] = null;
+        postData['eventStartTime'] = null;
+        postData['eventEndTime'] = null;
+      }
 
-    if (mounted) Navigator.pop(context, true);
+      if (_isEdit) {
+        if (_images.isNotEmpty) {
+          final urls = await _uploadImages(widget.postId!);
+          postData['imageUrls'] = FieldValue.arrayUnion(urls);
+        }
+        await repo.updatePost(widget.postId!, postData);
+      } else {
+        postData['createdAt'] = FieldValue.serverTimestamp();
+        postData['expireAt'] = Timestamp.fromDate(DateTime.now().add(const Duration(days: 365)));
+        postData['commentCount'] = 0;
+        postData['likeCount'] = 0;
+        postData['dislikeCount'] = 0;
+        postData['likes'] = <String, dynamic>{};
+        postData['dislikes'] = <String, dynamic>{};
+        postData['imageUrls'] = <String>[];
+        postData['anonymousCount'] = 0;
+        postData['anonymousMapping'] = <String, dynamic>{};
+        final docRef = await repo.createPost(postData);
+
+        if (_images.isNotEmpty) {
+          final urls = await _uploadImages(docRef.id);
+          await docRef.update({'imageUrls': urls});
+        }
+        unawaited(AnalyticsService.logPostCreate(boardType: _category, isAnonymous: _isAnonymous));
+      }
+
+      if (!_isEdit) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt('last_post_time', DateTime.now().millisecondsSinceEpoch);
+        await _clearDraft();
+      }
+
+      if (mounted) Navigator.pop(context, true);
+    } catch (e) {
+      log('WritePostScreen: submit error: $e');
+      if (mounted) {
+        setState(() => _saving = false);
+        showErrorSnackbar(context, e);
+      }
+    }
   }
 }

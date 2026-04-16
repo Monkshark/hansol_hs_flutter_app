@@ -61,4 +61,22 @@ class AnalyticsService {
       _log('notification_toggle', {'category': category, 'enabled': enabled.toString()});
 
   static Future<void> logSearch(String term) => _log('search', {'search_term': term});
+
+  // App lifecycle
+  static Future<void> logAppOpen({required String source}) =>
+      _log('app_open', {'source': source});
+
+  // Feature discovery (first-time visits)
+  static Future<void> logFeatureDiscovery({required String feature}) =>
+      _log('feature_discovery', {'feature': feature});
+
+  // Post creation funnel
+  static Future<void> logPostStart({required String boardType}) =>
+      _log('post_start', {'board_type': boardType});
+
+  static Future<void> logPostDraft() => _log('post_draft');
+
+  // Error shown to user
+  static Future<void> logErrorShown({required String errorType}) =>
+      _log('error_shown', {'error_type': errorType});
 }

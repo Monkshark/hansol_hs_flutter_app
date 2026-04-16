@@ -6,6 +6,7 @@ import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 
 class ReportsTab extends StatefulWidget {
   const ReportsTab({super.key});
@@ -105,11 +106,12 @@ class ReportsTabState extends State<ReportsTab> {
                         onTap: () async {
                           try {
                             await PostRepository.instance.deletePost(postId);
+                            await docs[index].reference.delete();
+                            _refresh();
                           } catch (e) {
                             log('ReportsTab: delete post error: $e');
+                            if (context.mounted) showErrorSnackbar(context, e);
                           }
-                          await docs[index].reference.delete();
-                          _refresh();
                         },
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
