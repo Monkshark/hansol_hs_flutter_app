@@ -11,9 +11,13 @@ import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/search_tokens.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/pinned_limit_sheet.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/unsaved_draft_sheet.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/write_category_selector.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_event_form_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_image_section.dart';
 import 'package:hansol_high_school/screens/board/write_widgets/write_poll_form_section.dart';
+import 'package:hansol_high_school/screens/board/write_widgets/write_toggle_row.dart';
 import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -64,10 +68,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
   ];
 
   bool get _isEdit => widget.postId != null;
-
-  String _localizedCategory(BuildContext context, String key) {
-    return BoardCategories.localizedName(AppLocalizations.of(context)!, key);
-  }
 
   @override
   void initState() {
@@ -178,39 +178,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
         final title = _titleController.text.trim();
         final content = _contentController.text.trim();
         if (!_isEdit && (title.isNotEmpty || content.isNotEmpty)) {
-          final action = await showModalBottomSheet<String>(
-            context: context,
-            backgroundColor: Colors.transparent,
-            builder: (ctx) => Container(
-              margin: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF1E2028) : Colors.white,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                const SizedBox(height: 8),
-                Container(width: 36, height: 4, decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-                const SizedBox(height: 16),
-                Text(AppLocalizations.of(context)!.write_unsavedChanges, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
-                const SizedBox(height: 20),
-                Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
-                  Expanded(child: TextButton(
-                    onPressed: () => Navigator.pop(ctx, 'discard'),
-                    child: Text(AppLocalizations.of(context)!.write_draftDelete, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w600)),
-                  )),
-                  const SizedBox(width: 10),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () => Navigator.pop(ctx, 'save'),
-                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.theme.primaryColor, foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-                    child: Text(AppLocalizations.of(context)!.write_draftSave),
-                  )),
-                ])),
-                const SizedBox(height: 12),
-              ])),
-            ),
-          );
+          final action = await showUnsavedDraftSheet(context);
           if (action == 'save') await _saveDraft();
           if (action == 'discard') await _clearDraft();
           if (action == null) return;
@@ -259,43 +227,13 @@ class _WritePostScreenState extends State<WritePostScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.write_category, style: TextStyle(
-              fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
-            const SizedBox(height: 8),
-            SizedBox(
-              height: 36,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: _categoryKeys.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final cat = _categoryKeys[index];
-                  final selected = _category == cat;
-                  return GestureDetector(
-                    onTap: () => setState(() {
-                      _category = cat;
-                      if (cat != BoardCategories.info) _attachEvent = false;
-                    }),
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                      decoration: BoxDecoration(
-                        color: selected
-                            ? AppColors.theme.primaryColor
-                            : (isDark ? const Color(0xFF252830) : const Color(0xFFF0F0F0)),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        _localizedCategory(context, cat),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          color: selected ? Colors.white : AppColors.theme.darkGreyColor,
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              ),
+            WriteCategorySelector(
+              categoryKeys: _categoryKeys,
+              selectedCategory: _category,
+              onCategoryChanged: (cat) => setState(() {
+                _category = cat;
+                if (cat != BoardCategories.info) _attachEvent = false;
+              }),
             ),
             const SizedBox(height: 20),
             TextField(
@@ -349,28 +287,13 @@ class _WritePostScreenState extends State<WritePostScreen> {
 
             if (_category == BoardCategories.info) ...[
               const SizedBox(height: 16),
-              GestureDetector(
+              WriteToggleRow(
+                value: _attachEvent,
                 onTap: () => setState(() => _attachEvent = !_attachEvent),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 22, height: 22,
-                      decoration: BoxDecoration(
-                        color: _attachEvent ? AppColors.theme.tertiaryColor : Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: _attachEvent ? AppColors.theme.tertiaryColor : AppColors.theme.darkGreyColor,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: _attachEvent ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(AppLocalizations.of(context)!.write_eventAttach, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
-                    const SizedBox(width: 4),
-                    Icon(Icons.event, size: 16, color: AppColors.theme.tertiaryColor),
-                  ],
-                ),
+                label: AppLocalizations.of(context)!.write_eventAttach,
+                activeColor: AppColors.theme.tertiaryColor,
+                icon: Icons.event,
+                labelWeight: FontWeight.w600,
               ),
               if (_attachEvent) ...[
                 const SizedBox(height: 12),
@@ -389,28 +312,13 @@ class _WritePostScreenState extends State<WritePostScreen> {
             ],
 
             const SizedBox(height: 16),
-            GestureDetector(
+            WriteToggleRow(
+              value: _attachPoll,
               onTap: () => setState(() => _attachPoll = !_attachPoll),
-              child: Row(
-                children: [
-                  Container(
-                    width: 22, height: 22,
-                    decoration: BoxDecoration(
-                      color: _attachPoll ? AppColors.theme.secondaryColor : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: _attachPoll ? AppColors.theme.secondaryColor : AppColors.theme.darkGreyColor,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: _attachPoll ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(AppLocalizations.of(context)!.write_pollAttach, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
-                  const SizedBox(width: 4),
-                  Icon(Icons.poll, size: 16, color: AppColors.theme.secondaryColor),
-                ],
-              ),
+              label: AppLocalizations.of(context)!.write_pollAttach,
+              activeColor: AppColors.theme.secondaryColor,
+              icon: Icons.poll,
+              labelWeight: FontWeight.w600,
             ),
             if (_attachPoll) ...[
               const SizedBox(height: 12),
@@ -428,52 +336,23 @@ class _WritePostScreenState extends State<WritePostScreen> {
             ],
 
             const SizedBox(height: 16),
-            GestureDetector(
+            WriteToggleRow(
+              value: _isAnonymous,
               onTap: () => setState(() => _isAnonymous = !_isAnonymous),
-              child: Row(
-                children: [
-                  Container(
-                    width: 22, height: 22,
-                    decoration: BoxDecoration(
-                      color: _isAnonymous ? AppColors.theme.primaryColor : Colors.transparent,
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(
-                        color: _isAnonymous ? AppColors.theme.primaryColor : AppColors.theme.darkGreyColor,
-                        width: 1.5,
-                      ),
-                    ),
-                    child: _isAnonymous ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
-                  ),
-                  const SizedBox(width: 8),
-                  Text(AppLocalizations.of(context)!.write_anonymous, style: TextStyle(fontSize: 14, color: textColor)),
-                ],
-              ),
+              label: AppLocalizations.of(context)!.write_anonymous,
+              activeColor: AppColors.theme.primaryColor,
             ),
 
             if (AuthService.cachedProfile?.isManager == true) ...[
               const SizedBox(height: 16),
-              GestureDetector(
+              WriteToggleRow(
+                value: _isPinned,
                 onTap: () => setState(() => _isPinned = !_isPinned),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 22, height: 22,
-                      decoration: BoxDecoration(
-                        color: _isPinned ? Colors.red : Colors.transparent,
-                        borderRadius: BorderRadius.circular(6),
-                        border: Border.all(
-                          color: _isPinned ? Colors.red : AppColors.theme.darkGreyColor,
-                          width: 1.5,
-                        ),
-                      ),
-                      child: _isPinned ? const Icon(Icons.check, size: 16, color: Colors.white) : null,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(AppLocalizations.of(context)!.write_pinAsNotice, style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: textColor)),
-                    const SizedBox(width: 4),
-                    const Icon(Icons.push_pin, size: 16, color: Colors.red),
-                  ],
-                ),
+                label: AppLocalizations.of(context)!.write_pinAsNotice,
+                activeColor: Colors.red,
+                icon: Icons.push_pin,
+                iconColor: Colors.red,
+                labelWeight: FontWeight.w600,
               ),
             ],
 
@@ -707,7 +586,7 @@ class _WritePostScreenState extends State<WritePostScreen> {
     if (_isPinned) {
       final pinnedSnap = await repo.getPinnedPosts();
       if (pinnedSnap.docs.length >= 3 && mounted) {
-        final result = await _showPinnedLimitSheet(pinnedSnap.docs);
+        final result = await showPinnedLimitSheet(context, pinnedSnap.docs);
         if (result == null) {
           setState(() => _saving = false);
           return;
@@ -795,95 +674,5 @@ class _WritePostScreenState extends State<WritePostScreen> {
     }
 
     if (mounted) Navigator.pop(context, true);
-  }
-
-  Future<String?> _showPinnedLimitSheet(List<QueryDocumentSnapshot<Map<String, dynamic>>> pinnedDocs) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-
-    return showModalBottomSheet<String>(
-      context: context,
-      backgroundColor: Colors.transparent,
-      isScrollControlled: true,
-      builder: (ctx) => Container(
-        margin: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E2028) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 8),
-              Container(width: 36, height: 4, decoration: BoxDecoration(
-                color: isDark ? Colors.grey[600] : Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              )),
-              const SizedBox(height: 16),
-              Text(AppLocalizations.of(context)!.write_pinLimitExceeded, style: TextStyle(
-                fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
-              const SizedBox(height: 8),
-              Text(AppLocalizations.of(context)!.write_pinLimitMessage,
-                style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor),
-                textAlign: TextAlign.center),
-              const SizedBox(height: 16),
-              ...pinnedDocs.map((doc) {
-                final data = doc.data();
-                final title = data['title'] ?? AppLocalizations.of(context)!.write_noTitle;
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-                  child: GestureDetector(
-                    onTap: () async {
-                      try {
-                        await PostRepository.instance.unpinPost(doc.id);
-                        if (ctx.mounted) Navigator.pop(ctx, 'unpinned');
-                      } catch (e) {
-                        if (ctx.mounted) {
-                          ScaffoldMessenger.of(ctx).showSnackBar(
-                            SnackBar(content: Text(AppLocalizations.of(ctx)!.write_unpinFailed)),
-                          );
-                        }
-                      }
-                    },
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(child: Text(title, style: TextStyle(
-                            fontSize: 14, fontWeight: FontWeight.w500, color: textColor),
-                            maxLines: 1, overflow: TextOverflow.ellipsis)),
-                          const SizedBox(width: 8),
-                          Text(AppLocalizations.of(context)!.write_pinUnpinAction, style: const TextStyle(
-                            fontSize: 13, fontWeight: FontWeight.w600, color: Colors.red)),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              }),
-              const SizedBox(height: 12),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: TextButton(
-                    onPressed: () => Navigator.pop(ctx, 'cancel'),
-                    child: Text(AppLocalizations.of(context)!.write_registerWithoutPin, style: TextStyle(
-                      color: AppColors.theme.darkGreyColor, fontWeight: FontWeight.w600)),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        ),
-      ),
-    );
   }
 }
