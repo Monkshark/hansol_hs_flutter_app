@@ -6,7 +6,7 @@
 <title>Docs — 한솔고등학교 앱</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/atom-one-dark.min.css">
 <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
@@ -44,9 +44,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .md a:hover{text-decoration:underline}
 .md ul,.md ol{padding-left:24px;margin:0 0 12px}
 .md li{font-size:14px;line-height:1.7;margin:2px 0}
-.md code{background:var(--card-bg);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'Fira Code',Consolas,monospace}
-.md pre{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin:0 0 16px;overflow-x:auto}
-.md pre code{background:none;padding:0;font-size:13px;line-height:1.5}
+.md code{background:var(--card-bg);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;color:#e6d9a2}
+.md pre{background:#1e2228;border:1px solid var(--border);border-radius:8px;margin:0 0 16px;overflow:hidden;position:relative}
+.md pre code{background:none;padding:16px;font-size:13px;line-height:1.55;display:block;overflow-x:auto;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;color:#abb2bf}
+.md pre code.hljs{background:none;padding:16px}
+.md pre .code-lang{position:absolute;top:0;right:44px;font-size:11px;color:var(--muted);background:#282c34;padding:2px 8px;border-radius:0 0 4px 4px;font-family:'JetBrains Mono',monospace;text-transform:lowercase;letter-spacing:.3px;user-select:none;pointer-events:none}
+.md pre .copy-btn{position:absolute;top:6px;right:6px;background:#2d333b;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;opacity:0;transition:opacity .15s,background .15s,color .15s;font-family:inherit}
+.md pre:hover .copy-btn{opacity:1}
+.md pre .copy-btn:hover{background:var(--accent-dim);color:var(--text);border-color:var(--accent)}
+.md pre .copy-btn.ok{color:#7ee787;border-color:#2ea043}
 .md pre.mermaid{background:#fff;text-align:center;padding:16px;border-color:var(--border)}
 .md pre.mermaid svg{max-width:100%;height:auto}
 .md blockquote{border-left:3px solid var(--accent);padding:4px 16px;margin:0 0 12px;color:var(--muted)}
@@ -414,6 +420,44 @@ var FILES = [
         if(nodes.length) mermaid.run({nodes:nodes});
       }
     } catch(e){ console.warn('Mermaid run failed:', e); }
+
+    // Decorate code blocks: language badge + copy button
+    inner.querySelectorAll('.md pre').forEach(function(pre){
+      if(pre.classList.contains('mermaid')) return;
+      var code = pre.querySelector('code');
+      if(!code) return;
+      var lang = '';
+      (code.className || '').split(/\s+/).forEach(function(c){
+        if(c.indexOf('language-') === 0) lang = c.substring(9);
+      });
+      if(lang){
+        var badge = document.createElement('span');
+        badge.className = 'code-lang';
+        badge.textContent = lang;
+        pre.appendChild(badge);
+      }
+      var btn = document.createElement('button');
+      btn.className = 'copy-btn';
+      btn.type = 'button';
+      btn.textContent = 'Copy';
+      btn.onclick = function(){
+        var text = code.textContent || '';
+        var done = function(){
+          btn.textContent = 'Copied';
+          btn.classList.add('ok');
+          setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('ok'); }, 1200);
+        };
+        if(navigator.clipboard && navigator.clipboard.writeText){
+          navigator.clipboard.writeText(text).then(done).catch(function(){});
+        } else {
+          var ta = document.createElement('textarea');
+          ta.value = text; document.body.appendChild(ta); ta.select();
+          try { document.execCommand('copy'); done(); } catch(e){}
+          document.body.removeChild(ta);
+        }
+      };
+      pre.appendChild(btn);
+    });
 
     document.getElementById('content').scrollTop = 0;
     closeSidebar();
