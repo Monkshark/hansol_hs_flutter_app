@@ -109,6 +109,8 @@
   "meal_breakfast": "Breakfast",
   "meal_lunch": "Lunch",
   "meal_dinner": "Dinner",
+  "meal_yearMonthHeader": "{month}/{year}",
+  "@meal_yearMonthHeader": {"placeholders": {"year": {"type": "int"}, "month": {"type": "int"}}},
 
   "notice_noSchedule": "No schedules",
   "notice_continuousDeleteTitle": "Delete Multi-day Schedule",
@@ -360,6 +362,9 @@
   "grade_noData": "No data",
   "grade_scoreNoData": "No score data",
   "grade_goalGrade": "Target Grade",
+  "grade_goalSettingTooltip": "Set Goal",
+  "grade_goalPercentileTitle": "{subject} Target Percentile",
+  "@grade_goalPercentileTitle": {"placeholders": {"subject": {}}},
 
   "gradeInput_screenTitle": "Add Exam",
   "gradeInput_screenEdit": "Edit Exam",

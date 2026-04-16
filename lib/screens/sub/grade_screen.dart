@@ -225,7 +225,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
                                             decoration: BoxDecoration(
                                               color: sheetColor, borderRadius: BorderRadius.circular(16)),
                                             child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-                                              Text('$subject 목표 백분위', style: TextStyle(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: textColor)),
+                                              Text(AppLocalizations.of(context)!.grade_goalPercentileTitle(subject), style: TextStyle(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w700, color: textColor)),
                                               const SizedBox(height: 12),
                                               TextField(
                                                 controller: ctrl, autofocus: true, keyboardType: TextInputType.number,
@@ -385,7 +385,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.flag_outlined),
-            tooltip: '목표 설정',
+            tooltip: AppLocalizations.of(context)!.grade_goalSettingTooltip,
             onPressed: () => _showGoalSheet(context),
           ),
         ],

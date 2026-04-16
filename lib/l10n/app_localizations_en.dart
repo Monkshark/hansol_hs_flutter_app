@@ -343,6 +343,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get meal_dinner => 'Dinner';
 
   @override
+  String meal_yearMonthHeader(int year, int month) {
+    return '$month/$year';
+  }
+
+  @override
   String get notice_noSchedule => 'No schedules';
 
   @override
@@ -1125,6 +1130,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get grade_goalGrade => 'Target Grade';
+
+  @override
+  String get grade_goalSettingTooltip => 'Set Goal';
+
+  @override
+  String grade_goalPercentileTitle(Object subject) {
+    return '$subject Target Percentile';
+  }
 
   @override
   String get gradeInput_screenTitle => 'Add Exam';

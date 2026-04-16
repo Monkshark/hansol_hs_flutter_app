@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
 
@@ -264,7 +265,7 @@ class _HeaderTitleState extends State<_HeaderTitle> {
   Widget build(BuildContext context) {
     final monday = widget.mondayForPage(_currentPage);
     return Text(
-      '${monday.year}년 ${monday.month}월',
+      AppLocalizations.of(context)!.meal_yearMonthHeader(monday.year, monday.month),
       style: TextStyle(
         color: Colors.white,
         fontSize: Responsive.sp(context, 18),
