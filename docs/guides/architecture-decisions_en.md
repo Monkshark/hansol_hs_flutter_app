@@ -2,18 +2,7 @@
 
 > 한국어: [architecture-decisions.md](./architecture-decisions.md)
 
-Each entry captures *why this option rather than the alternatives*. New ADRs follow the template at the bottom.
-
-## Index
-
-- [ADR-01. State Management: Riverpod 2.5](#adr-01-state-management-riverpod-25)
-- [ADR-02. Sensitive Data Storage: flutter_secure_storage](#adr-02-sensitive-data-storage-flutter_secure_storage)
-- [ADR-03. Board Search: Client-side n-gram Indexing](#adr-03-board-search-client-side-n-gram-indexing)
-- [ADR-04. Like Counter: `Map<uid,bool>` + Denormalized int](#adr-04-like-counter-mapuidbool--denormalized-int)
-- [ADR-05. Charts: CustomPainter Directly](#adr-05-charts-custompainter-directly)
-- [ADR-06. Storage Allocation](#adr-06-storage-allocation)
-- [ADR-07. DI: GetIt + Abstract Repository](#adr-07-di-getit--abstract-repository)
-- [ADR-08. Test Strategy: Unit + Provider + Widget + Rules](#adr-08-test-strategy-unit--provider--widget--rules)
+Each entry captures *why this option rather than the alternatives*.
 
 ---
 
@@ -105,21 +94,3 @@ One clear purpose per store → "where does this data live?" is never ambiguous.
 - **Firestore Rules (34)**: `@firebase/rules-unit-testing` + emulator — validates rules themselves (regression-proof even without code changes)
 - **Rejected**: full integration with real Firebase Auth — CI cost ↑, flake ↑
 - **Totals**: 524 (Flutter) + 34 (Rules) = **558**. Full breakdown in [testing_en.md](./testing_en.md)
-
----
-
-## Template for New ADRs
-
-```md
-## ADR-NN. Decision Title (vs alt1 / alt2)
-
-- **Chosen because**: one or two sentences
-- **Rejected**:
-  - *alt1* — why it lost
-  - *alt2* — why it lost
-- **Trade-off**: what the choice costs
-- **Related files**: `path/to/file.dart`, `path/to/other.rules`
-```
-
-- Number = previous max + 1
-- Emphasize *why not the alternative* more than *why this*
