@@ -827,5 +827,17 @@
   "error_generic": "문제가 발생했습니다",
   "error_retry": "다시 시도",
   "error_network": "네트워크 연결을 확인해주세요",
-  "error_loadFailed": "데이터를 불러올 수 없습니다"
+  "error_loadFailed": "데이터를 불러올 수 없습니다",
+
+  "offline_postQueued": "오프라인 상태입니다. 연결되면 자동으로 게시됩니다.",
+  "offline_commentQueued": "오프라인 상태입니다. 연결되면 자동으로 등록됩니다.",
+  "offline_syncComplete": "동기화 완료",
+  "offline_syncFailed": "일부 작업을 동기화하지 못했습니다",
+  "offline_pendingCount": "{count}개 대기 중",
+  "@offline_pendingCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offline_syncing": "동기화 중..."
 }

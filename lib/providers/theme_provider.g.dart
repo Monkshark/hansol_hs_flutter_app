@@ -8,11 +8,7 @@ part of 'theme_provider.dart';
 
 String _$themeHash() => r'264432281afb94608be2d224afc606a4dd8ae98f';
 
-/// 테마 모드 관리 (라이트/다크/시스템)
-///
-/// SettingData의 themeModeIndex와 동기화. riverpod_generator 기반.
-///
-/// Copied from [Theme].
+/// See also [Theme].
 @ProviderFor(Theme)
 final themeProvider = NotifierProvider<Theme, ThemeMode>.internal(
   Theme.new,

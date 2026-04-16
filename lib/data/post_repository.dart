@@ -1,6 +1,8 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hansol_high_school/network/network_status.dart';
+import 'package:hansol_high_school/network/offline_queue_manager.dart';
 
 /// 게시판 Firestore 데이터 접근 계층
 class PostRepository {
@@ -74,11 +76,22 @@ class PostRepository {
 
   // ─── Create ───
 
-  Future<DocumentReference<Map<String, dynamic>>> createPost(Map<String, dynamic> data) =>
-      _posts.add(data);
+  /// 글 작성. 오프라인이면 큐에 저장하고 null 반환.
+  Future<DocumentReference<Map<String, dynamic>>?> createPost(Map<String, dynamic> data) async {
+    if (await NetworkStatus.isUnconnected()) {
+      await OfflineQueueManager.instance.enqueuePost(data);
+      return null;
+    }
+    return _posts.add(data);
+  }
 
-  Future<DocumentReference<Map<String, dynamic>>> addComment(
+  /// 댓글 작성. 오프라인이면 큐에 저장하고 null 반환.
+  Future<DocumentReference<Map<String, dynamic>>?> addComment(
       String postId, Map<String, dynamic> commentData) async {
+    if (await NetworkStatus.isUnconnected()) {
+      await OfflineQueueManager.instance.enqueueComment(postId, commentData);
+      return null;
+    }
     final ref = await commentsRef(postId).add(commentData);
     await postRef(postId).update({'commentCount': FieldValue.increment(1)});
     return ref;

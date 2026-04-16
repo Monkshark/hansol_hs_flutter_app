@@ -16,6 +16,7 @@ import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/data/service_locator.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/notification/daily_meal_notification.dart';
+import 'package:hansol_high_school/network/offline_queue_manager.dart';
 import 'package:hansol_high_school/notification/deep_link_service.dart';
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/notification/popup_notice.dart';
@@ -94,6 +95,7 @@ Future<void> main() async {
 
 Future<void> _deferredInit() async {
   unawaited(AnalyticsService.logAppOpen(source: 'organic'));
+  unawaited(OfflineQueueManager.instance.initialize());
   unawaited(_safeInit('AppCheck', () => FirebaseAppCheck.instance.activate(
     androidProvider: const bool.fromEnvironment('dart.vm.product')
         ? AndroidProvider.playIntegrity

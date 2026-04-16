@@ -2329,4 +2329,24 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get error_loadFailed => '데이터를 불러올 수 없습니다';
+
+  @override
+  String get offline_postQueued => '오프라인 상태입니다. 연결되면 자동으로 게시됩니다.';
+
+  @override
+  String get offline_commentQueued => '오프라인 상태입니다. 연결되면 자동으로 등록됩니다.';
+
+  @override
+  String get offline_syncComplete => '동기화 완료';
+
+  @override
+  String get offline_syncFailed => '일부 작업을 동기화하지 못했습니다';
+
+  @override
+  String offline_pendingCount(int count) {
+    return '$count개 대기 중';
+  }
+
+  @override
+  String get offline_syncing => '동기화 중...';
 }

@@ -4393,6 +4393,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'데이터를 불러올 수 없습니다'**
   String get error_loadFailed;
+
+  /// No description provided for @offline_postQueued.
+  ///
+  /// In ko, this message translates to:
+  /// **'오프라인 상태입니다. 연결되면 자동으로 게시됩니다.'**
+  String get offline_postQueued;
+
+  /// No description provided for @offline_commentQueued.
+  ///
+  /// In ko, this message translates to:
+  /// **'오프라인 상태입니다. 연결되면 자동으로 등록됩니다.'**
+  String get offline_commentQueued;
+
+  /// No description provided for @offline_syncComplete.
+  ///
+  /// In ko, this message translates to:
+  /// **'동기화 완료'**
+  String get offline_syncComplete;
+
+  /// No description provided for @offline_syncFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'일부 작업을 동기화하지 못했습니다'**
+  String get offline_syncFailed;
+
+  /// No description provided for @offline_pendingCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{count}개 대기 중'**
+  String offline_pendingCount(int count);
+
+  /// No description provided for @offline_syncing.
+  ///
+  /// In ko, this message translates to:
+  /// **'동기화 중...'**
+  String get offline_syncing;
 }
 
 class _AppLocalizationsDelegate

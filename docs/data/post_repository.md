@@ -64,18 +64,18 @@ Stream<QuerySnapshot> bookmarkedPostsStream(String uid)
 ### `createPost`
 
 ```dart
-Future<DocumentReference> createPost(Map<String, dynamic> data)
+Future<DocumentReference?> createPost(Map<String, dynamic> data)
 ```
 
-게시글 생성. `_posts.add(data)`
+게시글 생성. 오프라인이면 [`OfflineQueueManager`](../network/offline_queue_manager.md)에 저장하고 `null` 반환. 온라인이면 `_posts.add(data)` 실행
 
 ### `addComment`
 
 ```dart
-Future<DocumentReference> addComment(String postId, Map<String, dynamic> commentData)
+Future<DocumentReference?> addComment(String postId, Map<String, dynamic> commentData)
 ```
 
-댓글 추가 + `commentCount` 자동 증가 (`FieldValue.increment(1)`)
+댓글 추가 + `commentCount` 자동 증가 (`FieldValue.increment(1)`). 오프라인이면 큐에 저장하고 `null` 반환
 
 ---
 

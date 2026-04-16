@@ -379,9 +379,12 @@ Flutter 에러 발생
       └── error, stack, library, uid, createdAt
 ```
 
-### 네트워크 에러
+### 네트워크 에러 & 오프라인 퍼스트
 
-- `OfflineBanner`: connectivity_plus로 네트워크 상태 감지, 오프라인 시 배너 표시
+- [`NetworkStatus`](network/network_status.md): `isUnconnected()`(일회성) + `onStatusChange`(실시간 스트림) 제공
+- `OfflineBanner`: 네트워크 상태 + 동기화 상태(대기 수, 동기화 중) 표시
+- [`OfflineQueueManager`](network/offline_queue_manager.md): 오프라인 시 글/댓글 작성을 sqflite 큐에 저장, 네트워크 복원 시 자동 replay (최대 3회 재시도)
+- [`PostRepository`](data/post_repository.md): `createPost`, `addComment`에 오프라인 감지 → 큐 저장 분기
 - 각 API 호출은 try/catch로 감싸고, 실패 시 빈 데이터 또는 캐시 반환
 
 ### Firebase 초기화 실패
