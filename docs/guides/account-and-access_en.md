@@ -115,13 +115,13 @@ Students/teachers see a popup in March to update year/class/number. Identity is 
 | Create post/comment | ✅ | ✅ | ✅ |
 | Delete others' post/comment | ❌ | ✅ | ✅ |
 | Approve users | ❌ | ✅ | ✅ |
-| Suspend users | ❌ | ❌ (configurable) | ✅ |
+| Suspend users | ❌ | ✅ | ✅ |
 | Change roles | ❌ | ❌ | ✅ |
 | Pin announcements | ❌ | ✅ | ✅ |
-| Manage urgent popup | ❌ | ❌ | ✅ |
+| Manage urgent popup | ❌ | ✅ | ✅ |
 | Admin Web access | ❌ | ✅ | ✅ |
 | Handle reports | ❌ | ✅ | ✅ |
-| View audit logs | ❌ | ✅ (read) | ✅ |
+| Read/write audit logs | ❌ | ✅ | ✅ |
 
 Full rules detail: [security_en.md](./security_en.md).
 
