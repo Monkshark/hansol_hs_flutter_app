@@ -10,6 +10,7 @@ import 'package:hansol_high_school/screens/board/widgets/post_image_gallery.dart
 import 'package:hansol_high_school/screens/board/widgets/vote_button.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:intl/intl.dart';
 
 class PostDetailBody extends StatelessWidget {
@@ -218,7 +219,7 @@ class PostDetailBody extends StatelessWidget {
             stream: commentsStream,
             builder: (context, commentSnapshot) {
               if (commentSnapshot.hasError) {
-                return const Center(child: Text('오류가 발생했습니다'));
+                return ErrorView(message: l.error_loadFailed);
               }
               final comments = commentSnapshot.data?.docs ?? [];
 

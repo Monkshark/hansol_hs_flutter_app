@@ -7,6 +7,7 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/error_snackbar.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 
 class ReportsTab extends StatefulWidget {
   const ReportsTab({super.key});
@@ -43,7 +44,10 @@ class ReportsTabState extends State<ReportsTab> {
           );
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('오류가 발생했습니다'));
+          return ErrorView(
+            message: AppLocalizations.of(context)!.error_loadFailed,
+            onRetry: _refresh,
+          );
         }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {

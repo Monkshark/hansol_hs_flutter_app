@@ -63,7 +63,7 @@ class _CurrentSubjectCardState extends State<CurrentSubjectCard> {
       future: _getTodaySubjects(),
       builder: (context, snapshot) {
         if (snapshot.hasError) {
-          return _buildEmptyCard(context, '오류가 발생했습니다');
+          return _buildEmptyCard(context, AppLocalizations.of(context)!.error_loadFailed);
         }
         if (!snapshot.hasData || snapshot.data!.isEmpty) {
           return _buildEmptyCard(context, AppLocalizations.of(context)!.widget_loadingSchedule);

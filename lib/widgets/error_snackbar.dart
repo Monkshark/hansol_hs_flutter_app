@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/exceptions.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 
 void showErrorSnackbar(BuildContext context, Object error) {
+  final l = AppLocalizations.of(context)!;
   String message;
   if (error is NetworkException) {
-    message = '네트워크 연결을 확인해주세요';
+    message = l.error_network;
   } else if (error is ApiException) {
-    message = '데이터를 불러올 수 없습니다';
+    message = l.error_loadFailed;
   } else if (error is AuthException) {
-    message = '로그인이 필요합니다';
+    message = l.common_loginRequired;
   } else if (error is AppException) {
     message = error.message;
   } else {
-    message = '오류가 발생했습니다';
+    message = l.error_generic;
   }
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(content: Text(message)),

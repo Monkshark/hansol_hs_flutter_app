@@ -5,6 +5,7 @@ import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:intl/intl.dart';
 
 class BookmarkedPostsScreen extends StatelessWidget {
@@ -31,7 +32,7 @@ class BookmarkedPostsScreen extends StatelessWidget {
               stream: PostRepository.instance.bookmarkedPostsStream(uid),
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
-                  return const Center(child: Text('오류가 발생했습니다'));
+                  return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
                 }
                 final docs = snapshot.data?.docs ?? [];
 
