@@ -8,6 +8,7 @@
 <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/github-dark.min.css">
 <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{--bg:#0d1117;--sidebar-bg:#161b22;--card-bg:#1c2128;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--accent-dim:#1f6feb33}
 *{margin:0;padding:0;box-sizing:border-box}
@@ -46,6 +47,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .md code{background:var(--card-bg);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'Fira Code',Consolas,monospace}
 .md pre{background:var(--card-bg);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin:0 0 16px;overflow-x:auto}
 .md pre code{background:none;padding:0;font-size:13px;line-height:1.5}
+.md pre.mermaid{background:#fff;text-align:center;padding:16px;border-color:var(--border)}
+.md pre.mermaid svg{max-width:100%;height:auto}
 .md blockquote{border-left:3px solid var(--accent);padding:4px 16px;margin:0 0 12px;color:var(--muted)}
 .md table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px}
 .md th,.md td{padding:8px 12px;border:1px solid var(--border);text-align:left}
@@ -179,6 +182,7 @@ var FILES = [
         langPrefix:'hljs language-',
         highlight:function(code,lang){
           try{
+            if(lang === 'mermaid') return code; // leave raw for mermaid renderer
             if(lang && hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value;
             return hljs.highlightAuto(code).value;
           }catch(e){return code;}
@@ -187,6 +191,28 @@ var FILES = [
     }
   }catch(e){ console.warn('Highlight init skipped:', e); }
   marked.use({breaks:false,gfm:true});
+  // Render ```mermaid blocks as <pre class="mermaid"> so mermaid.run() can process them.
+  // Handle both marked v4 signature (code, lang) and v12 token-object signature.
+  marked.use({renderer:{code:function(code, lang){
+    var raw, language;
+    if(typeof code === 'object' && code !== null){
+      raw = code.text || '';
+      language = (code.lang || '').trim();
+    } else {
+      raw = code || '';
+      language = (lang || '').trim();
+    }
+    if(language === 'mermaid'){
+      var esc = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      return '<pre class="mermaid">' + esc + '</pre>';
+    }
+    return false; // let default renderer handle non-mermaid
+  }}});
+  try {
+    if(globalThis.mermaid){
+      mermaid.initialize({startOnLoad:false, theme:'dark', securityLevel:'loose'});
+    }
+  } catch(e){ console.warn('Mermaid init skipped:', e); }
 
   // ---- Language state ----
   var LANG_KEY = 'docsViewerLang';
@@ -359,20 +385,35 @@ var FILES = [
       if(hashIdx !== -1){ hashPart = href.substring(hashIdx); href = href.substring(0, hashIdx); }
       if(!href.endsWith('.md')) return;
 
-      var resolved = href;
-      if(dir && href.indexOf('/') !== 0 && href.indexOf('..') !== 0){
-        resolved = dir + '/' + href;
-      } else if(href.indexOf('./') === 0){
-        resolved = (dir ? dir + '/' : '') + href.substring(2);
-      } else if(href.indexOf('../') === 0){
-        var parts = dir.split('/');
-        while(resolved.indexOf('../') === 0){ parts.pop(); resolved = resolved.substring(3); }
-        resolved = (parts.length ? parts.join('/') + '/' : '') + resolved;
+      // Normalize ./ prefix before joining
+      if(href.indexOf('./') === 0) href = href.substring(2);
+
+      var resolved;
+      if(href.indexOf('../') === 0){
+        var parts = dir ? dir.split('/') : [];
+        var h = href;
+        while(h.indexOf('../') === 0){ parts.pop(); h = h.substring(3); }
+        resolved = (parts.length ? parts.join('/') + '/' : '') + h;
+      } else if(href.indexOf('/') === 0){
+        resolved = href.substring(1);
+      } else {
+        resolved = dir ? dir + '/' + href : href;
       }
       if(MD_DATA[resolved]){
         a.onclick = function(e){ e.preventDefault(); loadFile(resolved); };
+      } else {
+        // Intercept anyway to avoid the browser navigating to a 404 relative URL
+        a.onclick = function(e){ e.preventDefault(); console.warn('Doc not found in viewer:', resolved); };
       }
     });
+
+    // Render mermaid diagrams in the newly inserted content
+    try {
+      if(globalThis.mermaid){
+        var nodes = inner.querySelectorAll('pre.mermaid');
+        if(nodes.length) mermaid.run({nodes:nodes});
+      }
+    } catch(e){ console.warn('Mermaid run failed:', e); }
 
     document.getElementById('content').scrollTop = 0;
     closeSidebar();

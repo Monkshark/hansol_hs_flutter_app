@@ -2,18 +2,7 @@
 
 > English: [architecture-decisions_en.md](./architecture-decisions_en.md)
 
-각 결정은 *왜 다른 후보가 아니라 이 선택인가* 를 짧게 정리합니다. 새 ADR을 추가할 때는 문서 하단 템플릿을 사용하세요.
-
-## 목차
-
-- [ADR-01. 상태관리: Riverpod 2.5](#adr-01-상태관리-riverpod-25-vs-provider--bloc--getx)
-- [ADR-02. 민감 데이터 저장소: flutter_secure_storage](#adr-02-민감-데이터-저장소-flutter_secure_storage-vs-sharedpreferences)
-- [ADR-03. 게시판 검색: 클라이언트 n-gram 인덱싱](#adr-03-게시판-검색-클라이언트-n-gram-인덱싱-vs-algolia--typesense--클라이언트-필터)
-- [ADR-04. 좋아요 카운터: Map<uid,bool> + 비정규화 int](#adr-04-좋아요-카운터-mapuidbool--비정규화-int-vs-map-only--int-only)
-- [ADR-05. 차트: CustomPainter 직접 구현](#adr-05-차트-custompainter-직접-구현-vs-fl_chart--syncfusion)
-- [ADR-06. 저장소 분담: SQLite / Firestore / SecureStorage / Cloud Storage](#adr-06-저장소-분담-sqlite--firestore--securestorage--cloud-storage)
-- [ADR-07. DI: GetIt + 추상 Repository](#adr-07-di-getit--추상-repository-vs-riverpod-provider만--get_it-직접만)
-- [ADR-08. 테스트 전략: Unit + Provider + Widget + Rules 4계층](#adr-08-테스트-전략-unit--provider--widget--rules-4계층)
+각 결정은 *왜 다른 후보가 아니라 이 선택인가* 를 짧게 정리합니다.
 
 ---
 
@@ -105,21 +94,3 @@
 - **Firestore Rules (34)**: `@firebase/rules-unit-testing` + 에뮬레이터로 보안 규칙 자체를 검증. 코드 변경 없이 rules 회귀 방지
 - **버린 옵션**: 통합 테스트 전체 의존 (Firebase Auth 실로그인) — CI 비용 ↑, 플레이크 ↑
 - **합계**: 524 (Flutter) + 34 (Rules) = **558개**. 상세 분류는 [testing.md](./testing.md) 참조.
-
----
-
-## 새 ADR 추가 템플릿
-
-```md
-## ADR-NN. 결정 제목 (vs 대안1 / 대안2)
-
-- **선택 이유**: 한두 문장 요약
-- **버린 옵션**:
-  - *대안1* — 포기 이유
-  - *대안2* — 포기 이유
-- **트레이드오프**: 선택의 비용
-- **관련 파일**: `path/to/file.dart`, `path/to/other.rules`
-```
-
-- 번호는 기존 최대값 + 1
-- "왜 이 방향"보다 "왜 다른 방향이 아닌가"에 중점
