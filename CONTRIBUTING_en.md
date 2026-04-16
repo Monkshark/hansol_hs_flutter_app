@@ -8,11 +8,11 @@ Thanks for contributing to the Hansol HS app. This document covers branching, PR
 
 New contributors should skim these in order to build context:
 
-1. [Product Overview](./docs/product-overview_en.md)
-2. [Architecture Overview](./docs/architecture-overview_en.md)
-3. [Architecture Decisions (ADRs)](./docs/architecture-decisions_en.md)
+1. [Product Overview](./docs/guides/product-overview_en.md)
+2. [Architecture Overview](./docs/guides/architecture-overview_en.md)
+3. [Architecture Decisions (ADRs)](./docs/guides/architecture-decisions_en.md)
 4. Target feature detail: [Public](./docs/features/public-features_en.md) / [Community](./docs/features/community-features_en.md) / [Personal](./docs/features/personal-features_en.md) / [Admin](./docs/features/admin-features_en.md)
-5. [Testing Strategy](./docs/testing_en.md)
+5. [Testing Strategy](./docs/guides/testing_en.md)
 
 ## Dev Environment
 
@@ -87,8 +87,8 @@ Topics: `README`, `golden test`, `Firestore rules`, `auth`, `build`, `docs`, `CI
 ### Core Conventions
 - **Riverpod**: `@riverpod` annotation with codegen. Manual `Provider<T>` only in exceptional cases.
 - **Layer separation**: Widget → Provider → Manager/Repository. Widgets must not touch Firestore directly.
-- **DI**: Managers/Repositories via GetIt, widgets via Riverpod. Mixing rules: [ADR-07](./docs/architecture-decisions_en.md#adr-07-di-getit--abstract-repository).
-- **Minimize private widgets**: if a file exceeds ~200 lines, extract Stateless widgets. See [Technical Challenge #13](./docs/technical-challenges_en.md#13-statefulwidget-1400-lines--stateless-composition-refactoring).
+- **DI**: Managers/Repositories via GetIt, widgets via Riverpod. Mixing rules: [ADR-07](./docs/guides/architecture-decisions_en.md#adr-07-di-getit--abstract-repository).
+- **Minimize private widgets**: if a file exceeds ~200 lines, extract Stateless widgets. See [Technical Challenge #13](./docs/guides/technical-challenges_en.md#13-statefulwidget-1400-lines--stateless-composition-refactoring).
 
 ### TypeScript (Admin Web)
 - Same principles under `admin-web/`. Next.js 14 App Router, Tailwind, Firebase Auth.
@@ -118,7 +118,7 @@ For every new feature, add at least one of:
 - Rules test (for any new rule branch)
 - Widget / Golden (for reusable UI)
 
-Full strategy: [testing_en.md](./docs/testing_en.md).
+Full strategy: [testing_en.md](./docs/guides/testing_en.md).
 
 ## Documentation Updates
 
@@ -148,5 +148,5 @@ If you update a Korean file, sync the paired `_en.md`. Updating a "Last sync: YY
 ## Related Docs
 - [Deployment Guide](./DEPLOY_en.md)
 - [User Guide](./USER_GUIDE_en.md)
-- [Testing Strategy](./docs/testing_en.md)
-- [CI/CD Setup](./docs/cicd-setup_en.md)
+- [Testing Strategy](./docs/guides/testing_en.md)
+- [CI/CD Setup](./docs/guides/cicd-setup_en.md)

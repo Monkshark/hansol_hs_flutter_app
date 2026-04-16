@@ -7,11 +7,11 @@
 ## 급식 조회
 
 - **NEIS API** 기반 조식/중식/석식 메뉴 실시간 조회
-- **월간 프리페치** 캐시 (24시간 / 빈 결과 5분), Completer 패턴으로 동시 요청 방지 ([기술과제 #2](../technical-challenges.md#2-급식-api-동시-요청-경합-race-condition))
+- **월간 프리페치** 캐시 (24시간 / 빈 결과 5분), Completer 패턴으로 동시 요청 방지 ([기술과제 #2](../guides/technical-challenges.md#2-급식-api-동시-요청-경합-race-condition))
 - 급식 카드 탭 → 이미지 공유, **영양 성분** (탄수화물/단백질/지방 등) + 알레르기 유발 식품 표시
 - 급식 알림에 메뉴 미리보기 포함 (로컬 알림 — 조식/중식/석식 개별 시간)
 
-**관련 파일**: `lib/screens/main/meal_screen.dart`, `lib/api/meal_api.dart`, `test/meal_api_test.dart`, `test/meal_test.dart`
+**관련 파일**: `lib/screens/main/meal_screen.dart`, `lib/api/meal_data_api.dart`, `test/meal_api_test.dart`, `test/meal_test.dart`
 
 ### 캐시 전략
 
@@ -25,7 +25,7 @@
 
 - **1학년**: 반별 자동 조회 / **2-3학년**: 선택과목 기반 맞춤 시간표
 - **교사 전용 시간표**: 학년 탭(1/2/3학년) → 과목 스와이프 → 중복 반 선택
-- **충돌 자동 감지** + 해결 팝업, 과목별 컬러 커스터마이징 (원형 피커) ([기술과제 #4](../technical-challenges.md#4-선택과목-시간표-충돌-slot-conflict))
+- **충돌 자동 감지** + 해결 팝업, 과목별 컬러 커스터마이징 (원형 피커) ([기술과제 #4](../guides/technical-challenges.md#4-선택과목-시간표-충돌-slot-conflict))
 - **현재 교시** 실시간 표시 (1분 갱신, 프로그레스 바), 오늘 요일 하이라이트
 - 선택과목 저장 확인 + 미저장 뒤로가기 경고
 - 새 학기(3월) 시간표 + 선택과목 자동 리셋
@@ -53,7 +53,7 @@
 - **자정 자동 갱신** (AlarmManager + Dart 백그라운드 콜백)
 - 앱 실행 시 자동 갱신, **Firestore 읽기 0** (캐시 데이터 활용)
 
-**관련 파일**: `android/app/src/main/java/.../widget/`, `lib/` 의 `home_widget` 브릿지 — 자세한 네이티브 동기화는 [기술과제 #참고](../technical-challenges.md) 참조.
+**관련 파일**: `android/app/src/main/java/.../widget/`, `lib/` 의 `home_widget` 브릿지 — 자세한 네이티브 동기화는 [기술과제 #참고](../guides/technical-challenges.md) 참조.
 
 ## 홈 화면 위젯 (iOS)
 
@@ -98,4 +98,4 @@
 - [엔드유저 가이드](../../USER_GUIDE.md) — 실제 사용 방법
 - [커뮤니티 기능](./community-features.md) — 게시판/채팅 등 로그인 필요 기능
 - [개인 기능](./personal-features.md) — 성적/개인일정 등 개인화 기능
-- [데이터 모델](../data-model.md) — `app_config`, `users` 스키마
+- [데이터 모델](../guides/data-model.md) — `app_config`, `users` 스키마

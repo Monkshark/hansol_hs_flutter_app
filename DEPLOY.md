@@ -43,7 +43,7 @@ cd ..
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
-**주의**: 규칙 변경은 실배포 즉시 반영됩니다. 반드시 [testing.md](./docs/testing.md)의 34개 rules 테스트 통과 확인 후 배포하세요. 관련 배경: [security.md](./docs/security.md).
+**주의**: 규칙 변경은 실배포 즉시 반영됩니다. 반드시 [testing.md](./docs/guides/testing.md)의 34개 rules 테스트 통과 확인 후 배포하세요. 관련 배경: [security.md](./docs/guides/security.md).
 
 ## 2. Cloud Storage Rules
 
@@ -69,7 +69,7 @@ firebase deploy --only functions:kakaoCustomAuth
 - `functions/index.js` 에서 환경 변수 필요 여부 (예: `firebase functions:config:set kakao.secret="..."`). 단, v2 Functions는 `secrets`/`params` 방식도 가능.
 - Blaze 요금제 필수 (외부 네트워크 호출 — Kakao API 등)
 
-Functions 목록은 [architecture-overview.md](./docs/architecture-overview.md#cloud-functions-트리거-맵) 참조.
+Functions 목록은 [architecture-overview.md](./docs/guides/architecture-overview.md#cloud-functions-트리거-맵) 참조.
 
 ## 4. Flutter 모바일 앱
 
@@ -171,7 +171,7 @@ npm start     # 로컬 실행
 | Android 서명 | `android/key.properties`, `.jks` | 로컬 빌드 머신 |
 | iOS 서명 | Xcode Automatic Signing / 프로비저닝 프로파일 | 로컬 빌드 머신 |
 
-**절대 커밋 금지**: 실제 키 파일은 `.gitignore` 처리 확인. CI는 더미 값으로 빌드만 검증합니다 ([cicd-setup.md](./docs/cicd-setup.md)).
+**절대 커밋 금지**: 실제 키 파일은 `.gitignore` 처리 확인. CI는 더미 값으로 빌드만 검증합니다 ([cicd-setup.md](./docs/guides/cicd-setup.md)).
 
 ## 8. 순차 배포 권장 순서
 
@@ -197,7 +197,7 @@ graph LR
 - **Admin Web**: Vercel은 이전 배포 promote 가능
 
 ## 관련 문서
-- [CI/CD 설정](./docs/cicd-setup.md)
-- [보안 모델](./docs/security.md)
-- [아키텍처 개요](./docs/architecture-overview.md)
+- [CI/CD 설정](./docs/guides/cicd-setup.md)
+- [보안 모델](./docs/guides/security.md)
+- [아키텍처 개요](./docs/guides/architecture-overview.md)
 - [기여 가이드](./CONTRIBUTING.md)

@@ -156,4 +156,4 @@ A. 일반 사용자는 익명 번호만 보입니다. admin은 감사 로그로 
 - [공개 기능 상세](./docs/features/public-features.md)
 - [커뮤니티 기능 상세](./docs/features/community-features.md)
 - [개인 기능 상세](./docs/features/personal-features.md)
-- [인증 & 접근](./docs/account-and-access.md)
+- [인증 & 접근](./docs/guides/account-and-access.md)

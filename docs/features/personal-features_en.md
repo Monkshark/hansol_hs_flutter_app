@@ -15,7 +15,7 @@ Features handling personal user data. Grades are fully local, personal schedules
 
 ### Visualization
 
-- **Trend chart**: `CustomPainter` line chart ([ADR-05](../architecture-decisions_en.md#adr-05-charts-custompainter-directly))
+- **Trend chart**: `CustomPainter` line chart ([ADR-05](../guides/architecture-decisions_en.md#adr-05-charts-custompainter-directly))
   - Toggle modes: grade / raw score / percentile / standard score
   - Correctly renders inverted grade axis (lower = better)
 - **Per-subject goals** — grade (0.1 step for susi) / percentile (for jeongsi), managed separately
@@ -25,7 +25,7 @@ Features handling personal user data. Grades are fully local, personal schedules
 
 ### Storage
 
-- **Grades stored locally only** — never uploaded (`flutter_secure_storage`, [ADR-02](../architecture-decisions_en.md#adr-02-sensitive-data-storage-flutter_secure_storage))
+- **Grades stored locally only** — never uploaded (`flutter_secure_storage`, [ADR-02](../guides/architecture-decisions_en.md#adr-02-sensitive-data-storage-flutter_secure_storage))
 - Android Keystore / iOS Keychain delegation
 - Plain legacy data → one-time migration on first launch
 
@@ -61,7 +61,7 @@ Features handling personal user data. Grades are fully local, personal schedules
 ## New School-Year Update
 
 - Students/teachers see a March popup to update year/class/number
-- **Identity not user-changeable** (admin only — see [security_en.md](../security_en.md))
+- **Identity not user-changeable** (admin only — see [security_en.md](../guides/security_en.md))
 
 ## Deletion
 
@@ -71,11 +71,11 @@ Double-confirmation dialog → full wipe:
 3. Delete Cloud Storage profile picture
 4. `user.delete()` — delete Auth account
 
-Order matters — Auth first causes PERMISSION_DENIED ([Technical Challenge #10](../technical-challenges_en.md#10-account-deletion-ordering-auth--firestore-permission-loss)).
+Order matters — Auth first causes PERMISSION_DENIED ([Technical Challenge #10](../guides/technical-challenges_en.md#10-account-deletion-ordering-auth--firestore-permission-loss)).
 
 ## See Also
 - [Public Features](./public-features_en.md)
 - [Community Features](./community-features_en.md)
 - [Admin Features](./admin-features_en.md)
-- [Account & Access](../account-and-access_en.md)
-- [Security Model](../security_en.md)
+- [Account & Access](../guides/account-and-access_en.md)
+- [Security Model](../guides/security_en.md)

@@ -15,7 +15,7 @@
 
 ### 시각화
 
-- **추이 그래프**: CustomPainter 꺾은선 ([ADR-05](../architecture-decisions.md#adr-05-차트-custompainter-직접-구현))
+- **추이 그래프**: CustomPainter 꺾은선 ([ADR-05](../guides/architecture-decisions.md#adr-05-차트-custompainter-직접-구현))
   - 모드 토글: 등급 / 원점수 / 백분위 / 표준점수
   - 등급 스케일 반전(낮을수록 좋음) 올바르게 표시
 - **과목별 목표** 등급(수시 0.1단위) / 목표 백분위(정시) 분리 설정
@@ -25,7 +25,7 @@
 
 ### 저장소
 
-- **성적 로컬 전용 저장** — 서버 전송 없음 (`flutter_secure_storage`, [ADR-02](../architecture-decisions.md#adr-02-민감-데이터-저장소-flutter_secure_storage))
+- **성적 로컬 전용 저장** — 서버 전송 없음 (`flutter_secure_storage`, [ADR-02](../guides/architecture-decisions.md#adr-02-민감-데이터-저장소-flutter_secure_storage))
 - Android Keystore / iOS Keychain 위임
 - 기존 평문 데이터 → 첫 실행 시 1회 자동 마이그레이션
 
@@ -62,12 +62,12 @@
 
 - 재학생/교사만 **3월에 정보 업데이트 팝업** 표시
 - 학년/반/번호 등 새 학년 정보 입력 유도
-- **역할 변경 불가** (관리자만 역할 변경 가능 — [security.md](../security.md) 참조)
+- **역할 변경 불가** (관리자만 역할 변경 가능 — [security.md](../guides/security.md) 참조)
 
 ## 회원 탈퇴
 
 - **이중 확인** 다이얼로그
-- **완전 삭제 순서** ([기술과제 #10](../technical-challenges.md#10-계정-삭제-순서-문제-auth--firestore-권한-소실)):
+- **완전 삭제 순서** ([기술과제 #10](../guides/technical-challenges.md#10-계정-삭제-순서-문제-auth--firestore-권한-소실)):
   1. Firestore `users/{uid}` 문서 삭제 (인증 상태 유지 중)
   2. 연관 하위 컬렉션 (`subjects`, `notifications`, `sync`) 일괄 삭제
   3. Cloud Storage 프로필 사진 삭제
@@ -78,5 +78,5 @@
 - [공개 기능](./public-features.md)
 - [커뮤니티 기능](./community-features.md)
 - [관리자 기능](./admin-features.md)
-- [인증 & 접근](../account-and-access.md)
-- [보안 모델](../security.md)
+- [인증 & 접근](../guides/account-and-access.md)
+- [보안 모델](../guides/security.md)
