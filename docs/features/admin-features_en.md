@@ -110,4 +110,4 @@ graph LR
 - [Account & Access](../guides/account-and-access_en.md)
 - [Security Model](../guides/security_en.md) — rules helpers, field validation
 - [CI/CD Setup](../guides/cicd-setup_en.md)
-- [Deployment Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY_en.md)
+- [Deployment Guide](../DEPLOY_en.md)

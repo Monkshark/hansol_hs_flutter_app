@@ -25,15 +25,15 @@ Documentation is split by topic. Jump in based on your purpose.
 2. [Architecture Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)
 3. [Architecture Decisions (ADRs)](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md)
 4. Feature deep-dives: [Public](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md) / [Community](https://monkshark.github.io/hansol_hs_flutter_app/#features/community-features_en.md) / [Personal](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features_en.md) / [Admin](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md)
-5. [Contributing Guide](./CONTRIBUTING_en.md)
+5. [Contributing Guide](https://monkshark.github.io/hansol_hs_flutter_app/#CONTRIBUTING_en.md)
 
 ### End Users (Students / Teachers / Alumni / Parents)
-- [User Guide](./USER_GUIDE_en.md)
+- [User Guide](https://monkshark.github.io/hansol_hs_flutter_app/#USER_GUIDE_en.md)
 - [Public Features](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md)
 - [Account & Access](https://monkshark.github.io/hansol_hs_flutter_app/#guides/account-and-access_en.md)
 
 ### Operations / Deployment
-- [Deployment Guide](./DEPLOY_en.md)
+- [Deployment Guide](https://monkshark.github.io/hansol_hs_flutter_app/#DEPLOY_en.md)
 - [CI/CD Setup](https://monkshark.github.io/hansol_hs_flutter_app/#guides/cicd-setup_en.md)
 - [Security Model](https://monkshark.github.io/hansol_hs_flutter_app/#guides/security_en.md)
 - [Architecture Overview](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)

@@ -8,6 +8,11 @@
 <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/highlight.js@11/styles/atom-one-dark.min.css">
 <script src="https://cdn.jsdelivr.net/npm/highlight.js@11/highlight.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/languages/dart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/languages/kotlin.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/languages/swift.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/languages/yaml.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/highlight.js@11/languages/gradle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
 :root{--bg:#0d1117;--sidebar-bg:#161b22;--card-bg:#1c2128;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--accent-dim:#1f6feb33}
@@ -112,8 +117,11 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 // (falls back to Korean and disables EN-specific behaviors for that entry).
 var FILES = [
   { titleKo:'개요', titleEn:'Overview', items:[
-    {nameKo:'README (목차)',         nameEn:'README (index)',         pathKo:'README.md',  pathEn:'README_en.md'},
-    {nameKo:'main (앱 진입점)',      nameEn:'main (entry point)',     pathKo:'main.md',    pathEn:'main_en.md'}
+    {nameKo:'README (목차)',         nameEn:'README (index)',         pathKo:'README.md',         pathEn:'README_en.md'},
+    {nameKo:'사용자 가이드',         nameEn:'User guide',             pathKo:'USER_GUIDE.md',     pathEn:'USER_GUIDE_en.md'},
+    {nameKo:'기여 가이드',           nameEn:'Contributing guide',     pathKo:'CONTRIBUTING.md',   pathEn:'CONTRIBUTING_en.md'},
+    {nameKo:'배포 가이드',           nameEn:'Deployment guide',       pathKo:'DEPLOY.md',         pathEn:'DEPLOY_en.md'},
+    {nameKo:'main (앱 진입점)',      nameEn:'main (entry point)',     pathKo:'main.md',           pathEn:'main_en.md'}
   ]},
   { titleKo:'가이드', titleEn:'Guides', items:[
     {nameKo:'제품 개요',             nameEn:'Product overview',       pathKo:'guides/product-overview.md',       pathEn:'guides/product-overview_en.md'},
@@ -420,6 +428,31 @@ var FILES = [
         if(nodes.length) mermaid.run({nodes:nodes});
       }
     } catch(e){ console.warn('Mermaid run failed:', e); }
+
+    // Rewrite <img> src so repo-relative paths (e.g. "../../screenshots/x.png")
+    // resolve correctly inside the viewer. Inside docs/ → Pages-relative;
+    // outside docs/ → raw.githubusercontent.com URL.
+    inner.querySelectorAll('.md img[src]').forEach(function(img){
+      var src = img.getAttribute('src');
+      if(!src) return;
+      if(/^(https?:)?\/\//.test(src) || src.indexOf('data:') === 0) return;
+      if(src.indexOf('./') === 0) src = src.substring(2);
+      var baseParts = ['docs'];
+      if(dir) baseParts = baseParts.concat(dir.split('/'));
+      var s = src;
+      if(s.indexOf('/') === 0){
+        baseParts = ['docs'];
+        s = s.substring(1);
+      } else {
+        while(s.indexOf('../') === 0){ baseParts.pop(); s = s.substring(3); }
+      }
+      var resolved = baseParts.concat(s ? [s] : []).join('/');
+      if(resolved.indexOf('docs/') === 0){
+        img.setAttribute('src', resolved.substring(5));
+      } else {
+        img.setAttribute('src', 'https://raw.githubusercontent.com/Monkshark/hansol_hs_flutter_app/master/' + resolved);
+      }
+    });
 
     // Decorate code blocks: language badge + copy button
     inner.querySelectorAll('.md pre').forEach(function(pre){

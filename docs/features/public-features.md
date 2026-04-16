@@ -65,7 +65,7 @@
 - 시스템 다크/라이트 모드 자동 대응
 - 1시간 주기 Timeline 갱신
 
-**관련 파일**: `ios/Widget*/`, App Groups 설정은 [DEPLOY.md](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY.md) 참조.
+**관련 파일**: `ios/Widget*/`, App Groups 설정은 [DEPLOY.md](../DEPLOY.md) 참조.
 
 ## 긴급 팝업 공지
 
@@ -95,7 +95,7 @@
 - 첨부 파일 / 중요 표시 지원
 
 ## 관련 문서
-- [엔드유저 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/USER_GUIDE.md) — 실제 사용 방법
+- [엔드유저 가이드](../USER_GUIDE.md) — 실제 사용 방법
 - [커뮤니티 기능](./community-features.md) — 게시판/채팅 등 로그인 필요 기능
 - [개인 기능](./personal-features.md) — 성적/개인일정 등 개인화 기능
 - [데이터 모델](../guides/data-model.md) — `app_config`, `users` 스키마

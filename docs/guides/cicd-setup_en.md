@@ -44,7 +44,7 @@ CI builds/tests without real NEIS / Firebase / Kakao keys. Reasons:
 - Tests validate logic without network calls
 - APK is built with a dummy config (not for real execution)
 
-Local development needs the real key files — see [DEPLOY_en.md](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY_en.md).
+Local development needs the real key files — see [DEPLOY_en.md](../DEPLOY_en.md).
 
 ## firestore-rules.yml Pipeline
 
@@ -113,5 +113,5 @@ flutter build apk --debug --target-platform android-arm64
 
 ## See Also
 - [Testing Strategy](./testing_en.md)
-- [Deployment Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY_en.md)
-- [Contributing Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/CONTRIBUTING_en.md)
+- [Deployment Guide](../DEPLOY_en.md)
+- [Contributing Guide](../CONTRIBUTING_en.md)
