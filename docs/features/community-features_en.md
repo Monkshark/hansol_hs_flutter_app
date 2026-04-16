@@ -9,7 +9,7 @@ Features where students, teachers, alumni, and parents communicate — board, 1:
 ### Categories & Browsing
 
 - **6 categories** + **Popular** tab: Free / Question / Info-share / Lost & Found / Student Council / Clubs
-- **Popular sorted** by denormalized `likeCount` + composite index `(likeCount desc, createdAt desc)` ([ADR-04](../architecture-decisions_en.md#adr-04-like-counter-mapuidbool--denormalized-int))
+- **Popular sorted** by denormalized `likeCount` + composite index `(likeCount desc, createdAt desc)` ([ADR-04](../guides/architecture-decisions_en.md#adr-04-like-counter-mapuidbool--denormalized-int))
 - **Cursor-based pagination** (20 per page, infinite scroll, pull-to-refresh)
 - **Pinned announcements** (up to 3, admin-only, always on top)
 
@@ -18,17 +18,17 @@ Features where students, teachers, alumni, and parents communicate — board, 1:
 - **Image attachment**: 1080px compressed + EXIF/GPS stripped, PageView swipe viewer + Hero animation + pinch-zoom
 - **Polls** (up to 6 options, real-time result bars)
 - **Schedule sharing** (links to academic events)
-- **Anonymous numbering**: 익명1/익명2/익명(글쓴이), via Firestore Transaction ([Technical Challenge #3](../technical-challenges_en.md#3-anonymous-number-consistency-concurrent-write))
+- **Anonymous numbering**: 익명1/익명2/익명(글쓴이), via Firestore Transaction ([Technical Challenge #3](../guides/technical-challenges_en.md#3-anonymous-number-consistency-concurrent-write))
 
 ### Interactions
 
-- **Upvote/downvote**: `Map<uid,bool>` + `likeCount` int counter, ±1 delta enforced in rules ([ADR-04](../architecture-decisions_en.md#adr-04-like-counter-mapuidbool--denormalized-int))
+- **Upvote/downvote**: `Map<uid,bool>` + `likeCount` int counter, ±1 delta enforced in rules ([ADR-04](../guides/architecture-decisions_en.md#adr-04-like-counter-mapuidbool--denormalized-int))
 - **Bookmark** (re-accessible under My Activity → Saved)
 - **Comments + replies** (indented), author-of-post comments badged blue
 
 ### Search
 
-- **n-gram search**: title+body 2-gram indexed into `searchTokens`, `array-contains-any` query ([ADR-03](../architecture-decisions_en.md#adr-03-board-search-client-side-n-gram-indexing))
+- **n-gram search**: title+body 2-gram indexed into `searchTokens`, `array-contains-any` query ([ADR-03](../guides/architecture-decisions_en.md#adr-03-board-search-client-side-n-gram-indexing))
 - **350ms debounce**, 50-result fetch + client substring filter reduces false positives
 - **Search history**: last 10 keyword chips, delete individually or all
 
@@ -49,7 +49,7 @@ Features where students, teachers, alumni, and parents communicate — board, 1:
 
 - **User search** to start a chat (by name/student ID; admins shown by default)
 - **Realtime messages** (Firestore `onSnapshot`, limit 30)
-- **Read receipts** + unread badge ([Technical Challenge #6](../technical-challenges_en.md#6-chat-read-receipt-realtime-sync-dual-stream))
+- **Read receipts** + unread badge ([Technical Challenge #6](../guides/technical-challenges_en.md#6-chat-read-receipt-realtime-sync-dual-stream))
 - **Message deletion**: self only / for both (if unread and ≤1h old)
 - **Leave chat**: system message + other party's view retained
 - Skeleton loading UI
@@ -75,9 +75,9 @@ Five independent toggles:
 ### Implementation
 
 - **In-app notifications**: bell icon + unread badge (`users/{uid}/notifications/{id}`)
-- **FCM push**: 13 types (10 FCM + 3 local)
-- **Server-side filtering**: Cloud Functions check `users/{uid}.notiXxx` before sending ([Technical Challenge #7](../technical-challenges_en.md#7-per-category-push-toggles-server-side-filter))
-- **Auto-unsuspension**: Cloud Functions scheduler (hourly) ([Technical Challenge #8](../technical-challenges_en.md#8-auto-expiring-suspensions-scheduler-trigger))
+- **FCM push**: 4 FCM topics (`account` / `comment` / `new_post` / `chat`) + 3 local (breakfast/lunch/dinner)
+- **Server-side filtering**: Cloud Functions check `users/{uid}.notiXxx` before sending ([Technical Challenge #7](../guides/technical-challenges_en.md#7-per-category-push-toggles-server-side-filter))
+- **Auto-unsuspension**: Cloud Functions scheduler (hourly) ([Technical Challenge #8](../guides/technical-challenges_en.md#8-auto-expiring-suspensions-scheduler-trigger))
 
 **Files**: `lib/notification/fcm_service.dart`, `lib/screens/sub/notification_setting_screen.dart`, `lib/screens/board/notification_screen.dart`, `functions/index.js`
 
@@ -105,5 +105,5 @@ Client-side front-loaded; Firestore rules carry only minimal validation.
 - [Public Features](./public-features_en.md)
 - [Personal Features](./personal-features_en.md)
 - [Admin Features](./admin-features_en.md)
-- [Security Model](../security_en.md)
-- [Data Model](../data-model_en.md) — `posts`, `comments`, `chats`, `reports`
+- [Security Model](../guides/security_en.md)
+- [Data Model](../guides/data-model_en.md) — `posts`, `comments`, `chats`, `reports`

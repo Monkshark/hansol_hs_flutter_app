@@ -156,4 +156,4 @@ Use the in-app Feedback / Bug report menu — admins will see it. For anything u
 - [Public Features](./docs/features/public-features_en.md)
 - [Community Features](./docs/features/community-features_en.md)
 - [Personal Features](./docs/features/personal-features_en.md)
-- [Account & Access](./docs/account-and-access_en.md)
+- [Account & Access](./docs/guides/account-and-access_en.md)

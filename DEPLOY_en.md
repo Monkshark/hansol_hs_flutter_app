@@ -43,7 +43,7 @@ cd ..
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
-**Warning**: Rules changes take effect immediately. Always run the 34 rules tests ([testing_en.md](./docs/testing_en.md)) before deploying. Background: [security_en.md](./docs/security_en.md).
+**Warning**: Rules changes take effect immediately. Always run the 34 rules tests ([testing_en.md](./docs/guides/testing_en.md)) before deploying. Background: [security_en.md](./docs/guides/security_en.md).
 
 ## 2. Cloud Storage Rules
 
@@ -69,7 +69,7 @@ Pre-flight:
 - Check if `functions/index.js` needs env vars (e.g. `firebase functions:config:set kakao.secret="..."`, or use v2 `secrets`/`params`)
 - **Blaze plan required** (outbound network — Kakao API)
 
-Function list → [architecture-overview_en.md](./docs/architecture-overview_en.md#cloud-functions-trigger-map).
+Function list → [architecture-overview_en.md](./docs/guides/architecture-overview_en.md#cloud-functions-trigger-map).
 
 ## 4. Flutter Mobile App
 
@@ -169,7 +169,7 @@ No separate deployment — widgets ship with the app.
 | Android signing | `android/key.properties`, `.jks` | local build machine |
 | iOS signing | Xcode Automatic Signing / provisioning profile | local build machine |
 
-**Never commit real keys.** Verify `.gitignore`. CI only validates builds with dummy values ([cicd-setup_en.md](./docs/cicd-setup_en.md)).
+**Never commit real keys.** Verify `.gitignore`. CI only validates builds with dummy values ([cicd-setup_en.md](./docs/guides/cicd-setup_en.md)).
 
 ## 8. Recommended Deploy Order
 
@@ -195,7 +195,7 @@ Deploy rules and Functions **before** the app so old clients don't break under n
 - **Admin Web**: Vercel lets you promote a previous deploy.
 
 ## Related Docs
-- [CI/CD Setup](./docs/cicd-setup_en.md)
-- [Security Model](./docs/security_en.md)
-- [Architecture Overview](./docs/architecture-overview_en.md)
+- [CI/CD Setup](./docs/guides/cicd-setup_en.md)
+- [Security Model](./docs/guides/security_en.md)
+- [Architecture Overview](./docs/guides/architecture-overview_en.md)
 - [Contributing Guide](./CONTRIBUTING_en.md)

@@ -8,11 +8,11 @@
 
 새 기여자라면 이 순서로 문서를 훑으면 맥락이 잡힙니다.
 
-1. [제품 개요](./docs/product-overview.md)
-2. [아키텍처 개요](./docs/architecture-overview.md)
-3. [아키텍처 의사결정 일지](./docs/architecture-decisions.md)
+1. [제품 개요](./docs/guides/product-overview.md)
+2. [아키텍처 개요](./docs/guides/architecture-overview.md)
+3. [아키텍처 의사결정 일지](./docs/guides/architecture-decisions.md)
 4. 작업할 피처의 상세: [공개](./docs/features/public-features.md) / [커뮤니티](./docs/features/community-features.md) / [개인](./docs/features/personal-features.md) / [관리자](./docs/features/admin-features.md)
-5. [테스트 전략](./docs/testing.md)
+5. [테스트 전략](./docs/guides/testing.md)
 
 ## 개발 환경 준비
 
@@ -87,8 +87,8 @@ flutter pub run build_runner watch --delete-conflicting-outputs
 ### 주요 관례
 - **Riverpod**: `@riverpod` 어노테이션 기반 코드 생성. 수동 `Provider<T>` 선언은 예외적 경우에만.
 - **레이어 분리**: Widget → Provider → Manager/Repository. Widget에서 Firestore 직접 접근 금지.
-- **DI**: Manager/Repository는 GetIt으로, Widget은 Riverpod으로. 혼용 규칙은 [ADR-07](./docs/architecture-decisions.md#adr-07-di-getit--추상-repository).
-- **비공개 위젯 최소화**: 파일이 200줄을 넘으면 Stateless Widget으로 분리 ([기술과제 #13](./docs/technical-challenges.md#13-statefulwidget-1400-라인--stateless-composition-refactoring)).
+- **DI**: Manager/Repository는 GetIt으로, Widget은 Riverpod으로. 혼용 규칙은 [ADR-07](./docs/guides/architecture-decisions.md#adr-07-di-getit--추상-repository).
+- **비공개 위젯 최소화**: 파일이 200줄을 넘으면 Stateless Widget으로 분리 ([기술과제 #13](./docs/guides/technical-challenges.md#13-statefulwidget-1400-라인--stateless-composition-refactoring)).
 
 ### TypeScript (Admin Web)
 - `admin-web/` 에서 동일 원칙. Next.js 14 App Router, Tailwind, Firebase Auth.
@@ -118,7 +118,7 @@ firebase emulators:exec --only firestore,auth --project hansol-test "npm test"
 - 새 rules 분기 → Rules test
 - 재사용 UI → Widget / Golden
 
-자세한 전략: [testing.md](./docs/testing.md).
+자세한 전략: [testing.md](./docs/guides/testing.md).
 
 ## 문서 업데이트
 
@@ -148,5 +148,5 @@ firebase emulators:exec --only firestore,auth --project hansol-test "npm test"
 ## 관련 문서
 - [배포 가이드](./DEPLOY.md)
 - [엔드유저 가이드](./USER_GUIDE.md)
-- [테스트 전략](./docs/testing.md)
-- [CI/CD 설정](./docs/cicd-setup.md)
+- [테스트 전략](./docs/guides/testing.md)
+- [CI/CD 설정](./docs/guides/cicd-setup.md)

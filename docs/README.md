@@ -1,6 +1,8 @@
 # API Reference - 목차
 
 > 화면(Screen)·위젯(Widget) 문서는 제외. 서비스·모델·API·알림 등 핵심 계층만 정리
+>
+> 주제별 가이드(아키텍처, 데이터 모델, 테스트, 보안 등)는 [`guides/`](./guides/), 기능별 상세는 [`features/`](./features/) 참조
 
 ## 앱 진입점
 - [main](main.md) — 앱 초기화, MainScreen, 전역 상태
@@ -46,11 +48,6 @@
 - [dark_app_colors](styles/dark_app_colors.md) — 다크 테마 색상 구현체
 - [light_app_colors](styles/light_app_colors.md) — 라이트 테마 색상 구현체
 
-## 변경 이력
-- [08-i18n-notifications](08-i18n-notifications.md) — i18n 완성, 인앱 언어 전환, 알림 딥링크, 버그 수정
-
-## 유틸
-- [widget_service](widgets/home_widget/widget_service.md) — 홈 화면 위젯 데이터 갱신
-- [chat_utils](screens/chat/chat_utils.md) — 1:1 채팅 시작 유틸리티
-- [notification_permission_sheet](widgets/notification_permission_sheet.md) — 알림 권한 요청 바텀시트
-- [network_status](network/network_status.md) — 네트워크 연결 상태
+## 네트워크 (lib/network/)
+- [network_status](network/network_status.md) — 네트워크 연결 상태 스트림
+- [offline_queue_manager](network/offline_queue_manager.md) — 오프라인 쓰기 큐 (sqflite)

@@ -6,7 +6,8 @@
 [![Firestore Rules Tests](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml/badge.svg)](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-146%20unit%20%2B%2034%20rules-success)
+![Tests](https://img.shields.io/badge/tests-524%20Flutter%20%2B%2034%20rules-success)
+[![codecov](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app/branch/master/graph/badge.svg)](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app)
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
 [![Riverpod Graph](https://img.shields.io/badge/Riverpod%20Graph-Interactive-6c5ce7?logo=d3.js&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
@@ -20,28 +21,40 @@ A full-stack project with a Flutter mobile app + Next.js admin dashboard. Featur
 Documentation is split by topic. Jump in based on your purpose.
 
 ### First-time Contributors
-1. [Product Overview](./docs/product-overview_en.md)
-2. [Architecture Overview](./docs/architecture-overview_en.md)
-3. [Architecture Decisions (ADRs)](./docs/architecture-decisions_en.md)
+1. [Product Overview](./docs/guides/product-overview_en.md)
+2. [Architecture Overview](./docs/guides/architecture-overview_en.md)
+3. [Architecture Decisions (ADRs)](./docs/guides/architecture-decisions_en.md)
 4. Feature deep-dives: [Public](./docs/features/public-features_en.md) / [Community](./docs/features/community-features_en.md) / [Personal](./docs/features/personal-features_en.md) / [Admin](./docs/features/admin-features_en.md)
 5. [Contributing Guide](./CONTRIBUTING_en.md)
 
 ### End Users (Students / Teachers / Alumni / Parents)
 - [User Guide](./USER_GUIDE_en.md)
 - [Public Features](./docs/features/public-features_en.md)
-- [Account & Access](./docs/account-and-access_en.md)
+- [Account & Access](./docs/guides/account-and-access_en.md)
 
 ### Operations / Deployment
 - [Deployment Guide](./DEPLOY_en.md)
-- [CI/CD Setup](./docs/cicd-setup_en.md)
-- [Security Model](./docs/security_en.md)
-- [Architecture Overview](./docs/architecture-overview_en.md)
+- [CI/CD Setup](./docs/guides/cicd-setup_en.md)
+- [Security Model](./docs/guides/security_en.md)
+- [Architecture Overview](./docs/guides/architecture-overview_en.md)
 
 ### Further Reading
-- [Data Model](./docs/data-model_en.md)
-- [Testing Strategy](./docs/testing_en.md)
-- [Technical Challenges (14 cases)](./docs/technical-challenges_en.md)
-- [Screenshots Gallery](./docs/screenshots-gallery_en.md)
+- [Data Model](./docs/guides/data-model_en.md)
+- [Testing Strategy](./docs/guides/testing_en.md) — 524 Flutter + 34 Rules tests
+- [Technical Challenges (14 cases)](./docs/guides/technical-challenges_en.md)
+- [Screenshots Gallery](./docs/guides/screenshots-gallery_en.md)
+
+### Per-File Technical Reference
+> Detailed per-file docs for service / model / API / notification layers (for editing a specific file or tracing a flow)
+
+- [📚 Full API Reference Index](./docs/README.md) — consolidated index for the items below
+- [`main.md`](./docs/main.md) — app entry point, MainScreen, global state
+- **API layer** (`docs/api/`): [meal_data_api](./docs/api/meal_data_api.md) · [timetable_data_api](./docs/api/timetable_data_api.md) · [notice_data_api](./docs/api/notice_data_api.md)
+- **Data layer** (`docs/data/`): [auth_service](./docs/data/auth_service.md) · [grade_manager](./docs/data/grade_manager.md) · [local_database](./docs/data/local_database.md) · [post_repository](./docs/data/post_repository.md) · [search_tokens](./docs/data/search_tokens.md) · [service_locator](./docs/data/service_locator.md) · [setting_data](./docs/data/setting_data.md) · etc.
+- **Notifications** (`docs/notification/`): [fcm_service](./docs/notification/fcm_service.md) · [daily_meal_notification](./docs/notification/daily_meal_notification.md) · [popup_notice](./docs/notification/popup_notice.md) · [update_checker](./docs/notification/update_checker.md)
+- **State Management** (`docs/providers/`): [providers](./docs/providers/providers.md) — all Riverpod Notifier/AsyncNotifier
+- **Network** (`docs/network/`): [network_status](./docs/network/network_status.md) · [offline_queue_manager](./docs/network/offline_queue_manager.md)
+- **Styles** (`docs/styles/`): [app_colors](./docs/styles/app_colors.md) · [dark_app_colors](./docs/styles/dark_app_colors.md) · [light_app_colors](./docs/styles/light_app_colors.md)
 
 ## Screenshots (Summary)
 
@@ -53,18 +66,19 @@ Documentation is split by topic. Jump in based on your purpose.
 |:--:|:--:|:--:|:--:|
 | ![Meal](screenshots/meal.png) | ![Search](screenshots/board_search_results.png) | ![Grades](screenshots/susi.png) | ![Web](screenshots/admin_web.png) |
 
-Full gallery → [Screenshots Gallery](./docs/screenshots-gallery_en.md)
+Full gallery → [Screenshots Gallery](./docs/guides/screenshots-gallery_en.md)
 
 ## Metrics
 
 | Metric | Value | Notes |
 |---|---|---|
-| **Total LOC** | **26,200+** | Dart 22,367 + TypeScript 1,882 + Java/XML 887 + Swift 330 + JS 737 |
-| **Source files** | **91** (Flutter) + **12** (Admin Web) + **5** (Android Widget) + **1** (iOS Widget) | 27 screens, 15 extracted widgets, 49 models/utils/services |
-| **Cloud Functions** | **8** | Push, OAuth, scheduler, account deletion |
+| **Total LOC** | **~40,000** | Dart 33,389 + TypeScript/TSX + Java/XML + Swift + JS |
+| **Source files** | **122** (Flutter) + **22** (Admin Web TS/TSX) + Android/iOS widgets | screens, extracted widgets, models/utils/services |
+| **Cloud Functions** | **13** | Kakao OAuth · post/comment/like triggers · user C/U/D · chat · report · suspension scheduler · OG renderer · old-post cleanup |
 | **OAuth providers** | **4** | Google, Apple, Kakao, GitHub |
-| **Push notifications** | **13 types** | FCM 10 + local 3, per-category on/off |
-| **Tests** | **146 + 34** | Flutter unit/widget/provider/golden 146 + Firestore rules emulator 34 (180 total) |
+| **Push notifications** | **4 FCM types** | `account` / `comment` / `new_post` / `chat` (+ local breakfast/lunch/dinner). Per-category on/off |
+| **Tests** | **524 / 34** | Flutter 520 (test 440 + testWidgets 80) + Integration 4 + Firestore Rules emulator 34 |
+| **Docs** | **75 MDs (≈9,544 lines)** | Root 8 + `docs/guides/` 20 + `docs/features/` 8 + per-file details `docs/{api,data,...}` 39 |
 | **State management** | **Riverpod 2.5** | AsyncNotifier/Notifier + GetIt + repository DI |
 | **Image compression** | **~70% reduction** | Posts: 1080px w/ EXIF/GPS stripped, profiles: 256px |
 | **Search** | **Firestore n-gram index** | Title+body 2-gram `array-contains-any`, 350ms debounce |
@@ -78,10 +92,10 @@ Full gallery → [Screenshots Gallery](./docs/screenshots-gallery_en.md)
 | Item | Value | Method |
 |---|---|---|
 | **Release APK** | **27 MB** | `build/app/outputs/flutter-apk/app-release.apk` (universal) |
-| **Dart LOC** | **22,576** | `find lib -name '*.dart' \| xargs cat \| wc -l` |
-| **Dart files** | **101** | `find lib -name '*.dart' \| wc -l` |
-| **Unit/widget test time** | **~3s** | `flutter test` 131 tests, local machine |
-| **Rules test time** | **~4s** | `firebase emulators:exec ... npm test` 34 tests |
+| **Dart LOC** | **33,389** | `find lib -name '*.dart' \| xargs cat \| wc -l` |
+| **Dart files** | **122** | `find lib -name '*.dart' \| wc -l` |
+| **Flutter test count** | **524** | test() 440 + testWidgets() 80 + Integration 4 |
+| **Rules test count** | **34** | `firebase emulators:exec ... npm test` |
 | **Compressed image size** | **~30% of original** | 1080px wide, JPEG q80, EXIF stripped |
 | **Search fetch limit** | **50 / 350ms debounce** | `array-contains-any` + client-side substring filter |
 | **Board page size** | **20 / cursor pagination** | `startAfterDocument` + `limit(20)` |
@@ -125,8 +139,8 @@ graph TD
     I -->|hourly suspension expiry| D
 ```
 
-- **Riverpod provider dependency graph** and **layered data-flow model** → [architecture-overview_en.md](./docs/architecture-overview_en.md)
-- Storage allocation rationale (sqflite / Firestore / SecureStorage / Cloud Storage) → [ADR-06](./docs/architecture-decisions_en.md)
+- **Riverpod provider dependency graph** and **layered data-flow model** → [architecture-overview_en.md](./docs/guides/architecture-overview_en.md)
+- Storage allocation rationale (sqflite / Firestore / SecureStorage / Cloud Storage) → [ADR-06](./docs/guides/architecture-decisions_en.md)
 
 ### 🔗 [Interactive Riverpod Graph (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
@@ -136,16 +150,16 @@ D3.js-based zoom/drag graph. Source HTML at `docs/riverpod_graph.html`.
 
 | ADR | Decision | Link |
 |---|---|---|
-| 01 | State mgmt = Riverpod 2.5 | [link](./docs/architecture-decisions_en.md#adr-01-state-management-riverpod-25) |
-| 02 | Grade storage = flutter_secure_storage (local-only) | [link](./docs/architecture-decisions_en.md#adr-02-sensitive-data-storage-flutter_secure_storage) |
-| 03 | Board search = client-side n-gram index | [link](./docs/architecture-decisions_en.md#adr-03-board-search-client-side-n-gram-indexing) |
-| 04 | Like counter = `Map<uid,bool>` + denormalized int | [link](./docs/architecture-decisions_en.md#adr-04-like-counter-mapuidbool--denormalized-int) |
-| 05 | Charts = direct `CustomPainter` | [link](./docs/architecture-decisions_en.md#adr-05-charts-custompainter-directly) |
-| 06 | Storage allocation = SQLite/Firestore/SecureStorage/Cloud Storage | [link](./docs/architecture-decisions_en.md#adr-06-storage-allocation) |
-| 07 | DI = GetIt + abstract repository | [link](./docs/architecture-decisions_en.md#adr-07-di-getit--abstract-repository) |
-| 08 | Test strategy = 4 layers (Unit/Provider/Widget/Rules) | [link](./docs/architecture-decisions_en.md#adr-08-test-strategy-unit--provider--widget--rules) |
+| 01 | State mgmt = Riverpod 2.5 | [link](./docs/guides/architecture-decisions_en.md#adr-01-state-management-riverpod-25) |
+| 02 | Grade storage = flutter_secure_storage (local-only) | [link](./docs/guides/architecture-decisions_en.md#adr-02-sensitive-data-storage-flutter_secure_storage) |
+| 03 | Board search = client-side n-gram index | [link](./docs/guides/architecture-decisions_en.md#adr-03-board-search-client-side-n-gram-indexing) |
+| 04 | Like counter = `Map<uid,bool>` + denormalized int | [link](./docs/guides/architecture-decisions_en.md#adr-04-like-counter-mapuidbool--denormalized-int) |
+| 05 | Charts = direct `CustomPainter` | [link](./docs/guides/architecture-decisions_en.md#adr-05-charts-custompainter-directly) |
+| 06 | Storage allocation = SQLite/Firestore/SecureStorage/Cloud Storage | [link](./docs/guides/architecture-decisions_en.md#adr-06-storage-allocation) |
+| 07 | DI = GetIt + abstract repository | [link](./docs/guides/architecture-decisions_en.md#adr-07-di-getit--abstract-repository) |
+| 08 | Test strategy = 4 layers (Unit/Provider/Widget/Rules) | [link](./docs/guides/architecture-decisions_en.md#adr-08-test-strategy-unit--provider--widget--rules) |
 
-Full details → [architecture-decisions_en.md](./docs/architecture-decisions_en.md).
+Full details → [architecture-decisions_en.md](./docs/guides/architecture-decisions_en.md).
 
 ## Tech Stack
 
@@ -161,7 +175,7 @@ Full details → [architecture-decisions_en.md](./docs/architecture-decisions_en
 | **Local** | sqflite (schedule DB), SharedPreferences (settings/cache) |
 | **Auth** | Google / Apple / Kakao / GitHub OAuth |
 | **CI** | GitHub Actions — analyze + test + Codecov + Android APK |
-| **Test** | `flutter_test` — Unit + Widget + Provider (146) + Firestore rules (34) |
+| **Test** | `flutter_test` — Unit + Widget + Provider + Golden + Integration (524) + Firestore rules (34) |
 
 ## Features (Summary)
 
@@ -180,16 +194,16 @@ Full details → [architecture-decisions_en.md](./docs/architecture-decisions_en
 - **On deletion**: Firestore → Storage → Auth order for complete erasure.
 - **OAuth only**: no passwords stored.
 
-Details → [security_en.md](./docs/security_en.md).
+Details → [security_en.md](./docs/guides/security_en.md).
 
 ## Testing & CI/CD
 
-- **180 tests** (Unit 89 + Provider 17 + Widget 17 + Golden 5 + Repository 8 + Rules 34 + Integration 10)
-- `flutter test --coverage` ~3s / `firebase emulators:exec ... npm test` ~4s
+- **524 Flutter tests + 34 Rules tests** (Unit / Widget / Provider / Golden / Repository / Integration / Firestore Rules)
+- `flutter test` locally / `firebase emulators:exec ... npm test` for rules
 - Two GitHub Actions workflows: [flutter.yml](./.github/workflows/flutter.yml), [firestore-rules.yml](./.github/workflows/firestore-rules.yml)
 - Codecov upload, debug APK artifact on master push
 
-Details → [testing_en.md](./docs/testing_en.md), [cicd-setup_en.md](./docs/cicd-setup_en.md).
+Details → [testing_en.md](./docs/guides/testing_en.md), [cicd-setup_en.md](./docs/guides/cicd-setup_en.md).
 
 ## Data Model (Summary)
 
@@ -203,7 +217,7 @@ erDiagram
     users }o--o{ chats : "participates"
 ```
 
-Collection schema, indexes, and rule mappings → [data-model_en.md](./docs/data-model_en.md).
+Collection schema, indexes, and rule mappings → [data-model_en.md](./docs/guides/data-model_en.md).
 
 ## Technical Challenges (Highlights)
 
@@ -214,7 +228,7 @@ Collection schema, indexes, and rule mappings → [data-model_en.md](./docs/data
 
 Swapped `StreamBuilder` for `FutureBuilder` + collapsed `ExpansionTile` child lazy render. Closed tabs do 0 reads.
 
-→ [technical-challenges_en.md#9](./docs/technical-challenges_en.md#9-admin-screen-firestore-read-overload-stream--future-transition)
+→ [technical-challenges_en.md#9](./docs/guides/technical-challenges_en.md#9-admin-screen-firestore-read-overload-stream--future-transition)
 </details>
 
 <details>
@@ -222,7 +236,7 @@ Swapped `StreamBuilder` for `FutureBuilder` + collapsed `ExpansionTile` child la
 
 Four large screens 4,575 → 2,589 lines, 15 widget modules extracted, 113 tests still green.
 
-→ [technical-challenges_en.md#13](./docs/technical-challenges_en.md#13-statefulwidget-1400-lines--stateless-composition-refactoring)
+→ [technical-challenges_en.md#13](./docs/guides/technical-challenges_en.md#13-statefulwidget-1400-lines--stateless-composition-refactoring)
 </details>
 
 <details>
@@ -230,10 +244,10 @@ Four large screens 4,575 → 2,589 lines, 15 widget modules extracted, 113 tests
 
 Async `ref.invalidateSelf()` made provider tests flaky. Fixed by replacing state directly in mutators.
 
-→ [technical-challenges_en.md#11](./docs/technical-challenges_en.md#11-riverpod-asyncnotifier-race-condition-invalidateself)
+→ [technical-challenges_en.md#11](./docs/guides/technical-challenges_en.md#11-riverpod-asyncnotifier-race-condition-invalidateself)
 </details>
 
-**All 14 cases** → [technical-challenges_en.md](./docs/technical-challenges_en.md)
+**All 14 cases** → [technical-challenges_en.md](./docs/guides/technical-challenges_en.md)
 
 ## License
 
@@ -241,5 +255,5 @@ Published for learning and portfolio purposes. School logos and image assets may
 
 ## Contact
 
-- Bugs / feature requests: GitHub Issues
+- Bugs / feature requests: GitHub Issues · justinchoo0814@gmail.com · IG [@void___main](https://instagram.com/void___main)
 - In-app: Settings → Feedback / bug report
