@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hansol_high_school/data/api_strings.dart';
+import 'package:hansol_high_school/data/exceptions.dart';
 import 'package:hansol_high_school/data/meal.dart';
 import 'nies_api_keys.dart';
 
@@ -95,32 +96,38 @@ class MealDataApi {
         '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&MLSV_YMD=$formattedDate';
 
-    final data = await _fetchData(requestURL);
-    if (data == null || !data.containsKey('mealServiceDietInfo')) {
+    try {
+      final data = await _fetchData(requestURL);
+      if (!data.containsKey('mealServiceDietInfo')) {
+        final empty = Meal(meal: ApiStrings.mealNoData, date: date, mealType: mealType, kcal: '');
+        _saveToCache(prefs, cacheKey, empty);
+        return empty;
+      }
+
+      final infoArray = data['mealServiceDietInfo'] as List<dynamic>;
+      for (var info in infoArray) {
+        if (!info.containsKey('row')) continue;
+        for (var row in info['row']) {
+          final meal = Meal(
+            meal: (row['DDISH_NM'] as String).replaceAll('<br/>', '\n'),
+            date: date,
+            mealType: mealType,
+            kcal: row['CAL_INFO'] as String,
+            ntrInfo: (row['NTR_INFO'] as String?)?.replaceAll('<br/>', '\n') ?? '',
+          );
+          _saveToCache(prefs, cacheKey, meal);
+          return meal;
+        }
+      }
+
+      final empty = Meal(meal: ApiStrings.mealNoData, date: date, mealType: mealType, kcal: '');
+      _saveToCache(prefs, cacheKey, empty);
+      return empty;
+    } on NetworkException {
       final empty = Meal(meal: ApiStrings.mealNoData, date: date, mealType: mealType, kcal: '');
       _saveToCache(prefs, cacheKey, empty);
       return empty;
     }
-
-    final infoArray = data['mealServiceDietInfo'] as List<dynamic>;
-    for (var info in infoArray) {
-      if (!info.containsKey('row')) continue;
-      for (var row in info['row']) {
-        final meal = Meal(
-          meal: (row['DDISH_NM'] as String).replaceAll('<br/>', '\n'),
-          date: date,
-          mealType: mealType,
-          kcal: row['CAL_INFO'] as String,
-          ntrInfo: (row['NTR_INFO'] as String?)?.replaceAll('<br/>', '\n') ?? '',
-        );
-        _saveToCache(prefs, cacheKey, meal);
-        return meal;
-      }
-    }
-
-    final empty = Meal(meal: ApiStrings.mealNoData, date: date, mealType: mealType, kcal: '');
-    _saveToCache(prefs, cacheKey, empty);
-    return empty;
   }
 
   static Future<void> _prefetchMonth(DateTime date) async {
@@ -152,9 +159,11 @@ class MealDataApi {
 
       log('MealDataApi: prefetch $monthKey ($fromDate~$toDate)');
 
-      final data = await _fetchData(requestURL);
-      if (data == null) {
-        log('MealDataApi: prefetch $monthKey - no data (null response)');
+      late final Map<String, dynamic> data;
+      try {
+        data = await _fetchData(requestURL);
+      } on NetworkException catch (e) {
+        log('MealDataApi: prefetch $monthKey - network error: $e');
         completer.complete();
         return;
       }
@@ -266,24 +275,28 @@ class MealDataApi {
     }
   }
 
-  static Future<Map<String, dynamic>?> _fetchData(String url) async {
+  static Future<Map<String, dynamic>> _fetchData(String url) async {
     try {
       final response = await _client.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+        throw NetworkException('HTTP ${response.statusCode}');
+      }
 
       final data = jsonDecode(response.body);
       if (data is Map<String, dynamic> &&
           data['RESULT'] != null &&
           data['RESULT']['CODE'] == 'INFO-200') {
-        return null;
+        return data;
       }
       return data;
-    } on TimeoutException {
+    } on NetworkException {
+      rethrow;
+    } on TimeoutException catch (e) {
       log('MealDataApi: fetch timeout');
-      return null;
+      throw NetworkException('요청 시간 초과', e);
     } catch (e) {
       log('MealDataApi: fetch error: $e');
-      return null;
+      throw NetworkException('API 요청 실패', e);
     }
   }
 

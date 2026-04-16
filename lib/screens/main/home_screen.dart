@@ -107,6 +107,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         FutureBuilder<UserProfile?>(
                           future: AuthService.getCachedProfile(),
                           builder: (context, snap) {
+                            if (snap.hasError) return const SizedBox.shrink();
                             if (snap.data?.isManager == true) {
                               return IconButton(
                                 onPressed: () => Navigator.of(context).push(
@@ -129,6 +130,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                 .where('read', isEqualTo: false)
                                 .snapshots(),
                             builder: (context, snap) {
+                              if (snap.hasError) return const SizedBox.shrink();
                               final unread = snap.data?.docs.length ?? 0;
                               return Stack(
                                 children: [
@@ -417,6 +419,7 @@ class _UpcomingEventDDay extends StatelessWidget {
     return FutureBuilder<DDay?>(
       future: DDayManager.getPinned(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
         if (snapshot.connectionState != ConnectionState.done) {
           return Text(
             AppLocalizations.of(context)!.home_scheduleLoading,
@@ -490,6 +493,7 @@ class _TodayLunchPreview extends StatelessWidget {
         type: MealDataApi.MENU,
       ),
       builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
         String preview = AppLocalizations.of(context)!.home_lunchPreview;
         if (snapshot.hasData && snapshot.data?.meal != null) {
           final menu = snapshot.data!.meal!;
@@ -522,6 +526,7 @@ class _RecentPosts extends StatelessWidget {
     return StreamBuilder<List<QuerySnapshot<Map<String, dynamic>>>>(
       stream: _combinedStream(),
       builder: (context, snapshot) {
+        if (snapshot.hasError) return const SizedBox.shrink();
         if (!snapshot.hasData) return const SizedBox.shrink();
 
         final pinnedDocs = snapshot.data![0].docs;

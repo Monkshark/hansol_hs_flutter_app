@@ -79,6 +79,7 @@ service cloud.firestore {
 
       // 작성자만 자유 수정 (admin/manager도 글 수정 불가, 삭제는 가능)
       // 그 외는 인터랙션 필드만 + 카운터 증감 검증
+      // 매니저는 공지 고정/해제 가능 (isPinned, pinnedAt)
       allow update: if isSignedIn() && (
         request.auth.uid == resource.data.authorUid ||
         (
@@ -86,6 +87,10 @@ service cloud.firestore {
           validCounterDelta('likeCount') &&
           validCounterDelta('dislikeCount') &&
           validCounterDelta('commentCount')
+        ) ||
+        (
+          isAdminOrManager() &&
+          changedKeys().hasOnly(['isPinned', 'pinnedAt'])
         )
       );
 

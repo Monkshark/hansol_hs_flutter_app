@@ -41,6 +41,9 @@ class DeleteLogsTabState extends State<DeleteLogsTab> {
             child: Center(child: CircularProgressIndicator()),
           );
         }
+        if (snapshot.hasError) {
+          return const Center(child: Text('오류가 발생했습니다'));
+        }
 
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {

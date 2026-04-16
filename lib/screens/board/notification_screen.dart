@@ -49,6 +49,9 @@ class NotificationScreen extends StatelessWidget {
             .limit(50)
             .snapshots(),
         builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return const Center(child: Text('오류가 발생했습니다'));
+          }
           final docs = snapshot.data?.docs ?? [];
 
           if (docs.isEmpty) {

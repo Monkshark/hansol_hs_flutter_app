@@ -1370,6 +1370,12 @@ abstract class AppLocalizations {
   /// **'해제'**
   String get write_pinUnpinAction;
 
+  /// No description provided for @write_unpinFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'공지 해제 실패'**
+  String get write_unpinFailed;
+
   /// No description provided for @write_registerWithoutPin.
   ///
   /// In ko, this message translates to:

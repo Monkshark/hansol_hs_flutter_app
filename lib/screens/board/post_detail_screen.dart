@@ -114,6 +114,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           StreamBuilder<DocumentSnapshot<Map<String, dynamic>>>(
             stream: _postRef.snapshots(),
             builder: (context, snapshot) {
+              if (snapshot.hasError) return const SizedBox.shrink();
               final data = snapshot.data?.data();
               if (data == null) return const SizedBox.shrink();
               final isAuthor = AuthService.currentUser?.uid == data['authorUid'];
@@ -121,6 +122,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
               return FutureBuilder<UserProfile?>(
                 future: AuthService.getCachedProfile(),
                 builder: (context, profileSnap) {
+                  if (profileSnap.hasError) return const SizedBox.shrink();
                   final isManager = profileSnap.data?.isManager ?? false;
 
                   final isPinned = data['isPinned'] == true;
@@ -342,6 +344,9 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                     StreamBuilder<QuerySnapshot>(
                       stream: _postRef.collection('comments').orderBy('createdAt').snapshots(),
                       builder: (context, commentSnapshot) {
+                        if (commentSnapshot.hasError) {
+                          return const Center(child: Text('오류가 발생했습니다'));
+                        }
                         final comments = commentSnapshot.data?.docs ?? [];
 
                         return Column(

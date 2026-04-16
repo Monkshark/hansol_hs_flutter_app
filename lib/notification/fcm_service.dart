@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -19,6 +20,10 @@ class FcmService {
   static final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   static final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
+
+  static StreamSubscription<String>? _tokenRefreshSub;
+  static StreamSubscription<RemoteMessage>? _onMessageSub;
+  static StreamSubscription<RemoteMessage>? _onMessageOpenedSub;
 
   static late AndroidNotificationChannel _channel;
 
@@ -53,13 +58,13 @@ class FcmService {
     );
 
     await _saveToken();
-    _messaging.onTokenRefresh.listen(_onTokenRefresh);
+    _tokenRefreshSub = _messaging.onTokenRefresh.listen(_onTokenRefresh);
 
     await _subscribeTopics();
 
-    FirebaseMessaging.onMessage.listen(_onForegroundMessage);
+    _onMessageSub = FirebaseMessaging.onMessage.listen(_onForegroundMessage);
 
-    FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
+    _onMessageOpenedSub = FirebaseMessaging.onMessageOpenedApp.listen(_onMessageOpenedApp);
 
     final initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
@@ -67,6 +72,12 @@ class FcmService {
     }
 
     log('FcmService: initialized');
+  }
+
+  static Future<void> dispose() async {
+    await _tokenRefreshSub?.cancel();
+    await _onMessageSub?.cancel();
+    await _onMessageOpenedSub?.cancel();
   }
 
   static Future<void> _saveToken() async {

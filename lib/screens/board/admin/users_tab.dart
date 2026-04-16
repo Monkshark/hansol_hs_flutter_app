@@ -79,6 +79,9 @@ class UsersTabState extends State<UsersTab> {
             child: Center(child: CircularProgressIndicator()),
           );
         }
+        if (snapshot.hasError) {
+          return const Center(child: Text('오류가 발생했습니다'));
+        }
         final allDocs = snapshot.data?.docs ?? [];
         final docs = allDocs.where((d) {
           final data = d.data();
@@ -123,6 +126,9 @@ class UsersTabState extends State<UsersTab> {
         return FutureBuilder<UserProfile?>(
           future: AuthService.getCachedProfile(),
           builder: (context, myProfileSnap) {
+            if (myProfileSnap.hasError) {
+              return const Center(child: Text('오류가 발생했습니다'));
+            }
             final isAdmin = myProfileSnap.data?.isAdmin ?? false;
 
             return ListView.separated(

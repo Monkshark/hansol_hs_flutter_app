@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:developer';
 import 'package:app_links/app_links.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 class DeepLinkService {
   static final _appLinks = AppLinks();
   static const _postPrefix = '/post/';
+  static StreamSubscription<Uri>? _linkSub;
 
   static Future<void> initialize() async {
     try {
@@ -16,10 +18,14 @@ class DeepLinkService {
       log('DeepLinkService: initial link error: $e');
     }
 
-    _appLinks.uriLinkStream.listen(
+    _linkSub = _appLinks.uriLinkStream.listen(
       _handleUri,
       onError: (e) => log('DeepLinkService: stream error: $e'),
     );
+  }
+
+  static Future<void> dispose() async {
+    await _linkSub?.cancel();
   }
 
   static void _handleUri(Uri uri) {

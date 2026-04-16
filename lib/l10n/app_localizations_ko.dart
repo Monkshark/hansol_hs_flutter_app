@@ -675,6 +675,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get write_pinUnpinAction => '해제';
 
   @override
+  String get write_unpinFailed => '공지 해제 실패';
+
+  @override
   String get write_registerWithoutPin => '공지 없이 등록';
 
   @override

@@ -9,6 +9,7 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:hansol_high_school/data/api_strings.dart';
+import 'package:hansol_high_school/data/exceptions.dart';
 import 'nies_api_keys.dart';
 
 class UpcomingEvent {
@@ -65,8 +66,10 @@ class NoticeDataApi {
         '&SD_SCHUL_CODE=${NiesApiKeys.sdSchulCode}'
         '&AA_YMD=$formattedDate';
 
-    final data = await _fetchData(requestURL);
-    if (data == null) {
+    late final Map<String, dynamic> data;
+    try {
+      data = await _fetchData(requestURL);
+    } on NetworkException {
       _cache(prefs, cacheKey, ApiStrings.noticeNoData);
       return ApiStrings.noticeNoData;
     }
@@ -126,8 +129,12 @@ class NoticeDataApi {
 
     log('$_tag: getUpcomingEvent: $requestURL');
 
-    final data = await _fetchData(requestURL);
-    if (data == null) return null;
+    late final Map<String, dynamic> data;
+    try {
+      data = await _fetchData(requestURL);
+    } on NetworkException {
+      return null;
+    }
 
     if (data.containsKey('RESULT') && data['RESULT']['CODE'] == 'INFO-200') {
       return null;
@@ -195,8 +202,12 @@ class NoticeDataApi {
         '&AA_FROM_YMD=$fromDate'
         '&AA_TO_YMD=$toDate';
 
-    final data = await _fetchData(requestURL);
-    if (data == null) return [];
+    late final Map<String, dynamic> data;
+    try {
+      data = await _fetchData(requestURL);
+    } on NetworkException {
+      return [];
+    }
     if (data.containsKey('RESULT') && data['RESULT']['CODE'] == 'INFO-200') return [];
     if (!data.containsKey('SchoolSchedule')) return [];
 
@@ -259,10 +270,15 @@ class NoticeDataApi {
         '&AA_FROM_YMD=$fromDate'
         '&AA_TO_YMD=$toDate';
 
-    final data = await _fetchData(requestURL);
+    late final Map<String, dynamic> data;
+    try {
+      data = await _fetchData(requestURL);
+    } on NetworkException {
+      return {};
+    }
     final result = <DateTime, String>{};
 
-    if (data != null && data.containsKey('SchoolSchedule')) {
+    if (data.containsKey('SchoolSchedule')) {
       final infoArray = data['SchoolSchedule'] as List<dynamic>;
       for (var info in infoArray) {
         if (!info.containsKey('row')) continue;
@@ -293,17 +309,21 @@ class NoticeDataApi {
     prefs.setInt('$cacheKey-timestamp', DateTime.now().millisecondsSinceEpoch);
   }
 
-  Future<Map<String, dynamic>?> _fetchData(String url) async {
+  Future<Map<String, dynamic>> _fetchData(String url) async {
     try {
       final response = await _client.get(Uri.parse(url)).timeout(const Duration(seconds: 10));
-      if (response.statusCode != 200) return null;
+      if (response.statusCode != 200) {
+        throw NetworkException('HTTP ${response.statusCode}');
+      }
       return jsonDecode(response.body);
-    } on TimeoutException {
+    } on NetworkException {
+      rethrow;
+    } on TimeoutException catch (e) {
       log('$_tag: fetch timeout');
-      return null;
+      throw NetworkException('요청 시간 초과', e);
     } catch (e) {
       log('$_tag: fetch error: $e');
-      return null;
+      throw NetworkException('API 요청 실패', e);
     }
   }
 
