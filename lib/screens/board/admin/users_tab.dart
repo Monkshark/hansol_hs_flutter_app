@@ -198,7 +198,7 @@ class UsersTabState extends State<UsersTab> {
                                     ],
                                   ],
                                 ),
-                                Text('$studentId · $grade학년 $classNum반',
+                                Text('$studentId · ${l.profileSetup_gradeClass(grade, classNum)}',
                                   style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
                                 if (widget.filter == 'suspended') ...[
                                   const SizedBox(height: 4),
