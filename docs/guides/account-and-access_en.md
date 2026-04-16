@@ -129,4 +129,4 @@ Full rules detail: [security_en.md](./security_en.md).
 - [Security Model](./security_en.md)
 - [Admin Features](../features/admin-features_en.md)
 - [Data Model](./data-model_en.md) — full `users` schema
-- [User Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/USER_GUIDE_en.md)
+- [User Guide](../USER_GUIDE_en.md)

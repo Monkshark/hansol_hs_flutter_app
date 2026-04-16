@@ -65,7 +65,7 @@ Core information features any user encounters. Some require login, but they all 
 - System dark/light auto-matched
 - Hourly Timeline refresh
 
-**Files**: `ios/Widget*/`. App Groups setup in [DEPLOY_en.md](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY_en.md).
+**Files**: `ios/Widget*/`. App Groups setup in [DEPLOY_en.md](../DEPLOY_en.md).
 
 ## Urgent Popup Announcements
 
@@ -95,7 +95,7 @@ Core information features any user encounters. Some require login, but they all 
 - Attachments / importance flag supported
 
 ## See Also
-- [User Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/USER_GUIDE_en.md)
+- [User Guide](../USER_GUIDE_en.md)
 - [Community Features](./community-features_en.md)
 - [Personal Features](./personal-features_en.md)
 - [Data Model](../guides/data-model_en.md) — `app_config`, `users` schema
