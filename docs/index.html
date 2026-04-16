@@ -6,7 +6,7 @@
 <title>Docs — 한솔고등학교 앱</title>
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked-highlight/lib/index.umd.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+<link rel="stylesheet" id="hljsTheme" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/kotlin.min.js"></script>
@@ -15,7 +15,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/gradle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
 <style>
-:root{--bg:#0d1117;--sidebar-bg:#161b22;--card-bg:#1c2128;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--accent-dim:#1f6feb33}
+:root{--bg:#0d1117;--sidebar-bg:#161b22;--card-bg:#1c2128;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--accent:#58a6ff;--accent-dim:#1f6feb33;--pre-bg:#1e2228;--inline-code:#e6d9a2;--code-text:#abb2bf;--badge-bg:#282c34;--copy-bg:#2d333b;--mermaid-bg:#ffffff;--shadow:rgba(0,0,0,.4);color-scheme:dark}
+html[data-theme="light"]{--bg:#ffffff;--sidebar-bg:#f6f8fa;--card-bg:#eaeef2;--border:#d0d7de;--text:#1f2328;--muted:#59636e;--accent:#0969da;--accent-dim:#0969da1a;--pre-bg:#f6f8fa;--inline-code:#953800;--code-text:#1f2328;--badge-bg:#eaeef2;--copy-bg:#ffffff;--mermaid-bg:#fafbfc;--shadow:rgba(0,0,0,.15);color-scheme:light}
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
 .sidebar{width:280px;min-width:280px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
@@ -49,16 +50,16 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .md a:hover{text-decoration:underline}
 .md ul,.md ol{padding-left:24px;margin:0 0 12px}
 .md li{font-size:14px;line-height:1.7;margin:2px 0}
-.md code{background:var(--card-bg);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;color:#e6d9a2}
-.md pre{background:#1e2228;border:1px solid var(--border);border-radius:8px;margin:0 0 16px;overflow:hidden;position:relative}
-.md pre code{background:none;padding:16px;font-size:13px;line-height:1.55;display:block;overflow-x:auto;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;color:#abb2bf}
+.md code{background:var(--card-bg);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;color:var(--inline-code)}
+.md pre{background:var(--pre-bg);border:1px solid var(--border);border-radius:8px;margin:0 0 16px;overflow:hidden;position:relative}
+.md pre code{background:none;padding:16px;font-size:13px;line-height:1.55;display:block;overflow-x:auto;font-family:'JetBrains Mono','Fira Code',Consolas,monospace;color:var(--code-text)}
 .md pre code.hljs{background:none;padding:16px}
-.md pre .code-lang{position:absolute;top:0;right:44px;font-size:11px;color:var(--muted);background:#282c34;padding:2px 8px;border-radius:0 0 4px 4px;font-family:'JetBrains Mono',monospace;text-transform:lowercase;letter-spacing:.3px;user-select:none;pointer-events:none}
-.md pre .copy-btn{position:absolute;top:6px;right:6px;background:#2d333b;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;opacity:0;transition:opacity .15s,background .15s,color .15s;font-family:inherit}
+.md pre .code-lang{position:absolute;top:0;right:44px;font-size:11px;color:var(--muted);background:var(--badge-bg);padding:2px 8px;border-radius:0 0 4px 4px;font-family:'JetBrains Mono',monospace;text-transform:lowercase;letter-spacing:.3px;user-select:none;pointer-events:none}
+.md pre .copy-btn{position:absolute;top:6px;right:6px;background:var(--copy-bg);border:1px solid var(--border);color:var(--muted);font-size:11px;padding:4px 10px;border-radius:5px;cursor:pointer;opacity:0;transition:opacity .15s,background .15s,color .15s;font-family:inherit}
 .md pre:hover .copy-btn{opacity:1}
 .md pre .copy-btn:hover{background:var(--accent-dim);color:var(--text);border-color:var(--accent)}
-.md pre .copy-btn.ok{color:#7ee787;border-color:#2ea043}
-.md pre.mermaid{background:#fff;text-align:center;padding:16px;border-color:var(--border)}
+.md pre .copy-btn.ok{color:#2ea043;border-color:#2ea043}
+.md pre.mermaid{background:var(--mermaid-bg);text-align:center;padding:16px;border-color:var(--border)}
 .md pre.mermaid svg{max-width:100%;height:auto}
 .md blockquote{border-left:3px solid var(--accent);padding:4px 16px;margin:0 0 12px;color:var(--muted)}
 .md table{width:100%;border-collapse:collapse;margin:0 0 16px;font-size:13px}
@@ -78,19 +79,44 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 .nav-btn:disabled{opacity:.3;cursor:default}
 .overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:98}
 .overlay.show{display:block}
-.menu-toggle{display:none;position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:22px;cursor:pointer;z-index:100;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.menu-toggle{display:none;position:fixed;bottom:20px;right:20px;width:48px;height:48px;background:var(--accent);border:none;border-radius:50%;color:#fff;font-size:22px;cursor:pointer;z-index:100;box-shadow:0 4px 12px var(--shadow)}
+.theme-toggle{background:var(--card-bg);border:1px solid var(--border);border-radius:6px;width:30px;height:26px;padding:0;cursor:pointer;color:var(--muted);display:inline-flex;align-items:center;justify-content:center;margin-right:6px;transition:background .15s,color .15s,border-color .15s}
+.theme-toggle:hover{color:var(--accent);border-color:var(--accent);background:var(--accent-dim)}
+.theme-toggle svg{width:15px;height:15px;display:block}
+.theme-toggle .icon-sun{display:none}
+.theme-toggle .icon-moon{display:block}
+html[data-theme="light"] .theme-toggle .icon-sun{display:block}
+html[data-theme="light"] .theme-toggle .icon-moon{display:none}
 @media(max-width:768px){.sidebar{position:fixed;left:-300px;top:0;bottom:0;z-index:99;transition:left .25s ease}.sidebar.open{left:0}.overlay.show{display:block}.menu-toggle{display:block}.content{padding:20px 14px}.md h1{font-size:22px}.md h2{font-size:18px}.md h3{font-size:15px}.md pre{padding:10px 12px;font-size:12px}.md table{font-size:12px;display:block;overflow-x:auto}.md th,.md td{padding:6px 8px;white-space:nowrap}}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 </style>
+<script>
+// Apply stored theme ASAP to prevent flash of wrong theme.
+(function(){
+  try {
+    var t = localStorage.getItem('docsViewerTheme');
+    if(t !== 'light' && t !== 'dark') t = 'dark';
+    document.documentElement.setAttribute('data-theme', t);
+    var link = document.getElementById('hljsTheme');
+    if(link) link.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-' + (t === 'light' ? 'light' : 'dark') + '.min.css';
+  } catch(e){}
+})();
+</script>
 </head>
 <body>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
     <div class="sidebar-header-row">
       <h1 id="sidebarTitle">한솔고 앱 Docs</h1>
-      <div class="lang-toggle" role="group" aria-label="Language">
-        <button class="lang-btn" id="langKo" type="button">KR</button>
-        <button class="lang-btn" id="langEn" type="button">EN</button>
+      <div style="display:inline-flex;align-items:center">
+        <button class="theme-toggle" id="themeToggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="4"/><line x1="12" y1="2" x2="12" y2="5"/><line x1="12" y1="19" x2="12" y2="22"/><line x1="2" y1="12" x2="5" y2="12"/><line x1="19" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="6.9" y2="6.9"/><line x1="17.1" y1="17.1" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="6.9" y2="17.1"/><line x1="17.1" y1="6.9" x2="19.1" y2="4.9"/></svg>
+        </button>
+        <div class="lang-toggle" role="group" aria-label="Language">
+          <button class="lang-btn" id="langKo" type="button">KR</button>
+          <button class="lang-btn" id="langEn" type="button">EN</button>
+        </div>
       </div>
     </div>
     <input type="text" class="search-box" id="search" placeholder="검색... (Ctrl+K)">
@@ -224,7 +250,8 @@ var FILES = [
   }}});
   try {
     if(globalThis.mermaid){
-      mermaid.initialize({startOnLoad:false, theme:'dark', securityLevel:'loose'});
+      var storedTheme = (localStorage.getItem('docsViewerTheme') === 'light') ? 'default' : 'dark';
+      mermaid.initialize({startOnLoad:false, theme: storedTheme, securityLevel:'loose'});
     }
   } catch(e){ console.warn('Mermaid init skipped:', e); }
 
@@ -421,10 +448,12 @@ var FILES = [
       }
     });
 
-    // Render mermaid diagrams in the newly inserted content
+    // Render mermaid diagrams in the newly inserted content.
+    // Cache original source so we can re-render on theme switch (mermaid replaces innerHTML with SVG).
     try {
       if(globalThis.mermaid){
         var nodes = inner.querySelectorAll('pre.mermaid');
+        nodes.forEach(function(n){ if(!n.dataset.mermaidSrc) n.dataset.mermaidSrc = n.textContent; });
         if(nodes.length) mermaid.run({nodes:nodes});
       }
     } catch(e){ console.warn('Mermaid run failed:', e); }
@@ -538,6 +567,44 @@ var FILES = [
   // ---- Language button wiring ----
   document.getElementById('langKo').addEventListener('click', function(){ if(getLang()!=='ko') applyLang('ko'); });
   document.getElementById('langEn').addEventListener('click', function(){ if(getLang()!=='en') applyLang('en'); });
+
+  // ---- Theme toggle ----
+  var THEME_KEY = 'docsViewerTheme';
+  function getTheme(){ return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'; }
+  function setThemeStored(t){ localStorage.setItem(THEME_KEY, t === 'light' ? 'light' : 'dark'); }
+  function swapHljsStylesheet(theme){
+    var link = document.getElementById('hljsTheme');
+    if(link) link.href = 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-' + (theme === 'light' ? 'light' : 'dark') + '.min.css';
+  }
+  function reInitMermaidAndRerender(theme){
+    if(!globalThis.mermaid) return;
+    try {
+      mermaid.initialize({startOnLoad:false, theme: theme === 'light' ? 'default' : 'dark', securityLevel:'loose'});
+    } catch(e){ console.warn('Mermaid re-init failed:', e); }
+    var inner = document.getElementById('contentInner');
+    if(!inner) return;
+    var nodes = inner.querySelectorAll('pre.mermaid');
+    nodes.forEach(function(n){
+      if(n.dataset.mermaidSrc){
+        n.removeAttribute('data-processed');
+        n.innerHTML = n.dataset.mermaidSrc;
+      }
+    });
+    try {
+      if(nodes.length) mermaid.run({nodes: nodes});
+    } catch(e){ console.warn('Mermaid re-run failed:', e); }
+  }
+  function applyTheme(theme, opts){
+    opts = opts || {};
+    theme = (theme === 'light') ? 'light' : 'dark';
+    setThemeStored(theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    swapHljsStylesheet(theme);
+    if(!opts.skipMermaid) reInitMermaidAndRerender(theme);
+  }
+  document.getElementById('themeToggle').addEventListener('click', function(){
+    applyTheme(getTheme() === 'light' ? 'dark' : 'light');
+  });
 
   function initialDefaultPath(){
     return (getLang() === 'en' && MD_DATA['README_en.md']) ? 'README_en.md' : 'README.md';
