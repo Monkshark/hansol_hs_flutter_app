@@ -9,7 +9,7 @@
 ### 카테고리 & 탐색
 
 - **6개 카테고리** + **인기글** 탭: 자유 / 질문 / 정보공유 / 분실물 / 학생회 / 동아리
-- **인기글 정렬**: `likeCount` 비정규화 카운터 + composite index `(likeCount desc, createdAt desc)` ([ADR-04](../architecture-decisions.md#adr-04-좋아요-카운터))
+- **인기글 정렬**: `likeCount` 비정규화 카운터 + composite index `(likeCount desc, createdAt desc)` ([ADR-04](../guides/architecture-decisions.md#adr-04-좋아요-카운터))
 - **커서 기반 페이지네이션** (20개씩, 무한 스크롤, 당겨서 새로고침)
 - **공지 시스템** (최대 3개, 상단 고정, 관리자 전용)
 
@@ -18,17 +18,17 @@
 - **이미지 첨부**: 1080px 압축 + EXIF/GPS 제거, PageView swipe viewer + Hero animation + pinch-zoom
 - **투표** 첨부 (최대 6선택지, 실시간 결과 바)
 - **일정 공유** (학사일정 링크)
-- **익명 번호제**: 익명1/익명2/익명(글쓴이), Firestore Transaction ([기술과제 #3](../technical-challenges.md#3-익명-게시판-번호-일관성-concurrent-write))
+- **익명 번호제**: 익명1/익명2/익명(글쓴이), Firestore Transaction ([기술과제 #3](../guides/technical-challenges.md#3-익명-게시판-번호-일관성-concurrent-write))
 
 ### 인터랙션
 
-- **추천/비추천**: `Map<uid,bool>` + `likeCount` int counter, rules 단계 ±1 delta 검증 ([ADR-04](../architecture-decisions.md#adr-04-좋아요-카운터))
+- **추천/비추천**: `Map<uid,bool>` + `likeCount` int counter, rules 단계 ±1 delta 검증 ([ADR-04](../guides/architecture-decisions.md#adr-04-좋아요-카운터))
 - **북마크** (내 활동 → 저장한 글에서 재조회)
 - **댓글 + 대댓글** (들여쓰기), 글쓴이 댓글 구분 (파란 배경 + 뱃지)
 
 ### 검색
 
-- **n-gram 검색**: 제목+본문 2-gram을 `searchTokens` 배열에 인덱싱, `array-contains-any` 쿼리 ([ADR-03](../architecture-decisions.md#adr-03-게시판-검색-클라이언트-n-gram-인덱싱))
+- **n-gram 검색**: 제목+본문 2-gram을 `searchTokens` 배열에 인덱싱, `array-contains-any` 쿼리 ([ADR-03](../guides/architecture-decisions.md#adr-03-게시판-검색-클라이언트-n-gram-인덱싱))
 - **350ms debounce**, 50개 fetch + client substring 필터로 false positive 줄임
 - **검색 history**: 최근 10개 검색어 chip, 개별/전체 삭제
 
@@ -49,7 +49,7 @@
 
 - **유저 검색**으로 새 채팅 시작 (이름/학번 검색, 관리자 기본 표시)
 - **실시간 메시지** (Firestore onSnapshot, limit 30)
-- **읽음 표시** + 읽지 않은 메시지 수 뱃지 ([기술과제 #6](../technical-challenges.md#6-채팅-읽음-확인-실시간-동기화-dual-stream))
+- **읽음 표시** + 읽지 않은 메시지 수 뱃지 ([기술과제 #6](../guides/technical-challenges.md#6-채팅-읽음-확인-실시간-동기화-dual-stream))
 - **메시지 삭제**: 나만 삭제 / 같이 삭제 (안 읽었고 1시간 이내)
 - **채팅방 나가기**: 시스템 메시지 + 상대방 채팅 유지
 - 스켈레톤 로딩 UI
@@ -75,9 +75,9 @@
 ### 구현
 
 - **인앱 알림**: 벨 아이콘 + 안 읽은 뱃지 (`users/{uid}/notifications/{id}`)
-- **FCM 푸시**: 총 13종 (FCM 10 + 로컬 3)
-- **서버 필터링**: `users/{uid}`의 `notiXxx` 필드를 Cloud Functions에서 발송 전 체크 ([기술과제 #7](../technical-challenges.md#7-cloud-functions-알림-설정-개별-제어-server-side-filtering))
-- **정지 만료 자동 해제**: Cloud Functions 스케줄러 (매시간) ([기술과제 #8](../technical-challenges.md#8-정지-만료-자동-해제-scheduler-trigger))
+- **FCM 푸시**: FCM 4종 (`account` / `comment` / `new_post` / `chat`) + 로컬 3종 (조식/중식/석식)
+- **서버 필터링**: `users/{uid}`의 `notiXxx` 필드를 Cloud Functions에서 발송 전 체크 ([기술과제 #7](../guides/technical-challenges.md#7-cloud-functions-알림-설정-개별-제어-server-side-filtering))
+- **정지 만료 자동 해제**: Cloud Functions 스케줄러 (매시간) ([기술과제 #8](../guides/technical-challenges.md#8-정지-만료-자동-해제-scheduler-trigger))
 
 **관련 파일**: `lib/notification/fcm_service.dart`, `lib/screens/sub/notification_setting_screen.dart`, `lib/screens/board/notification_screen.dart`, `functions/index.js`
 
@@ -105,5 +105,5 @@ Rate Limit은 클라이언트 선방어 + Firestore Rules에서 최소 검증.
 - [공개 기능](./public-features.md)
 - [개인 기능](./personal-features.md)
 - [관리자 기능](./admin-features.md)
-- [보안 모델](../security.md)
-- [데이터 모델](../data-model.md) — `posts`, `comments`, `chats`, `reports` 스키마
+- [보안 모델](../guides/security.md)
+- [데이터 모델](../guides/data-model.md) — `posts`, `comments`, `chats`, `reports` 스키마

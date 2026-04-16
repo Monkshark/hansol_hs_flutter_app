@@ -7,11 +7,11 @@ Core information features any user encounters. Some require login, but they all 
 ## Meals
 
 - **NEIS API**-based real-time breakfast/lunch/dinner lookup
-- **Monthly prefetch** cache (24h / 5min for empty results); Completer pattern avoids concurrent duplicate fetches ([Technical Challenge #2](../technical-challenges_en.md#2-meal-api-concurrent-request-race-condition))
+- **Monthly prefetch** cache (24h / 5min for empty results); Completer pattern avoids concurrent duplicate fetches ([Technical Challenge #2](../guides/technical-challenges_en.md#2-meal-api-concurrent-request-race-condition))
 - Tap a meal card → share as image; shows **nutrition** (carb/protein/fat) + allergen info
 - Meal notifications include a menu preview (local notifications, per-meal schedulable)
 
-**Files**: `lib/screens/main/meal_screen.dart`, `lib/api/meal_api.dart`, `test/meal_api_test.dart`, `test/meal_test.dart`
+**Files**: `lib/screens/main/meal_screen.dart`, `lib/api/meal_data_api.dart`, `test/meal_api_test.dart`, `test/meal_test.dart`
 
 ### Cache Strategy
 
@@ -25,7 +25,7 @@ Core information features any user encounters. Some require login, but they all 
 
 - **1st year**: auto by class. **2nd/3rd year**: custom based on selected electives
 - **Teacher view**: year tabs (1/2/3) → swipe subjects → pick among duplicated classes
-- **Auto slot-conflict detection** + resolution dialog; per-subject color customization ([Technical Challenge #4](../technical-challenges_en.md#4-timetable-elective-slot-conflicts))
+- **Auto slot-conflict detection** + resolution dialog; per-subject color customization ([Technical Challenge #4](../guides/technical-challenges_en.md#4-timetable-elective-slot-conflicts))
 - **Current period** live highlight (1-min refresh, progress bar); today's column highlighted
 - Elective save confirmation + unsaved back-nav warning
 - Auto-reset in March (new semester) for timetable + electives
@@ -98,4 +98,4 @@ Core information features any user encounters. Some require login, but they all 
 - [User Guide](../../USER_GUIDE_en.md)
 - [Community Features](./community-features_en.md)
 - [Personal Features](./personal-features_en.md)
-- [Data Model](../data-model_en.md) — `app_config`, `users` schema
+- [Data Model](../guides/data-model_en.md) — `app_config`, `users` schema

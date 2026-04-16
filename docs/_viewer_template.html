@@ -14,7 +14,12 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);display:flex;height:100vh;overflow:hidden}
 .sidebar{width:280px;min-width:280px;background:var(--sidebar-bg);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow:hidden}
 .sidebar-header{padding:20px 16px 12px;border-bottom:1px solid var(--border)}
-.sidebar-header h1{font-size:15px;font-weight:600;margin-bottom:10px}
+.sidebar-header-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.sidebar-header h1{font-size:15px;font-weight:600}
+.lang-toggle{display:inline-flex;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;overflow:hidden}
+.lang-btn{background:transparent;border:none;color:var(--muted);font-size:11px;font-weight:600;padding:4px 10px;cursor:pointer;transition:background .15s,color .15s}
+.lang-btn.active{background:var(--accent-dim);color:var(--accent)}
+.lang-btn:not(.active):hover{color:var(--text)}
 .search-box{width:100%;padding:7px 10px;background:var(--card-bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:13px;outline:none}
 .search-box:focus{border-color:var(--accent)}
 .search-box::placeholder{color:var(--muted)}
@@ -67,7 +72,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,san
 <body>
 <aside class="sidebar" id="sidebar">
   <div class="sidebar-header">
-    <h1>한솔고 앱 Docs</h1>
+    <div class="sidebar-header-row">
+      <h1 id="sidebarTitle">한솔고 앱 Docs</h1>
+      <div class="lang-toggle" role="group" aria-label="Language">
+        <button class="lang-btn" id="langKo" type="button">KR</button>
+        <button class="lang-btn" id="langEn" type="button">EN</button>
+      </div>
+    </div>
     <input type="text" class="search-box" id="search" placeholder="검색... (Ctrl+K)">
   </div>
   <nav class="nav-list" id="navList"></nav>
@@ -87,64 +98,79 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 <script>
 /*__MD_DATA__*/
 
-var FILES = {
-  '개요': [
-    {name:'README',path:'README.md'},
-    {name:'01 Overview',path:'01-overview.md'},
-    {name:'02 Architecture',path:'02-architecture.md'},
-    {name:'03 Data Layer',path:'03-data-layer.md'},
-    {name:'04 Screens Guide',path:'04-screens-guide.md'},
-    {name:'05 Firebase Backend',path:'05-firebase-backend.md'},
-    {name:'06 API Integration',path:'06-api-integration.md'},
-    {name:'07 Admin System',path:'07-admin-system.md'},
-    {name:'08 i18n + 알림 개선',path:'08-phase4-i18n-notifications.md'},
-    {name:'Main (진입점)',path:'main.md'}
-  ],
-  'API': [
-    {name:'MealDataApi',path:'api/meal_data_api.md'},
-    {name:'NoticeDataApi',path:'api/notice_data_api.md'},
-    {name:'TimetableDataApi',path:'api/timetable_data_api.md'}
-  ],
-  '데이터': [
-    {name:'AuthService',path:'data/auth_service.md'},
-    {name:'AuthRepository',path:'data/auth_repository.md'},
-    {name:'GradeManager',path:'data/grade_manager.md'},
-    {name:'GradeRepository',path:'data/grade_repository.md'},
-    {name:'DdayManager',path:'data/dday_manager.md'},
-    {name:'LocalDatabase',path:'data/local_database.md'},
-    {name:'SubjectDataManager',path:'data/subject_data_manager.md'},
-    {name:'SearchTokens',path:'data/search_tokens.md'},
-    {name:'SearchHistoryService',path:'data/search_history_service.md'},
-    {name:'SecureStorageService',path:'data/secure_storage_service.md'},
-    {name:'AnalyticsService',path:'data/analytics_service.md'},
-    {name:'SettingData',path:'data/setting_data.md'},
-    {name:'ServiceLocator',path:'data/service_locator.md'},
-    {name:'Meal (모델)',path:'data/meal.md'},
-    {name:'ScheduleData (모델)',path:'data/schedule_data.md'},
-    {name:'Subject (모델)',path:'data/subject.md'},
-    {name:'Device',path:'data/device.md'}
-  ],
-  '알림': [
-    {name:'FcmService',path:'notification/fcm_service.md'},
-    {name:'DailyMealNotification',path:'notification/daily_meal_notification.md'},
-    {name:'PopupNotice',path:'notification/popup_notice.md'},
-    {name:'UpdateChecker',path:'notification/update_checker.md'}
-  ],
-  '상태 관리': [
-    {name:'Providers',path:'providers/providers.md'}
-  ],
-  '스타일': [
-    {name:'AppColors',path:'styles/app_colors.md'},
-    {name:'DarkAppColors',path:'styles/dark_app_colors.md'},
-    {name:'LightAppColors',path:'styles/light_app_colors.md'}
-  ],
-  '기타': [
-    {name:'WidgetService',path:'widgets/home_widget/widget_service.md'},
-    {name:'ChatUtils',path:'screens/chat/chat_utils.md'},
-    {name:'NetworkStatus',path:'network/network_status.md'},
-    {name:'NotificationPermissionSheet',path:'widgets/notification_permission_sheet.md'}
-  ]
-};
+// Each group has {titleKo, titleEn} and items have {nameKo, nameEn, pathKo, pathEn}.
+// pathKo / pathEn are relative to docs/. If an EN pair is missing, set pathEn to null
+// (falls back to Korean and disables EN-specific behaviors for that entry).
+var FILES = [
+  { titleKo:'개요', titleEn:'Overview', items:[
+    {nameKo:'README (목차)',         nameEn:'README (index)',         pathKo:'README.md',  pathEn:'README_en.md'},
+    {nameKo:'main (앱 진입점)',      nameEn:'main (entry point)',     pathKo:'main.md',    pathEn:'main_en.md'}
+  ]},
+  { titleKo:'가이드', titleEn:'Guides', items:[
+    {nameKo:'제품 개요',             nameEn:'Product overview',       pathKo:'guides/product-overview.md',       pathEn:'guides/product-overview_en.md'},
+    {nameKo:'아키텍처 개요',         nameEn:'Architecture overview',  pathKo:'guides/architecture-overview.md',  pathEn:'guides/architecture-overview_en.md'},
+    {nameKo:'아키텍처 결정 로그',    nameEn:'Architecture decisions', pathKo:'guides/architecture-decisions.md', pathEn:'guides/architecture-decisions_en.md'},
+    {nameKo:'데이터 모델',           nameEn:'Data model',             pathKo:'guides/data-model.md',             pathEn:'guides/data-model_en.md'},
+    {nameKo:'기술 과제와 해결',      nameEn:'Technical challenges',   pathKo:'guides/technical-challenges.md',   pathEn:'guides/technical-challenges_en.md'},
+    {nameKo:'테스트 전략',           nameEn:'Testing strategy',       pathKo:'guides/testing.md',                pathEn:'guides/testing_en.md'},
+    {nameKo:'보안',                  nameEn:'Security',               pathKo:'guides/security.md',               pathEn:'guides/security_en.md'},
+    {nameKo:'계정과 접근 제어',      nameEn:'Account & access',       pathKo:'guides/account-and-access.md',     pathEn:'guides/account-and-access_en.md'},
+    {nameKo:'CI/CD 셋업',            nameEn:'CI/CD setup',            pathKo:'guides/cicd-setup.md',             pathEn:'guides/cicd-setup_en.md'},
+    {nameKo:'스크린샷 갤러리',       nameEn:'Screenshots gallery',    pathKo:'guides/screenshots-gallery.md',    pathEn:'guides/screenshots-gallery_en.md'}
+  ]},
+  { titleKo:'기능', titleEn:'Features', items:[
+    {nameKo:'공용 기능',             nameEn:'Public features',        pathKo:'features/public-features.md',    pathEn:'features/public-features_en.md'},
+    {nameKo:'개인 기능',             nameEn:'Personal features',      pathKo:'features/personal-features.md',  pathEn:'features/personal-features_en.md'},
+    {nameKo:'커뮤니티 기능',         nameEn:'Community features',     pathKo:'features/community-features.md', pathEn:'features/community-features_en.md'},
+    {nameKo:'관리자 기능',           nameEn:'Admin features',         pathKo:'features/admin-features.md',     pathEn:'features/admin-features_en.md'}
+  ]},
+  { titleKo:'API', titleEn:'API', items:[
+    {nameKo:'MealDataApi',           nameEn:'MealDataApi',            pathKo:'api/meal_data_api.md',       pathEn:'api/meal_data_api_en.md'},
+    {nameKo:'NoticeDataApi',         nameEn:'NoticeDataApi',          pathKo:'api/notice_data_api.md',     pathEn:'api/notice_data_api_en.md'},
+    {nameKo:'TimetableDataApi',      nameEn:'TimetableDataApi',       pathKo:'api/timetable_data_api.md',  pathEn:'api/timetable_data_api_en.md'}
+  ]},
+  { titleKo:'데이터', titleEn:'Data', items:[
+    {nameKo:'AuthService',           nameEn:'AuthService',            pathKo:'data/auth_service.md',          pathEn:'data/auth_service_en.md'},
+    {nameKo:'AuthRepository',        nameEn:'AuthRepository',         pathKo:'data/auth_repository.md',       pathEn:'data/auth_repository_en.md'},
+    {nameKo:'GradeManager',          nameEn:'GradeManager',           pathKo:'data/grade_manager.md',         pathEn:'data/grade_manager_en.md'},
+    {nameKo:'GradeRepository',       nameEn:'GradeRepository',        pathKo:'data/grade_repository.md',      pathEn:'data/grade_repository_en.md'},
+    {nameKo:'DdayManager',           nameEn:'DdayManager',            pathKo:'data/dday_manager.md',          pathEn:'data/dday_manager_en.md'},
+    {nameKo:'LocalDatabase',         nameEn:'LocalDatabase',          pathKo:'data/local_database.md',        pathEn:'data/local_database_en.md'},
+    {nameKo:'SubjectDataManager',    nameEn:'SubjectDataManager',     pathKo:'data/subject_data_manager.md',  pathEn:'data/subject_data_manager_en.md'},
+    {nameKo:'SearchTokens',          nameEn:'SearchTokens',           pathKo:'data/search_tokens.md',         pathEn:'data/search_tokens_en.md'},
+    {nameKo:'SearchHistoryService',  nameEn:'SearchHistoryService',   pathKo:'data/search_history_service.md', pathEn:'data/search_history_service_en.md'},
+    {nameKo:'SecureStorageService',  nameEn:'SecureStorageService',   pathKo:'data/secure_storage_service.md', pathEn:'data/secure_storage_service_en.md'},
+    {nameKo:'AnalyticsService',      nameEn:'AnalyticsService',       pathKo:'data/analytics_service.md',     pathEn:'data/analytics_service_en.md'},
+    {nameKo:'SettingData',           nameEn:'SettingData',            pathKo:'data/setting_data.md',          pathEn:'data/setting_data_en.md'},
+    {nameKo:'ServiceLocator',        nameEn:'ServiceLocator',         pathKo:'data/service_locator.md',       pathEn:'data/service_locator_en.md'},
+    {nameKo:'PostRepository',        nameEn:'PostRepository',         pathKo:'data/post_repository.md',       pathEn:'data/post_repository_en.md'},
+    {nameKo:'Meal (모델)',           nameEn:'Meal (model)',           pathKo:'data/meal.md',                  pathEn:'data/meal_en.md'},
+    {nameKo:'ScheduleData (모델)',   nameEn:'ScheduleData (model)',   pathKo:'data/schedule_data.md',         pathEn:'data/schedule_data_en.md'},
+    {nameKo:'Subject (모델)',        nameEn:'Subject (model)',        pathKo:'data/subject.md',               pathEn:'data/subject_en.md'},
+    {nameKo:'Device',                nameEn:'Device',                 pathKo:'data/device.md',                pathEn:'data/device_en.md'},
+    {nameKo:'ApiStrings',            nameEn:'ApiStrings',             pathKo:'data/api_strings.md',           pathEn:'data/api_strings_en.md'},
+    {nameKo:'BoardCategories',       nameEn:'BoardCategories',        pathKo:'data/board_categories.md',      pathEn:'data/board_categories_en.md'},
+    {nameKo:'Exceptions',            nameEn:'Exceptions',             pathKo:'data/exceptions.md',            pathEn:'data/exceptions_en.md'}
+  ]},
+  { titleKo:'네트워크', titleEn:'Network', items:[
+    {nameKo:'NetworkStatus',         nameEn:'NetworkStatus',          pathKo:'network/network_status.md',         pathEn:'network/network_status_en.md'},
+    {nameKo:'OfflineQueueManager',   nameEn:'OfflineQueueManager',    pathKo:'network/offline_queue_manager.md',  pathEn:'network/offline_queue_manager_en.md'}
+  ]},
+  { titleKo:'알림', titleEn:'Notifications', items:[
+    {nameKo:'FcmService',            nameEn:'FcmService',             pathKo:'notification/fcm_service.md',             pathEn:'notification/fcm_service_en.md'},
+    {nameKo:'DailyMealNotification', nameEn:'DailyMealNotification',  pathKo:'notification/daily_meal_notification.md', pathEn:'notification/daily_meal_notification_en.md'},
+    {nameKo:'PopupNotice',           nameEn:'PopupNotice',            pathKo:'notification/popup_notice.md',            pathEn:'notification/popup_notice_en.md'},
+    {nameKo:'UpdateChecker',         nameEn:'UpdateChecker',          pathKo:'notification/update_checker.md',          pathEn:'notification/update_checker_en.md'}
+  ]},
+  { titleKo:'상태 관리', titleEn:'State management', items:[
+    {nameKo:'Providers',             nameEn:'Providers',              pathKo:'providers/providers.md',  pathEn:'providers/providers_en.md'}
+  ]},
+  { titleKo:'스타일', titleEn:'Styles', items:[
+    {nameKo:'AppColors',             nameEn:'AppColors',              pathKo:'styles/app_colors.md',        pathEn:'styles/app_colors_en.md'},
+    {nameKo:'DarkAppColors',         nameEn:'DarkAppColors',          pathKo:'styles/dark_app_colors.md',   pathEn:'styles/dark_app_colors_en.md'},
+    {nameKo:'LightAppColors',        nameEn:'LightAppColors',         pathKo:'styles/light_app_colors.md',  pathEn:'styles/light_app_colors_en.md'}
+  ]}
+];
 
 (function(){
   try {
@@ -162,100 +188,204 @@ var FILES = {
   }catch(e){ console.warn('Highlight init skipped:', e); }
   marked.use({breaks:false,gfm:true});
 
-  var navList = document.getElementById('navList');
-  var allItems = [];
+  // ---- Language state ----
+  var LANG_KEY = 'docsViewerLang';
+  function getLang(){ return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'ko'; }
+  function setLang(l){ localStorage.setItem(LANG_KEY, l === 'en' ? 'en' : 'ko'); }
 
-  Object.keys(FILES).forEach(function(group){
-    var g = document.createElement('div');
-    g.className = 'nav-group';
-    g.innerHTML = '<div class="nav-group-title">' + group + '</div>';
-    FILES[group].forEach(function(f){
-      var a = document.createElement('a');
-      a.className = 'nav-item';
-      a.textContent = f.name;
-      a.dataset.path = f.path;
-      a.onclick = function(){ loadFile(f.path, f.name); };
-      g.appendChild(a);
-      allItems.push({el:a, name:f.name.toLowerCase(), path:f.path.toLowerCase()});
+  // Build lookup: path -> { group, item, lang } and pair map (ko<->en).
+  var PATH_INDEX = {};
+  var PAIR = {}; // koPath -> enPath and enPath -> koPath
+  FILES.forEach(function(g){
+    g.items.forEach(function(it){
+      PATH_INDEX[it.pathKo] = { group:g, item:it, lang:'ko' };
+      if(it.pathEn){
+        PATH_INDEX[it.pathEn] = { group:g, item:it, lang:'en' };
+        PAIR[it.pathKo] = it.pathEn;
+        PAIR[it.pathEn] = it.pathKo;
+      }
     });
-    navList.appendChild(g);
   });
 
-  document.getElementById('search').addEventListener('input', function(e){
-    var q = e.target.value.toLowerCase().trim();
+  function pathForItem(item, lang){
+    if(lang === 'en' && item.pathEn) return item.pathEn;
+    return item.pathKo;
+  }
+  function nameForItem(item, lang){
+    return (lang === 'en' && item.nameEn) ? item.nameEn : item.nameKo;
+  }
+  function titleForGroup(g, lang){
+    return (lang === 'en' && g.titleEn) ? g.titleEn : g.titleKo;
+  }
+
+  // ---- Navigation rendering ----
+  var navList = document.getElementById('navList');
+  var allItems = []; // {el, item, group}
+
+  function renderNav(lang){
+    navList.innerHTML = '';
+    allItems = [];
+    FILES.forEach(function(g){
+      var gEl = document.createElement('div');
+      gEl.className = 'nav-group';
+      var titleEl = document.createElement('div');
+      titleEl.className = 'nav-group-title';
+      titleEl.textContent = titleForGroup(g, lang);
+      gEl.appendChild(titleEl);
+      g.items.forEach(function(it){
+        var a = document.createElement('a');
+        a.className = 'nav-item';
+        a.textContent = nameForItem(it, lang);
+        a.dataset.path = pathForItem(it, lang);
+        a.onclick = function(){ loadFile(a.dataset.path); };
+        gEl.appendChild(a);
+        allItems.push({el:a, item:it, group:g});
+      });
+      navList.appendChild(gEl);
+    });
+  }
+
+  function applyLang(lang, opts){
+    opts = opts || {};
+    setLang(lang);
+    document.documentElement.lang = lang;
+    document.getElementById('langKo').classList.toggle('active', lang === 'ko');
+    document.getElementById('langEn').classList.toggle('active', lang === 'en');
+    document.getElementById('search').placeholder = (lang === 'en') ? 'Search... (Ctrl+K)' : '검색... (Ctrl+K)';
+    document.getElementById('sidebarTitle').textContent = (lang === 'en') ? 'Hansol HS App Docs' : '한솔고 앱 Docs';
+    renderNav(lang);
+
+    if(!opts.skipContentSwap){
+      // Remap currently open doc to the other language if available.
+      var cur = currentPath();
+      if(cur){
+        var info = PATH_INDEX[cur];
+        if(info){
+          var newPath = pathForItem(info.item, lang);
+          if(newPath !== cur){
+            loadFile(newPath, { replaceHistory:true });
+            return;
+          }
+        }
+      }
+    }
+    // Re-apply active highlight & search filter for the newly rendered nav.
+    var cur2 = currentPath();
+    highlightActive(cur2);
+    applySearchFilter();
+  }
+
+  function highlightActive(p){
     allItems.forEach(function(i){
-      i.el.style.display = (!q || i.name.indexOf(q)!==-1 || i.path.indexOf(q)!==-1) ? '' : 'none';
+      i.el.classList.toggle('active', i.el.dataset.path === p);
+    });
+  }
+
+  // ---- Search ----
+  function applySearchFilter(){
+    var q = (document.getElementById('search').value || '').toLowerCase().trim();
+    allItems.forEach(function(i){
+      var hay = (i.item.nameKo + ' ' + (i.item.nameEn||'') + ' ' + i.item.pathKo + ' ' + (i.item.pathEn||'')).toLowerCase();
+      i.el.style.display = (!q || hay.indexOf(q) !== -1) ? '' : 'none';
     });
     navList.querySelectorAll('.nav-group').forEach(function(g){
       var vis = Array.from(g.querySelectorAll('.nav-item')).some(function(i){ return i.style.display !== 'none'; });
       g.style.display = vis ? '' : 'none';
     });
-  });
+  }
+  document.getElementById('search').addEventListener('input', applySearchFilter);
 
+  // ---- Navigation history (within viewer) ----
   var history = [];
   var historyIndex = -1;
-  var navigating = false; // popstate에서 재진입 방지
+  var navigating = false;
 
-  function loadFile(p, name, fromPopState){
-    allItems.forEach(function(i){ i.el.classList.toggle('active', i.el.dataset.path === p); });
-    var inner = document.getElementById('contentInner');
+  function currentPath(){
+    return historyIndex >= 0 ? history[historyIndex] : null;
+  }
+
+  function loadFile(p, opts){
+    opts = opts || {};
+    // Resolve alt-lang paths: if user is KR and clicks an _en link, keep the click path as-is.
     var text = MD_DATA[p];
+    var inner = document.getElementById('contentInner');
     if(!text){
       inner.innerHTML = '<div class="welcome"><h2>문서를 찾을 수 없습니다</h2><p>' + p + '</p></div>';
       return;
     }
 
-    // history 관리
-    if(!fromPopState){
-      // 현재 위치 이후 기록 삭제 (새 탐색)
+    highlightActive(p);
+
+    // history management
+    if(!opts.fromPopState && !opts.replaceHistory){
       history = history.slice(0, historyIndex + 1);
       history.push(p);
       historyIndex = history.length - 1;
+    } else if(opts.replaceHistory){
+      if(historyIndex < 0){ history.push(p); historyIndex = 0; }
+      else history[historyIndex] = p;
     }
 
     var html = marked.parse(text);
     var dir = p.indexOf('/') !== -1 ? p.substring(0, p.lastIndexOf('/')) : '';
     var fileName = p.split('/').pop();
 
-    // 뒤로/앞으로 버튼 + breadcrumb
     var canBack = historyIndex > 0;
     var canFwd = historyIndex < history.length - 1;
+    var lang = getLang();
+    var backLabel = (lang === 'en') ? 'Back' : '뒤로';
+    var fwdLabel = (lang === 'en') ? 'Forward' : '앞으로';
+    var rootPath = (lang === 'en' && MD_DATA['README_en.md']) ? 'README_en.md' : 'README.md';
+
     var navHtml = '<div class="breadcrumb"><span class="nav-btns">'
-      + '<button class="nav-btn" onclick="window._goBack()" ' + (canBack ? '' : 'disabled') + ' title="뒤로">&#8592;</button>'
-      + '<button class="nav-btn" onclick="window._goForward()" ' + (canFwd ? '' : 'disabled') + ' title="앞으로">&#8594;</button>'
+      + '<button class="nav-btn" onclick="window._goBack()" ' + (canBack ? '' : 'disabled') + ' title="' + backLabel + '">&#8592;</button>'
+      + '<button class="nav-btn" onclick="window._goForward()" ' + (canFwd ? '' : 'disabled') + ' title="' + fwdLabel + '">&#8594;</button>'
       + '</span>'
-      + '<a href="#" onclick="window._loadFile(\'README.md\',\'README\');return false">docs</a> / '
+      + '<a href="#" onclick="window._loadFile(\'' + rootPath + '\');return false">docs</a> / '
       + (dir ? dir + ' / ' : '')
       + '<strong>' + fileName + '</strong></div>';
 
     inner.innerHTML = navHtml + '<div class="md">' + html + '</div>';
 
-    // Rewrite .md links to in-viewer navigation
+    // Rewrite .md links to in-viewer navigation.
     inner.querySelectorAll('.md a[href]').forEach(function(a){
       var href = a.getAttribute('href');
-      if(!href || !href.endsWith('.md') || href.indexOf('http') === 0) return;
+      if(!href || href.indexOf('http') === 0) return;
+      var hashOnly = href.charAt(0) === '#';
+      if(hashOnly) return; // same-page anchors handled by browser
+      // Strip any query/hash for resolution but keep for re-attach (rare).
+      var hashPart = '';
+      var hashIdx = href.indexOf('#');
+      if(hashIdx !== -1){ hashPart = href.substring(hashIdx); href = href.substring(0, hashIdx); }
+      if(!href.endsWith('.md')) return;
+
       var resolved = href;
       if(dir && href.indexOf('/') !== 0 && href.indexOf('..') !== 0){
         resolved = dir + '/' + href;
+      } else if(href.indexOf('./') === 0){
+        resolved = (dir ? dir + '/' : '') + href.substring(2);
       } else if(href.indexOf('../') === 0){
-        var parts = dir.split('/'); parts.pop();
-        resolved = (parts.length ? parts.join('/') + '/' : '') + href.replace('../','');
+        var parts = dir.split('/');
+        while(resolved.indexOf('../') === 0){ parts.pop(); resolved = resolved.substring(3); }
+        resolved = (parts.length ? parts.join('/') + '/' : '') + resolved;
       }
       if(MD_DATA[resolved]){
-        a.onclick = function(e){ e.preventDefault(); loadFile(resolved, resolved.split('/').pop().replace('.md','')); };
+        a.onclick = function(e){ e.preventDefault(); loadFile(resolved); };
       }
     });
 
     document.getElementById('content').scrollTop = 0;
     closeSidebar();
-    if(!fromPopState) window.history.pushState({path:p}, '', '#' + p);
+    if(!opts.fromPopState){
+      window.history.pushState({path:p}, '', '#' + p);
+    }
   }
 
   window._goBack = function(){
     if(historyIndex > 0){
       historyIndex--;
       var p = history[historyIndex];
-      loadFile(p, p.split('/').pop().replace('.md',''), true);
+      loadFile(p, {fromPopState:true});
       window.history.pushState({path:p}, '', '#' + p);
     }
   };
@@ -263,40 +393,58 @@ var FILES = {
     if(historyIndex < history.length - 1){
       historyIndex++;
       var p = history[historyIndex];
-      loadFile(p, p.split('/').pop().replace('.md',''), true);
+      loadFile(p, {fromPopState:true});
       window.history.pushState({path:p}, '', '#' + p);
     }
   };
+  window._loadFile = function(p){ loadFile(p); };
 
-  // expose for breadcrumb onclick
-  window._loadFile = loadFile;
-
-  // 브라우저 뒤로/앞으로 버튼
   window.addEventListener('popstate', function(e){
     if(navigating) return;
-    var p = (e.state && e.state.path) || location.hash.slice(1) || 'README.md';
+    var p = (e.state && e.state.path) || location.hash.slice(1) || initialDefaultPath();
     if(MD_DATA[p]){
       navigating = true;
-      // history 배열에서 해당 항목 찾기
       var idx = history.lastIndexOf(p);
       if(idx !== -1) historyIndex = idx;
-      loadFile(p, p.split('/').pop().replace('.md',''), true);
+      loadFile(p, {fromPopState:true});
       navigating = false;
     }
   });
 
   document.addEventListener('keydown', function(e){
     if((e.ctrlKey || e.metaKey) && e.key === 'k'){ e.preventDefault(); document.getElementById('search').focus(); }
-    // Alt+Left/Right for back/forward
     if(e.altKey && e.key === 'ArrowLeft'){ e.preventDefault(); window._goBack(); }
     if(e.altKey && e.key === 'ArrowRight'){ e.preventDefault(); window._goForward(); }
   });
 
+  // ---- Language button wiring ----
+  document.getElementById('langKo').addEventListener('click', function(){ if(getLang()!=='ko') applyLang('ko'); });
+  document.getElementById('langEn').addEventListener('click', function(){ if(getLang()!=='en') applyLang('en'); });
+
+  function initialDefaultPath(){
+    return (getLang() === 'en' && MD_DATA['README_en.md']) ? 'README_en.md' : 'README.md';
+  }
+
+  // ---- Bootstrap ----
+  var initialLang = getLang();
+  applyLang(initialLang, {skipContentSwap:true});
+
   var hash = location.hash.slice(1);
   if(hash && MD_DATA[hash]){
-    loadFile(hash, hash.split('/').pop().replace('.md',''));
+    // If URL hash points to a language different from the preference, honor the URL.
+    var info = PATH_INDEX[hash];
+    if(info && info.lang !== initialLang){
+      // Adjust lang to match URL without re-navigating.
+      setLang(info.lang);
+      document.getElementById('langKo').classList.toggle('active', info.lang === 'ko');
+      document.getElementById('langEn').classList.toggle('active', info.lang === 'en');
+      document.getElementById('search').placeholder = (info.lang === 'en') ? 'Search... (Ctrl+K)' : '검색... (Ctrl+K)';
+      document.getElementById('sidebarTitle').textContent = (info.lang === 'en') ? 'Hansol HS App Docs' : '한솔고 앱 Docs';
+      renderNav(info.lang);
+    }
+    loadFile(hash);
   } else {
-    loadFile('README.md', 'README');
+    loadFile(initialDefaultPath());
   }
 })();
 </script>
