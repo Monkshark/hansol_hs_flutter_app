@@ -133,4 +133,4 @@ Client-side guards are bypassable, so **the real defense is the per-field valida
 - [Data Model](./data-model_en.md)
 - [Architecture Decisions](./architecture-decisions_en.md)
 - [Account & Access](./account-and-access_en.md)
-- [Deployment Guide](../../DEPLOY_en.md) — rules deploy commands
+- [Deployment Guide](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY_en.md) — rules deploy commands
