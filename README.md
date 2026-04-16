@@ -142,22 +142,22 @@ graph TD
 - **Riverpod Provider 의존성 그래프**, **데이터 흐름 계층 모델** → [architecture-overview.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview.md)
 - 저장소 분담(sqflite/Firestore/SecureStorage/Storage) 설계 근거 → [ADR-06](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions.md)
 
-### 🔗 [인터랙티브 Riverpod 그래프 (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
+### 🔗 [인터랙티브 Riverpod 그래프](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
 D3.js 기반 zoom/drag 그래프로 전체 Provider 노드 탐색 가능. 원본 HTML은 `docs/riverpod_graph.html`.
 
 ## 의사결정 일지 요약
 
-| ADR | 결정 | 링크 |
-|---|---|---|
-| 01 | 상태관리 = Riverpod 2.5 | [링크](./docs/guides/architecture-decisions.md#adr-01-상태관리-riverpod-25-vs-provider--bloc--getx) |
-| 02 | 성적 저장 = flutter_secure_storage (로컬 전용) | [링크](./docs/guides/architecture-decisions.md#adr-02-민감-데이터-저장소-flutter_secure_storage-vs-sharedpreferences) |
-| 03 | 게시판 검색 = 클라이언트 n-gram 인덱싱 | [링크](./docs/guides/architecture-decisions.md#adr-03-게시판-검색-클라이언트-n-gram-인덱싱-vs-algolia--typesense--클라이언트-필터) |
-| 04 | 좋아요 카운터 = Map<uid,bool> + 비정규화 int | [링크](./docs/guides/architecture-decisions.md#adr-04-좋아요-카운터-mapuidbool--비정규화-int-vs-map-only--int-only) |
-| 05 | 차트 = CustomPainter 직접 구현 | [링크](./docs/guides/architecture-decisions.md#adr-05-차트-custompainter-직접-구현-vs-fl_chart--syncfusion) |
-| 06 | 저장소 분담 = SQLite / Firestore / SecureStorage / Cloud Storage | [링크](./docs/guides/architecture-decisions.md#adr-06-저장소-분담-sqlite--firestore--securestorage--cloud-storage) |
-| 07 | DI = GetIt + 추상 Repository | [링크](./docs/guides/architecture-decisions.md#adr-07-di-getit--추상-repository-vs-riverpod-provider만--get_it-직접만) |
-| 08 | 테스트 전략 = Unit + Provider + Widget + Rules 4계층 | [링크](./docs/guides/architecture-decisions.md#adr-08-테스트-전략-unit--provider--widget--rules-4계층) |
+| ADR | 결정 |
+|---|---|
+| 01 | 상태관리 = Riverpod 2.5 |
+| 02 | 성적 저장 = flutter_secure_storage (로컬 전용) |
+| 03 | 게시판 검색 = 클라이언트 n-gram 인덱싱 |
+| 04 | 좋아요 카운터 = Map<uid,bool> + 비정규화 int |
+| 05 | 차트 = CustomPainter 직접 구현 |
+| 06 | 저장소 분담 = SQLite / Firestore / SecureStorage / Cloud Storage |
+| 07 | DI = GetIt + 추상 Repository |
+| 08 | 테스트 전략 = Unit + Provider + Widget + Rules 4계층 |
 
 전체 상세는 [architecture-decisions.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions.md).
 
@@ -251,9 +251,15 @@ erDiagram
 
 ## 라이선스
 
-이 레포는 학습/포트폴리오 목적으로 공개되었습니다. 학교 로고·이미지 자산의 무단 사용은 제한됩니다.
+이 레포는 학습/포트폴리오 목적으로 공개되었습니다. 내부 소스 이미지 자산의 무단 사용은 제한됩니다.
 
 ## Contact
 
-- 버그 / 기능 제안: GitHub Issues · justinchoo0814@gmail.com · IG [@void___main](https://instagram.com/void___main)
+- 버그 / 기능 제안: GitHub Issues · IG [@void___main](https://instagram.com/void___main)
 - 앱 내: 설정 → 건의사항 / 버그 제보
+- 이메일 ([📧 메일쓰기](mailto:justinchoo0814@gmail.com?subject=%ED%95%9C%EC%86%94%EA%B3%A0%20%EC%95%B1)):
+
+```
+justinchoo0814@gmail.com
+```
+
