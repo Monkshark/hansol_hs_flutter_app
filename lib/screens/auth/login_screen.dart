@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/main.dart' show providerContainer;
 import 'package:hansol_high_school/notification/fcm_service.dart';
 import 'package:hansol_high_school/providers/settings_provider.dart';
@@ -47,6 +48,14 @@ class _LoginScreenState extends State<LoginScreen> {
     if (!mounted) return;
 
     if (hasProfile) {
+      final profile = await AuthService.getUserProfile();
+      if (profile != null) {
+        SettingData().restoreGradeIfNeeded(
+          profileGrade: profile.grade,
+          profileClassNum: profile.classNum,
+        );
+      }
+      if (!mounted) return;
       AuthService.clearProfileCache();
       providerContainer.read(appRefreshProvider.notifier).refresh();
       Navigator.of(context).pop(true);

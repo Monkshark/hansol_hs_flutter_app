@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -581,6 +582,19 @@ class _SettingScreenState extends State<SettingScreen> {
         classNum = selectedValues[1];
         _saveSettings();
       });
+      _syncGradeToFirestore(selectedValues[0], selectedValues[1]);
+    }
+  }
+  Future<void> _syncGradeToFirestore(int g, int c) async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'grade': g,
+        'classNum': c,
+      });
+    } catch (e) {
+      log('SettingScreen: Firestore grade sync error: $e');
     }
   }
 }
