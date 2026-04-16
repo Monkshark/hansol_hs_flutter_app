@@ -20,7 +20,7 @@ Management functionality for `manager` / `admin` roles. Delivered through two ch
 
 ### ExpansionTile-Based Tabs
 
-Five sections as collapsible `ExpansionTile` cards — collapsed tabs render nothing, so Firestore reads are 0 ([Technical Challenge #9](../technical-challenges_en.md#9-admin-screen-firestore-read-overload-stream--future-transition)).
+Five sections as collapsible `ExpansionTile` cards — collapsed tabs render nothing, so Firestore reads are 0 ([Technical Challenge #9](../guides/technical-challenges_en.md#9-admin-screen-firestore-read-overload-stream--future-transition)).
 
 | Tab | Content |
 |---|---|
@@ -107,7 +107,7 @@ graph LR
 - **Auto-unsuspension**: Cloud Functions scheduler checks `suspendedUntil <= now` hourly → deletes the field → `onUserUpdated` trigger → unsuspension push
 
 ## See Also
-- [Account & Access](../account-and-access_en.md)
-- [Security Model](../security_en.md) — rules helpers, field validation
-- [CI/CD Setup](../cicd-setup_en.md)
+- [Account & Access](../guides/account-and-access_en.md)
+- [Security Model](../guides/security_en.md) — rules helpers, field validation
+- [CI/CD Setup](../guides/cicd-setup_en.md)
 - [Deployment Guide](../../DEPLOY_en.md)

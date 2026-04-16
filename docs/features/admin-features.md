@@ -20,7 +20,7 @@
 
 ### ExpansionTile 기반 탭 구조
 
-5개 섹션이 펼쳤다 접었다 할 수 있는 `ExpansionTile` 카드로 구성 — 닫힌 탭은 child 렌더 안 함으로 Firestore 읽기 0 ([기술과제 #9](../technical-challenges.md#9-관리자-화면-firestore-읽기-과다-stream--future-전환))
+5개 섹션이 펼쳤다 접었다 할 수 있는 `ExpansionTile` 카드로 구성 — 닫힌 탭은 child 렌더 안 함으로 Firestore 읽기 0 ([기술과제 #9](../guides/technical-challenges.md#9-관리자-화면-firestore-읽기-과다-stream--future-전환))
 
 | 탭 | 내용 |
 |---|---|
@@ -107,7 +107,7 @@ graph LR
 - **자동 정지 해제**: Cloud Functions 스케줄러가 매시간 `suspendedUntil <= now` 조회 → 필드 삭제 → `onUserUpdated` 트리거 → 해제 푸시
 
 ## 관련 문서
-- [인증 & 접근](../account-and-access.md)
-- [보안 모델](../security.md) — rules 헬퍼 함수, 필드 단위 검증
-- [CI/CD & 배포](../cicd-setup.md)
+- [인증 & 접근](../guides/account-and-access.md)
+- [보안 모델](../guides/security.md) — rules 헬퍼 함수, 필드 단위 검증
+- [CI/CD & 배포](../guides/cicd-setup.md)
 - [배포 가이드](../../DEPLOY.md)
