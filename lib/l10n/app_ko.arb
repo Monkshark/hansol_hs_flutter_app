@@ -115,6 +115,8 @@
   "meal_breakfast": "조식",
   "meal_lunch": "중식",
   "meal_dinner": "석식",
+  "meal_yearMonthHeader": "{year}년 {month}월",
+  "@meal_yearMonthHeader": {"placeholders": {"year": {"type": "int"}, "month": {"type": "int"}}},
 
   "notice_noSchedule": "일정이 없습니다",
   "notice_continuousDeleteTitle": "연속 일정 삭제",
@@ -394,6 +396,9 @@
   "grade_noData": "데이터가 없습니다",
   "grade_scoreNoData": "점수 데이터가 없습니다",
   "grade_goalGrade": "목표 등급",
+  "grade_goalSettingTooltip": "목표 설정",
+  "grade_goalPercentileTitle": "{subject} 목표 백분위",
+  "@grade_goalPercentileTitle": {"placeholders": {"subject": {}}},
 
   "gradeInput_screenTitle": "시험 추가",
   "gradeInput_screenEdit": "시험 수정",

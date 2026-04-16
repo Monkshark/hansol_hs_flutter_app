@@ -332,6 +332,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get meal_dinner => '석식';
 
   @override
+  String meal_yearMonthHeader(int year, int month) {
+    return '$year년 $month월';
+  }
+
+  @override
   String get notice_noSchedule => '일정이 없습니다';
 
   @override
@@ -1103,6 +1108,14 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get grade_goalGrade => '목표 등급';
+
+  @override
+  String get grade_goalSettingTooltip => '목표 설정';
+
+  @override
+  String grade_goalPercentileTitle(Object subject) {
+    return '$subject 목표 백분위';
+  }
 
   @override
   String get gradeInput_screenTitle => '시험 추가';

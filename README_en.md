@@ -10,7 +10,6 @@
 [![codecov](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app/branch/master/graph/badge.svg)](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app)
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
-[![Riverpod Graph](https://img.shields.io/badge/Riverpod%20Graph-Interactive-6c5ce7?logo=d3.js&logoColor=white)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
 > An integrated school platform for students, teachers, alumni, and parents of Hansol High School (Sejong, Korea).
 
