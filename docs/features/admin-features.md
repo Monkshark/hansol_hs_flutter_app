@@ -110,4 +110,4 @@ graph LR
 - [인증 & 접근](../guides/account-and-access.md)
 - [보안 모델](../guides/security.md) — rules 헬퍼 함수, 필드 단위 검증
 - [CI/CD & 배포](../guides/cicd-setup.md)
-- [배포 가이드](../../DEPLOY.md)
+- [배포 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY.md)

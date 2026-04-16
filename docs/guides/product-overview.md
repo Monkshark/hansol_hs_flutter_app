@@ -73,6 +73,6 @@
 ## 관련 문서
 - [아키텍처 개요](./architecture-overview.md)
 - [아키텍처 의사결정 일지](./architecture-decisions.md)
-- [기여 가이드](../../CONTRIBUTING.md)
-- [배포 가이드](../../DEPLOY.md)
-- [엔드유저 가이드](../../USER_GUIDE.md)
+- [기여 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/CONTRIBUTING.md)
+- [배포 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/DEPLOY.md)
+- [엔드유저 가이드](https://github.com/Monkshark/hansol_hs_flutter_app/blob/master/USER_GUIDE.md)

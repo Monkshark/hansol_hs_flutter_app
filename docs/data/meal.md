@@ -71,5 +71,5 @@ factory Meal.fromJson(Map<String, dynamic> json) => _$MealFromJson(json);
 | [`MealDataApi`](../api/meal_data_api.md)`.getMeal` | API 응답을 Meal 객체로 변환 후 반환 |
 | [`MealDataApi`](../api/meal_data_api.md)`._saveToCache` | Meal을 JSON으로 직렬화해 SharedPreferences에 캐시 |
 | `MealScreen` | Meal.meal을 줄바꿈 기준으로 split해 메뉴 리스트 표시 |
-| [`WidgetService`](../widgets/home_widget/widget_service.md)`.updateMealWidget` | Meal.meal에서 알레르기 정보 제거 후 홈 위젯에 전달 |
+| `WidgetService.updateMealWidget` | Meal.meal에서 알레르기 정보 제거 후 홈 위젯에 전달 |
 | [`DailyMealNotification`](../notification/daily_meal_notification.md) | Meal.meal을 한 줄로 합쳐 알림 본문에 사용 |
