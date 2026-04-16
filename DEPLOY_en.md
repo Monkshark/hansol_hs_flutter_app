@@ -43,7 +43,7 @@ cd ..
 firebase deploy --only firestore:rules,firestore:indexes
 ```
 
-**Warning**: Rules changes take effect immediately. Always run the 34 rules tests ([testing_en.md](./docs/index.html#guides/testing_en.md)) before deploying. Background: [security_en.md](./docs/index.html#guides/security_en.md).
+**Warning**: Rules changes take effect immediately. Always run the 34 rules tests ([testing_en.md](./docs/guides/testing_en.md)) before deploying. Background: [security_en.md](./docs/guides/security_en.md).
 
 ## 2. Cloud Storage Rules
 
@@ -169,7 +169,7 @@ No separate deployment — widgets ship with the app.
 | Android signing | `android/key.properties`, `.jks` | local build machine |
 | iOS signing | Xcode Automatic Signing / provisioning profile | local build machine |
 
-**Never commit real keys.** Verify `.gitignore`. CI only validates builds with dummy values ([cicd-setup_en.md](./docs/index.html#guides/cicd-setup_en.md)).
+**Never commit real keys.** Verify `.gitignore`. CI only validates builds with dummy values ([cicd-setup_en.md](./docs/guides/cicd-setup_en.md)).
 
 ## 8. Recommended Deploy Order
 
@@ -195,7 +195,7 @@ Deploy rules and Functions **before** the app so old clients don't break under n
 - **Admin Web**: Vercel lets you promote a previous deploy.
 
 ## Related Docs
-- [CI/CD Setup](./docs/index.html#guides/cicd-setup_en.md)
-- [Security Model](./docs/index.html#guides/security_en.md)
-- [Architecture Overview](./docs/index.html#guides/architecture-overview_en.md)
+- [CI/CD Setup](./docs/guides/cicd-setup_en.md)
+- [Security Model](./docs/guides/security_en.md)
+- [Architecture Overview](./docs/guides/architecture-overview_en.md)
 - [Contributing Guide](./CONTRIBUTING_en.md)

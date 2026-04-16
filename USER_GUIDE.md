@@ -102,7 +102,7 @@ manager / admin 역할은 추가 기능 이용 가능:
 - **Flutter Admin 화면**: 설정 → 관리자
 - **Admin Web**: 별도 웹 대시보드 주소 (관리자에게 안내)
 
-상세는 [docs/features/admin-features.md](./docs/index.html#features/admin-features.md) 참조.
+상세는 [docs/features/admin-features.md](./docs/features/admin-features.md) 참조.
 
 ## 계정 관리
 
@@ -153,7 +153,7 @@ A. 일반 사용자는 익명 번호만 보입니다. admin은 감사 로그로 
 앱 내 "건의사항 / 버그 제보" 메뉴를 이용하시면 관리자가 확인합니다. 긴급한 경우 학교 공식 채널로 연락하세요.
 
 ## 관련 문서
-- [공개 기능 상세](./docs/index.html#features/public-features.md)
-- [커뮤니티 기능 상세](./docs/index.html#features/community-features.md)
-- [개인 기능 상세](./docs/index.html#features/personal-features.md)
-- [인증 & 접근](./docs/index.html#guides/account-and-access.md)
+- [공개 기능 상세](./docs/features/public-features.md)
+- [커뮤니티 기능 상세](./docs/features/community-features.md)
+- [개인 기능 상세](./docs/features/personal-features.md)
+- [인증 & 접근](./docs/guides/account-and-access.md)
