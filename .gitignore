@@ -209,3 +209,6 @@ test/failures/
 
 .firebase/
 admin-web/tsconfig.tsbuildinfo
+
+# Local-only study notes
+docs/_local/
