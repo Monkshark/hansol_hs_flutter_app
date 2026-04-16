@@ -1,7 +1,9 @@
 import 'dart:developer';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
+import 'package:hansol_high_school/data/auth_service.dart' show AuthService;
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -400,6 +402,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
       _classNum = result[1];
       SettingData().grade = _grade;
       SettingData().classNum = _classNum;
+      _syncGradeToFirestore(_grade, _classNum);
 
       if (_grade >= 2) {
         if (!mounted) return;
@@ -549,6 +552,19 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         ])),
       ]),
     ))]);
+  }
+
+  Future<void> _syncGradeToFirestore(int g, int c) async {
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await FirebaseFirestore.instance.collection('users').doc(uid).update({
+        'grade': g,
+        'classNum': c,
+      });
+    } catch (e) {
+      log('TimetableViewScreen: Firestore grade sync error: $e');
+    }
   }
 }
 

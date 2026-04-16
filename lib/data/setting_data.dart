@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingData {
@@ -12,6 +13,15 @@ class SettingData {
 
   Future<void> init() async {
     _sharedPreferences = await SharedPreferences.getInstance();
+  }
+
+  /// Firestore UserProfile에서 학년/반을 복원 (로컬에 미설정일 때만)
+  void restoreGradeIfNeeded({required int profileGrade, required int profileClassNum}) {
+    if (isGradeSet) return;
+    if (profileGrade <= 0 || profileClassNum <= 0) return;
+    grade = profileGrade;
+    classNum = profileClassNum;
+    log('SettingData: restored grade=$profileGrade, class=$profileClassNum from Firestore');
   }
 
   set grade(int value) => _sharedPreferences.setInt('Grade', value);
