@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hansol_high_school/data/exceptions.dart';
+import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/widgets/error_snackbar.dart';
 
 void main() {
   Widget wrap(Widget child) {
-    return MaterialApp(home: Scaffold(body: child));
+    return MaterialApp(
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: AppLocalizations.supportedLocales,
+      locale: const Locale('ko'),
+      home: Scaffold(body: child),
+    );
   }
 
   testWidgets('NetworkException → 네트워크 메시지', (tester) async {
@@ -75,7 +87,7 @@ void main() {
     await tester.tap(find.text('trigger'));
     await tester.pump();
 
-    expect(find.text('오류가 발생했습니다'), findsOneWidget);
+    expect(find.text('문제가 발생했습니다'), findsOneWidget);
   });
 
   testWidgets('String 에러 → 기본 메시지', (tester) async {
@@ -89,7 +101,7 @@ void main() {
     await tester.tap(find.text('trigger'));
     await tester.pump();
 
-    expect(find.text('오류가 발생했습니다'), findsOneWidget);
+    expect(find.text('문제가 발생했습니다'), findsOneWidget);
   });
 
   testWidgets('SnackBar가 실제로 표시됨', (tester) async {

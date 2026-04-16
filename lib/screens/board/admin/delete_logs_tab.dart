@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 
 class DeleteLogsTab extends StatefulWidget {
   const DeleteLogsTab({super.key});
@@ -42,7 +43,10 @@ class DeleteLogsTabState extends State<DeleteLogsTab> {
           );
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('오류가 발생했습니다'));
+          return ErrorView(
+            message: AppLocalizations.of(context)!.error_loadFailed,
+            onRetry: () { setState(() => _future = _fetch()); },
+          );
         }
 
         final docs = snapshot.data?.docs ?? [];

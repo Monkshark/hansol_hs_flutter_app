@@ -11,6 +11,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -314,7 +315,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
               stream: FirebaseFirestore.instance.collection('chats').doc(widget.chatId).snapshots(),
               builder: (context, chatSnapshot) {
                 if (chatSnapshot.hasError) {
-                  return const Center(child: Text('오류가 발생했습니다'));
+                  return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
                 }
                 final chatData = chatSnapshot.data?.data();
                 final otherUnread = (chatData?['unreadCount'] as Map<String, dynamic>?)?[widget.otherUid] ?? 0;
@@ -324,7 +325,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                       .collection('messages').orderBy('createdAt', descending: true).limit(30).snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
-                      return const Center(child: Text('오류가 발생했습니다'));
+                      return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
                     }
                     final docs = snapshot.data?.docs ?? [];
                     if (docs.isEmpty) return Center(child: Text(AppLocalizations.of(context)!.chat_firstMessage, style: TextStyle(color: AppColors.theme.darkGreyColor)));

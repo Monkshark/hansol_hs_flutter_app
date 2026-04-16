@@ -12,6 +12,7 @@ import 'package:hansol_high_school/screens/sub/teacher_timetable_select_screen.d
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/screens/sub/timetable_widgets/color_picker_dialog.dart';
 import 'package:hansol_high_school/screens/sub/timetable_widgets/conflict_dialog.dart';
@@ -474,6 +475,12 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return ErrorView(
+              message: AppLocalizations.of(context)!.timetable_loadError,
+              onRetry: () { setState(() => _future = _buildTimetable()); },
+            );
           }
           if (!snapshot.hasData) {
             return Center(child: Text(AppLocalizations.of(context)!.timetable_loadError));
