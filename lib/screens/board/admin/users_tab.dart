@@ -6,6 +6,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/error_snackbar.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 
 class UsersTab extends StatefulWidget {
   final String filter;
@@ -81,7 +82,10 @@ class UsersTabState extends State<UsersTab> {
           );
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('오류가 발생했습니다'));
+          return ErrorView(
+            message: AppLocalizations.of(context)!.error_loadFailed,
+            onRetry: refresh,
+          );
         }
         final allDocs = snapshot.data?.docs ?? [];
         final docs = allDocs.where((d) {
@@ -128,7 +132,7 @@ class UsersTabState extends State<UsersTab> {
           future: AuthService.getCachedProfile(),
           builder: (context, myProfileSnap) {
             if (myProfileSnap.hasError) {
-              return const Center(child: Text('오류가 발생했습니다'));
+              return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
             }
             final isAdmin = myProfileSnap.data?.isAdmin ?? false;
 

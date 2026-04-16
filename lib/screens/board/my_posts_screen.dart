@@ -6,6 +6,7 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 
 class MyPostsScreen extends StatefulWidget {
   const MyPostsScreen({super.key});
@@ -88,7 +89,7 @@ class _MyPostsList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('오류가 발생했습니다'));
+          return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
         }
 
         final docs = snapshot.data?.docs ?? [];
@@ -133,7 +134,7 @@ class _MyCommentsList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('오류가 발생했습니다'));
+          return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
         }
 
         final docs = snapshot.data?.docs ?? [];
@@ -215,7 +216,7 @@ class _BookmarkedPostsList extends StatelessWidget {
           return const Center(child: CircularProgressIndicator());
         }
         if (snapshot.hasError) {
-          return const Center(child: Text('오류가 발생했습니다'));
+          return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
         }
         final docs = snapshot.data?.docs ?? [];
         if (docs.isEmpty) {

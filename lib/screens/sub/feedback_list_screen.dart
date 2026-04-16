@@ -4,6 +4,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:intl/intl.dart';
 
 class FeedbackListScreen extends StatelessWidget {
@@ -33,6 +34,9 @@ class FeedbackListScreen extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
           }
 
           final docs = snapshot.data?.docs ?? [];
