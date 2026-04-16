@@ -354,11 +354,23 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
         commentData['replyTo'] = _replyToCommentId;
         commentData['replyToName'] = _replyToName;
       }
-      await _repo.addComment(widget.postId, commentData);
+      final commentRef = await _repo.addComment(widget.postId, commentData);
       unawaited(AnalyticsService.logCommentCreate(
         postId: widget.postId,
         isReply: _replyToCommentId != null,
       ));
+
+      if (commentRef == null) {
+        // 오프라인 → 큐에 저장됨
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(AppLocalizations.of(context)!.offline_commentQueued)),
+          );
+        }
+        _commentController.clear();
+        setState(() { _sending = false; _replyToCommentId = null; _replyToName = null; });
+        return;
+      }
 
       final postSnap = await _repo.getPost(widget.postId);
       final postData = postSnap.data();

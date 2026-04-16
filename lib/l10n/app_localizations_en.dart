@@ -2379,4 +2379,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get error_loadFailed => 'Failed to load data';
+
+  @override
+  String get offline_postQueued =>
+      'You are offline. Your post will be published when connected.';
+
+  @override
+  String get offline_commentQueued =>
+      'You are offline. Your comment will be posted when connected.';
+
+  @override
+  String get offline_syncComplete => 'Sync complete';
+
+  @override
+  String get offline_syncFailed => 'Some operations failed to sync';
+
+  @override
+  String offline_pendingCount(int count) {
+    return '$count pending';
+  }
+
+  @override
+  String get offline_syncing => 'Syncing...';
 }

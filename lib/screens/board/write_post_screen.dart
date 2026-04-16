@@ -666,9 +666,18 @@ class _WritePostScreenState extends State<WritePostScreen> {
         postData['anonymousMapping'] = <String, dynamic>{};
         final docRef = await repo.createPost(postData);
 
-        if (_images.isNotEmpty) {
-          final urls = await _uploadImages(docRef.id);
-          await docRef.update({'imageUrls': urls});
+        if (docRef == null) {
+          // 오프라인 → 큐에 저장됨
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(AppLocalizations.of(context)!.offline_postQueued)),
+            );
+          }
+        } else {
+          if (_images.isNotEmpty) {
+            final urls = await _uploadImages(docRef.id);
+            await docRef.update({'imageUrls': urls});
+          }
         }
         unawaited(AnalyticsService.logPostCreate(boardType: _category, isAnonymous: _isAnonymous));
       }

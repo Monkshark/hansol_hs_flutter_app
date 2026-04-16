@@ -752,5 +752,17 @@
   "error_generic": "Something went wrong",
   "error_retry": "Retry",
   "error_network": "Please check your network connection",
-  "error_loadFailed": "Failed to load data"
+  "error_loadFailed": "Failed to load data",
+
+  "offline_postQueued": "You are offline. Your post will be published when connected.",
+  "offline_commentQueued": "You are offline. Your comment will be posted when connected.",
+  "offline_syncComplete": "Sync complete",
+  "offline_syncFailed": "Some operations failed to sync",
+  "offline_pendingCount": "{count} pending",
+  "@offline_pendingCount": {
+    "placeholders": {
+      "count": {"type": "int"}
+    }
+  },
+  "offline_syncing": "Syncing..."
 }
