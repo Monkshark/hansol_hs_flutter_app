@@ -317,7 +317,7 @@ class AuthService {
 
   static Future<UserProfile?> getCachedProfile() async {
     if (_cachedProfile != null && _cacheTime != null &&
-        DateTime.now().difference(_cacheTime!).inMinutes < 5) {
+        DateTime.now().difference(_cacheTime!).inMinutes < 1) {
       return _cachedProfile;
     }
     _cachedProfile = await getUserProfile();

@@ -344,13 +344,18 @@ class _MainScreenState extends State<MainScreen> {
     });
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _checkAccountExists();
+      if (!mounted) return;
       await _checkNewSemester();
+      if (!mounted) return;
       final prefs = await SharedPreferences.getInstance();
-      if (prefs.getBool('onboarding_done') != true && mounted) {
+      if (!mounted) return;
+      if (prefs.getBool('onboarding_done') != true) {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const OnboardingScreen()));
+        if (!mounted) return;
       }
-      if (!AuthService.isLoggedIn && mounted) {
+      if (!AuthService.isLoggedIn) {
         await Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+        if (!mounted) return;
       }
       if (AuthService.isLoggedIn) {
         unawaited(GetIt.I<LocalDataBase>().loadFromFirestore());

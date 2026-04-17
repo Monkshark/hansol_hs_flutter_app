@@ -93,8 +93,11 @@ class PostRepository {
       await OfflineQueueManager.instance.enqueueComment(postId, commentData);
       return null;
     }
-    final ref = await commentsRef(postId).add(commentData);
-    await postRef(postId).update({'commentCount': FieldValue.increment(1)});
+    final ref = commentsRef(postId).doc();
+    final batch = FirebaseFirestore.instance.batch();
+    batch.set(ref, commentData);
+    batch.update(postRef(postId), {'commentCount': FieldValue.increment(1)});
+    await batch.commit();
     return ref;
   }
 
@@ -232,8 +235,10 @@ class PostRepository {
   // ─── Delete ───
 
   Future<void> deleteComment(String postId, String commentId) async {
-    await commentsRef(postId).doc(commentId).delete();
-    await postRef(postId).update({'commentCount': FieldValue.increment(-1)});
+    final batch = FirebaseFirestore.instance.batch();
+    batch.delete(commentsRef(postId).doc(commentId));
+    batch.update(postRef(postId), {'commentCount': FieldValue.increment(-1)});
+    await batch.commit();
   }
 
   Future<void> deletePost(String postId) async {
