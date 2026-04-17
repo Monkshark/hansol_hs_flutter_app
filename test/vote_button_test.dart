@@ -87,4 +87,55 @@ void main() {
     final textWidget = tester.widget<Text>(find.text('7'));
     expect(textWidget.style?.color, Colors.red);
   });
+
+  group('접근성', () {
+    Semantics findVoteSemantics(WidgetTester tester) {
+      return tester.widget<Semantics>(find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.button == true && w.properties.label != null,
+      ));
+    }
+
+    testWidgets('좋아요 버튼에 semantic label 존재', (tester) async {
+      await tester.pumpWidget(wrap(VoteButton(
+        icon: Icons.thumb_up_outlined,
+        activeIcon: Icons.thumb_up,
+        count: 5,
+        isActive: false,
+        activeColor: Colors.blue,
+        onTap: () {},
+      )));
+
+      final semantics = findVoteSemantics(tester);
+      expect(semantics.properties.label, 'Like 5');
+      expect(semantics.properties.button, isTrue);
+    });
+
+    testWidgets('싫어요 버튼에 semantic label 존재', (tester) async {
+      await tester.pumpWidget(wrap(VoteButton(
+        icon: Icons.thumb_down_outlined,
+        activeIcon: Icons.thumb_down,
+        count: 3,
+        isActive: false,
+        activeColor: Colors.red,
+        onTap: () {},
+      )));
+
+      final semantics = findVoteSemantics(tester);
+      expect(semantics.properties.label, 'Dislike 3');
+    });
+
+    testWidgets('count 변경 시 semantic label 업데이트', (tester) async {
+      await tester.pumpWidget(wrap(VoteButton(
+        icon: Icons.thumb_up_outlined,
+        activeIcon: Icons.thumb_up,
+        count: 0,
+        isActive: false,
+        activeColor: Colors.blue,
+        onTap: () {},
+      )));
+
+      final semantics = findVoteSemantics(tester);
+      expect(semantics.properties.label, 'Like 0');
+    });
+  });
 }
