@@ -1,6 +1,7 @@
 import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/network/network_status.dart';
 import 'package:hansol_high_school/network/offline_queue_manager.dart';
 
@@ -291,8 +292,8 @@ class PostRepository {
       _db.collection('reports').add({
         'postId': postId,
         'reporterUid': reporterUid,
-        'reason': reason,
-        'detail': detail ?? '',
+        'reason': InputSanitizer.sanitize(reason),
+        'detail': InputSanitizer.sanitize(detail ?? ''),
         'createdAt': FieldValue.serverTimestamp(),
       });
 }
