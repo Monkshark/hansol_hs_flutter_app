@@ -6,6 +6,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   final bool isUpdate;
@@ -131,11 +132,10 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
       if (mounted) Navigator.of(context).pop(true);
     } catch (e) {
-      debugPrint('ProfileSetup: save failed: $e');
+      log('ProfileSetup: save failed: $e');
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.profileSetup_saveFailed)));
+        showErrorSnackbar(context, e);
       }
     }
   }

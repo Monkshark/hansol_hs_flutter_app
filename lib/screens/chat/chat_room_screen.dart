@@ -120,7 +120,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
       if (!mounted) return;
       Navigator.of(context).pop();
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftError)));
+      log('ChatRoom: leave error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     }
   }
 
@@ -277,11 +278,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
         'unreadCount.${widget.otherUid}': FieldValue.increment(1),
       });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.chat_imageSendError)),
-        );
-      }
+      log('ChatRoom: image send error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     } finally {
       if (mounted) setState(() => _uploadingImage = false);
     }
@@ -470,7 +468,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
                 onSubmitted: (_) => _sendMessage(),
               )),
               const SizedBox(width: 4),
-              IconButton(onPressed: _sendMessage, icon: Icon(Icons.send, color: AppColors.theme.primaryColor)),
+              IconButton(onPressed: _sendMessage, tooltip: 'Send message', icon: Icon(Icons.send, color: AppColors.theme.primaryColor)),
             ]),
           ),
         ],

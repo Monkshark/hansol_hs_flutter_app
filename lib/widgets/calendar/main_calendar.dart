@@ -125,17 +125,25 @@ class _MainCalendarState extends State<MainCalendar> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                GestureDetector(
-                  onTap: () => _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut),
-                  child: Icon(Icons.chevron_left, color: textColor, size: 22),
+                Semantics(
+                  button: true,
+                  label: 'Previous month',
+                  child: GestureDetector(
+                    onTap: () => _pageController.previousPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut),
+                    child: Icon(Icons.chevron_left, color: textColor, size: 22),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Text(DateFormat(AppLocalizations.of(context)!.common_dateYM, Localizations.localeOf(context).toString()).format(_focusedDay),
                   style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700)),
                 const SizedBox(width: 16),
-                GestureDetector(
-                  onTap: () => _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut),
-                  child: Icon(Icons.chevron_right, color: textColor, size: 22),
+                Semantics(
+                  button: true,
+                  label: 'Next month',
+                  child: GestureDetector(
+                    onTap: () => _pageController.nextPage(duration: const Duration(milliseconds: 300), curve: Curves.easeOut),
+                    child: Icon(Icons.chevron_right, color: textColor, size: 22),
+                  ),
                 ),
               ],
             ),

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
@@ -6,6 +7,7 @@ import 'package:hansol_high_school/screens/chat/chat_room_screen.dart';
 import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:hansol_high_school/screens/chat/chat_utils.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:hansol_high_school/widgets/skeleton.dart';
 import 'package:intl/intl.dart';
 
@@ -97,7 +99,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
               final unreadCount = (data['unreadCount'] as Map<String, dynamic>?)?[uid] ?? 0;
               final timeStr = lastMessageAt != null ? _formatTime(lastMessageAt.toDate()) : '';
 
-              return GestureDetector(
+              return Semantics(
+                button: true,
+                label: otherName,
+                child: GestureDetector(
                 onTap: () => Navigator.push(context, MaterialPageRoute(
                   builder: (_) => ChatRoomScreen(chatId: docs[index].id, otherName: otherName, otherUid: otherUid),
                 )),
@@ -158,7 +163,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     ],
                   ),
                 ),
-              );
+              ));
             },
           );
         },
@@ -349,7 +354,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftSuccess)));
     } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(AppLocalizations.of(context)!.chat_leftError)));
+      log('ChatList: leave error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     }
   }
 

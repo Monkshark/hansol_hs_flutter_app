@@ -48,6 +48,9 @@ class PostCard extends StatelessWidget {
     final timeStr = createdAt != null ? _formatTime(context, createdAt.toDate()) : '';
 
     return RepaintBoundary(
+      child: Semantics(
+      button: true,
+      label: title,
       child: GestureDetector(
       behavior: HitTestBehavior.opaque,
       onTap: onTap,
@@ -187,7 +190,7 @@ class PostCard extends StatelessWidget {
           ],
         ),
       ),
-    ));
+    )));
   }
 
   String _formatTime(BuildContext context, DateTime dt) {
