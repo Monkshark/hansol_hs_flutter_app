@@ -220,7 +220,7 @@ erDiagram
 
 ## Technical Challenges (하이라이트)
 
-실제 운영 중 마주친 14개 기술 과제 중 대표 3건:
+개발 중 마주친 14개 기술 과제 중 대표 3건:
 
 <details>
 <summary><b>관리자 화면 Firestore 읽기 과다 → 130 → 20~30</b></summary>

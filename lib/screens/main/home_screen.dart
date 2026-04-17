@@ -206,50 +206,52 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
               child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                  const CurrentSubjectCard(),
-                  const SizedBox(height: 16),
-                  Semantics(
-                    button: true,
-                    label: l.home_timetableTitle,
-                    child: GestureDetector(
-                    onTap: () => Navigator.of(context).push(
-                      MaterialPageRoute(builder: (_) => const TimetableViewScreen()),
-                    ),
-                    child: Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: isDark ? const Color(0xFF1E2028) : Colors.white,
-                        borderRadius: BorderRadius.circular(14),
+                  if (AuthService.cachedProfile?.isGraduate != true) ...[
+                    const CurrentSubjectCard(),
+                    const SizedBox(height: 16),
+                    Semantics(
+                      button: true,
+                      label: l.home_timetableTitle,
+                      child: GestureDetector(
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const TimetableViewScreen()),
                       ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: Responsive.r(context, 40), height: Responsive.r(context, 40),
-                            decoration: BoxDecoration(
-                              color: AppColors.theme.tertiaryColor.withAlpha(25),
-                              borderRadius: BorderRadius.circular(10),
+                      child: Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: isDark ? const Color(0xFF1E2028) : Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: Responsive.r(context, 40), height: Responsive.r(context, 40),
+                              decoration: BoxDecoration(
+                                color: AppColors.theme.tertiaryColor.withAlpha(25),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.calendar_view_week, color: AppColors.theme.tertiaryColor, size: Responsive.r(context, 22)),
                             ),
-                            child: Icon(Icons.calendar_view_week, color: AppColors.theme.tertiaryColor, size: Responsive.r(context, 22)),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(AppLocalizations.of(context)!.home_timetableTitle, style: TextStyle(
-                                  fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: textColor)),
-                                Text(AppLocalizations.of(context)!.home_timetableSubtitle, style: TextStyle(
-                                  fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor)),
-                              ],
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(AppLocalizations.of(context)!.home_timetableTitle, style: TextStyle(
+                                    fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w600, color: textColor)),
+                                  Text(AppLocalizations.of(context)!.home_timetableSubtitle, style: TextStyle(
+                                    fontSize: Responsive.sp(context, 12), color: AppColors.theme.darkGreyColor)),
+                                ],
+                              ),
                             ),
-                          ),
-                          Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
-                        ],
+                            Icon(Icons.chevron_right, color: AppColors.theme.darkGreyColor),
+                          ],
+                        ),
                       ),
-                    ),
-                  )),
-                  const SizedBox(height: 8),
+                    )),
+                    const SizedBox(height: 8),
+                  ],
                   Semantics(
                     button: true,
                     label: l.home_gradesTitle,
