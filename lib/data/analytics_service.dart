@@ -1,5 +1,6 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AnalyticsService {
   AnalyticsService._();
@@ -70,11 +71,34 @@ class AnalyticsService {
   static Future<void> logFeatureDiscovery({required String feature}) =>
       _log('feature_discovery', {'feature': feature});
 
+  static Future<void> trackFirstVisit(String feature) async {
+    final key = 'visited_$feature';
+    final prefs = await SharedPreferences.getInstance();
+    if (prefs.getBool(key) == true) return;
+    await prefs.setBool(key, true);
+    await logFeatureDiscovery(feature: feature);
+  }
+
   // Post creation funnel
   static Future<void> logPostStart({required String boardType}) =>
       _log('post_start', {'board_type': boardType});
 
   static Future<void> logPostDraft() => _log('post_draft');
+
+  static Future<void> logPostSubmit({required String boardType}) =>
+      _log('post_submit', {'board_type': boardType});
+
+  // Session tracking
+  static DateTime? _sessionStart;
+
+  static void markSessionStart() => _sessionStart = DateTime.now();
+
+  static Future<void> logSessionEnd() async {
+    if (_sessionStart == null) return;
+    final seconds = DateTime.now().difference(_sessionStart!).inSeconds;
+    _sessionStart = null;
+    if (seconds > 1) await _log('session_duration', {'seconds': seconds});
+  }
 
   // Error shown to user
   static Future<void> logErrorShown({required String errorType}) =>

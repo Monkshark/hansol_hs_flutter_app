@@ -7,6 +7,7 @@ import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -39,6 +40,7 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFirstVisit('chat');
     _markAsRead();
   }
 

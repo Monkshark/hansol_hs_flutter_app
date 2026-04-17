@@ -602,6 +602,8 @@ class _WritePostScreenState extends State<WritePostScreen> {
       }
     }
 
+    if (!_isEdit) unawaited(AnalyticsService.logPostSubmit(boardType: _category));
+
     try {
       final postData = <String, dynamic>{
         'title': title,
