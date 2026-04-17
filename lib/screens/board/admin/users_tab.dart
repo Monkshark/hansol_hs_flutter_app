@@ -37,15 +37,19 @@ class UsersTabState extends State<UsersTab> {
   }
 
   Future<void> _logAdminAction(String action, String targetUid, String targetName) async {
-    await FirebaseFirestore.instance.collection('admin_logs').add({
-      'action': action,
-      'targetUid': targetUid,
-      'targetName': targetName,
-      'adminUid': AuthService.currentUser?.uid ?? '',
-      'adminName': AuthService.cachedProfile?.displayName ?? '',
-      'createdAt': FieldValue.serverTimestamp(),
-      'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
-    });
+    try {
+      await FirebaseFirestore.instance.collection('admin_logs').add({
+        'action': action,
+        'targetUid': targetUid,
+        'targetName': targetName,
+        'adminUid': AuthService.currentUser?.uid ?? '',
+        'adminName': AuthService.cachedProfile?.displayName ?? '',
+        'createdAt': FieldValue.serverTimestamp(),
+        'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+      });
+    } catch (e) {
+      log('UsersTab: logAdminAction error: $e');
+    }
   }
 
   bool _isSuspended(Map<String, dynamic> data) {
@@ -220,7 +224,7 @@ class UsersTabState extends State<UsersTab> {
                                 await docs[index].reference.update({'approved': true});
                                 await _sendAccountNotification(uid, l.admin_usersAccountApproved, l.admin_usersApprovedMessage);
                                 await _logAdminAction('승인', uid, name);
-                                _refreshAll();
+                                if (mounted) _refreshAll();
                               } catch (e) {
                                 log('UsersTab: approve error: $e');
                                 if (context.mounted) showErrorSnackbar(context, e);
@@ -232,7 +236,7 @@ class UsersTabState extends State<UsersTab> {
                                 await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
                                 await docs[index].reference.delete();
                                 await _logAdminAction('거절', uid, name);
-                                _refreshAll();
+                                if (mounted) _refreshAll();
                               } catch (e) {
                                 log('UsersTab: reject error: $e');
                                 if (context.mounted) showErrorSnackbar(context, e);
@@ -245,7 +249,7 @@ class UsersTabState extends State<UsersTab> {
                                 try {
                                   await docs[index].reference.update({'role': 'user'});
                                   AuthService.clearProfileCache();
-                                  _refreshAll();
+                                  if (mounted) _refreshAll();
                                 } catch (e) {
                                   log('UsersTab: removeAdmin error: $e');
                                   if (context.mounted) showErrorSnackbar(context, e);
@@ -260,7 +264,7 @@ class UsersTabState extends State<UsersTab> {
                                     final newRole = role == 'manager' ? 'user' : 'manager';
                                     await docs[index].reference.update({'role': newRole});
                                     await _logAdminAction('역할 변경: $newRole', uid, name);
-                                    _refreshAll();
+                                    if (mounted) _refreshAll();
                                   } catch (e) {
                                     log('UsersTab: roleChange error: $e');
                                     if (context.mounted) showErrorSnackbar(context, e);
@@ -272,7 +276,7 @@ class UsersTabState extends State<UsersTab> {
                                 try {
                                   await docs[index].reference.update({'role': 'admin'});
                                   await _logAdminAction('역할 변경: admin', uid, name);
-                                  _refreshAll();
+                                  if (mounted) _refreshAll();
                                 } catch (e) {
                                   log('UsersTab: makeAdmin error: $e');
                                   if (context.mounted) showErrorSnackbar(context, e);
@@ -290,7 +294,7 @@ class UsersTabState extends State<UsersTab> {
                                     if (!context.mounted) return;
                                     await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
                                     await _logAdminAction('정지', uid, name);
-                                    _refreshAll();
+                                    if (mounted) _refreshAll();
                                   } catch (e) {
                                     log('UsersTab: suspend error: $e');
                                     if (context.mounted) showErrorSnackbar(context, e);
@@ -308,7 +312,7 @@ class UsersTabState extends State<UsersTab> {
                                     await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
                                     await docs[index].reference.delete();
                                     await _logAdminAction('삭제', uid, name);
-                                    _refreshAll();
+                                    if (mounted) _refreshAll();
                                   } catch (e) {
                                     log('UsersTab: delete error: $e');
                                     if (context.mounted) showErrorSnackbar(context, e);
@@ -323,7 +327,7 @@ class UsersTabState extends State<UsersTab> {
                                 await docs[index].reference.update({'suspendedUntil': null});
                                 await _sendAccountNotification(uid, l.admin_usersSuspendRemoved, l.admin_usersSuspendRemovedMessage);
                                 await _logAdminAction('정지 해제', uid, name);
-                                _refreshAll();
+                                if (mounted) _refreshAll();
                               } catch (e) {
                                 log('UsersTab: unsuspend error: $e');
                                 if (context.mounted) showErrorSnackbar(context, e);

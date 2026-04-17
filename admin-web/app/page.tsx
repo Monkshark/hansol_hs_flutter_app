@@ -18,10 +18,18 @@ export default function LoginPage() {
     return role === 'admin' || role === 'manager';
   }
 
+  async function setSessionCookie(uid: string) {
+    const token = await auth.currentUser?.getIdToken();
+    if (token) {
+      document.cookie = `admin_session=${token}; path=/; max-age=${60 * 60 * 24}; SameSite=Strict`;
+    }
+  }
+
   async function handleEmail() {
     try {
       const result = await signInWithEmailAndPassword(auth, email, password);
       if (await checkRole(result.user.uid)) {
+        await setSessionCookie(result.user.uid);
         router.push('/dashboard');
       } else {
         setError('관리자 또는 매니저 권한이 필요합니다');
@@ -34,6 +42,7 @@ export default function LoginPage() {
     try {
       const result = await signInWithPopup(auth, new GoogleAuthProvider());
       if (await checkRole(result.user.uid)) {
+        await setSessionCookie(result.user.uid);
         router.push('/dashboard');
       } else {
         setError('관리자 또는 매니저 권한이 필요합니다');

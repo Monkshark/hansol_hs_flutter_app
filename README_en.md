@@ -220,7 +220,7 @@ Collection schema, indexes, and rule mappings → [data-model_en.md](https://mon
 
 ## Technical Challenges (Highlights)
 
-3 picks from 14 real production cases:
+3 picks from 14 cases encountered during development:
 
 <details>
 <summary><b>Admin screen Firestore reads: 130 → 20–30</b></summary>
