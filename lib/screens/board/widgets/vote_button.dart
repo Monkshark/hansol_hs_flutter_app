@@ -21,7 +21,11 @@ class VoteButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    final semanticLabel = icon == Icons.thumb_up_outlined ? 'Like' : 'Dislike';
+    return Semantics(
+      button: true,
+      label: '$semanticLabel $count',
+      child: GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
@@ -51,6 +55,6 @@ class VoteButton extends StatelessWidget {
           ],
         ),
       ),
-    );
+    ));
   }
 }

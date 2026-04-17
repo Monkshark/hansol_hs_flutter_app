@@ -97,6 +97,7 @@ class _NoticeScreenState extends State<NoticeScreen> {
     return Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       floatingActionButton: FloatingActionButton(
+        tooltip: 'Add schedule',
         backgroundColor: AppColors.theme.primaryColor,
         elevation: 2,
         onPressed: () {

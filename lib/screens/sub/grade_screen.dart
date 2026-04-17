@@ -124,6 +124,7 @@ class _GradeScreenState extends ConsumerState<GradeScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        tooltip: AppLocalizations.of(context)!.grade_screenTitle,
         onPressed: () async {
           final result = await Navigator.push<bool>(
             context,

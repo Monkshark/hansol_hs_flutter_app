@@ -18,21 +18,25 @@ class LinkCard extends StatelessWidget {
         color: isDark ? const Color(0xFF1E2028) : Colors.white,
         borderRadius: BorderRadius.circular(14),
       ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            children: [
-              Container(
-                width: Responsive.r(context, 44), height: Responsive.r(context, 44),
-                decoration: BoxDecoration(color: color.withAlpha(30), shape: BoxShape.circle),
-                child: Icon(icon, color: color, size: Responsive.r(context, 24)),
-              ),
-              SizedBox(height: Responsive.h(context, 8)),
-              Text(label, style: TextStyle(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
-            ],
+      child: Semantics(
+        button: true,
+        label: label,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(14),
+          onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 20),
+            child: Column(
+              children: [
+                Container(
+                  width: Responsive.r(context, 44), height: Responsive.r(context, 44),
+                  decoration: BoxDecoration(color: color.withAlpha(30), shape: BoxShape.circle),
+                  child: Icon(icon, color: color, size: Responsive.r(context, 24)),
+                ),
+                SizedBox(height: Responsive.h(context, 8)),
+                Text(label, style: TextStyle(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
+              ],
+            ),
           ),
         ),
       ),

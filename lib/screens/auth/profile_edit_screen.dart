@@ -7,6 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:hansol_high_school/main.dart' show providerContainer;
 import 'package:hansol_high_school/providers/settings_provider.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -160,10 +161,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoChangedSuccess)));
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoChangeFailed)));
-      }
+      log('ProfileEdit: photo change error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -191,10 +190,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoDeletedSuccess)));
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.profileEdit_photoDeleteFailed)));
-      }
+      log('ProfileEdit: photo delete error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -268,12 +265,8 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       providerContainer.read(appRefreshProvider.notifier).refresh();
       if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
     } catch (e) {
-      log('Account deletion error: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.profileEdit_deleteAccountFailed)),
-        );
-      }
+      log('ProfileEdit: account deletion error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     }
   }
 
