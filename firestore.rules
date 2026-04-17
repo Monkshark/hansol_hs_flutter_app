@@ -17,6 +17,10 @@ service cloud.firestore {
       );
     }
 
+    function noScript(value) {
+      return !value.matches('.*<[sS][cC][rR][iI][pP][tT].*');
+    }
+
     // 변경된 필드만 추출
     function changedKeys() {
       return request.resource.data.diff(resource.data).affectedKeys();
@@ -75,7 +79,9 @@ service cloud.firestore {
         request.resource.data.title.size() > 0 &&
         request.resource.data.title.size() <= 200 &&
         request.resource.data.content is string &&
-        request.resource.data.content.size() <= 5000;
+        request.resource.data.content.size() <= 5000 &&
+        noScript(request.resource.data.title) &&
+        noScript(request.resource.data.content);
 
       // 작성자만 자유 수정 (admin/manager도 글 수정 불가, 삭제는 가능)
       // 그 외는 인터랙션 필드만 + 카운터 증감 검증
@@ -105,6 +111,7 @@ service cloud.firestore {
           request.resource.data.content is string &&
           request.resource.data.content.size() > 0 &&
           request.resource.data.content.size() <= 1000 &&
+          noScript(request.resource.data.content) &&
           // mentions 필드는 string 배열 (uid 목록)
           (
             !('mentions' in request.resource.data) ||
@@ -126,7 +133,8 @@ service cloud.firestore {
         request.resource.data.reporterUid == request.auth.uid &&
         request.resource.data.reason is string &&
         request.resource.data.reason.size() > 0 &&
-        request.resource.data.reason.size() <= 200;
+        request.resource.data.reason.size() <= 200 &&
+        noScript(request.resource.data.reason);
       allow read, delete: if isAdminOrManager();
       allow update: if false;
     }
@@ -165,6 +173,7 @@ service cloud.firestore {
           ) &&
           request.resource.data.content is string &&
           request.resource.data.content.size() <= 2000 &&
+          noScript(request.resource.data.content) &&
           // imageUrl이 있으면 string, 100자 미만의 firebasestorage.googleapis.com URL이어야 함
           (
             !('imageUrl' in request.resource.data) ||
@@ -202,12 +211,20 @@ service cloud.firestore {
     // ── feedbacks ──────────────────────────────────────────────────────
     match /app_feedbacks/{feedbackId} {
       allow create: if isSignedIn() &&
-        request.resource.data.authorUid == request.auth.uid;
+        request.resource.data.authorUid == request.auth.uid &&
+        request.resource.data.content is string &&
+        request.resource.data.content.size() > 0 &&
+        request.resource.data.content.size() <= 3000 &&
+        noScript(request.resource.data.content);
       allow read, update, delete: if isAdminOrManager();
     }
     match /council_feedbacks/{feedbackId} {
       allow create: if isSignedIn() &&
-        request.resource.data.authorUid == request.auth.uid;
+        request.resource.data.authorUid == request.auth.uid &&
+        request.resource.data.content is string &&
+        request.resource.data.content.size() > 0 &&
+        request.resource.data.content.size() <= 3000 &&
+        noScript(request.resource.data.content);
       allow read, update, delete: if isAdminOrManager();
     }
 
