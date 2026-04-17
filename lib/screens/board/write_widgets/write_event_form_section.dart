@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
@@ -8,8 +11,8 @@ class WriteEventFormSection extends StatelessWidget {
   final DateTime? eventDate;
   final TimeOfDay? eventStartTime;
   final TimeOfDay? eventEndTime;
-  final VoidCallback onPickDate;
-  final void Function(bool isStart) onPickTime;
+  final void Function(DateTime date) onDateChanged;
+  final void Function(TimeOfDay time, bool isStart) onTimeChanged;
   final bool isDark;
   final Color? textColor;
   final Color fillColor;
@@ -20,12 +23,46 @@ class WriteEventFormSection extends StatelessWidget {
     required this.eventDate,
     required this.eventStartTime,
     required this.eventEndTime,
-    required this.onPickDate,
-    required this.onPickTime,
+    required this.onDateChanged,
+    required this.onTimeChanged,
     required this.isDark,
     required this.textColor,
     required this.fillColor,
   });
+
+  Future<void> _pickDate(BuildContext context) async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: eventDate ?? DateTime.now().add(const Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime.now().add(const Duration(days: 365)),
+      locale: const Locale('ko', 'KR'),
+    );
+    if (picked != null) onDateChanged(picked);
+  }
+
+  Future<void> _pickTime(BuildContext context, bool isStart) async {
+    final initial = isStart ? (eventStartTime ?? TimeOfDay.now()) : (eventEndTime ?? TimeOfDay.now());
+
+    if (Platform.isIOS) {
+      showCupertinoModalPopup(
+        context: context,
+        builder: (ctx) => Container(
+          height: 250,
+          color: Theme.of(context).scaffoldBackgroundColor,
+          child: CupertinoDatePicker(
+            mode: CupertinoDatePickerMode.time,
+            initialDateTime: DateTime(2024, 1, 1, initial.hour, initial.minute),
+            use24hFormat: false,
+            onDateTimeChanged: (dt) => onTimeChanged(TimeOfDay(hour: dt.hour, minute: dt.minute), isStart),
+          ),
+        ),
+      );
+    } else {
+      final picked = await showTimePicker(context: context, initialTime: initial);
+      if (picked != null) onTimeChanged(picked, isStart);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +93,7 @@ class WriteEventFormSection extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           GestureDetector(
-            onTap: onPickDate,
+            onTap: () => _pickDate(context),
             child: Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -86,7 +123,7 @@ class WriteEventFormSection extends StatelessWidget {
             children: [
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onPickTime(true),
+                  onTap: () => _pickTime(context, true),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
@@ -115,7 +152,7 @@ class WriteEventFormSection extends StatelessWidget {
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => onPickTime(false),
+                  onTap: () => _pickTime(context, false),
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
                     decoration: BoxDecoration(
