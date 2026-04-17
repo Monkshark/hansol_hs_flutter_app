@@ -355,7 +355,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> with PostDetailActi
       ));
 
       if (commentRef == null) {
-        // 오프라인 → 큐에 저장됨
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text(AppLocalizations.of(context)!.offline_commentQueued)),

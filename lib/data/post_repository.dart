@@ -14,7 +14,6 @@ class PostRepository {
   static CollectionReference<Map<String, dynamic>> get _posts =>
       _db.collection('posts');
 
-  // ─── References ───
 
   DocumentReference<Map<String, dynamic>> postRef(String postId) =>
       _posts.doc(postId);
@@ -22,7 +21,6 @@ class PostRepository {
   CollectionReference<Map<String, dynamic>> commentsRef(String postId) =>
       _posts.doc(postId).collection('comments');
 
-  // ─── Streams ───
 
   Stream<DocumentSnapshot<Map<String, dynamic>>> postStream(String postId) =>
       postRef(postId).snapshots();
@@ -30,7 +28,6 @@ class PostRepository {
   Stream<QuerySnapshot<Map<String, dynamic>>> commentsStream(String postId) =>
       commentsRef(postId).orderBy('createdAt').snapshots();
 
-  // ─── Read ───
 
   Future<QuerySnapshot<Map<String, dynamic>>> loadPosts({
     required Query<Map<String, dynamic>> query,
@@ -75,7 +72,6 @@ class PostRepository {
   Future<DocumentSnapshot<Map<String, dynamic>>> getPostFromServer(String postId) =>
       postRef(postId).get(const GetOptions(source: Source.server));
 
-  // ─── Create ───
 
   /// 글 작성. 오프라인이면 큐에 저장하고 null 반환.
   Future<DocumentReference<Map<String, dynamic>>?> createPost(Map<String, dynamic> data) async {
@@ -101,7 +97,6 @@ class PostRepository {
     return ref;
   }
 
-  // ─── Update ───
 
   Future<void> updatePost(String postId, Map<String, dynamic> data) =>
       postRef(postId).update(data);
@@ -232,7 +227,6 @@ class PostRepository {
     });
   }
 
-  // ─── Delete ───
 
   Future<void> deleteComment(String postId, String commentId) async {
     final batch = FirebaseFirestore.instance.batch();
@@ -249,7 +243,6 @@ class PostRepository {
     await postRef(postId).delete();
   }
 
-  // ─── Notifications (users subcollection) ───
 
   Future<void> sendNotification({
     required String targetUid,
@@ -274,19 +267,16 @@ class PostRepository {
     }
   }
 
-  // ─── Admin ───
 
   Future<void> logAdminAction(Map<String, dynamic> data) =>
       _db.collection('admin_logs').add(data);
 
-  // ─── Refresh ───
 
   Future<void> refreshFromServer(String postId) async {
     await postRef(postId).get(const GetOptions(source: Source.server));
     await commentsRef(postId).get(const GetOptions(source: Source.server));
   }
 
-  // ─── Report ───
 
   Future<void> reportPost({
     required String postId,

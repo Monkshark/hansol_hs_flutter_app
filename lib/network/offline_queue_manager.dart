@@ -19,7 +19,6 @@ class OfflineQueueManager {
   StreamSubscription<bool>? _networkSub;
   bool _isSyncing = false;
 
-  // ─── 동기화 상태 스트림 ───
 
   final _syncController = StreamController<SyncStatus>.broadcast();
 
@@ -30,7 +29,6 @@ class OfflineQueueManager {
   int _pendingCount = 0;
   int get pendingCount => _pendingCount;
 
-  // ─── 초기화 ───
 
   Future<void> initialize() async {
     final dbPath = await getDatabasesPath();
@@ -71,7 +69,6 @@ class OfflineQueueManager {
     _db = null;
   }
 
-  // ─── 큐에 작업 추가 ───
 
   /// 글 작성을 큐에 저장
   Future<int> enqueuePost(Map<String, dynamic> postData) async {
@@ -90,7 +87,6 @@ class OfflineQueueManager {
     final db = _db;
     if (db == null) return -1;
 
-    // serverTimestamp 플레이스홀더 → 나중에 replay 시 실제 값으로 교체
     final sanitized = _sanitizeForStorage(payload);
 
     final id = await db.insert('queue', {
@@ -106,7 +102,6 @@ class OfflineQueueManager {
     return id;
   }
 
-  // ─── 큐 처리 ───
 
   Future<void> _processQueue() async {
     if (_isSyncing) return;
@@ -124,7 +119,6 @@ class OfflineQueueManager {
         final rows = await db.query('queue', orderBy: 'createdAt ASC', limit: 1);
         if (rows.isEmpty) break;
 
-        // 네트워크 끊기면 중단
         if (await NetworkStatus.isUnconnected()) break;
 
         final row = rows.first;
@@ -140,7 +134,6 @@ class OfflineQueueManager {
         } catch (e) {
           log('OfflineQueue: failed $type (id=$id, retry=$retryCount): $e');
           if (retryCount >= 3) {
-            // 3번 실패하면 포기
             await db.delete('queue', where: 'id = ?', whereArgs: [id]);
             log('OfflineQueue: dropped $type after 3 retries (id=$id)');
           } else {
@@ -148,7 +141,7 @@ class OfflineQueueManager {
               {'retryCount': retryCount + 1},
               where: 'id = ?', whereArgs: [id],
             );
-            break; // 실패하면 다음 연결 복원 시 재시도
+            break;
           }
         }
 
@@ -187,7 +180,6 @@ class OfflineQueueManager {
     }
   }
 
-  // ─── 유틸리티 ───
 
   Future<void> _refreshPendingCount() async {
     final db = _db;

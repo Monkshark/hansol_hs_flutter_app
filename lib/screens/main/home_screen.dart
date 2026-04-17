@@ -49,7 +49,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
     if (!mounted) return;
     ref.invalidate(pinnedDDayProvider);
     ref.invalidate(todayLunchProvider);
-    setState(() {}); // CurrentSubjectCard + RecentPosts 갱신
+    setState(() {});
   }
 
   void _refreshDDay() {

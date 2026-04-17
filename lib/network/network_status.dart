@@ -14,7 +14,6 @@ class NetworkStatus {
     return results.isEmpty || results.contains(ConnectivityResult.none);
   }
 
-  // ─── 스트림 기반 실시간 모니터링 ───
 
   static final _connectivity = Connectivity();
   static StreamController<bool>? _controller;
@@ -41,7 +40,6 @@ class NetworkStatus {
         _controller?.add(offline);
       }
     });
-    // 초기값 설정
     _connectivity.checkConnectivity().then((results) {
       _lastKnown = results.isEmpty || results.contains(ConnectivityResult.none);
       _controller?.add(_lastKnown);
