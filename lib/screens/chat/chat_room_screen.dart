@@ -6,15 +6,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
+import 'package:hansol_high_school/data/image_utils.dart';
 import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/error_view.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path_provider/path_provider.dart';
 
 class ChatRoomScreen extends StatefulWidget {
   final String chatId;
@@ -256,14 +255,8 @@ class _ChatRoomScreenState extends State<ChatRoomScreen> {
 
     setState(() => _uploadingImage = true);
     try {
-      final tempDir = await getTemporaryDirectory();
-      final targetPath =
-          '${tempDir.path}/chat_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      final compressed = await FlutterImageCompress.compressAndGetFile(
-        picked.path, targetPath,
-        quality: 80, minWidth: 1280, minHeight: 1280,
-      );
-      final fileToUpload = compressed != null ? File(compressed.path) : File(picked.path);
+      final compressed = await ImageUtils.compress(File(picked.path), minWidth: 1280);
+      final fileToUpload = compressed ?? File(picked.path);
 
       final ref = FirebaseStorage.instance.ref(
         'chats/${widget.chatId}/${DateTime.now().millisecondsSinceEpoch}_$uid.jpg',

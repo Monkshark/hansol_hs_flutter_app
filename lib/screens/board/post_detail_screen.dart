@@ -15,9 +15,9 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/board/widgets/comment_input_bar.dart';
 import 'package:hansol_high_school/screens/board/widgets/post_action_sheet.dart';
+import 'package:hansol_high_school/screens/board/widgets/post_detail_actions_mixin.dart';
 import 'package:hansol_high_school/screens/board/widgets/post_detail_app_bar.dart';
 import 'package:hansol_high_school/screens/board/widgets/post_detail_body.dart';
-import 'package:hansol_high_school/screens/board/write_post_screen.dart';
 import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:intl/intl.dart';
@@ -33,7 +33,7 @@ class PostDetailScreen extends StatefulWidget {
 }
 
 
-class _PostDetailScreenState extends State<PostDetailScreen> {
+class _PostDetailScreenState extends State<PostDetailScreen> with PostDetailActionsMixin {
   final _commentController = TextEditingController();
   bool _sending = false;
   bool _commentAnonymous = false;
@@ -44,6 +44,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
   String? _replyToName;
 
   final _repo = PostRepository.instance;
+
+  @override
+  PostRepository get actionRepo => _repo;
+  @override
+  String get actionPostId => widget.postId;
 
   DocumentReference<Map<String, dynamic>> get _postRef =>
       _repo.postRef(widget.postId);
@@ -110,11 +115,11 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
           PostDetailAppBarActions(
             postStream: _postRef.snapshots(),
             postId: widget.postId,
-            onToggleBookmark: _toggleBookmark,
-            onEdit: _editPost,
-            onDelete: _deletePost,
-            onPin: _pinPost,
-            onUnpin: _unpinPost,
+            onToggleBookmark: toggleBookmark,
+            onEdit: editPost,
+            onDelete: deletePost,
+            onPin: pinPost,
+            onUnpin: unpinPost,
           ),
         ],
       ),
@@ -150,10 +155,10 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
                   onToggleLike: _toggleLike,
                   onToggleDislike: _toggleDislike,
                   onReport: () => showReportSheet(context: context, postId: widget.postId),
-                  onResolve: _resolvePost,
+                  onResolve: resolvePost,
                   onAddEvent: _addEventToCalendar,
                   onReplyTap: _onReplyTap,
-                  onDeleteComment: _confirmDeleteComment,
+                  onDeleteComment: confirmDeleteComment,
                 );
               },
             ),
@@ -171,17 +176,6 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       ),
     ),
     );
-  }
-
-  Future<void> _toggleBookmark(bool isCurrentlyBookmarked) async {
-    final uid = AuthService.currentUser?.uid;
-    if (uid == null) return;
-    try {
-      await _repo.toggleBookmark(widget.postId, uid, isCurrentlyBookmarked);
-    } catch (e) {
-      log('PostDetailScreen: toggleBookmark error: $e');
-      if (mounted) showErrorSnackbar(context, e);
-    }
   }
 
   Future<void> _toggleLike(bool hasLiked, bool hasDisliked) async {
@@ -444,102 +438,4 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     );
   }
 
-  Future<void> _confirmDeleteComment(String commentId) async {
-    final confirm = await showConfirmSheet(context, title: AppLocalizations.of(context)!.post_confirmDeleteComment, content: AppLocalizations.of(context)!.post_confirmDeleteCommentMessage, confirmLabel: AppLocalizations.of(context)!.common_delete);
-
-    if (confirm == true) {
-      try {
-        await _repo.deleteComment(widget.postId, commentId);
-      } catch (e) {
-        log('PostDetailScreen: deleteComment error: $e');
-        if (mounted) showErrorSnackbar(context, e);
-      }
-    }
-  }
-
-  Future<void> _pinPost() async {
-    try {
-      await _repo.pinPost(widget.postId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.post_pinSuccess)),
-        );
-      }
-    } on StateError {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.post_pinMaxed)),
-        );
-      }
-    }
-  }
-
-  Future<void> _unpinPost() async {
-    await _repo.unpinPost(widget.postId);
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(AppLocalizations.of(context)!.post_unpinSuccess)),
-      );
-    }
-  }
-
-  void _editPost(Map<String, dynamic> data) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (_) => WritePostScreen(
-          postId: widget.postId,
-          initialTitle: data['title'],
-          initialContent: data['content'],
-          initialCategory: data['category'],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _deletePost() async {
-    final confirm = await showConfirmSheet(context, title: AppLocalizations.of(context)!.post_deleteConfirm, content: AppLocalizations.of(context)!.post_deleteConfirmMessage, confirmLabel: AppLocalizations.of(context)!.common_delete);
-
-    if (confirm == true) {
-      try {
-        final uid = AuthService.currentUser?.uid;
-        final postSnap = await _repo.getPost(widget.postId);
-        final postData = postSnap.data();
-        if (postData != null && uid != null && uid != postData['authorUid']) {
-          final profile = await AuthService.getCachedProfile();
-          await _repo.logAdminAction({
-            'action': 'delete_post',
-            'adminUid': uid,
-            'adminName': profile?.displayName ?? '',
-            'postId': widget.postId,
-            'postTitle': postData['title'] ?? '',
-            'postAuthorUid': postData['authorUid'] ?? '',
-            'postAuthorName': postData['authorName'] ?? '',
-            'createdAt': FieldValue.serverTimestamp(),
-            'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
-          });
-        }
-
-        await _repo.deletePost(widget.postId);
-        if (mounted) Navigator.pop(context);
-      } catch (e) {
-        log('PostDetailScreen: deletePost error: $e');
-        if (mounted) showErrorSnackbar(context, e);
-      }
-    }
-  }
-
-  Future<void> _resolvePost() async {
-    try {
-      await _repo.resolvePost(widget.postId);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.post_resolvedMarked)),
-        );
-      }
-    } catch (e) {
-      log('PostDetailScreen: resolvePost error: $e');
-      if (mounted) showErrorSnackbar(context, e);
-    }
-  }
 }

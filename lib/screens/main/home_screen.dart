@@ -2,24 +2,23 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
-import 'package:hansol_high_school/screens/sub/dday_screen.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/providers/home_provider.dart';
 import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_list_screen.dart';
 import 'package:hansol_high_school/screens/board/notification_screen.dart';
-import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart';
 import 'package:hansol_high_school/screens/sub/timetable_view_screen.dart';
 import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
-import 'package:hansol_high_school/data/board_categories.dart';
+import 'package:hansol_high_school/widgets/home/home_header_widgets.dart';
+import 'package:hansol_high_school/widgets/home/link_card.dart';
+import 'package:hansol_high_school/widgets/home/recent_posts.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:intl/intl.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -167,7 +166,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
                         ),
                       ],
                     ),
-                    _UpcomingEventDDay(onRefresh: _refreshDDay),
+                    UpcomingEventDDay(onRefresh: _refreshDDay),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -194,7 +193,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
                       ),
                     ),
                     const SizedBox(height: 6),
-                    _TodayLunchPreview(),
+                    const TodayLunchPreview(),
                   ],
                 ),
               ),
@@ -338,7 +337,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
                           ),
                         )),
                         Divider(height: 1, color: isDark ? const Color(0xFF2A2D35) : const Color(0xFFEEEEEE)),
-                        _RecentPosts(),
+                        const RecentPosts(),
                       ],
                     ),
                   ),
@@ -387,11 +386,11 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
                   const SizedBox(height: 16),
                   Row(
                     children: [
-                      const Expanded(child: _LinkCard(icon: Icons.school_outlined, label: 'NEIS+', color: Color(0xFF4CAF50), url: 'https://neisplus.kr/')),
+                      const Expanded(child: LinkCard(icon: Icons.school_outlined, label: 'NEIS+', color: Color(0xFF4CAF50), url: 'https://neisplus.kr/')),
                       const SizedBox(width: 12),
-                      Expanded(child: _LinkCard(icon: Icons.language_outlined, label: AppLocalizations.of(context)!.home_linkRiroschool, color: const Color(0xFF2196F3), url: 'https://sjhansol.riroschool.kr/')),
+                      Expanded(child: LinkCard(icon: Icons.language_outlined, label: AppLocalizations.of(context)!.home_linkRiroschool, color: const Color(0xFF2196F3), url: 'https://sjhansol.riroschool.kr/')),
                       const SizedBox(width: 12),
-                      Expanded(child: _LinkCard(icon: Icons.campaign_outlined, label: AppLocalizations.of(context)!.home_linkOfficial, color: const Color(0xFFFF9800), url: 'https://sjhansol.sjeduhs.kr/sjhansol-h/main.do?sso=ok')),
+                      Expanded(child: LinkCard(icon: Icons.campaign_outlined, label: AppLocalizations.of(context)!.home_linkOfficial, color: const Color(0xFFFF9800), url: 'https://sjhansol.sjeduhs.kr/sjhansol-h/main.do?sso=ok')),
                     ],
                   ),
                   SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
@@ -405,239 +404,3 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
   }
 }
 
-class _UpcomingEventDDay extends ConsumerWidget {
-  final VoidCallback onRefresh;
-  const _UpcomingEventDDay({required this.onRefresh});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncDDay = ref.watch(pinnedDDayProvider);
-
-    return asyncDDay.when(
-      loading: () => Text(
-        AppLocalizations.of(context)!.home_scheduleLoading,
-        style: TextStyle(color: Colors.white, fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w700),
-      ),
-      error: (_, __) => const SizedBox.shrink(),
-      data: (pinnedDDay) {
-        if (pinnedDDay == null) {
-          return GestureDetector(
-            onTap: () => Navigator.of(context).push(
-              MaterialPageRoute(builder: (_) => const DDayScreen()),
-            ).then((_) => onRefresh()),
-            child: Row(
-              children: [
-                Icon(Icons.add_circle_outline, color: Colors.white.withAlpha(200), size: Responsive.r(context, 20)),
-                const SizedBox(width: 8),
-                Text(
-                  AppLocalizations.of(context)!.home_ddaySet,
-                  style: TextStyle(color: Colors.white.withAlpha(200), fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500),
-                ),
-              ],
-            ),
-          );
-        }
-
-        final d = pinnedDDay.dDay;
-        final dDayText = d == 0 ? 'D-Day' : d > 0 ? 'D-$d' : 'D+${-d}';
-        final titleText = '${pinnedDDay.title} · ${DateFormat('M/d', Localizations.localeOf(context).toString()).format(pinnedDDay.date)}';
-
-        return GestureDetector(
-          onTap: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => const DDayScreen()),
-          ).then((_) => onRefresh()),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                dDayText,
-                style: TextStyle(
-                  color: Colors.white, fontSize: Responsive.sp(context, 28),
-                  fontWeight: FontWeight.w800, letterSpacing: 1),
-              ),
-              const SizedBox(width: 10),
-              Flexible(
-                child: Text(
-                  titleText,
-                  style: TextStyle(
-                    color: Colors.white.withAlpha(220),
-                    fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w600),
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-}
-
-class _TodayLunchPreview extends ConsumerWidget {
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final asyncMeal = ref.watch(todayLunchProvider);
-
-    String preview = AppLocalizations.of(context)!.home_lunchPreview;
-    asyncMeal.whenData((meal) {
-      if (meal?.meal != null) {
-        final items = meal!.meal!.split('\n').take(3).map((e) =>
-          e.replaceAll(RegExp(r'\([0-9.,\s]+\)'), '').trim()
-        ).where((e) => e.isNotEmpty).join(' · ');
-        preview = '🍱 $items';
-      } else {
-        preview = AppLocalizations.of(context)!.home_lunchNoInfo;
-      }
-    });
-
-    return Text(
-      preview,
-      style: TextStyle(
-        color: Colors.white.withAlpha(180),
-        fontSize: Responsive.sp(context, 12),
-      ),
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-    );
-  }
-}
-
-class _RecentPosts extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final textColor = Theme.of(context).textTheme.bodyLarge?.color;
-
-    return StreamBuilder<List<QuerySnapshot<Map<String, dynamic>>>>(
-      stream: _combinedStream(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return const SizedBox.shrink();
-        if (!snapshot.hasData) return const SizedBox.shrink();
-
-        final pinnedDocs = snapshot.data![0].docs;
-        final recentDocs = snapshot.data![1].docs;
-
-        QueryDocumentSnapshot<Map<String, dynamic>>? pinnedPost;
-        if (pinnedDocs.isNotEmpty) {
-          pinnedPost = pinnedDocs.first;
-        }
-
-        final pinnedIds = pinnedDocs.map((d) => d.id).toSet();
-        final nonPinned = recentDocs.where((d) => !pinnedIds.contains(d.id)).take(2).toList();
-
-        final displayDocs = <QueryDocumentSnapshot<Map<String, dynamic>>>[];
-        if (pinnedPost != null) displayDocs.add(pinnedPost);
-        displayDocs.addAll(nonPinned);
-
-        if (displayDocs.isEmpty) return const SizedBox.shrink();
-
-        return Column(
-          children: displayDocs.map((doc) {
-            final data = doc.data();
-            final title = data['title'] ?? '';
-            final category = data['category'] ?? '';
-            final commentCount = data['commentCount'] ?? 0;
-            final isPinned = data['isPinned'] == true;
-
-            return GestureDetector(
-              onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => PostDetailScreen(postId: doc.id))),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  children: [
-                    if (isPinned)
-                      const Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(Icons.push_pin, size: 12, color: Colors.red),
-                      ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: _catColor(category).withAlpha(20),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(category,
-                        style: TextStyle(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: _catColor(category))),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(title,
-                        style: TextStyle(fontSize: Responsive.sp(context, 13), color: textColor),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    ),
-                    if (commentCount > 0) ...[
-                      const SizedBox(width: 6),
-                      Text('[$commentCount]',
-                        style: TextStyle(fontSize: Responsive.sp(context, 11), color: AppColors.theme.primaryColor)),
-                    ],
-                  ],
-                ),
-              ),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Stream<List<QuerySnapshot<Map<String, dynamic>>>> _combinedStream() {
-    final pinnedStream = FirebaseFirestore.instance
-        .collection('posts')
-        .where('isPinned', isEqualTo: true)
-        .orderBy('pinnedAt', descending: true)
-        .limit(1)
-        .snapshots();
-
-    final recentStream = FirebaseFirestore.instance
-        .collection('posts')
-        .orderBy('createdAt', descending: true)
-        .limit(5)
-        .snapshots();
-
-    return pinnedStream.asyncExpand((pinnedSnap) {
-      return recentStream.map((recentSnap) => [pinnedSnap, recentSnap]);
-    });
-  }
-
-  Color _catColor(String c) => BoardCategories.color(c);
-}
-
-class _LinkCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  final String url;
-  const _LinkCard({required this.icon, required this.label, required this.color, required this.url});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2028) : Colors.white,
-        borderRadius: BorderRadius.circular(14),
-      ),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(14),
-        onTap: () => launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20),
-          child: Column(
-            children: [
-              Container(
-                width: Responsive.r(context, 44), height: Responsive.r(context, 44),
-                decoration: BoxDecoration(color: color.withAlpha(30), shape: BoxShape.circle),
-                child: Icon(icon, color: color, size: Responsive.r(context, 24)),
-              ),
-              SizedBox(height: Responsive.h(context, 8)),
-              Text(label, style: TextStyle(fontSize: Responsive.sp(context, 13), fontWeight: FontWeight.w600, color: Theme.of(context).textTheme.bodyLarge?.color)),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
