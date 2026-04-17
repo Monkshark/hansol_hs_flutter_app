@@ -2,7 +2,7 @@
 
 > `lib/data/dday_manager.dart` — D-day CRUD, Firestore 동기화
 
-`DDay` 모델과 `DDayManager` 클래스를 포함. 모든 메서드가 `static`. 데이터는 [`SecureStorageService`](secure_storage_service.md)에 저장
+`DDay` 모델과 `DDayManager` 클래스를 포함. 모든 메서드가 `static`. 주 저장소는 Firestore (`users/{uid}/sync/ddays`), 오프라인 캐시는 SharedPreferences (`dday_cache` 키). D-day 데이터는 날짜와 라벨뿐이므로 암호화 불필요
 
 ---
 
@@ -38,27 +38,25 @@ static Future<List<DDay>> loadAll()
 
 **설명**: 전체 D-day 목록을 로드함
 
-1. SharedPreferences → SecureStorage 일회성 마이그레이션:
+1. 비로그인 상태면 SharedPreferences 캐시에서 로드:
    ```dart
-   await SecureStorageService.migrateFromPlain(
-     key: SecureStorageService.keyDdays,
-     oldValue: prefs.getString(_key),
-     onMigrated: () async => prefs.remove(_key),
-   );
+   if (!AuthService.isLoggedIn) return _loadFromCache();
    ```
 
-2. SecureStorage에서 JSON 읽기:
+2. 일회성 마이그레이션 실행 ([SecureStorage → Firestore](#_migratefromsecurestorage))
+
+3. Firestore에서 읽기:
    ```dart
-   final json = await SecureStorageService.read(SecureStorageService.keyDdays);
+   final doc = await _docRef(uid).get();
    ```
 
-3. 로컬 데이터가 없고 로그인 상태면 Firestore에서 복원:
+4. 성공 시 캐시에도 저장하여 오프라인 대비
+
+5. Firestore 에러 시 캐시 폴백:
    ```dart
-   if (json == null || json.isEmpty) {
-     if (AuthService.isLoggedIn) {
-       return _loadFromFirestore();
-     }
-     return [];
+   catch (e) {
+     log('DDayManager: Firestore load error: $e, falling back to cache');
+     return _loadFromCache();
    }
    ```
 
@@ -70,17 +68,18 @@ static Future<List<DDay>> loadAll()
 static Future<void> saveAll(List<DDay> list)
 ```
 
-**설명**: D-day 목록 전체를 저장하고 Firestore에 동기화함
+**설명**: D-day 목록 전체를 저장함
 
-```dart
-await SecureStorageService.write(
-  SecureStorageService.keyDdays,
-  jsonEncode(list.map((e) => e.toJson()).toList()),
-);
-_syncToFirestore(list);  // fire-and-forget
-```
+1. 항상 SharedPreferences 캐시에 먼저 저장 (오프라인 보장)
+2. 로그인 상태면 Firestore에 동기화:
+   ```dart
+   await _docRef(uid).set({
+     'items': list.map((e) => e.toJson()).toList(),
+     'updatedAt': FieldValue.serverTimestamp(),
+   });
+   ```
 
-Firestore 동기화는 비동기로 실행 (실패해도 로컬은 저장됨)
+Firestore 에러는 로깅만 (캐시는 이미 저장됨)
 
 ---
 
@@ -102,41 +101,24 @@ return pinned.first;
 
 ---
 
-## `_loadFromFirestore`
+## `_loadFromCache` / `_saveToCache`
 
-```dart
-static Future<List<DDay>> _loadFromFirestore()
-```
+SharedPreferences `dday_cache` 키를 사용하는 오프라인 캐시. 평문 저장 (D-day 데이터는 민감하지 않으므로 암호화 불필요)
 
-**설명**: Firestore `users/{uid}/sync/ddays` 문서에서 D-day 목록을 복원함
-
-```dart
-final doc = await FirebaseFirestore.instance
-    .collection('users').doc(uid)
-    .collection('sync').doc('ddays')
-    .get();
-```
-
-복원 후 SecureStorage에도 저장하여 다음 로드 시 로컬에서 읽히도록 함
+- `_loadFromCache`: 캐시에서 D-day 목록 로드
+- `_saveToCache`: D-day 목록을 캐시에 저장
 
 ---
 
-## `_syncToFirestore`
+## `_migrateFromSecureStorage`
 
 ```dart
-static Future<void> _syncToFirestore(List<DDay> list)
+static Future<void> _migrateFromSecureStorage()
 ```
 
-**설명**: D-day 목록을 Firestore에 동기화함
+**설명**: [`SecureStorageService`](secure_storage_service.md)에서 Firestore로 일회성 마이그레이션
 
-```dart
-await FirebaseFirestore.instance
-    .collection('users').doc(uid)
-    .collection('sync').doc('ddays')
-    .set({
-  'items': list.map((e) => e.toJson()).toList(),
-  'updatedAt': FieldValue.serverTimestamp(),
-});
-```
-
-비로그인 상태면 즉시 return. 에러는 로깅만 (silent fail)
+- SharedPreferences `dday_migrated` 플래그로 중복 실행 방지
+- 레거시 SharedPreferences 키(`dday_list`) + SecureStorage 확인
+- Firestore 문서가 없을 때만 업로드
+- 마이그레이션 후 SecureStorage 데이터 삭제

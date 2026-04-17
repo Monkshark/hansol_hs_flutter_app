@@ -11,7 +11,7 @@
 | 여기에 저장 | 여기에 저장하지 않음 |
 |-------------|---------------------|
 | 학업 기록 (성적, 목표) | 캐시 (시간표/급식/공지) — 빠른 read, 평문 OK |
-| D-day 등 개인 식별 정보 | Firebase Auth / Kakao SDK 토큰 — SDK 자체 관리 |
+| | Firebase Auth / Kakao SDK 토큰 — SDK 자체 관리 |
 
 ---
 
@@ -21,7 +21,7 @@
 static const String keyGradeExams = 'secure_grade_exams';
 static const String keyGradeGoals = 'secure_grade_goals';
 static const String keyGradeJeongsiGoals = 'secure_grade_jeongsi_goals';
-static const String keyDdays = 'secure_ddays';
+static const String keyDdays = 'secure_ddays';  // legacy — 마이그레이션 전용, DDayManager가 Firestore로 이전함
 ```
 
 네임스페이스 prefix(`secure_`)로 SharedPreferences 키와 충돌 방지
@@ -80,7 +80,7 @@ static Future<void> delete(String key)
 static Future<void> deleteAll()
 ```
 
-기본 CRUD. 모든 값은 String으로 직렬화 (JSON)하여 저장. 호출부([`GradeManager`](grade_manager.md), [`DDayManager`](dday_manager.md))가 `jsonEncode`/`jsonDecode` 담당
+기본 CRUD. 모든 값은 String으로 직렬화 (JSON)하여 저장. 호출부([`GradeManager`](grade_manager.md))가 `jsonEncode`/`jsonDecode` 담당
 
 ---
 
@@ -104,7 +104,7 @@ await write(key, oldValue);      // 암호화 저장
 await onMigrated();              // 호출부가 SharedPreferences에서 삭제
 ```
 
-- [`GradeManager`](grade_manager.md)`.loadExams`, [`DDayManager`](dday_manager.md)`.loadAll` 등에서 첫 호출 시 자동 실행
+- [`GradeManager`](grade_manager.md)`.loadExams`에서 첫 호출 시 자동 실행
 - **Idempotent**: 이미 마이그레이션된 경우 `false` 반환, 재실행 안전
 - `onMigrated` 콜백에서 평문 키 삭제 → 마이그레이션 완료 후 평문 데이터 잔존 방지
 
