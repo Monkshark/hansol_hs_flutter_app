@@ -194,6 +194,65 @@ void main() {
     expect(anonText.style?.color, AppColors.theme.primaryColor);
   });
 
+  group('접근성', () {
+    Iterable<Semantics> findButtonSemantics(WidgetTester tester) {
+      return tester.widgetList<Semantics>(find.byWidgetPredicate(
+        (w) => w is Semantics && w.properties.button == true && w.properties.label != null,
+      ));
+    }
+
+    testWidgets('익명 토글에 semantic label + button 속성', (tester) async {
+      await tester.pumpWidget(wrap(CommentInputBar(
+        controller: TextEditingController(),
+        sending: false,
+        commentAnonymous: false,
+        replyToName: null,
+        onToggleAnonymous: () {},
+        onCancelReply: () {},
+        onSubmit: () {},
+      )));
+      await tester.pumpAndSettle();
+
+      final semantics = findButtonSemantics(tester);
+      final anonSemantics = semantics.where((s) => s.properties.label == '익명');
+      expect(anonSemantics, isNotEmpty);
+      expect(anonSemantics.first.properties.button, isTrue);
+    });
+
+    testWidgets('전송 버튼에 tooltip 존재', (tester) async {
+      await tester.pumpWidget(wrap(CommentInputBar(
+        controller: TextEditingController(),
+        sending: false,
+        commentAnonymous: false,
+        replyToName: null,
+        onToggleAnonymous: () {},
+        onCancelReply: () {},
+        onSubmit: () {},
+      )));
+      await tester.pumpAndSettle();
+
+      final iconButton = tester.widget<IconButton>(find.byType(IconButton));
+      expect(iconButton.tooltip, 'Send comment');
+    });
+
+    testWidgets('답글 취소 버튼에 semantic label 존재', (tester) async {
+      await tester.pumpWidget(wrap(CommentInputBar(
+        controller: TextEditingController(),
+        sending: false,
+        commentAnonymous: false,
+        replyToName: '홍길동',
+        onToggleAnonymous: () {},
+        onCancelReply: () {},
+        onSubmit: () {},
+      )));
+      await tester.pumpAndSettle();
+
+      final semantics = findButtonSemantics(tester);
+      final cancelSemantics = semantics.where((s) => s.properties.label == 'Cancel reply');
+      expect(cancelSemantics, isNotEmpty);
+    });
+  });
+
   testWidgets('다크 모드에서 렌더링', (tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.dark(),
