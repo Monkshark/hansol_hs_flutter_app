@@ -63,11 +63,9 @@ class AnalyticsService {
 
   static Future<void> logSearch(String term) => _log('search', {'search_term': term});
 
-  // App lifecycle
   static Future<void> logAppOpen({required String source}) =>
       _log('app_open', {'source': source});
 
-  // Feature discovery (first-time visits)
   static Future<void> logFeatureDiscovery({required String feature}) =>
       _log('feature_discovery', {'feature': feature});
 
@@ -79,7 +77,6 @@ class AnalyticsService {
     await logFeatureDiscovery(feature: feature);
   }
 
-  // Post creation funnel
   static Future<void> logPostStart({required String boardType}) =>
       _log('post_start', {'board_type': boardType});
 
@@ -88,7 +85,6 @@ class AnalyticsService {
   static Future<void> logPostSubmit({required String boardType}) =>
       _log('post_submit', {'board_type': boardType});
 
-  // Session tracking
   static DateTime? _sessionStart;
 
   static void markSessionStart() => _sessionStart = DateTime.now();
@@ -100,7 +96,6 @@ class AnalyticsService {
     if (seconds > 1) await _log('session_duration', {'seconds': seconds});
   }
 
-  // Error shown to user
   static Future<void> logErrorShown({required String errorType}) =>
       _log('error_shown', {'error_type': errorType});
 }

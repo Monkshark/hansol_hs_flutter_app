@@ -91,7 +91,6 @@ html[data-theme="light"] .theme-toggle .icon-moon{display:none}
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}::-webkit-scrollbar-thumb:hover{background:var(--muted)}
 </style>
 <script>
-// Apply stored theme ASAP to prevent flash of wrong theme.
 (function(){
   try {
     var t = localStorage.getItem('docsViewerTheme');
@@ -138,9 +137,6 @@ function closeSidebar(){document.getElementById('sidebar').classList.remove('ope
 <script>
 /*__MD_DATA__*/
 
-// Each group has {titleKo, titleEn} and items have {nameKo, nameEn, pathKo, pathEn}.
-// pathKo / pathEn are relative to docs/. If an EN pair is missing, set pathEn to null
-// (falls back to Korean and disables EN-specific behaviors for that entry).
 var FILES = [
   { titleKo:'개요', titleEn:'Overview', items:[
     {nameKo:'README (목차)',         nameEn:'README (index)',         pathKo:'README.md',         pathEn:'README_en.md'},
@@ -222,7 +218,7 @@ var FILES = [
         langPrefix:'hljs language-',
         highlight:function(code,lang){
           try{
-            if(lang === 'mermaid') return code; // leave raw for mermaid renderer
+            if(lang === 'mermaid') return code;
             if(lang && hljs.getLanguage(lang)) return hljs.highlight(code,{language:lang}).value;
             return hljs.highlightAuto(code).value;
           }catch(e){return code;}
@@ -231,12 +227,9 @@ var FILES = [
     }
   }catch(e){ console.warn('Highlight init skipped:', e); }
   marked.use({breaks:false,gfm:true});
-  // Generate slug for heading id attributes (GitHub-style).
   function slugify(text){
     return text.toLowerCase().replace(/<[^>]*>/g,'').replace(/[^\w\u3130-\u318F\uAC00-\uD7AF\u4E00-\u9FFF -]/g,'').replace(/\s+/g,'-').replace(/-+$/,'');
   }
-  // Render ```mermaid blocks as <pre class="mermaid"> so mermaid.run() can process them.
-  // Handle both marked v4 signature (code, lang) and v12 token-object signature.
   marked.use({renderer:{code:function(code, lang){
     var raw, language;
     if(typeof code === 'object' && code !== null){
@@ -250,7 +243,7 @@ var FILES = [
       var esc = raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return '<pre class="mermaid">' + esc + '</pre>';
     }
-    return false; // let default renderer handle non-mermaid
+    return false;
   }}});
   try {
     if(globalThis.mermaid){
@@ -259,14 +252,12 @@ var FILES = [
     }
   } catch(e){ console.warn('Mermaid init skipped:', e); }
 
-  // ---- Language state ----
   var LANG_KEY = 'docsViewerLang';
   function getLang(){ return localStorage.getItem(LANG_KEY) === 'en' ? 'en' : 'ko'; }
   function setLang(l){ localStorage.setItem(LANG_KEY, l === 'en' ? 'en' : 'ko'); }
 
-  // Build lookup: path -> { group, item, lang } and pair map (ko<->en).
   var PATH_INDEX = {};
-  var PAIR = {}; // koPath -> enPath and enPath -> koPath
+  var PAIR = {};
   FILES.forEach(function(g){
     g.items.forEach(function(it){
       PATH_INDEX[it.pathKo] = { group:g, item:it, lang:'ko' };
@@ -289,9 +280,8 @@ var FILES = [
     return (lang === 'en' && g.titleEn) ? g.titleEn : g.titleKo;
   }
 
-  // ---- Navigation rendering ----
   var navList = document.getElementById('navList');
-  var allItems = []; // {el, item, group}
+  var allItems = [];
 
   function renderNav(lang){
     navList.innerHTML = '';
@@ -327,7 +317,6 @@ var FILES = [
     renderNav(lang);
 
     if(!opts.skipContentSwap){
-      // Remap currently open doc to the other language if available.
       var cur = currentPath();
       if(cur){
         var info = PATH_INDEX[cur];
@@ -340,7 +329,6 @@ var FILES = [
         }
       }
     }
-    // Re-apply active highlight & search filter for the newly rendered nav.
     var cur2 = currentPath();
     highlightActive(cur2);
     applySearchFilter();
@@ -352,7 +340,6 @@ var FILES = [
     });
   }
 
-  // ---- Search ----
   function applySearchFilter(){
     var q = (document.getElementById('search').value || '').toLowerCase().trim();
     allItems.forEach(function(i){
@@ -366,7 +353,6 @@ var FILES = [
   }
   document.getElementById('search').addEventListener('input', applySearchFilter);
 
-  // ---- Navigation history (within viewer) ----
   var history = [];
   var historyIndex = -1;
   var navigating = false;
@@ -377,7 +363,6 @@ var FILES = [
 
   function loadFile(p, opts){
     opts = opts || {};
-    // Resolve alt-lang paths: if user is KR and clicks an _en link, keep the click path as-is.
     var text = MD_DATA[p];
     var inner = document.getElementById('contentInner');
     if(!text){
@@ -387,7 +372,6 @@ var FILES = [
 
     highlightActive(p);
 
-    // history management
     if(!opts.fromPopState && !opts.replaceHistory){
       history = history.slice(0, historyIndex + 1);
       history.push(p);
@@ -418,12 +402,10 @@ var FILES = [
 
     inner.innerHTML = navHtml + '<div class="md">' + html + '</div>';
 
-    // Add id to headings so same-page #anchor links work (marked v12+ omits ids).
     inner.querySelectorAll('.md h1, .md h2, .md h3, .md h4, .md h5, .md h6').forEach(function(h){
       if(!h.id) h.id = slugify(h.textContent);
     });
 
-    // Rewrite .md links to in-viewer navigation.
     inner.querySelectorAll('.md a[href]').forEach(function(a){
       var href = a.getAttribute('href');
       if(!href || href.indexOf('http') === 0) return;
@@ -438,13 +420,11 @@ var FILES = [
         });
         return;
       }
-      // Strip any query/hash for resolution but keep for re-attach (rare).
       var hashPart = '';
       var hashIdx = href.indexOf('#');
       if(hashIdx !== -1){ hashPart = href.substring(hashIdx); href = href.substring(0, hashIdx); }
       if(!href.endsWith('.md')) return;
 
-      // Normalize ./ prefix before joining
       if(href.indexOf('./') === 0) href = href.substring(2);
 
       var resolved;
@@ -461,13 +441,10 @@ var FILES = [
       if(MD_DATA[resolved]){
         a.onclick = function(e){ e.preventDefault(); loadFile(resolved); };
       } else {
-        // Intercept anyway to avoid the browser navigating to a 404 relative URL
         a.onclick = function(e){ e.preventDefault(); console.warn('Doc not found in viewer:', resolved); };
       }
     });
 
-    // Render mermaid diagrams in the newly inserted content.
-    // Cache original source so we can re-render on theme switch (mermaid replaces innerHTML with SVG).
     try {
       if(globalThis.mermaid){
         var nodes = inner.querySelectorAll('pre.mermaid');
@@ -476,13 +453,10 @@ var FILES = [
       }
     } catch(e){ console.warn('Mermaid run failed:', e); }
 
-    // Rewrite <img> src so repo-relative paths (e.g. "../../screenshots/x.png")
-    // resolve correctly inside the viewer. Inside docs/ → Pages-relative;
-    // outside docs/ → raw.githubusercontent.com URL.
     inner.querySelectorAll('.md img[src]').forEach(function(img){
       var src = img.getAttribute('src');
       if(!src) return;
-      if(/^(https?:)?\/\//.test(src) || src.indexOf('data:') === 0) return;
+      if(/^(https?:)?\/\
       if(src.indexOf('./') === 0) src = src.substring(2);
       var baseParts = ['docs'];
       if(dir) baseParts = baseParts.concat(dir.split('/'));
@@ -501,7 +475,6 @@ var FILES = [
       }
     });
 
-    // Decorate code blocks: language badge + copy button
     inner.querySelectorAll('.md pre').forEach(function(pre){
       if(pre.classList.contains('mermaid')) return;
       var code = pre.querySelector('code');
@@ -582,11 +555,9 @@ var FILES = [
     if(e.altKey && e.key === 'ArrowRight'){ e.preventDefault(); window._goForward(); }
   });
 
-  // ---- Language button wiring ----
   document.getElementById('langKo').addEventListener('click', function(){ if(getLang()!=='ko') applyLang('ko'); });
   document.getElementById('langEn').addEventListener('click', function(){ if(getLang()!=='en') applyLang('en'); });
 
-  // ---- Theme toggle ----
   var THEME_KEY = 'docsViewerTheme';
   function getTheme(){ return localStorage.getItem(THEME_KEY) === 'light' ? 'light' : 'dark'; }
   function setThemeStored(t){ localStorage.setItem(THEME_KEY, t === 'light' ? 'light' : 'dark'); }
@@ -628,16 +599,13 @@ var FILES = [
     return (getLang() === 'en' && MD_DATA['README_en.md']) ? 'README_en.md' : 'README.md';
   }
 
-  // ---- Bootstrap ----
   var initialLang = getLang();
   applyLang(initialLang, {skipContentSwap:true});
 
   var hash = location.hash.slice(1);
   if(hash && MD_DATA[hash]){
-    // If URL hash points to a language different from the preference, honor the URL.
     var info = PATH_INDEX[hash];
     if(info && info.lang !== initialLang){
-      // Adjust lang to match URL without re-navigating.
       setLang(info.lang);
       document.getElementById('langKo').classList.toggle('active', info.lang === 'ko');
       document.getElementById('langEn').classList.toggle('active', info.lang === 'en');

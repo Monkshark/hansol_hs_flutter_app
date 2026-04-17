@@ -1,7 +1,6 @@
 import WidgetKit
 import SwiftUI
 
-// MARK: - 데이터 읽기
 
 struct WidgetData {
     let mealDate: String
@@ -29,7 +28,6 @@ struct WidgetData {
     }
 }
 
-// MARK: - Timeline Provider
 
 struct HansolTimelineProvider: TimelineProvider {
     func placeholder(in context: Context) -> HansolEntry {
@@ -50,7 +48,6 @@ struct HansolTimelineProvider: TimelineProvider {
 
     func getTimeline(in context: Context, completion: @escaping (Timeline<HansolEntry>) -> Void) {
         let entry = HansolEntry(date: Date(), data: WidgetData.load())
-        // 1시간마다 갱신
         let nextUpdate = Calendar.current.date(byAdding: .hour, value: 1, to: Date())!
         let timeline = Timeline(entries: [entry], policy: .after(nextUpdate))
         completion(timeline)
@@ -62,7 +59,6 @@ struct HansolEntry: TimelineEntry {
     let data: WidgetData
 }
 
-// MARK: - 테마 색상
 
 struct WidgetColors {
     let primary: Color
@@ -72,13 +68,13 @@ struct WidgetColors {
     static func resolve(_ colorScheme: ColorScheme) -> WidgetColors {
         if colorScheme == .dark {
             return WidgetColors(
-                primary: Color(red: 0.494, green: 0.722, blue: 0.855),  // #7EB8DA
+                primary: Color(red: 0.494, green: 0.722, blue: 0.855),
                 content: Color(white: 0.8),
                 sub: Color(white: 0.53)
             )
         } else {
             return WidgetColors(
-                primary: colors.primary,  // #3F72AF
+                primary: colors.primary,
                 content: colors.content,
                 sub: Color(white: 0.6)
             )
@@ -86,7 +82,6 @@ struct WidgetColors {
     }
 }
 
-// MARK: - 급식 위젯
 
 struct MealWidgetView: View {
     let data: WidgetData
@@ -129,7 +124,6 @@ struct MealWidgetView: View {
     }
 }
 
-// MARK: - 시간표 위젯
 
 struct TimetableWidgetView: View {
     let data: WidgetData
@@ -180,7 +174,6 @@ struct TimetableWidgetView: View {
     }
 }
 
-// MARK: - 통합 위젯
 
 struct CombinedWidgetView: View {
     let data: WidgetData
@@ -190,7 +183,6 @@ struct CombinedWidgetView: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // 급식 (왼쪽)
             VStack(alignment: .leading, spacing: 6) {
                 Text(data.mealDate)
                     .font(.system(size: 13, weight: .bold))
@@ -205,13 +197,11 @@ struct CombinedWidgetView: View {
             .frame(maxWidth: .infinity)
             .padding(.trailing, 6)
 
-            // 구분선
             Rectangle()
                 .fill(colors.sub.opacity(0.3))
                 .frame(width: 1)
                 .padding(.vertical, 4)
 
-            // 시간표 (오른쪽)
             VStack(alignment: .leading, spacing: 2) {
                 Text(data.timetableDate)
                     .font(.system(size: 13, weight: .bold))
@@ -277,7 +267,6 @@ struct CombinedWidgetView: View {
     }
 }
 
-// MARK: - 위젯 정의
 
 struct MealWidget: Widget {
     let kind: String = "MealWidget"
@@ -318,7 +307,6 @@ struct CombinedWidget: Widget {
     }
 }
 
-// MARK: - 위젯 번들
 
 @main
 struct HansolWidgetBundle: WidgetBundle {

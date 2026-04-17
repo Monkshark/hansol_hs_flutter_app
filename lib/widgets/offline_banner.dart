@@ -46,7 +46,6 @@ class _OfflineBannerState extends State<OfflineBanner> {
 
     final l = AppLocalizations.of(context)!;
 
-    // 동기화 중
     if (_syncStatus.state == SyncState.syncing) {
       return _buildBanner(
         color: Colors.orange,
@@ -56,7 +55,6 @@ class _OfflineBannerState extends State<OfflineBanner> {
       );
     }
 
-    // 오프라인 + 대기 작업
     if (_isOffline && hasPending) {
       return _buildBanner(
         color: Colors.red,
@@ -65,7 +63,6 @@ class _OfflineBannerState extends State<OfflineBanner> {
       );
     }
 
-    // 오프라인 (대기 작업 없음)
     if (_isOffline) {
       return _buildBanner(
         color: Colors.red,
@@ -74,7 +71,6 @@ class _OfflineBannerState extends State<OfflineBanner> {
       );
     }
 
-    // 온라인이지만 대기 작업 있음 (곧 동기화 시작)
     return _buildBanner(
       color: Colors.orange,
       icon: Icons.cloud_upload_outlined,

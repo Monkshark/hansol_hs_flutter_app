@@ -83,7 +83,6 @@ class DDayManager {
     return pinned.first;
   }
 
-  // --- cache (SharedPreferences, 비암호화) ---
 
   static Future<List<DDay>> _loadFromCache() async {
     try {
@@ -107,14 +106,12 @@ class DDayManager {
     }
   }
 
-  // --- migration: SecureStorage → Firestore (일회성) ---
 
   static Future<void> _migrateFromSecureStorage() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       if (prefs.getBool('dday_migrated') == true) return;
 
-      // 1) 기존 SharedPreferences 평문 → SecureStorage 마이그레이션 잔재 처리
       final legacyPlain = prefs.getString(_legacyKey);
       List<DDay>? ddays;
 
@@ -124,7 +121,6 @@ class DDayManager {
         await prefs.remove(_legacyKey);
       }
 
-      // 2) SecureStorage 데이터 확인
       if (ddays == null) {
         final secureJson = await SecureStorageService.read(SecureStorageService.keyDdays);
         if (secureJson != null && secureJson.isNotEmpty) {
@@ -133,7 +129,6 @@ class DDayManager {
         }
       }
 
-      // 3) Firestore에 저장 + SecureStorage 정리
       if (ddays != null && ddays.isNotEmpty) {
         final uid = AuthService.currentUser!.uid;
         final existingDoc = await _docRef(uid).get();

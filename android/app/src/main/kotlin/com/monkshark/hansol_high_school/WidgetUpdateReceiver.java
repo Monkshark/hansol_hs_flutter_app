@@ -24,7 +24,6 @@ public class WidgetUpdateReceiver extends BroadcastReceiver {
         if (ACTION_UPDATE.equals(action) || Intent.ACTION_BOOT_COMPLETED.equals(action)) {
             Log.d(TAG, "Midnight widget update triggered");
 
-            // Dart 백그라운드 콜백 실행 → API 호출 + 위젯 갱신
             try {
                 PendingIntent backgroundIntent = HomeWidgetBackgroundIntent.INSTANCE.getBroadcast(
                         context, Uri.parse("homeWidget://widgetUpdate"));
