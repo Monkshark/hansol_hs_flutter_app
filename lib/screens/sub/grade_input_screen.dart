@@ -539,7 +539,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(child: _dropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_year,
                       value: _year,
-                      items: List.generate(5, (i) => DateTime.now().year - 2 + i),
+                      items: List.generate(8, (i) => DateTime.now().year - 5 + i),
                       itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_yearSuffix(v),
                       onChanged: (v) => setState(() => _year = v!),
                       fillColor: fieldFill,
@@ -748,6 +748,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   }) {
     return DropdownButtonFormField<T>(
       initialValue: value,
+      isExpanded: true,
       decoration: InputDecoration(
         labelText: label,
         filled: true,
