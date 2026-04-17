@@ -231,6 +231,10 @@ var FILES = [
     }
   }catch(e){ console.warn('Highlight init skipped:', e); }
   marked.use({breaks:false,gfm:true});
+  // Generate slug for heading id attributes (GitHub-style).
+  function slugify(text){
+    return text.toLowerCase().replace(/<[^>]*>/g,'').replace(/[^\w\u3130-\u318F\uAC00-\uD7AF\u4E00-\u9FFF -]/g,'').replace(/\s+/g,'-').replace(/-+$/,'');
+  }
   // Render ```mermaid blocks as <pre class="mermaid"> so mermaid.run() can process them.
   // Handle both marked v4 signature (code, lang) and v12 token-object signature.
   marked.use({renderer:{code:function(code, lang){
@@ -414,17 +418,24 @@ var FILES = [
 
     inner.innerHTML = navHtml + '<div class="md">' + html + '</div>';
 
+    // Add id to headings so same-page #anchor links work (marked v12+ omits ids).
+    inner.querySelectorAll('.md h1, .md h2, .md h3, .md h4, .md h5, .md h6').forEach(function(h){
+      if(!h.id) h.id = slugify(h.textContent);
+    });
+
     // Rewrite .md links to in-viewer navigation.
     inner.querySelectorAll('.md a[href]').forEach(function(a){
       var href = a.getAttribute('href');
       if(!href || href.indexOf('http') === 0) return;
       var hashOnly = href.charAt(0) === '#';
       if(hashOnly){
-        a.onclick = function(e){
+        a.addEventListener('click', function(e){
           e.preventDefault();
-          var target = document.getElementById(href.substring(1));
-          if(target) target.scrollIntoView({behavior:'smooth'});
-        };
+          e.stopPropagation();
+          var id = decodeURIComponent(href.substring(1));
+          var target = document.getElementById(id);
+          if(target){ target.scrollIntoView({behavior:'smooth',block:'start'}); }
+        });
         return;
       }
       // Strip any query/hash for resolution but keep for re-attach (rare).
