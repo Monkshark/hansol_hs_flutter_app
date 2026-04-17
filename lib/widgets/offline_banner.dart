@@ -88,9 +88,10 @@ class _OfflineBannerState extends State<OfflineBanner> {
     required String text,
     bool spinning = false,
   }) {
+    final topPadding = MediaQuery.of(context).padding.top;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 6),
+      padding: EdgeInsets.only(top: topPadding + 6, bottom: 6),
       color: color,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
