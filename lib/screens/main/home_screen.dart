@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:hansol_high_school/api/meal_data_api.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
-import 'package:hansol_high_school/data/dday_manager.dart';
 import 'package:hansol_high_school/screens/sub/dday_screen.dart';
-import 'package:hansol_high_school/data/meal.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
+import 'package:hansol_high_school/providers/home_provider.dart';
 import 'package:hansol_high_school/screens/board/admin_screen.dart';
 import 'package:hansol_high_school/screens/board/board_screen.dart';
 import 'package:hansol_high_school/screens/chat/chat_list_screen.dart';
@@ -22,17 +21,14 @@ import 'package:intl/intl.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => HomeScreenState();
+  ConsumerState<HomeScreen> createState() => HomeScreenState();
 }
 
-class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
-  Key _ddayKey = UniqueKey();
-  Key _refreshKey = UniqueKey();
-
+class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -50,15 +46,15 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (state == AppLifecycleState.resumed) refresh();
   }
 
-  /// UniqueKey 교체로 FutureBuilder 자식 위젯을 강제 재생성.
-  /// FutureProvider로 전환하면 ref.invalidate()로 대체 가능하지만,
-  /// 현재 HomeScreen이 ConsumerWidget이 아니라 연쇄 변경이 크므로 유지.
   void refresh() {
-    if (mounted) setState(() { _ddayKey = UniqueKey(); _refreshKey = UniqueKey(); });
+    if (!mounted) return;
+    ref.invalidate(pinnedDDayProvider);
+    ref.invalidate(todayLunchProvider);
+    setState(() {}); // CurrentSubjectCard + RecentPosts 갱신
   }
 
   void _refreshDDay() {
-    setState(() => _ddayKey = UniqueKey());
+    ref.invalidate(pinnedDDayProvider);
   }
 
   @override
@@ -171,7 +167,7 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                         ),
                       ],
                     ),
-                    _UpcomingEventDDay(key: _ddayKey, onRefresh: _refreshDDay),
+                    _UpcomingEventDDay(onRefresh: _refreshDDay),
                     const SizedBox(height: 8),
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
@@ -205,7 +201,6 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           ),
           Expanded(
-            key: _refreshKey,
             child: RefreshIndicator(
               onRefresh: () async => refresh(),
               color: AppColors.theme.primaryColor,
@@ -410,25 +405,21 @@ class HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 }
 
-class _UpcomingEventDDay extends StatelessWidget {
+class _UpcomingEventDDay extends ConsumerWidget {
   final VoidCallback onRefresh;
-  const _UpcomingEventDDay({super.key, required this.onRefresh});
+  const _UpcomingEventDDay({required this.onRefresh});
 
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<DDay?>(
-      future: DDayManager.getPinned(),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return const SizedBox.shrink();
-        if (snapshot.connectionState != ConnectionState.done) {
-          return Text(
-            AppLocalizations.of(context)!.home_scheduleLoading,
-            style: TextStyle(color: Colors.white, fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w700),
-          );
-        }
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncDDay = ref.watch(pinnedDDayProvider);
 
-        final pinnedDDay = snapshot.data;
-
+    return asyncDDay.when(
+      loading: () => Text(
+        AppLocalizations.of(context)!.home_scheduleLoading,
+        style: TextStyle(color: Colors.white, fontSize: Responsive.sp(context, 22), fontWeight: FontWeight.w700),
+      ),
+      error: (_, __) => const SizedBox.shrink(),
+      data: (pinnedDDay) {
         if (pinnedDDay == null) {
           return GestureDetector(
             onTap: () => Navigator.of(context).push(
@@ -483,37 +474,31 @@ class _UpcomingEventDDay extends StatelessWidget {
   }
 }
 
-class _TodayLunchPreview extends StatelessWidget {
+class _TodayLunchPreview extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
-    return FutureBuilder<Meal?>(
-      future: MealDataApi.getMeal(
-        date: DateTime.now(),
-        mealType: MealDataApi.LUNCH,
-        type: MealDataApi.MENU,
+  Widget build(BuildContext context, WidgetRef ref) {
+    final asyncMeal = ref.watch(todayLunchProvider);
+
+    String preview = AppLocalizations.of(context)!.home_lunchPreview;
+    asyncMeal.whenData((meal) {
+      if (meal?.meal != null) {
+        final items = meal!.meal!.split('\n').take(3).map((e) =>
+          e.replaceAll(RegExp(r'\([0-9.,\s]+\)'), '').trim()
+        ).where((e) => e.isNotEmpty).join(' · ');
+        preview = '🍱 $items';
+      } else {
+        preview = AppLocalizations.of(context)!.home_lunchNoInfo;
+      }
+    });
+
+    return Text(
+      preview,
+      style: TextStyle(
+        color: Colors.white.withAlpha(180),
+        fontSize: Responsive.sp(context, 12),
       ),
-      builder: (context, snapshot) {
-        if (snapshot.hasError) return const SizedBox.shrink();
-        String preview = AppLocalizations.of(context)!.home_lunchPreview;
-        if (snapshot.hasData && snapshot.data?.meal != null) {
-          final menu = snapshot.data!.meal!;
-          final items = menu.split('\n').take(3).map((e) =>
-            e.replaceAll(RegExp(r'\([0-9.,\s]+\)'), '').trim()
-          ).where((e) => e.isNotEmpty).join(' · ');
-          preview = '🍱 $items';
-        } else if (snapshot.hasData) {
-          preview = AppLocalizations.of(context)!.home_lunchNoInfo;
-        }
-        return Text(
-          preview,
-          style: TextStyle(
-            color: Colors.white.withAlpha(180),
-            fontSize: Responsive.sp(context, 12),
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        );
-      },
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
