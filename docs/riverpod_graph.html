@@ -37,6 +37,7 @@
     html[data-theme="dark"] #themeToggle .icon-moon { display: none }
   </style>
   <script>
+    // Apply stored theme ASAP.
     (function(){
       try {
         var t = localStorage.getItem('docsViewerTheme');
@@ -154,6 +155,7 @@
       ]
     });
 
+    // Optional: highlight on click
     cy.on('tap', 'edge', function (evt) {
       const edge = evt.target;
       cy.edges().addClass('suppressed');
@@ -178,12 +180,14 @@ const edgeInfoDiv = document.getElementById('edge-info');
     cy.on('select', 'node', function (evt) {
       const node = evt.target;
 
+      // Clear previous highlights
       cy.elements().removeClass('highlighted');
       cy.elements().addClass('suppressed');
       
       node.connectedEdges().addClass('highlighted');
       node.connectedEdges().removeClass('suppressed');
 
+      // Highlight the node, its connected edges, and neighboring nodes
       const neighborhood = node.closedNeighborhood();
       neighborhood.addClass('highlighted');
     });
@@ -199,6 +203,7 @@ const edgeInfoDiv = document.getElementById('edge-info');
        edgeInfoDiv.style.display = 'none';
     });
 
+    // Theme toggle wiring — swap node color + suppressed edge/node color for readability on each bg.
     function applyCyTheme(theme){
       const isDark = theme === 'dark';
       cy.style()
