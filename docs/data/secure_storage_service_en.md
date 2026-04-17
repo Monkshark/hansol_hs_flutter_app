@@ -13,7 +13,7 @@
 | Stored here | Not stored here |
 |-------------|----------------|
 | Academic records (grades, goals) | Cache (timetable/meal/notice) — fast reads, plaintext OK |
-| Personally-identifying info like D-day | Firebase Auth / Kakao SDK tokens — managed by the SDKs themselves |
+| | Firebase Auth / Kakao SDK tokens — managed by the SDKs themselves |
 
 ---
 
@@ -23,7 +23,7 @@
 static const String keyGradeExams = 'secure_grade_exams';
 static const String keyGradeGoals = 'secure_grade_goals';
 static const String keyGradeJeongsiGoals = 'secure_grade_jeongsi_goals';
-static const String keyDdays = 'secure_ddays';
+static const String keyDdays = 'secure_ddays';  // legacy — migration-only, DDayManager moved to Firestore
 ```
 
 The namespace prefix (`secure_`) prevents collisions with SharedPreferences keys.
@@ -82,7 +82,7 @@ static Future<void> delete(String key)
 static Future<void> deleteAll()
 ```
 
-Basic CRUD. All values are serialized as String (JSON). Callers ([`GradeManager`](grade_manager.md), [`DDayManager`](dday_manager.md)) handle `jsonEncode`/`jsonDecode`.
+Basic CRUD. All values are serialized as String (JSON). Callers ([`GradeManager`](grade_manager.md)) handle `jsonEncode`/`jsonDecode`.
 
 ---
 
@@ -106,7 +106,7 @@ await write(key, oldValue);      // encrypted write
 await onMigrated();              // caller removes the plaintext from SharedPreferences
 ```
 
-- Runs automatically on the first call to [`GradeManager`](grade_manager.md)`.loadExams`, [`DDayManager`](dday_manager.md)`.loadAll`, etc.
+- Runs automatically on the first call to [`GradeManager`](grade_manager.md)`.loadExams`
 - **Idempotent**: Returns `false` when already migrated; safe to re-run
 - The `onMigrated` callback deletes the plaintext key → prevents residual plaintext data after migration
 

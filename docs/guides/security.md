@@ -112,9 +112,12 @@ function validCounterDelta(field) {
 
 ## 개인정보 보호
 
-- **개인정보 처리방침** 앱 내 표시 (`assets/privacy_policy.html`)
-- 가입 시 동의 필수
+- **개인정보 처리방침** 앱 내 표시 (`AppLocalizations` l10n 기반, `PrivacyPolicyScreen`)
+- 가입 시 동의 필수 + **만 14세 이상 확인 체크박스** (개인정보보호법 제22조의2)
+- 가입 화면에서 "전체 보기"로 전문 확인 가능
+- **설정에서 Analytics 수집 동의/거부 토글** (개인정보보호법 제10조)
 - 최소 수집 원칙: 이름/학번/이메일/프로필 사진만 (학교 맥락 필수 정보)
+- D-day 데이터(날짜 + 라벨)는 비민감 정보로 Firestore에 계정 연동 저장
 - **회원 탈퇴 시 즉시 파기** — 관련 컬렉션 + Storage + Auth 계정 순서로 완전 삭제 ([기술과제 #10](./technical-challenges.md#10-계정-삭제-순서-문제))
 - **TTL 자동 삭제**: 오래된 로그/신고는 `cleanupOldPosts` 스케줄러로 만료 처리
 
