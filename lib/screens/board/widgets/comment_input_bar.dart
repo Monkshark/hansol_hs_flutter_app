@@ -48,9 +48,13 @@ class CommentInputBar extends StatelessWidget {
                   Text(l.post_replyTo(replyToName!),
                     style: TextStyle(fontSize: Responsive.sp(context, 12), color: AppColors.theme.primaryColor)),
                   const Spacer(),
-                  GestureDetector(
-                    onTap: onCancelReply,
-                    child: Icon(Icons.close, size: Responsive.r(context, 16), color: AppColors.theme.darkGreyColor),
+                  Semantics(
+                    button: true,
+                    label: 'Cancel reply',
+                    child: GestureDetector(
+                      onTap: onCancelReply,
+                      child: Icon(Icons.close, size: Responsive.r(context, 16), color: AppColors.theme.darkGreyColor),
+                    ),
                   ),
                 ],
               ),
@@ -58,7 +62,10 @@ class CommentInputBar extends StatelessWidget {
           const SizedBox(height: 8),
           Row(
             children: [
-              GestureDetector(
+              Semantics(
+                button: true,
+                label: l.post_anonymous,
+                child: GestureDetector(
                 onTap: onToggleAnonymous,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -82,7 +89,7 @@ class CommentInputBar extends StatelessWidget {
                     ),
                   ),
                 ),
-              ),
+              )),
               const SizedBox(width: 8),
               Expanded(
                 child: TextField(
@@ -104,6 +111,7 @@ class CommentInputBar extends StatelessWidget {
               const SizedBox(width: 4),
               IconButton(
                 onPressed: sending ? null : onSubmit,
+                tooltip: 'Send comment',
                 icon: Icon(Icons.send, color: AppColors.theme.primaryColor),
               ),
             ],

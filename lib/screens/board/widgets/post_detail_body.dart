@@ -178,15 +178,19 @@ class PostDetailBody extends StatelessWidget {
               ),
               if (AuthService.currentUser?.uid != post['authorUid']) ...[
                 const SizedBox(width: 20),
-                GestureDetector(
-                  onTap: onReport,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.theme.darkGreyColor.withAlpha(80)),
+                Semantics(
+                  button: true,
+                  label: l.post_report,
+                  child: GestureDetector(
+                    onTap: onReport,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: AppColors.theme.darkGreyColor.withAlpha(80)),
+                      ),
+                      child: Icon(Icons.flag_outlined, size: Responsive.r(context, 20), color: AppColors.theme.darkGreyColor),
                     ),
-                    child: Icon(Icons.flag_outlined, size: Responsive.r(context, 20), color: AppColors.theme.darkGreyColor),
                   ),
                 ),
               ],

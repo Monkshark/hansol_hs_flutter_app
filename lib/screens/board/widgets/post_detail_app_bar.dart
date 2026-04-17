@@ -70,6 +70,7 @@ class PostDetailAppBarActions extends StatelessWidget {
                   ),
                 IconButton(
                   icon: Icon(Icons.more_vert, size: Responsive.r(context, 22)),
+                  tooltip: 'More options',
                   onPressed: () => showPostActionSheet(
                     context: context,
                     postId: postId,
