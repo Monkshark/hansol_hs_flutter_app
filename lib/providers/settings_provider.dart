@@ -128,7 +128,6 @@ final notificationSettingsProvider =
   NotificationSettingsNotifier.new,
 );
 
-// ─── Locale Provider ───
 
 class LocaleNotifier extends Notifier<Locale?> {
   @override
@@ -145,7 +144,6 @@ class LocaleNotifier extends Notifier<Locale?> {
 
 final localeProvider = NotifierProvider<LocaleNotifier, Locale?>(LocaleNotifier.new);
 
-// ─── App Refresh Provider ───
 
 class AppRefreshNotifier extends Notifier<int> {
   @override

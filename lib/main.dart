@@ -89,13 +89,11 @@ Future<void> main() async {
   tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
   providerContainer = ProviderContainer();
 
-  // 필수: SettingData + ServiceLocator만 await (UI에 필요)
   await Future.wait([SettingData().init(), setupServiceLocator()]);
 
   await initializeDateFormatting();
   runApp(UncontrolledProviderScope(container: providerContainer, child: const HansolHighSchool()));
 
-  // UI가 뜬 후 나머지 초기화를 백그라운드로 실행
   unawaited(_deferredInit());
 }
 
@@ -112,7 +110,7 @@ Future<void> _deferredInit() async {
   unawaited(_safeInit('Analytics', () async {
     final prefs = await SharedPreferences.getInstance();
     final userEnabled = prefs.getBool('analyticsEnabled') ?? true;
-    final isRelease = const bool.fromEnvironment('dart.vm.product');
+    const isRelease = bool.fromEnvironment('dart.vm.product');
     await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(isRelease && userEnabled);
   }));
 
@@ -285,7 +283,6 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> with Widget
     final locale = ref.watch(localeProvider);
     final refreshKey = ref.watch(appRefreshProvider);
 
-    // 테마 변경 시 AnimatedAppColors 동기화
     final isDark = _resolveIsDark(mode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
     AnimatedAppColors.instance.tick(isDark ? 1.0 : 0.0);

@@ -54,7 +54,6 @@ class MealDataApi {
     final cached = _getFromCache(prefs, cacheKey);
     if (cached != null && cached.meal != null && cached.meal != ApiStrings.mealNoData && cached.meal != ApiStrings.mealNoDataLegacy) {
       if (_isCacheStale(prefs, cacheKey)) {
-        // SWR: 만료된 캐시를 즉시 반환하고 백그라운드에서 갱신
         log('MealDataApi: getMeal stale cache, revalidating in background');
         _prefetchMonth(date);
       } else {
@@ -248,7 +247,6 @@ class MealDataApi {
     if (meal.meal == ApiStrings.mealNoData) {
       if (age > 5 * 60 * 1000) return null;
     } else if (age > 24 * 60 * 60 * 1000) {
-      // SWR: 3일 이내면 stale 캐시 반환 (isCacheStale로 확인)
       if (age > 3 * 24 * 60 * 60 * 1000) return null;
     }
 
