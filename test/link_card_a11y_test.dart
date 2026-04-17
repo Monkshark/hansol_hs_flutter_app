@@ -15,7 +15,7 @@ void main() {
   }
 
   testWidgets('LinkCard에 semantic label + button 속성 존재', (tester) async {
-    await tester.pumpWidget(wrap(LinkCard(
+    await tester.pumpWidget(wrap(const LinkCard(
       icon: Icons.school,
       label: '학교 홈페이지',
       color: Colors.blue,
@@ -28,7 +28,7 @@ void main() {
   });
 
   testWidgets('label이 다르면 semantic label도 다름', (tester) async {
-    await tester.pumpWidget(wrap(LinkCard(
+    await tester.pumpWidget(wrap(const LinkCard(
       icon: Icons.restaurant,
       label: '급식 메뉴',
       color: Colors.orange,
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets('아이콘과 텍스트 렌더링', (tester) async {
-    await tester.pumpWidget(wrap(LinkCard(
+    await tester.pumpWidget(wrap(const LinkCard(
       icon: Icons.school,
       label: '학교 홈페이지',
       color: Colors.blue,
@@ -54,7 +54,7 @@ void main() {
   testWidgets('다크 모드에서 렌더링 + semantic label 유지', (tester) async {
     await tester.pumpWidget(MaterialApp(
       theme: ThemeData.dark(),
-      home: Scaffold(
+      home: const Scaffold(
         body: LinkCard(
           icon: Icons.school,
           label: '학교 홈페이지',
