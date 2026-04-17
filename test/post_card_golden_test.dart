@@ -8,7 +8,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
-import 'package:hansol_high_school/screens/board/board_screen.dart';
+import 'package:hansol_high_school/screens/board/widgets/post_card.dart';
 
 /// 플랫폼 간 폰트 렌더링 차이(Windows ↔ Linux)를 흡수하기 위한 tolerance comparator.
 /// goldens는 Windows 로컬에서 생성되었고 CI는 Ubuntu라 anti-aliasing/font hinting
