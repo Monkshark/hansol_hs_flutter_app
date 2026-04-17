@@ -419,7 +419,14 @@ var FILES = [
       var href = a.getAttribute('href');
       if(!href || href.indexOf('http') === 0) return;
       var hashOnly = href.charAt(0) === '#';
-      if(hashOnly) return; // same-page anchors handled by browser
+      if(hashOnly){
+        a.onclick = function(e){
+          e.preventDefault();
+          var target = document.getElementById(href.substring(1));
+          if(target) target.scrollIntoView({behavior:'smooth'});
+        };
+        return;
+      }
       // Strip any query/hash for resolution but keep for re-attach (rare).
       var hashPart = '';
       var hashIdx = href.indexOf('#');

@@ -2,7 +2,7 @@
 
 > 한국어: [technical-challenges.md](./technical-challenges.md)
 
-14 engineering challenges hit during production operation, each with a *problem → solution → outcome* summary and related file paths.
+14 engineering challenges hit during development, each with a *problem → solution → outcome* summary and related file paths.
 
 ## Contents
 
