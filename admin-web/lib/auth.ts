@@ -31,5 +31,10 @@ export function useAuth() {
     });
   }, []);
 
-  return { user, profile, loading };
+  async function logout() {
+    await auth.signOut();
+    document.cookie = 'admin_session=; path=/; max-age=0';
+  }
+
+  return { user, profile, loading, logout };
 }
