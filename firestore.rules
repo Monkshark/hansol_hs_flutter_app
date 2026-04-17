@@ -145,6 +145,12 @@ service cloud.firestore {
       allow write: if isAdminOrManager();
     }
 
+    // ── app_stats (집계 카운터 — Cloud Functions가 쓰기, 관리자만 읽기) ──
+    match /app_stats/{doc} {
+      allow read: if isAdminOrManager();
+      allow write: if false;
+    }
+
     // ── admin_logs ─────────────────────────────────────────────────────
     match /admin_logs/{logId} {
       allow create: if isAdminOrManager();
