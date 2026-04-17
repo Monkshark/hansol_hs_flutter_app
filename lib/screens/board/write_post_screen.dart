@@ -460,7 +460,6 @@ class _WritePostScreenState extends State<WritePostScreen> {
         final docRef = await repo.createPost(postData);
 
         if (docRef == null) {
-          // 오프라인 → 큐에 저장됨
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(AppLocalizations.of(context)!.offline_postQueued)),

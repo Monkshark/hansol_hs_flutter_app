@@ -45,7 +45,6 @@ public class CombinedWidgetProvider extends AppWidgetProvider {
 
         views.setInt(R.id.widget_root, "setBackgroundResource", theme.background);
 
-        // 날짜
         String mealDate = prefs.getString("meal_date", "");
         String timetableDate = prefs.getString("timetable_date", "");
         views.setTextViewText(R.id.meal_date, mealDate);
@@ -53,12 +52,10 @@ public class CombinedWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.timetable_date, timetableDate);
         views.setTextColor(R.id.timetable_date, theme.titleColor);
 
-        // 급식 라벨
         views.setTextColor(R.id.meal_label_breakfast, theme.titleColor);
         views.setTextColor(R.id.meal_label_lunch, theme.titleColor);
         views.setTextColor(R.id.meal_label_dinner, theme.titleColor);
 
-        // 급식
         String breakfast = prefs.getString("meal_breakfast", "정보 없음");
         String lunch = prefs.getString("meal_lunch", "정보 없음");
         String dinner = prefs.getString("meal_dinner", "정보 없음");
@@ -69,10 +66,8 @@ public class CombinedWidgetProvider extends AppWidgetProvider {
         views.setTextViewText(R.id.meal_dinner, MealWidgetProvider.formatMeal(dinner));
         views.setTextColor(R.id.meal_dinner, theme.contentColor);
 
-        // 구분선
         views.setInt(R.id.divider, "setBackgroundColor", theme.dividerColor);
 
-        // 시간표
         String data = prefs.getString("timetable_data", "");
         int currentPeriod = 0;
         try { currentPeriod = prefs.getInt("timetable_current", 0); } catch (Exception e) {}

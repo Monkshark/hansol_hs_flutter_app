@@ -76,7 +76,6 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
       color: widget.backgroundColor,
       child: Column(
         children: [
-          // Header: year/month
           Padding(
             padding: const EdgeInsets.fromLTRB(24, 16, 24, 4),
             child: Align(
@@ -88,12 +87,9 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
               ),
             ),
           ),
-          // Arrows + swipeable (dow labels + day cells)
           Row(
             children: [
-              // < 화살표
               _buildArrowButton(Icons.chevron_left, _goToPreviousWeek),
-              // 요일 + 날짜 영역 전체 스와이프
               Expanded(
                 child: SizedBox(
                   height: Responsive.h(context, 68),
@@ -113,7 +109,6 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
 
                       return Column(
                         children: [
-                          // 요일 라벨
                           SizedBox(
                             height: Responsive.h(context, 24),
                             child: Row(
@@ -130,7 +125,6 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                               )).toList(),
                             ),
                           ),
-                          // 날짜 셀
                           Expanded(
                             child: Row(
                               children: weekDays.map((day) {
@@ -193,7 +187,6 @@ class _WeeklyCalendarState extends State<WeeklyCalendar> {
                   ),
                 ),
               ),
-              // > 화살표
               _buildArrowButton(Icons.chevron_right, _goToNextWeek),
             ],
           ),
