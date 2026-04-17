@@ -31,7 +31,8 @@ Future<void> main() async
 
 Once the UI is up, `unawaited(_deferredInit())` runs the remaining initialization in the background:
 
-1. **App Check** / **Performance Monitoring** / **Analytics** — each fire-and-forget via `_safeInit()`
+1. **App Check** / **Performance Monitoring** — each fire-and-forget via `_safeInit()`
+1. **Analytics** — reads `SharedPreferences('analyticsEnabled')` and checks release mode; collection is enabled only when both conditions are met. Then calls `AnalyticsService.logAppOpen(source: 'organic')`
 2. **Subject data preload** (grades 2 and 3 in parallel)
 3. **Local meal notifications** initialization + scheduling
 4. **FCM** init + **deep link** init + **widget service** init (fire-and-forget)

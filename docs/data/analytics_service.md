@@ -71,6 +71,53 @@ static Future<void> setUserProperty(String name, String? value)
 
 ---
 
+## 앱 수명주기 이벤트
+
+| 메서드 | 이벤트명 | 파라미터 |
+|--------|----------|----------|
+| `logAppOpen(source)` | `app_open` | `{source}` |
+| `markSessionStart()` | — | 내부 타이머 시작 |
+| `logSessionEnd()` | `session_duration` | `{seconds}` |
+
+`markSessionStart()`는 세션 시작 시각을 기록하고, `logSessionEnd()`가 호출되면 경과 시간(초)을 `session_duration` 이벤트로 전송
+
+---
+
+## 글 작성 퍼널
+
+| 메서드 | 이벤트명 | 파라미터 |
+|--------|----------|----------|
+| `logPostStart(boardType)` | `post_start` | `{board_type}` |
+| `logPostDraft()` | `post_draft` | — |
+| `logPostSubmit(boardType)` | `post_submit` | `{board_type}` |
+
+글 작성 흐름: **post_start → post_draft → post_submit**. 퍼널 분석으로 이탈 구간 파악 가능
+
+---
+
+## 기타 이벤트
+
+| 메서드 | 이벤트명 | 파라미터 |
+|--------|----------|----------|
+| `logFeatureDiscovery(feature)` | `feature_discovery` | `{feature}` |
+| `trackFirstVisit(feature)` | `feature_discovery` | `{feature}` (최초 1회만) |
+| `logErrorShown(errorType)` | `error_shown` | `{error_type}` |
+
+`trackFirstVisit`는 SharedPreferences `visited_$feature` 키를 확인하여 최초 방문 시에만 `feature_discovery` 이벤트를 기록
+
+---
+
+## 사용자 수집 동의 (opt-out)
+
+AnalyticsService 외부에서 수집 여부를 제어:
+
+- **`main.dart` `_deferredInit()`**: `SharedPreferences.getBool('analyticsEnabled')`와 릴리스 모드 여부를 조합하여 `FirebaseAnalytics.instance.setAnalyticsCollectionEnabled()` 호출
+- **설정 화면**: 사용자가 토글로 analytics 수집을 켜고 끌 수 있으며, 변경 시 `SharedPreferences`에 저장 후 즉시 `setAnalyticsCollectionEnabled()`를 호출
+
+기본값은 릴리스 빌드에서 활성화. 사용자가 설정에서 끄면 이후 모든 이벤트 전송이 중단됨
+
+---
+
 ## 내부 구조
 
 ```dart

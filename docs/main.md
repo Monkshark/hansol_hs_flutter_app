@@ -29,7 +29,8 @@ Future<void> main() async
 
 UI가 뜬 뒤 `unawaited(_deferredInit())`로 나머지 초기화를 백그라운드 실행:
 
-1. **App Check** / **Performance Monitoring** / **Analytics** — 각각 `_safeInit()`으로 fire-and-forget
+1. **App Check** / **Performance Monitoring** — 각각 `_safeInit()`으로 fire-and-forget
+1. **Analytics** — `SharedPreferences('analyticsEnabled')` 값과 릴리스 모드 여부를 확인하여, 두 조건 모두 충족할 때만 수집 활성화. 이후 `AnalyticsService.logAppOpen(source: 'organic')` 호출
 2. **과목 데이터 프리로드** (2학년, 3학년 병렬)
 3. **로컬 급식 알림** 초기화 + 스케줄링
 4. **FCM** 초기화 + **딥링크** 초기화 + **위젯 서비스** 초기화 (fire-and-forget)

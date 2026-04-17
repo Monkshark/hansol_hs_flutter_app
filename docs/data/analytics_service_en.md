@@ -73,6 +73,53 @@ Set user properties (grade, userType, etc.).
 
 ---
 
+## App lifecycle events
+
+| Method | Event name | Parameters |
+|--------|----------|----------|
+| `logAppOpen(source)` | `app_open` | `{source}` |
+| `markSessionStart()` | — | Starts internal timer |
+| `logSessionEnd()` | `session_duration` | `{seconds}` |
+
+`markSessionStart()` records the session start time. When `logSessionEnd()` is called, the elapsed time in seconds is sent as a `session_duration` event.
+
+---
+
+## Post creation funnel
+
+| Method | Event name | Parameters |
+|--------|----------|----------|
+| `logPostStart(boardType)` | `post_start` | `{board_type}` |
+| `logPostDraft()` | `post_draft` | — |
+| `logPostSubmit(boardType)` | `post_submit` | `{board_type}` |
+
+Post creation flow: **post_start → post_draft → post_submit**. Funnel analysis can identify drop-off points.
+
+---
+
+## Other events
+
+| Method | Event name | Parameters |
+|--------|----------|----------|
+| `logFeatureDiscovery(feature)` | `feature_discovery` | `{feature}` |
+| `trackFirstVisit(feature)` | `feature_discovery` | `{feature}` (first visit only) |
+| `logErrorShown(errorType)` | `error_shown` | `{error_type}` |
+
+`trackFirstVisit` checks SharedPreferences key `visited_$feature` and logs the `feature_discovery` event only on the first visit.
+
+---
+
+## User collection consent (opt-out)
+
+Analytics collection is controlled outside of AnalyticsService:
+
+- **`main.dart` `_deferredInit()`**: Combines `SharedPreferences.getBool('analyticsEnabled')` with a release mode check to call `FirebaseAnalytics.instance.setAnalyticsCollectionEnabled()`.
+- **Settings screen**: The user can toggle analytics collection on/off. Changes are saved to `SharedPreferences` and `setAnalyticsCollectionEnabled()` is called immediately.
+
+Collection is enabled by default in release builds. If the user disables it in settings, all subsequent event transmission stops.
+
+---
+
 ## Internal structure
 
 ```dart
