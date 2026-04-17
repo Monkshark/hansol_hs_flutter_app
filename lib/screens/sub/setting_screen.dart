@@ -14,6 +14,7 @@ import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/styles/responsive.dart';
 import 'package:hansol_high_school/screens/sub/timetable_select_screen.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:hansol_high_school/main.dart' show providerContainer;
 import 'package:hansol_high_school/providers/settings_provider.dart';
 import 'package:hansol_high_school/providers/theme_provider.dart' show themeProvider;
@@ -40,6 +41,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
   late Future<void> _settingsFuture;
   String _cacheSize = '';
+  bool _analyticsEnabled = true;
 
   @override
   void initState() {
@@ -69,6 +71,7 @@ class _SettingScreenState extends State<SettingScreen> {
 
   Future<void> _loadSettings() async {
     await SettingData().init();
+    final prefs = await SharedPreferences.getInstance();
     setState(() {
       grade = SettingData().grade;
       classNum = SettingData().classNum;
@@ -79,6 +82,7 @@ class _SettingScreenState extends State<SettingScreen> {
       lunchTime = _parseTimeOfDay(SettingData().lunchTime);
       isDinnerNotificationOn = SettingData().isDinnerNotificationOn;
       dinnerTime = _parseTimeOfDay(SettingData().dinnerTime);
+      _analyticsEnabled = prefs.getBool('analyticsEnabled') ?? true;
     });
   }
 
@@ -300,10 +304,24 @@ class _SettingScreenState extends State<SettingScreen> {
                 GestureDetector(
                   behavior: HitTestBehavior.opaque,
                   onTap: () => Navigator.push(context,
-                    MaterialPageRoute(builder: (_) => const _PrivacyPolicyScreen())),
+                    MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
                   child: _buildSettingRow(
                     AppLocalizations.of(context)!.settings_privacy,
                     trailing: Icon(Icons.chevron_right, size: Responsive.r(context, 18), color: AppColors.theme.darkGreyColor),
+                  ),
+                ),
+                _buildDivider(),
+                _buildSettingRow(
+                  AppLocalizations.of(context)!.settings_analyticsCollection,
+                  trailing: Switch.adaptive(
+                    value: _analyticsEnabled,
+                    activeTrackColor: AppColors.theme.primaryColor,
+                    onChanged: (v) async {
+                      setState(() => _analyticsEnabled = v);
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.setBool('analyticsEnabled', v);
+                      await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(v);
+                    },
                   ),
                 ),
                 _buildDivider(),
@@ -599,8 +617,8 @@ class _SettingScreenState extends State<SettingScreen> {
   }
 }
 
-class _PrivacyPolicyScreen extends StatelessWidget {
-  const _PrivacyPolicyScreen();
+class PrivacyPolicyScreen extends StatelessWidget {
+  const PrivacyPolicyScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
