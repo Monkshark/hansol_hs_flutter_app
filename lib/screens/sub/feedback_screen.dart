@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -7,6 +8,7 @@ import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/input_sanitizer.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
+import 'package:hansol_high_school/widgets/error_snackbar.dart';
 import 'package:image_picker/image_picker.dart';
 
 class FeedbackScreen extends StatefulWidget {
@@ -108,10 +110,8 @@ class _FeedbackScreenState extends State<FeedbackScreen> {
         Navigator.of(context).pop();
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(AppLocalizations.of(context)!.feedback_sendError)));
-      }
+      log('Feedback: send error: $e');
+      if (mounted) showErrorSnackbar(context, e);
     } finally {
       if (mounted) setState(() => _isSending = false);
     }

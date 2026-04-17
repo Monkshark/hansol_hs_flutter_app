@@ -43,40 +43,44 @@ class RecentPosts extends StatelessWidget {
             final commentCount = data['commentCount'] ?? 0;
             final isPinned = data['isPinned'] == true;
 
-            return GestureDetector(
-              onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => PostDetailScreen(postId: doc.id))),
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                child: Row(
-                  children: [
-                    if (isPinned)
-                      const Padding(
-                        padding: EdgeInsets.only(right: 4),
-                        child: Icon(Icons.push_pin, size: 12, color: Colors.red),
+            return Semantics(
+              button: true,
+              label: title,
+              child: GestureDetector(
+                onTap: () => Navigator.push(context,
+                  MaterialPageRoute(builder: (_) => PostDetailScreen(postId: doc.id))),
+                child: Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  child: Row(
+                    children: [
+                      if (isPinned)
+                        const Padding(
+                          padding: EdgeInsets.only(right: 4),
+                          child: Icon(Icons.push_pin, size: 12, color: Colors.red),
+                        ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                        decoration: BoxDecoration(
+                          color: BoardCategories.color(category).withAlpha(20),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(category,
+                          style: TextStyle(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: BoardCategories.color(category))),
                       ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
-                      decoration: BoxDecoration(
-                        color: BoardCategories.color(category).withAlpha(20),
-                        borderRadius: BorderRadius.circular(4),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(title,
+                          style: TextStyle(fontSize: Responsive.sp(context, 13), color: textColor),
+                          maxLines: 1, overflow: TextOverflow.ellipsis),
                       ),
-                      child: Text(category,
-                        style: TextStyle(fontSize: Responsive.sp(context, 10), fontWeight: FontWeight.w600, color: BoardCategories.color(category))),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(title,
-                        style: TextStyle(fontSize: Responsive.sp(context, 13), color: textColor),
-                        maxLines: 1, overflow: TextOverflow.ellipsis),
-                    ),
-                    if (commentCount > 0) ...[
-                      const SizedBox(width: 6),
-                      Text('[$commentCount]',
-                        style: TextStyle(fontSize: Responsive.sp(context, 11), color: AppColors.theme.primaryColor)),
+                      if (commentCount > 0) ...[
+                        const SizedBox(width: 6),
+                        Text('[$commentCount]',
+                          style: TextStyle(fontSize: Responsive.sp(context, 11), color: AppColors.theme.primaryColor)),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             );
