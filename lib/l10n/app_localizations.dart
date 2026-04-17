@@ -3443,7 +3443,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection2AutoContent.
   ///
   /// In ko, this message translates to:
-  /// **'• 게시글·댓글·채팅 내용 (사용자가 작성한 텍스트 및 이미지)\n• 상호작용 기록 (좋아요·싫어요·북마크·투표 참여)\n• 신고·차단 기록\n• 검색 기록: 최근 검색어 최대 10개 (기기 내에만 저장)\n• 알림 설정값 (푸시·급식 알림 on/off 및 알림 시간)'**
+  /// **'• 게시글·댓글·채팅 내용 (사용자가 작성한 텍스트 및 이미지)\n• 상호작용 기록 (좋아요·싫어요·북마크·투표 참여)\n• 신고·차단 기록\n• 검색 기록: 최근 검색어 최대 10개 (기기 내에만 저장)\n• 알림 설정값 (푸시·급식 알림 on/off 및 알림 시간)\n• D-day 목록: 제목·날짜·고정 여부 (계정 연동, Firestore 저장)'**
   String get settings_privacySection2AutoContent;
 
   /// No description provided for @settings_privacySection2AutoCollect.
@@ -3467,7 +3467,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection2LocalOnlyContent.
   ///
   /// In ko, this message translates to:
-  /// **'• 시험 성적·목표 성적: Android Keystore / iOS Keychain 암호화 저장\n• D-day 목록: 암호화 로컬 저장\n• 임시저장 게시글, 테마·알림 시간 설정: 기기 내 저장'**
+  /// **'• 시험 성적·목표 성적: Android Keystore / iOS Keychain 암호화 저장\n• 임시저장 게시글, 테마·알림 시간 설정: 기기 내 저장'**
   String get settings_privacySection2LocalOnlyContent;
 
   /// No description provided for @settings_privacySection3Title.
@@ -3479,7 +3479,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection3Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.\n\n• 회원 정보 (프로필·인증): 회원 탈퇴 시까지\n• 게시글·댓글·첨부 이미지: 작성일로부터 4년 (고정 공지 제외)\n• 채팅 메시지: 회원 탈퇴 시까지\n• 앱 이용 로그 (Analytics): 수집일로부터 14개월\n• 오류·충돌 보고 (Crashlytics): 수집일로부터 90일'**
+  /// **'앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.\n\n• 회원 정보 (프로필·인증): 회원 탈퇴 시까지\n• 게시글·댓글·첨부 이미지: 작성일로부터 4년 (고정 공지 제외)\n• 채팅 메시지: 회원 탈퇴 시까지\n• D-day 목록: 회원 탈퇴 시까지\n• 앱 이용 로그 (Analytics): 수집일로부터 14개월\n• 오류·충돌 보고 (Crashlytics): 수집일로부터 90일'**
   String get settings_privacySection3Content;
 
   /// No description provided for @settings_privacySection4Title.
