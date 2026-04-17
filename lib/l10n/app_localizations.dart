@@ -287,8 +287,26 @@ abstract class AppLocalizations {
   /// No description provided for @profileSetup_privacyDescription.
   ///
   /// In ko, this message translates to:
-  /// **'원활한 서비스 제공을 위해 이름, 학번 등 기본 정보를 수집합니다. 수집된 정보는 앱 이용 목적으로만 사용되며, 회원 탈퇴 시 즉시 삭제됩니다.'**
+  /// **'원활한 서비스 제공을 위해 이름, 학번 등 기본 정보를 수집합니다. 수집된 정보는 앱 이용 목적으로만 사용되며, 자세한 보유기간은 처리방침을 확인해 주세요.'**
   String get profileSetup_privacyDescription;
+
+  /// No description provided for @profileSetup_privacyViewFull.
+  ///
+  /// In ko, this message translates to:
+  /// **'전체 보기'**
+  String get profileSetup_privacyViewFull;
+
+  /// No description provided for @profileSetup_ageConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'만 14세 이상 확인 (필수)'**
+  String get profileSetup_ageConfirmTitle;
+
+  /// No description provided for @profileSetup_ageConfirmDescription.
+  ///
+  /// In ko, this message translates to:
+  /// **'본 앱은 만 14세 이상을 대상으로 합니다. 만 14세 미만인 경우 법정대리인의 동의가 필요합니다.'**
+  String get profileSetup_ageConfirmDescription;
 
   /// No description provided for @profileSetup_updateTitle.
   ///
@@ -3545,8 +3563,20 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection10Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 웹 쿠키를 사용하지 않습니다. 다만 Firebase Analytics SDK를 통해 앱 이용 로그(화면 조회, 이벤트 등)를 자동으로 수집합니다.\n\n• 수집 목적: 서비스 이용 통계 분석 및 앱 개선\n• 거부 방법: 기기 설정에서 광고 추적 제한을 활성화하거나, 앱을 삭제하여 수집을 중단할 수 있습니다.'**
+  /// **'앱은 웹 쿠키를 사용하지 않습니다. 다만 Firebase Analytics SDK를 통해 앱 이용 로그(화면 조회, 이벤트 등)를 자동으로 수집합니다.\n\n• 수집 목적: 서비스 이용 통계 분석 및 앱 개선\n• 거부 방법: 앱 설정 > 이용 통계 수집을 비활성화하거나, 기기 설정에서 광고 추적 제한을 활성화하여 수집을 중단할 수 있습니다.'**
   String get settings_privacySection10Content;
+
+  /// No description provided for @settings_analyticsCollection.
+  ///
+  /// In ko, this message translates to:
+  /// **'이용 통계 수집'**
+  String get settings_analyticsCollection;
+
+  /// No description provided for @settings_analyticsCollectionDesc.
+  ///
+  /// In ko, this message translates to:
+  /// **'앱 개선을 위한 사용 통계를 수집합니다'**
+  String get settings_analyticsCollectionDesc;
 
   /// No description provided for @settings_privacySection11Title.
   ///
