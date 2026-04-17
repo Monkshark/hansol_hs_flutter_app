@@ -105,11 +105,13 @@ async function sendPush(token, title, body, data = {}) {
 async function sendPushToAdmins(title, body, excludeUid) {
   const admins = await getFirestore().collection("users")
     .where("role", "in", ["admin", "manager"]).get();
+  const promises = [];
   for (const doc of admins.docs) {
     if (doc.id === excludeUid) continue;
     const token = doc.data().fcmToken;
-    if (token) await sendPush(token, title, body, { type: "account", _targetUid: doc.id });
+    if (token) promises.push(sendPush(token, title, body, { type: "account", _targetUid: doc.id }));
   }
+  await Promise.all(promises);
 }
 
 exports.onCommentCreated = onDocumentCreated(
