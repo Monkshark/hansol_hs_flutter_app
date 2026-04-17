@@ -2,45 +2,82 @@
 
 > 한국어: [testing.md](./testing.md)
 
-A 4-layer test setup (Unit + Provider + Widget + Golden + Firestore Rules), totalling **558 tests**.
+A 4-layer test setup (Unit + Provider + Widget + Golden + Firestore Rules), totalling **597 tests**.
 
 ## Snapshot
 
 | Layer | Count | Characteristic |
 |---|---|---|
 | `test()` unit | 440 | models / utils / parsers / Provider / Repository / Golden — zero external deps |
-| `testWidgets()` widget | 80 | UI verification with `ProviderScope.overrides` + mock notifier |
+| `testWidgets()` widget | 123 | UI verification with `ProviderScope.overrides` + mock notifier (incl. a11y) |
 | Integration | 4 | `integration_test/` — app-level navigation E2E |
 | Firestore Rules | 34 | `@firebase/rules-unit-testing` + emulator |
-| **Total** | **524 Flutter + 34 Rules = 558** | |
+| **Total** | **563 Flutter + 34 Rules = 597** | |
 
-> Measured: `grep -rE "^\s*test\(" test/` = 440, `grep -rE "^\s*testWidgets\(" test/` = 80, `integration_test/` = 4.
+> Measured: `grep -rE "^\s*test\(" test/` = 440, `grep -rE "^\s*testWidgets\(" test/` = 123, `integration_test/` = 4.
 
 ## Test Layout
 
 ```
 test/
-├── auth_repository_test.dart       # repository + mock injection
+├── auth_repository_test.dart        # repository + mock injection
 ├── auth_service_test.dart
+├── board_categories_test.dart
+├── chat_id_test.dart
+├── comment_input_bar_test.dart      # widget — incl. a11y tests
+├── conflict_dialog_test.dart
 ├── dday_manager_test.dart
+├── dday_manager_extended_test.dart
+├── deep_link_service_test.dart
+├── delete_alert_dialog_test.dart
+├── error_snackbar_test.dart
+├── error_view_test.dart
+├── event_attach_card_test.dart
+├── exceptions_test.dart
+├── fcm_payload_test.dart
 ├── grade_manager_test.dart
-├── grade_provider_test.dart        # provider test
-├── grade_screen_widget_test.dart   # widget test
-├── meal_api_test.dart              # unit (Completer prefetch)
+├── grade_provider_test.dart         # provider test
+├── grade_screen_widget_test.dart    # widget test
+├── input_sanitizer_test.dart
+├── link_card_a11y_test.dart         # widget — a11y only
+├── meal_api_test.dart               # unit (Completer prefetch)
+├── meal_card_allergy_test.dart
+├── meal_data_api_test.dart
+├── meal_subject_model_test.dart
 ├── meal_test.dart
-├── post_card_golden_test.dart      # golden
+├── network_status_test.dart
+├── notice_api_test.dart
+├── notice_data_api_test.dart
+├── offline_queue_manager_test.dart
+├── poll_card_test.dart
+├── post_card_golden_test.dart       # golden
+├── responsive_test.dart
 ├── schedule_data_test.dart
 ├── search_history_service_test.dart
-├── search_tokens_test.dart         # unit (2-gram tokenizer)
-├── secure_storage_service_test.dart# unit (migrateFromPlain)
+├── search_tokens_test.dart          # unit (2-gram tokenizer)
+├── secure_storage_service_test.dart # unit (migrateFromPlain)
+├── setting_data_test.dart
+├── skeleton_test.dart
 ├── timetable_api_test.dart
+├── timetable_cell_test.dart
+├── timetable_data_api_test.dart
+├── timetable_parse_test.dart
+├── today_banner_test.dart
+├── user_profile_test.dart
+├── version_compare_test.dart
+├── vote_button_test.dart            # widget — a11y + behavior
 ├── widget_service_test.dart
-├── helpers/                        # common mock utils
-└── goldens/                        # golden PNG snapshots
+├── widget_service_logic_test.dart
+├── write_category_selector_test.dart
+├── write_toggle_row_test.dart
+├── helpers/                         # common mock utils
+└── goldens/                         # golden PNG snapshots
 
-tests/firestore-rules/              # rules emulator (Node.js)
-integration_test/                   # e2e (optional)
+tests/firestore-rules/               # rules emulator (Node.js)
+integration_test/                    # e2e (optional)
 ```
+
+> 53 test files total (excluding helpers/ and goldens/ directories).
 
 ## Layer Details
 
@@ -64,10 +101,11 @@ integration_test/                   # e2e (optional)
   ```
 - `addTearDown(container.dispose)` prevents ProviderContainer leaks ([Technical Challenge #12](./technical-challenges_en.md#12-non-deterministic-widget-test-timer-leak))
 
-### 3. Widget (17)
+### 3. Widget (123 testWidgets)
 - Inject mock notifiers via `ProviderScope(overrides: [...])`
 - Cover loading / error / empty / success branches
 - **Avoid timer leaks**: simulate indefinite loading with `Completer.future`, `complete()` at teardown
+- **Accessibility (a11y) tests**: `link_card_a11y_test.dart`, `vote_button_test.dart` (a11y group), `comment_input_bar_test.dart` (a11y group) -- verify Semantics labels, tab order, and screen reader compatibility
 
 ### 4. Golden (5)
 - `post_card_golden_test.dart` — 5 PostCard variants (default / liked / notice / +N badge / anon+manager view)
@@ -142,7 +180,7 @@ Two GitHub Actions workflows run in parallel:
 Details → [cicd-setup_en.md](./cicd-setup_en.md).
 
 ## Measured Times
-- Flutter full suite (`flutter test`): 520 tests (`test` + `testWidgets`), local machine seconds~tens of seconds
+- Flutter full suite (`flutter test`): 563 tests (`test` + `testWidgets`), local machine seconds~tens of seconds
 - Integration (`integration_test/`): 4 tests, device/emulator required
 - Rules: **~4s**, 34 tests, via `firebase emulators:exec`
 
