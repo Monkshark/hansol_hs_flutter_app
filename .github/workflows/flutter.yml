@@ -43,7 +43,6 @@ jobs:
           DART
           cat > lib/firebase_options.dart << 'DART'
           import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-          import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
           class DefaultFirebaseOptions {
             static FirebaseOptions get currentPlatform => const FirebaseOptions(
               apiKey: 'dummy', appId: 'dummy', messagingSenderId: 'dummy', projectId: 'dummy',
@@ -64,7 +63,7 @@ jobs:
         continue-on-error: true
 
       - name: Analyze
-        run: flutter analyze --no-fatal-infos --no-fatal-warnings
+        run: flutter analyze --no-fatal-infos
 
       - name: Run tests with coverage
         run: flutter test --coverage --reporter=expanded
@@ -120,7 +119,6 @@ jobs:
           DART
           cat > lib/firebase_options.dart << 'DART'
           import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
-          import 'package:flutter/foundation.dart' show defaultTargetPlatform, kIsWeb, TargetPlatform;
           class DefaultFirebaseOptions {
             static FirebaseOptions get currentPlatform => const FirebaseOptions(
               apiKey: 'dummy', appId: 'dummy', messagingSenderId: 'dummy', projectId: 'dummy',

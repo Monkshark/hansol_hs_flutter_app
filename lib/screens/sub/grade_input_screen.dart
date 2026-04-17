@@ -299,7 +299,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(child: GradeDropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_year,
                       value: _year,
-                      items: List.generate(5, (i) => DateTime.now().year - 2 + i),
+                      items: List.generate(8, (i) => DateTime.now().year - 5 + i),
                       itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_yearSuffix(v),
                       onChanged: (v) => setState(() => _year = v!),
                       fillColor: fieldFill,
@@ -308,7 +308,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(child: GradeDropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_semester,
                       value: _semester,
-                      items: [1, 2],
+                      items: const [1, 2],
                       itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_semesterSuffix(v),
                       onChanged: (v) => setState(() => _semester = v!),
                       fillColor: fieldFill,
@@ -317,7 +317,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                     Expanded(child: GradeDropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_grade,
                       value: _grade,
-                      items: [1, 2, 3],
+                      items: const [1, 2, 3],
                       itemLabel: (v) => AppLocalizations.of(context)!.gradeInput_gradeSuffix(v),
                       onChanged: (v) => setState(() => _grade = v!),
                       fillColor: fieldFill,
@@ -430,7 +430,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         Expanded(flex: 2, child: GradeScoreField(controller: s.averageCtrl, fillColor: fieldFill)),
                         Expanded(flex: 2, child: GradeMiniDropdown<int>(
                           value: int.tryParse(s.rankCtrl.text),
-                          items: [1, 2, 3, 4, 5],
+                          items: const [1, 2, 3, 4, 5],
                           onChanged: (v) => setState(() => s.rankCtrl.text = v?.toString() ?? ''),
                           fillColor: fieldFill,
                         )),

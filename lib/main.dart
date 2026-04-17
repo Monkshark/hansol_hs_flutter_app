@@ -100,8 +100,8 @@ Future<void> main() async {
 }
 
 Future<void> _deferredInit() async {
-  unawaited(AnalyticsService.logAppOpen(source: 'organic'));
-  unawaited(OfflineQueueManager.instance.initialize());
+  unawaited(_safeInit('AnalyticsOpen', () => AnalyticsService.logAppOpen(source: 'organic')));
+  unawaited(_safeInit('OfflineQueue', () => OfflineQueueManager.instance.initialize()));
   unawaited(_safeInit('AppCheck', () => FirebaseAppCheck.instance.activate(
     androidProvider: const bool.fromEnvironment('dart.vm.product')
         ? AndroidProvider.playIntegrity
@@ -121,9 +121,10 @@ Future<void> _deferredInit() async {
   await meal.scheduleDailyNotifications();
 
   FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-  unawaited(FcmService.initialize());
-  unawaited(DeepLinkService.initialize());
-  unawaited(WidgetService.initialize().then((_) {
+  unawaited(_safeInit('FcmService', () => FcmService.initialize()));
+  unawaited(_safeInit('DeepLink', () => DeepLinkService.initialize()));
+  unawaited(_safeInit('WidgetService', () async {
+    await WidgetService.initialize();
     WidgetService.updateAll();
     HomeWidget.registerInteractivityCallback(widgetBackgroundCallback);
   }));
