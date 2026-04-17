@@ -221,10 +221,13 @@ class HansolHighSchool extends ConsumerStatefulWidget {
   ConsumerState<HansolHighSchool> createState() => _HansolHighSchoolState();
 }
 
-class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
+class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    AnalyticsService.markSessionStart();
+
     final mode = ref.read(themeProvider);
     final isDark = _resolveIsDark(mode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
@@ -241,6 +244,21 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> {
         ]);
       }
     });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.paused || state == AppLifecycleState.detached) {
+      unawaited(AnalyticsService.logSessionEnd());
+    } else if (state == AppLifecycleState.resumed) {
+      AnalyticsService.markSessionStart();
+    }
   }
 
   bool _resolveIsDark(ThemeMode mode) {

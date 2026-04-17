@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart' show AuthService;
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/data/subject_data_manager.dart';
@@ -41,6 +42,7 @@ class _TimetableViewScreenState extends State<TimetableViewScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFirstVisit('timetable');
     _grade = SettingData().grade;
     _classNum = SettingData().classNum;
     _loadConflictResolutions();
