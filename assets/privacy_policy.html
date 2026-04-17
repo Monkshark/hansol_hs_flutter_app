@@ -89,13 +89,13 @@
   <tr><td>앱 이용 로그</td><td>화면 조회, 로그인/로그아웃, 게시글 작성·조회 등 (Firebase Analytics)</td></tr>
   <tr><td>오류·충돌 정보</td><td>스택트레이스, 기기 OS 버전, 앱 버전 등 (Firebase Crashlytics)</td></tr>
   <tr><td>기기 정보</td><td>OS 종류·버전, 화면 크기, 앱 버전 (Firebase SDK 자동 수집)</td></tr>
+  <tr><td>D-day 목록</td><td>제목·날짜·고정 여부 (계정 연동, Firestore 저장)</td></tr>
 </table>
 
 <h3>5. 기기 내에만 저장되는 정보 (서버 미전송)</h3>
 <table>
   <tr><th>항목</th><th>저장 방식</th></tr>
   <tr><td>시험 성적·목표 성적</td><td>Android Keystore / iOS Keychain 암호화 저장</td></tr>
-  <tr><td>D-day 목록</td><td>암호화 로컬 저장</td></tr>
   <tr><td>임시저장 게시글</td><td>기기 내 저장 (SharedPreferences)</td></tr>
   <tr><td>테마·알림 시간 설정</td><td>기기 내 저장 (SharedPreferences)</td></tr>
 </table>
@@ -108,6 +108,7 @@
   <tr><td>회원 정보 (프로필·인증)</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>
   <tr><td>게시글·댓글·첨부 이미지</td><td>작성일로부터 4년 (고정 공지 제외)</td><td>서비스 운영 정책</td></tr>
   <tr><td>채팅 메시지</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>
+  <tr><td>D-day 목록</td><td>회원 탈퇴 시까지</td><td>서비스 제공</td></tr>
   <tr><td>앱 이용 로그 (Analytics)</td><td>수집일로부터 14개월</td><td>Firebase 기본 보존 정책</td></tr>
   <tr><td>오류·충돌 보고 (Crashlytics)</td><td>수집일로부터 90일</td><td>Firebase 기본 보존 정책</td></tr>
   <tr><td>기기 내 저장 데이터</td><td>앱 삭제 시 자동 삭제</td><td>로컬 저장</td></tr>
