@@ -40,7 +40,7 @@ import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/providers/settings_provider.dart';
-import 'package:hansol_high_school/providers/theme_provider.dart';
+import 'package:hansol_high_school/providers/theme_provider.dart' hide Theme;
 import 'package:hansol_high_school/api/kakao_keys.dart';
 import 'package:hansol_high_school/api/timetable_data_api.dart';
 import 'package:hansol_high_school/widgets/home_widget/widget_service.dart';
@@ -65,6 +65,12 @@ Future<void> main() async {
     DeviceOrientation.portraitDown,
     DeviceOrientation.portraitUp,
   ]);
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+    statusBarColor: Colors.transparent,
+    systemNavigationBarColor: Colors.transparent,
+    systemNavigationBarDividerColor: Colors.transparent,
+  ));
   try {
     if (Firebase.apps.isEmpty) {
       await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -431,23 +437,29 @@ class _MainScreenState extends State<MainScreen> {
           )),
         ],
       ),
-      bottomNavigationBar: SizedBox(
-        height: 56 + MediaQuery.of(context).padding.bottom,
-        child: NavigationBar(
-          selectedIndex: _currentIndex,
-          labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
-          onDestinationSelected: (index) {
-            _pageController.animateToPage(
-              index,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeIn,
-            );
-          },
-          destinations: const [
-            NavigationDestination(icon: Icon(Icons.restaurant_outlined), selectedIcon: Icon(Icons.restaurant), label: ''),
-            NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: ''),
-            NavigationDestination(icon: Icon(Icons.calendar_month_outlined), selectedIcon: Icon(Icons.calendar_month), label: ''),
-          ],
+      bottomNavigationBar: Container(
+        color: Theme.of(context).navigationBarTheme.backgroundColor,
+        child: SafeArea(
+          top: false,
+          child: SizedBox(
+            height: 56,
+            child: NavigationBar(
+              selectedIndex: _currentIndex,
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysHide,
+              onDestinationSelected: (index) {
+                _pageController.animateToPage(
+                  index,
+                  duration: const Duration(milliseconds: 200),
+                  curve: Curves.easeIn,
+                );
+              },
+              destinations: const [
+                NavigationDestination(icon: Icon(Icons.restaurant_outlined), selectedIcon: Icon(Icons.restaurant), label: ''),
+                NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home), label: ''),
+                NavigationDestination(icon: Icon(Icons.calendar_month_outlined), selectedIcon: Icon(Icons.calendar_month), label: ''),
+              ],
+            ),
+          ),
         ),
       ),
     );
