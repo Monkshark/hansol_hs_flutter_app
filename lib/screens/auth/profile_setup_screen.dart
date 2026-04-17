@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
+import 'package:hansol_high_school/screens/sub/setting_screen.dart' show PrivacyPolicyScreen;
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   String _userType = 'student';
   bool _isSaving = false;
   bool _privacyAgreed = false;
+  bool _ageConfirmed = false;
 
   @override
   void initState() {
@@ -292,6 +294,38 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                           const SizedBox(height: 4),
                           Text(AppLocalizations.of(context)!.profileSetup_privacyDescription,
                             style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor, height: 1.5)),
+                          const SizedBox(height: 4),
+                          GestureDetector(
+                            onTap: () => Navigator.push(context,
+                              MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
+                            child: Text(AppLocalizations.of(context)!.profileSetup_privacyViewFull,
+                              style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600,
+                                color: AppColors.theme.primaryColor, decoration: TextDecoration.underline)),
+                          ),
+                        ])),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  GestureDetector(
+                    onTap: () => setState(() => _ageConfirmed = !_ageConfirmed),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 22, height: 22, child: Checkbox(
+                          value: _ageConfirmed,
+                          onChanged: (v) => setState(() => _ageConfirmed = v ?? false),
+                          activeColor: AppColors.theme.primaryColor,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
+                          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        )),
+                        const SizedBox(width: 10),
+                        Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                          Text(AppLocalizations.of(context)!.profileSetup_ageConfirmTitle, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600,
+                            color: _ageConfirmed ? (isDark ? Colors.white : Colors.black87) : AppColors.theme.darkGreyColor)),
+                          const SizedBox(height: 4),
+                          Text(AppLocalizations.of(context)!.profileSetup_ageConfirmDescription,
+                            style: TextStyle(fontSize: 11, color: AppColors.theme.darkGreyColor, height: 1.5)),
                         ])),
                       ],
                     ),
@@ -302,7 +336,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                 SizedBox(
                   width: double.infinity, height: 52,
                   child: ElevatedButton(
-                    onPressed: (_isSaving || (!widget.isUpdate && !_privacyAgreed)) ? null : _save,
+                    onPressed: (_isSaving || (!widget.isUpdate && (!_privacyAgreed || !_ageConfirmed))) ? null : _save,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.theme.primaryColor,
                       foregroundColor: Colors.white,

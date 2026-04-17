@@ -111,7 +111,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileSetup_privacyDescription =>
-      'We collect basic information such as name and student ID for smooth service. Collected information is used only for app purposes and is immediately deleted upon account withdrawal.';
+      'We collect basic information such as name and student ID for smooth service. Collected information is used only for app purposes. Please see the full privacy policy for retention details.';
+
+  @override
+  String get profileSetup_privacyViewFull => 'View full policy';
+
+  @override
+  String get profileSetup_ageConfirmTitle => 'Age Confirmation (Required)';
+
+  @override
+  String get profileSetup_ageConfirmDescription =>
+      'This app is intended for users aged 14 and above. Parental consent is required for users under 14.';
 
   @override
   String get profileSetup_updateTitle => 'Profile Update';
@@ -1905,7 +1915,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection10Content =>
-      'The App does not use web cookies. However, it automatically collects app usage logs (screen views, events, etc.) through the Firebase Analytics SDK.\n\n• Collection purpose: Usage statistics analysis and app improvement\n• Opt-out: Enable ad tracking restrictions in device settings or uninstall the app.';
+      'The App does not use web cookies. However, it automatically collects app usage logs (screen views, events, etc.) through the Firebase Analytics SDK.\n\n• Collection purpose: Usage statistics analysis and app improvement\n• Opt-out: Disable usage statistics in app Settings, or enable ad tracking restrictions in device settings.';
+
+  @override
+  String get settings_analyticsCollection => 'Usage Statistics';
+
+  @override
+  String get settings_analyticsCollectionDesc =>
+      'Collect usage statistics for app improvement';
 
   @override
   String get settings_privacySection11Title => 'Article 11 (Anonymous Posting)';

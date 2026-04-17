@@ -109,9 +109,12 @@ Future<void> _deferredInit() async {
     appleProvider: AppleProvider.debug,
   )));
   unawaited(_safeInit('Performance', () => FirebasePerformance.instance.setPerformanceCollectionEnabled(true)));
-  unawaited(_safeInit('Analytics', () => FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(
-    const bool.fromEnvironment('dart.vm.product'),
-  )));
+  unawaited(_safeInit('Analytics', () async {
+    final prefs = await SharedPreferences.getInstance();
+    final userEnabled = prefs.getBool('analyticsEnabled') ?? true;
+    final isRelease = const bool.fromEnvironment('dart.vm.product');
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(isRelease && userEnabled);
+  }));
 
   unawaited(_preloadSubjects(2));
   unawaited(_preloadSubjects(3));
