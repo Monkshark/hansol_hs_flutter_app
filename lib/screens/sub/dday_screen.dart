@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hansol_high_school/api/notice_data_api.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/dday_manager.dart';
 import 'package:hansol_high_school/data/local_database.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -22,6 +23,7 @@ class _DDayScreenState extends State<DDayScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFirstVisit('dday');
     _load();
     _loadEvents();
   }
