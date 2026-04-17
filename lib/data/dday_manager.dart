@@ -32,32 +32,47 @@ class DDay {
 }
 
 class DDayManager {
-  static const _key = 'dday_list';
+  static const _cacheKey = 'dday_cache';
+  static const _legacyKey = 'dday_list';
+
+  static DocumentReference<Map<String, dynamic>> _docRef(String uid) =>
+      FirebaseFirestore.instance.collection('users').doc(uid).collection('sync').doc('ddays');
 
   static Future<List<DDay>> loadAll() async {
-    final prefs = await SharedPreferences.getInstance();
-    await SecureStorageService.migrateFromPlain(
-      key: SecureStorageService.keyDdays,
-      oldValue: prefs.getString(_key),
-      onMigrated: () async => prefs.remove(_key),
-    );
-    final json = await SecureStorageService.read(SecureStorageService.keyDdays);
-    if (json == null || json.isEmpty) {
-      if (AuthService.isLoggedIn) {
-        return _loadFromFirestore();
+    if (!AuthService.isLoggedIn) return _loadFromCache();
+
+    await _migrateFromSecureStorage();
+
+    try {
+      final uid = AuthService.currentUser!.uid;
+      final doc = await _docRef(uid).get();
+      if (doc.exists && doc.data() != null) {
+        final list = doc.data()!['items'] as List<dynamic>?;
+        if (list != null && list.isNotEmpty) {
+          final ddays = list.map((e) => DDay.fromJson(Map<String, dynamic>.from(e))).toList();
+          _saveToCache(ddays);
+          return ddays;
+        }
       }
       return [];
+    } catch (e) {
+      log('DDayManager: Firestore load error: $e, falling back to cache');
+      return _loadFromCache();
     }
-    final list = jsonDecode(json) as List<dynamic>;
-    return list.map((e) => DDay.fromJson(e)).toList();
   }
 
   static Future<void> saveAll(List<DDay> list) async {
-    await SecureStorageService.write(
-      SecureStorageService.keyDdays,
-      jsonEncode(list.map((e) => e.toJson()).toList()),
-    );
-    _syncToFirestore(list);
+    _saveToCache(list);
+    if (!AuthService.isLoggedIn) return;
+    try {
+      final uid = AuthService.currentUser!.uid;
+      await _docRef(uid).set({
+        'items': list.map((e) => e.toJson()).toList(),
+        'updatedAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      log('DDayManager: Firestore save error: $e');
+    }
   }
 
   static Future<DDay?> getPinned() async {
@@ -68,44 +83,73 @@ class DDayManager {
     return pinned.first;
   }
 
-  static Future<List<DDay>> _loadFromFirestore() async {
+  // --- cache (SharedPreferences, 비암호화) ---
+
+  static Future<List<DDay>> _loadFromCache() async {
     try {
-      final uid = AuthService.currentUser!.uid;
-      final doc = await FirebaseFirestore.instance
-          .collection('users').doc(uid)
-          .collection('sync').doc('ddays')
-          .get();
-      if (doc.exists && doc.data() != null) {
-        final list = doc.data()!['items'] as List<dynamic>?;
-        if (list != null && list.isNotEmpty) {
-          final ddays = list.map((e) => DDay.fromJson(Map<String, dynamic>.from(e))).toList();
-          await SecureStorageService.write(
-            SecureStorageService.keyDdays,
-            jsonEncode(ddays.map((e) => e.toJson()).toList()),
-          );
-          log('DDayManager: loaded ${ddays.length} D-days from Firestore');
-          return ddays;
-        }
-      }
+      final prefs = await SharedPreferences.getInstance();
+      final json = prefs.getString(_cacheKey);
+      if (json == null || json.isEmpty) return [];
+      final list = jsonDecode(json) as List<dynamic>;
+      return list.map((e) => DDay.fromJson(e)).toList();
     } catch (e) {
-      log('DDayManager: Firestore load error: $e');
+      log('DDayManager: cache load error: $e');
+      return [];
     }
-    return [];
   }
 
-  static Future<void> _syncToFirestore(List<DDay> list) async {
-    if (!AuthService.isLoggedIn) return;
+  static Future<void> _saveToCache(List<DDay> list) async {
     try {
-      final uid = AuthService.currentUser!.uid;
-      await FirebaseFirestore.instance
-          .collection('users').doc(uid)
-          .collection('sync').doc('ddays')
-          .set({
-        'items': list.map((e) => e.toJson()).toList(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_cacheKey, jsonEncode(list.map((e) => e.toJson()).toList()));
     } catch (e) {
-      log('DDayManager: Firestore sync error: $e');
+      log('DDayManager: cache save error: $e');
+    }
+  }
+
+  // --- migration: SecureStorage → Firestore (일회성) ---
+
+  static Future<void> _migrateFromSecureStorage() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      if (prefs.getBool('dday_migrated') == true) return;
+
+      // 1) 기존 SharedPreferences 평문 → SecureStorage 마이그레이션 잔재 처리
+      final legacyPlain = prefs.getString(_legacyKey);
+      List<DDay>? ddays;
+
+      if (legacyPlain != null && legacyPlain.isNotEmpty) {
+        final list = jsonDecode(legacyPlain) as List<dynamic>;
+        ddays = list.map((e) => DDay.fromJson(e)).toList();
+        await prefs.remove(_legacyKey);
+      }
+
+      // 2) SecureStorage 데이터 확인
+      if (ddays == null) {
+        final secureJson = await SecureStorageService.read(SecureStorageService.keyDdays);
+        if (secureJson != null && secureJson.isNotEmpty) {
+          final list = jsonDecode(secureJson) as List<dynamic>;
+          ddays = list.map((e) => DDay.fromJson(e)).toList();
+        }
+      }
+
+      // 3) Firestore에 저장 + SecureStorage 정리
+      if (ddays != null && ddays.isNotEmpty) {
+        final uid = AuthService.currentUser!.uid;
+        final existingDoc = await _docRef(uid).get();
+        if (!existingDoc.exists || existingDoc.data()?['items'] == null) {
+          await _docRef(uid).set({
+            'items': ddays.map((e) => e.toJson()).toList(),
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+          log('DDayManager: migrated ${ddays.length} D-days to Firestore');
+        }
+      }
+
+      await SecureStorageService.delete(SecureStorageService.keyDdays);
+      await prefs.setBool('dday_migrated', true);
+    } catch (e) {
+      log('DDayManager: migration error: $e');
     }
   }
 }
