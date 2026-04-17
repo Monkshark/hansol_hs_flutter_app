@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/analytics_service.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/search_history_service.dart';
 import 'package:hansol_high_school/data/search_tokens.dart';
@@ -55,6 +56,7 @@ class _BoardScreenState extends State<BoardScreen> {
   @override
   void initState() {
     super.initState();
+    AnalyticsService.trackFirstVisit('board');
     _loadPosts();
     _loadSearchHistory();
     _scrollController.addListener(_onScroll);
