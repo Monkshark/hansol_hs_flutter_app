@@ -1838,7 +1838,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection2AutoContent =>
-      '• Posts, comments, chat content (text and images)\n• Interaction records (likes, dislikes, bookmarks, voting)\n• Report and block records\n• Search history: Up to 10 recent searches (stored locally only)\n• Notification settings (push/meal on/off and times)';
+      '• Posts, comments, chat content (text and images)\n• Interaction records (likes, dislikes, bookmarks, voting)\n• Report and block records\n• Search history: Up to 10 recent searches (stored locally only)\n• Notification settings (push/meal on/off and times)\n• D-day List: Title, date, and pin status (synced to account via Firestore)';
 
   @override
   String get settings_privacySection2AutoCollect => 'Auto-Collected Items';
@@ -1853,14 +1853,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection2LocalOnlyContent =>
-      '• Exam Scores: Encrypted in Android Keystore / iOS Keychain\n• D-day List: Encrypted local storage\n• Draft Posts, Theme/Notification Settings: Device local storage';
+      '• Exam Scores: Encrypted in Android Keystore / iOS Keychain\n• Draft Posts, Theme/Notification Settings: Device local storage';
 
   @override
   String get settings_privacySection3Title => 'Article 3 (Retention Period)';
 
   @override
   String get settings_privacySection3Content =>
-      'The App deletes information without delay after collection purposes are fulfilled.\n\n• Member Info (Profile/Auth): Until account withdrawal\n• Posts, Comments, Images: 4 years from creation (except pinned)\n• Chat Messages: Until account withdrawal\n• Usage Logs (Analytics): 14 months from collection\n• Crash Reports (Crashlytics): 90 days from collection';
+      'The App deletes information without delay after collection purposes are fulfilled.\n\n• Member Info (Profile/Auth): Until account withdrawal\n• Posts, Comments, Images: 4 years from creation (except pinned)\n• Chat Messages: Until account withdrawal\n• D-day List: Until account withdrawal\n• Usage Logs (Analytics): 14 months from collection\n• Crash Reports (Crashlytics): 90 days from collection';
 
   @override
   String get settings_privacySection4Title =>
