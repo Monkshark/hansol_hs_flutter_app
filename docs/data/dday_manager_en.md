@@ -4,7 +4,7 @@
 
 > `lib/data/dday_manager.dart` — D-day CRUD, Firestore sync
 
-Contains the `DDay` model and the `DDayManager` class. All methods are `static`. Data is stored in [`SecureStorageService`](secure_storage_service.md).
+Contains the `DDay` model and the `DDayManager` class. All methods are `static`. Primary storage is Firestore (`users/{uid}/sync/ddays`), with SharedPreferences as offline cache (`dday_cache` key). D-day data is just dates and labels, so encryption is unnecessary.
 
 ---
 
@@ -40,27 +40,25 @@ static Future<List<DDay>> loadAll()
 
 **Description**: Loads the full list of D-days.
 
-1. One-time migration from SharedPreferences to SecureStorage:
+1. If not logged in, load from SharedPreferences cache:
    ```dart
-   await SecureStorageService.migrateFromPlain(
-     key: SecureStorageService.keyDdays,
-     oldValue: prefs.getString(_key),
-     onMigrated: () async => prefs.remove(_key),
-   );
+   if (!AuthService.isLoggedIn) return _loadFromCache();
    ```
 
-2. Read JSON from SecureStorage:
+2. Run one-time migration ([SecureStorage to Firestore](#_migratefromsecurestorage))
+
+3. Read from Firestore:
    ```dart
-   final json = await SecureStorageService.read(SecureStorageService.keyDdays);
+   final doc = await _docRef(uid).get();
    ```
 
-3. Restore from Firestore if no local data exists and the user is logged in:
+4. On success, also save to cache for offline availability
+
+5. On Firestore error, fall back to cache:
    ```dart
-   if (json == null || json.isEmpty) {
-     if (AuthService.isLoggedIn) {
-       return _loadFromFirestore();
-     }
-     return [];
+   catch (e) {
+     log('DDayManager: Firestore load error: $e, falling back to cache');
+     return _loadFromCache();
    }
    ```
 
@@ -72,17 +70,18 @@ static Future<List<DDay>> loadAll()
 static Future<void> saveAll(List<DDay> list)
 ```
 
-**Description**: Saves the entire D-day list and syncs to Firestore.
+**Description**: Saves the entire D-day list.
 
-```dart
-await SecureStorageService.write(
-  SecureStorageService.keyDdays,
-  jsonEncode(list.map((e) => e.toJson()).toList()),
-);
-_syncToFirestore(list);  // fire-and-forget
-```
+1. Always save to SharedPreferences cache first (guarantees offline access)
+2. If logged in, sync to Firestore:
+   ```dart
+   await _docRef(uid).set({
+     'items': list.map((e) => e.toJson()).toList(),
+     'updatedAt': FieldValue.serverTimestamp(),
+   });
+   ```
 
-Firestore sync runs asynchronously (local is saved even if sync fails).
+Firestore errors are only logged (cache is already saved).
 
 ---
 
@@ -104,41 +103,24 @@ Item displayed in the D-day widget at the top of the home screen.
 
 ---
 
-## `_loadFromFirestore`
+## `_loadFromCache` / `_saveToCache`
 
-```dart
-static Future<List<DDay>> _loadFromFirestore()
-```
+Offline cache using the SharedPreferences `dday_cache` key. Stored as plaintext (D-day data is not sensitive, so encryption is unnecessary).
 
-**Description**: Restores the D-day list from the Firestore `users/{uid}/sync/ddays` document.
-
-```dart
-final doc = await FirebaseFirestore.instance
-    .collection('users').doc(uid)
-    .collection('sync').doc('ddays')
-    .get();
-```
-
-After restoring, also stores to SecureStorage so the next load reads from local.
+- `_loadFromCache`: Load D-day list from cache
+- `_saveToCache`: Save D-day list to cache
 
 ---
 
-## `_syncToFirestore`
+## `_migrateFromSecureStorage`
 
 ```dart
-static Future<void> _syncToFirestore(List<DDay> list)
+static Future<void> _migrateFromSecureStorage()
 ```
 
-**Description**: Syncs the D-day list to Firestore.
+**Description**: One-time migration from [`SecureStorageService`](secure_storage_service.md) to Firestore.
 
-```dart
-await FirebaseFirestore.instance
-    .collection('users').doc(uid)
-    .collection('sync').doc('ddays')
-    .set({
-  'items': list.map((e) => e.toJson()).toList(),
-  'updatedAt': FieldValue.serverTimestamp(),
-});
-```
-
-Returns immediately if not logged in. Errors are only logged (silent fail).
+- Guarded by SharedPreferences `dday_migrated` flag to prevent repeated runs
+- Checks legacy SharedPreferences key (`dday_list`) + SecureStorage
+- Uploads to Firestore only if the document does not already exist
+- Cleans up SecureStorage data after migration

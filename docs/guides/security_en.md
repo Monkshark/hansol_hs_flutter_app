@@ -112,8 +112,12 @@ Client-side guards are bypassable, so **the real defense is the per-field valida
 
 ## Privacy
 
-- **Privacy policy** shown in-app (`assets/privacy_policy.html`); consent required at signup
+- **Privacy policy** shown in-app (`AppLocalizations`-based l10n, `PrivacyPolicyScreen`); consent required at signup
+- **Age confirmation checkbox** (must be 14+) at profile setup (PIPA Article 22-2)
+- "View full policy" link opens the complete privacy policy during signup
+- **Analytics opt-out toggle** in settings (PIPA Article 10)
 - Minimal collection: name / student ID / email / profile picture (school context essentials)
+- D-day data (dates + labels) is non-sensitive and synced to Firestore (account-linked)
 - **Immediate wipe on deletion** — collections + Storage + Auth in order ([technical-challenges_en.md#10](./technical-challenges_en.md#10-account-deletion-ordering-auth--firestore-permission-loss))
 - **TTL cleanup**: stale logs/reports swept by the `cleanupOldPosts` scheduler
 
