@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
-import 'package:hansol_high_school/screens/board/board_screen.dart';
+import 'package:hansol_high_school/screens/board/widgets/post_card.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/error_view.dart';

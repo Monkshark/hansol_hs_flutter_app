@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:hansol_high_school/data/grade_manager.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
+import 'package:hansol_high_school/screens/sub/grade_input_widgets/subject_entry.dart';
+import 'package:hansol_high_school/screens/sub/grade_input_widgets/grade_form_fields.dart';
+import 'package:hansol_high_school/screens/sub/grade_input_widgets/subject_pickers.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
@@ -36,7 +38,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
   String _mockMonth = '3월';
   final _privateLabelController = TextEditingController();
 
-  final List<_SubjectEntry> _subjects = [];
+  final List<SubjectEntry> _subjects = [];
   bool _saving = false;
 
   Map<String, String> _availableTypes(AppLocalizations l) {
@@ -67,7 +69,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       _privateLabelController.text = exam.mockLabel ?? '';
     }
     for (final s in exam.scores) {
-      _subjects.add(_SubjectEntry(
+      _subjects.add(SubjectEntry(
         name: s.subject,
         rawScoreCtrl: TextEditingController(text: s.rawScore?.toString() ?? ''),
         averageCtrl: TextEditingController(text: s.average?.toString() ?? ''),
@@ -121,11 +123,11 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     }
 
     if (!mounted) return;
-    final selected = await _showSubjectPicker(available, AppLocalizations.of(context)!.gradeInput_selectSubjects);
+    final selected = await showSubjectPicker(context, available, AppLocalizations.of(context)!.gradeInput_selectSubjects);
     if (selected != null && selected.isNotEmpty) {
       setState(() {
         for (final name in selected) {
-          _subjects.add(_SubjectEntry(name: name));
+          _subjects.add(SubjectEntry(name: name));
         }
       });
     }
@@ -148,260 +150,18 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       return;
     }
 
-    final selected = await _showMockSubjectPicker(existing);
+    final selected = await showMockSubjectPicker(context, existing);
     if (selected != null && selected.isNotEmpty) {
       setState(() {
         for (final name in selected) {
-          _subjects.add(_SubjectEntry(name: name));
+          _subjects.add(SubjectEntry(name: name));
         }
       });
     }
   }
 
-  Future<List<String>?> _showSubjectPicker(List<String> available, String title) async {
-    final checked = <String, bool>{for (final s in available) s: false};
-    return showDialog<List<String>>(
-      context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return StatefulBuilder(builder: (ctx, setDlg) {
-          return Dialog(
-            backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(title, style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700,
-                    color: Theme.of(ctx).textTheme.bodyLarge?.color,
-                  )),
-                  const SizedBox(height: 16),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.4),
-                    child: SingleChildScrollView(
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 6,
-                        children: available.map((s) {
-                          final on = checked[s]!;
-                          return FilterChip(
-                            label: Text(s),
-                            selected: on,
-                            selectedColor: Color(GradeManager.getSubjectColor(s)).withAlpha(40),
-                            checkmarkColor: Color(GradeManager.getSubjectColor(s)),
-                            onSelected: (v) => setDlg(() => checked[s] = v),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(children: [
-                    Expanded(child: TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                    )),
-                    const SizedBox(width: 10),
-                    Expanded(child: ElevatedButton(
-                      onPressed: () {
-                        final result = checked.entries
-                            .where((e) => e.value)
-                            .map((e) => e.key)
-                            .toList();
-                        Navigator.pop(ctx, result);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.theme.primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(AppLocalizations.of(context)!.dday_addButton),
-                    )),
-                  ]),
-                ],
-              ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
-  Future<List<String>?> _showMockSubjectPicker(Set<String> existing) async {
-    final checked = <String, bool>{};
-    for (final list in GradeManager.mockSubjects.values) {
-      for (final s in list) {
-        if (!existing.contains(s)) checked[s] = false;
-      }
-    }
-
-    return showDialog<List<String>>(
-      context: context,
-      builder: (ctx) {
-        final isDark = Theme.of(ctx).brightness == Brightness.dark;
-        return StatefulBuilder(builder: (ctx, setDlg) {
-          return Dialog(
-            backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxHeight: MediaQuery.of(ctx).size.height * 0.7),
-              child: Padding(
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(AppLocalizations.of(context)!.gradeInput_mockSubjectPicker, style: TextStyle(
-                    fontSize: 18, fontWeight: FontWeight.w700,
-                    color: Theme.of(ctx).textTheme.bodyLarge?.color,
-                  )),
-                  const SizedBox(height: 16),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: GradeManager.mockSubjects.entries.map((cat) {
-                          final available = cat.value.where((s) => checked.containsKey(s)).toList();
-                          if (available.isEmpty) return const SizedBox.shrink();
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 12),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(cat.key, style: TextStyle(
-                                  fontSize: 13, fontWeight: FontWeight.w600,
-                                  color: AppColors.theme.darkGreyColor,
-                                )),
-                                const SizedBox(height: 6),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 6,
-                                  children: available.map((s) {
-                                    final on = checked[s]!;
-                                    return FilterChip(
-                                      label: Text(s),
-                                      selected: on,
-                                      selectedColor: Color(GradeManager.getSubjectColor(s)).withAlpha(40),
-                                      checkmarkColor: Color(GradeManager.getSubjectColor(s)),
-                                      onSelected: (v) => setDlg(() => checked[s] = v),
-                                    );
-                                  }).toList(),
-                                ),
-                              ],
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(children: [
-                    Expanded(child: TextButton(
-                      onPressed: () => Navigator.pop(ctx),
-                      child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                    )),
-                    const SizedBox(width: 10),
-                    Expanded(child: ElevatedButton(
-                      onPressed: () {
-                        final result = checked.entries
-                            .where((e) => e.value)
-                            .map((e) => e.key)
-                            .toList();
-                        Navigator.pop(ctx, result);
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.theme.primaryColor,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        elevation: 0,
-                      ),
-                      child: Text(AppLocalizations.of(context)!.dday_addButton),
-                    )),
-                  ]),
-                ],
-              ),
-            ),
-            ),
-          );
-        });
-      },
-    );
-  }
-
   Future<void> _addManualSubject() async {
-    final ctrl = TextEditingController();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final name = await showModalBottomSheet<String>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (ctx) => Padding(
-        padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-        child: Container(
-          margin: const EdgeInsets.all(12),
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: isDark ? const Color(0xFF1E2028) : Colors.white,
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: SafeArea(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Container(width: 36, height: 4, decoration: BoxDecoration(
-                  color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-                const SizedBox(height: 16),
-                Text(AppLocalizations.of(context)!.gradeInput_addSubject, style: TextStyle(
-                  fontSize: 17, fontWeight: FontWeight.w700,
-                  color: Theme.of(ctx).textTheme.bodyLarge?.color,
-                )),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: ctrl,
-                  autofocus: true,
-                  decoration: InputDecoration(
-                    hintText: AppLocalizations.of(context)!.gradeInput_subjectName,
-                    filled: true,
-                    fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                  ),
-                  onSubmitted: (t) {
-                    if (t.trim().isNotEmpty) Navigator.pop(ctx, t.trim());
-                  },
-                ),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: TextButton(
-                    onPressed: () => Navigator.pop(ctx),
-                    child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
-                  )),
-                  const SizedBox(width: 10),
-                  Expanded(child: ElevatedButton(
-                    onPressed: () {
-                      final t = ctrl.text.trim();
-                      if (t.isNotEmpty) Navigator.pop(ctx, t);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.theme.primaryColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      elevation: 0,
-                    ),
-                    child: Text(AppLocalizations.of(context)!.dday_addButton),
-                  )),
-                ]),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
+    final name = await showAddManualSubjectSheet(context);
     if (name != null && name.isNotEmpty) {
       if (_subjects.any((s) => s.name == name)) {
         if (mounted) {
@@ -411,7 +171,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
         }
         return;
       }
-      setState(() => _subjects.add(_SubjectEntry(name: name)));
+      setState(() => _subjects.add(SubjectEntry(name: name)));
     }
   }
 
@@ -513,7 +273,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   ),
                   onSelected: (v) {
                     if (!v) return;
-                    final old = !_isEdit ? List.of(_subjects) : <_SubjectEntry>[];
+                    final old = !_isEdit ? List.of(_subjects) : <SubjectEntry>[];
                     setState(() {
                       _type = e.key;
                       if (!_isEdit) _subjects.clear();
@@ -536,7 +296,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
               child: Column(
                 children: [
                   Row(children: [
-                    Expanded(child: _dropdown<int>(
+                    Expanded(child: GradeDropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_year,
                       value: _year,
                       items: List.generate(5, (i) => DateTime.now().year - 2 + i),
@@ -545,7 +305,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       fillColor: fieldFill,
                     )),
                     const SizedBox(width: 10),
-                    Expanded(child: _dropdown<int>(
+                    Expanded(child: GradeDropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_semester,
                       value: _semester,
                       items: [1, 2],
@@ -554,7 +314,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                       fillColor: fieldFill,
                     )),
                     const SizedBox(width: 10),
-                    Expanded(child: _dropdown<int>(
+                    Expanded(child: GradeDropdown<int>(
                       label: AppLocalizations.of(context)!.gradeInput_grade,
                       value: _grade,
                       items: [1, 2, 3],
@@ -565,7 +325,7 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                   ]),
                   if (_type == 'mock') ...[
                     const SizedBox(height: 12),
-                    _dropdown<String>(
+                    GradeDropdown<String>(
                       label: AppLocalizations.of(context)!.gradeInput_month,
                       value: _mockMonth,
                       items: _mockMonthKeys,
@@ -666,15 +426,15 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         ),
                       ),
                       if (!_isMock) ...[
-                        Expanded(flex: 2, child: _scoreField(s.rawScoreCtrl, fieldFill, isInt: true)),
-                        Expanded(flex: 2, child: _scoreField(s.averageCtrl, fieldFill)),
-                        Expanded(flex: 2, child: _miniDropdown<int>(
+                        Expanded(flex: 2, child: GradeScoreField(controller: s.rawScoreCtrl, fillColor: fieldFill, isInt: true)),
+                        Expanded(flex: 2, child: GradeScoreField(controller: s.averageCtrl, fillColor: fieldFill)),
+                        Expanded(flex: 2, child: GradeMiniDropdown<int>(
                           value: int.tryParse(s.rankCtrl.text),
                           items: [1, 2, 3, 4, 5],
                           onChanged: (v) => setState(() => s.rankCtrl.text = v?.toString() ?? ''),
                           fillColor: fieldFill,
                         )),
-                        Expanded(flex: 2, child: _miniDropdown<String>(
+                        Expanded(flex: 2, child: GradeMiniDropdown<String>(
                           value: s.achievement,
                           items: SubjectScore.achievements,
                           onChanged: (v) => setState(() => s.achievement = v),
@@ -682,9 +442,9 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
                         )),
                       ],
                       if (_isMock) ...[
-                        Expanded(flex: 2, child: _scoreField(s.percentileCtrl, fieldFill)),
-                        Expanded(flex: 2, child: _scoreField(s.standardScoreCtrl, fieldFill)),
-                        Expanded(flex: 2, child: _scoreField(s.rankCtrl, fieldFill, isInt: true)),
+                        Expanded(flex: 2, child: GradeScoreField(controller: s.percentileCtrl, fillColor: fieldFill)),
+                        Expanded(flex: 2, child: GradeScoreField(controller: s.standardScoreCtrl, fillColor: fieldFill)),
+                        Expanded(flex: 2, child: GradeScoreField(controller: s.rankCtrl, fillColor: fieldFill, isInt: true)),
                       ],
                       SizedBox(
                         width: 32,
@@ -723,46 +483,10 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
     );
   }
 
-  TextStyle get _headerStyle => TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w600,
-    color: AppColors.theme.darkGreyColor,
-  );
+  TextStyle get _headerStyle => TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.theme.darkGreyColor);
 
-  Widget _sectionLabel(String text) => Text(
-    text,
-    style: TextStyle(
-      fontSize: 15,
-      fontWeight: FontWeight.w700,
-      color: Theme.of(context).textTheme.bodyLarge?.color,
-    ),
-  );
-
-  Widget _dropdown<T>({
-    required String label,
-    required T value,
-    required List<T> items,
-    required String Function(T) itemLabel,
-    required ValueChanged<T?> onChanged,
-    required Color fillColor,
-  }) {
-    return DropdownButtonFormField<T>(
-      initialValue: value,
-      decoration: InputDecoration(
-        labelText: label,
-        filled: true,
-        fillColor: fillColor,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
-        ),
-        isDense: true,
-      ),
-      items: items.map((v) => DropdownMenuItem(value: v, child: Text(itemLabel(v), style: const TextStyle(fontSize: 14)))).toList(),
-      onChanged: onChanged,
-    );
-  }
+  Widget _sectionLabel(String text) => Text(text,
+    style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Theme.of(context).textTheme.bodyLarge?.color));
 
   Widget _actionChip({required IconData icon, required String label, required VoidCallback onTap}) {
     return ActionChip(
@@ -772,90 +496,5 @@ class _GradeInputScreenState extends State<GradeInputScreen> {
       side: BorderSide(color: AppColors.theme.primaryColor.withAlpha(40)),
       onPressed: onTap,
     );
-  }
-
-  Widget _miniDropdown<T>({required T? value, required List<T> items, required ValueChanged<T?> onChanged, required Color fillColor}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3),
-      child: Container(
-        height: 36,
-        decoration: BoxDecoration(
-          color: fillColor,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: DropdownButtonHideUnderline(
-          child: DropdownButton<T>(
-            value: items.contains(value) ? value : null,
-            isExpanded: true,
-            isDense: true,
-            alignment: Alignment.center,
-            hint: Text('-', style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor), textAlign: TextAlign.center),
-            items: items.map((e) => DropdownMenuItem<T>(
-              value: e,
-              alignment: Alignment.center,
-              child: Text('$e', style: const TextStyle(fontSize: 13)),
-            )).toList(),
-            onChanged: onChanged,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _scoreField(TextEditingController ctrl, Color fillColor, {bool isInt = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 3),
-      child: TextField(
-        controller: ctrl,
-        keyboardType: TextInputType.numberWithOptions(decimal: !isInt),
-        inputFormatters: isInt
-            ? [FilteringTextInputFormatter.digitsOnly]
-            : [FilteringTextInputFormatter.allow(RegExp(r'[\d.]'))],
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 13),
-        decoration: InputDecoration(
-          filled: true,
-          fillColor: fillColor,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 4, vertical: 8),
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide.none,
-          ),
-          isDense: true,
-        ),
-      ),
-    );
-  }
-}
-
-class _SubjectEntry {
-  final String name;
-  final TextEditingController rawScoreCtrl;
-  final TextEditingController averageCtrl;
-  final TextEditingController rankCtrl;
-  final TextEditingController standardScoreCtrl;
-  final TextEditingController percentileCtrl;
-  String? achievement;
-
-  _SubjectEntry({
-    required this.name,
-    TextEditingController? rawScoreCtrl,
-    TextEditingController? averageCtrl,
-    TextEditingController? rankCtrl,
-    TextEditingController? standardScoreCtrl,
-    TextEditingController? percentileCtrl,
-    this.achievement,
-  })  : rawScoreCtrl = rawScoreCtrl ?? TextEditingController(),
-        averageCtrl = averageCtrl ?? TextEditingController(),
-        rankCtrl = rankCtrl ?? TextEditingController(),
-        standardScoreCtrl = standardScoreCtrl ?? TextEditingController(),
-        percentileCtrl = percentileCtrl ?? TextEditingController();
-
-  void dispose() {
-    rawScoreCtrl.dispose();
-    averageCtrl.dispose();
-    rankCtrl.dispose();
-    standardScoreCtrl.dispose();
-    percentileCtrl.dispose();
   }
 }
