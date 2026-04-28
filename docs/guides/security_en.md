@@ -27,6 +27,39 @@ function isAdminOrManager() {
   );
 }
 
+function isModerator() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.role in ['admin', 'manager', 'moderator']
+  );
+}
+
+function isAuditor() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.role in ['admin', 'manager', 'auditor']
+  );
+}
+
+function isStaff() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.role in ['admin', 'manager', 'moderator', 'auditor']
+  );
+}
+
+function isVerified() {
+  return isSignedIn() &&
+    get(/databases/$(db)/documents/users/$(auth.uid))
+      .data.get('verificationStatus', 'verified') == 'verified';
+}
+
+function isNotSuspended() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.get('suspendedUntil', null) == null ||
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.suspendedUntil < request.time
+  );
+}
+
+function canWrite() { return isVerified() && isNotSuspended(); }
+
 function changedKeys() {
   return request.resource.data.diff(resource.data).affectedKeys();
 }
@@ -62,18 +95,47 @@ function validCounterDelta(field) {
 - **read**: public
 - **create**: `authorUid == auth.uid` + title 1–200 chars + content ≤5000 chars
 - **update**: author freely, OR non-author limited to `isInteractionUpdate()` + `validCounterDelta(±1)`
-- **delete**: author or manager/admin
+- **delete**: author or moderator+ (`isModerator()`)
+
+### `posts/{postId}/comments/{commentId}`
+- **delete**: author or moderator+ (`isModerator()`)
 
 ### `chats/{chatId}` + messages
 - Only participants (`participants` array) can read/write
 - Message `update` is only for deletion fields (`deleted`, `deletedFor`) — content tampering blocked
 
-### `reports`, `admin_logs`, `function_logs`
-- `reports.create` — authed users; read/delete admin-only
-- `admin_logs` / `function_logs` — admin-only
+### `reports`
+- **create**: authed users
+- **read**: staff+ (`isStaff()` — admin, manager, moderator, auditor)
+- **delete**: manager/admin (`isAdminOrManager()`)
+
+### `admin_logs`
+- **create**: moderator+ (`isModerator()`)
+- **read**: staff+ (`isStaff()`)
+
+### `app_stats`, `function_logs`, `crash_logs`
+- **read**: auditor+ (`isAuditor()` — admin, manager, auditor)
+
+### `app_feedbacks`, `council_feedbacks`
+- **read**: auditor+ (`isAuditor()`)
+- **update/delete**: manager/admin (`isAdminOrManager()`)
 
 ### `app_config/{key}`
 - Public read (version check, popup); admin-only write
+
+### Verification / Suspension Guard
+- `posts` create, `comments` create, `reports` create, `chats/messages` create require `canWrite()` — blocks suspended/unverified users
+- Legacy users (no `verificationStatus`/`suspendedUntil` field) are grandfathered through
+
+### New Collections (PIPA compliance)
+- `studentIds/{studentId}` — student ID occupancy index. Read: signed-in. Write: Cloud Functions only
+- `otp_codes/{uid}` — school-email OTP. All client read/write denied
+- `banned_devices/{installationId}` — block re-registration after suspension. Client denied
+- `reports_queue/{postId}` — auto-aggregated report queue. Read: staff+, write: Functions
+- `appeals/{appealId}` — suspension appeals. Suspended users may write under their own uid (bypasses canWrite), 500-char limit, status changes by admin/manager only
+- `data_requests/{requestId}` — data portability / access requests. Create requires canWrite + own uid; read by self or manager+
+- `teacher_invites/{inviteId}` — teacher invite codes. Issue by admin/manager, redemption by Functions
+- `community_rules/{version}` — public read, admin/manager publish
 
 ## Rate Limiting
 
@@ -129,7 +191,7 @@ Client-side guards are bypassable, so **the real defense is the per-field valida
 
 ## Testing
 
-- `tests/firestore-rules/`: `@firebase/rules-unit-testing` + emulator, 34 tests
+- `tests/firestore-rules/`: `@firebase/rules-unit-testing` + emulator, 80 tests
 - Covers permission bypass / counter forgery / field forgery at CI time
 - Run: see [testing_en.md](./testing_en.md) + [cicd-setup_en.md](./cicd-setup_en.md)
 

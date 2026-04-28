@@ -61,10 +61,34 @@ final isAdminProvider = Provider<bool>((ref) {
   );
 });
 
+final isStaffProvider = Provider<bool>((ref) {
+  final profile = ref.watch(userProfileProvider);
+  return profile.maybeWhen(
+    data: (p) => p?.isStaff ?? false,
+    orElse: () => false,
+  );
+});
+
 final isSuspendedProvider = Provider<bool>((ref) {
   final profile = ref.watch(userProfileProvider);
   return profile.maybeWhen(
     data: (p) => p?.isSuspended ?? false,
+    orElse: () => false,
+  );
+});
+
+final isVerifiedProvider = Provider<bool>((ref) {
+  final profile = ref.watch(userProfileProvider);
+  return profile.maybeWhen(
+    data: (p) => p?.isVerified ?? false,
+    orElse: () => false,
+  );
+});
+
+final canWriteProvider = Provider<bool>((ref) {
+  final profile = ref.watch(userProfileProvider);
+  return profile.maybeWhen(
+    data: (p) => p?.canWrite ?? false,
     orElse: () => false,
   );
 });

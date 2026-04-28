@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/admin/admin_widgets.dart';
 import 'package:hansol_high_school/screens/board/admin/delete_logs_tab.dart';
@@ -45,40 +46,59 @@ class _AdminScreenState extends State<AdminScreen> {
         centerTitle: true,
         elevation: 0,
       ),
-      body: ListView(
-        padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
-        children: [
-          AdminSection(title: AppLocalizations.of(context)!.admin_userManagement, icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_usersPending, icon: Icons.hourglass_top, color: Colors.orange, cardColor: cardColor, child: UsersTab(key: _pendingKey, filter: 'pending', onChanged: _refreshAllTabs)),
-            const SizedBox(height: 8),
-            AdminTile(title: AppLocalizations.of(context)!.admin_usersSuspended, icon: Icons.block, color: Colors.red,
-              cardColor: cardColor, child: UsersTab(key: _suspendedKey, filter: 'suspended', onChanged: _refreshAllTabs)),
-            const SizedBox(height: 8),
-            AdminTile(title: AppLocalizations.of(context)!.admin_usersApproved, icon: Icons.person_outline, color: AppColors.theme.primaryColor,
-              cardColor: cardColor, child: UsersTab(key: _approvedKey, filter: 'approved', onChanged: _refreshAllTabs)),
-          ]),
-          const SizedBox(height: 16),
+      body: FutureBuilder<UserProfile?>(
+        future: AuthService.getCachedProfile(),
+        builder: (context, snap) {
+          final profile = snap.data;
+          if (profile == null) return const Center(child: CircularProgressIndicator());
+          final l = AppLocalizations.of(context)!;
 
-          AdminSection(title: AppLocalizations.of(context)!.admin_boardManagement, icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, cardColor: cardColor, child: const ReportsTab()),
-            const SizedBox(height: 8),
-            AdminTile(title: AppLocalizations.of(context)!.admin_deleteLogs, icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
-              cardColor: cardColor, child: const DeleteLogsTab()),
-          ]),
-          const SizedBox(height: 16),
+          final sections = <Widget>[];
 
-          AdminSection(title: AppLocalizations.of(context)!.admin_feedback, icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
-            AdminTile(title: AppLocalizations.of(context)!.admin_feedbackCouncil, icon: Icons.school_outlined, color: const Color(0xFF4CAF50), cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
-            const SizedBox(height: 8),
-            AdminTile(title: AppLocalizations.of(context)!.admin_feedbackApp, icon: Icons.bug_report_outlined, color: AppColors.theme.primaryColor,
-              cardColor: cardColor, child: const FeedbackListScreen(type: 'app')),
-          ]),
-          const SizedBox(height: 16),
+          if (profile.isManager) {
+            sections.add(AdminSection(title: l.admin_userManagement, icon: Icons.people_outline, color: AppColors.theme.primaryColor, cardColor: cardColor, children: [
+              AdminTile(title: l.admin_usersPending, icon: Icons.hourglass_top, color: Colors.orange, cardColor: cardColor, child: UsersTab(key: _pendingKey, filter: 'pending', onChanged: _refreshAllTabs)),
+              const SizedBox(height: 8),
+              AdminTile(title: l.admin_usersSuspended, icon: Icons.block, color: Colors.red,
+                cardColor: cardColor, child: UsersTab(key: _suspendedKey, filter: 'suspended', onChanged: _refreshAllTabs)),
+              const SizedBox(height: 8),
+              AdminTile(title: l.admin_usersApproved, icon: Icons.person_outline, color: AppColors.theme.primaryColor,
+                cardColor: cardColor, child: UsersTab(key: _approvedKey, filter: 'approved', onChanged: _refreshAllTabs)),
+            ]));
+            sections.add(const SizedBox(height: 16));
+          }
 
-          AdminSection(title: AppLocalizations.of(context)!.admin_emergencyNotice, icon: Icons.warning_amber_rounded, color: Colors.red, cardColor: cardColor, children: [
-            PopupNoticeManager(cardColor: cardColor),
-          ]),
-        ],
+          if (profile.isModerator) {
+            sections.add(AdminSection(title: l.admin_boardManagement, icon: Icons.article_outlined, color: AppColors.theme.tertiaryColor, cardColor: cardColor, children: [
+              AdminTile(title: l.admin_reportsTab, icon: Icons.flag_outlined, color: Colors.red, cardColor: cardColor, child: const ReportsTab()),
+              const SizedBox(height: 8),
+              AdminTile(title: l.admin_deleteLogs, icon: Icons.delete_outline, color: AppColors.theme.darkGreyColor,
+                cardColor: cardColor, child: const DeleteLogsTab()),
+            ]));
+            sections.add(const SizedBox(height: 16));
+          }
+
+          if (profile.isManager || profile.isAuditor) {
+            sections.add(AdminSection(title: l.admin_feedback, icon: Icons.mail_outline, color: const Color(0xFF4CAF50), cardColor: cardColor, children: [
+              AdminTile(title: l.admin_feedbackCouncil, icon: Icons.school_outlined, color: const Color(0xFF4CAF50), cardColor: cardColor, child: const FeedbackListScreen(type: 'council')),
+              const SizedBox(height: 8),
+              AdminTile(title: l.admin_feedbackApp, icon: Icons.bug_report_outlined, color: AppColors.theme.primaryColor,
+                cardColor: cardColor, child: const FeedbackListScreen(type: 'app')),
+            ]));
+            sections.add(const SizedBox(height: 16));
+          }
+
+          if (profile.isManager) {
+            sections.add(AdminSection(title: l.admin_emergencyNotice, icon: Icons.warning_amber_rounded, color: Colors.red, cardColor: cardColor, children: [
+              PopupNoticeManager(cardColor: cardColor),
+            ]));
+          }
+
+          return ListView(
+            padding: EdgeInsets.fromLTRB(16, 8, 16, MediaQuery.of(context).padding.bottom + 16),
+            children: sections,
+          );
+        },
       ),
     ),
     );

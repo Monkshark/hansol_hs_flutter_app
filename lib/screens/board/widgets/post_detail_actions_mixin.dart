@@ -87,7 +87,7 @@ mixin PostDetailActionsMixin<T extends StatefulWidget> on State<T> {
           });
         }
 
-        await actionRepo.deletePost(actionPostId);
+        await actionRepo.deletePost(actionPostId, actorUid: uid);
         if (mounted) Navigator.pop(context);
       } catch (e) {
         log('PostDetailScreen: deletePost error: $e');
@@ -115,7 +115,7 @@ mixin PostDetailActionsMixin<T extends StatefulWidget> on State<T> {
 
     if (confirm == true) {
       try {
-        await actionRepo.deleteComment(actionPostId, commentId);
+        await actionRepo.deleteComment(actionPostId, commentId, actorUid: AuthService.currentUser?.uid);
       } catch (e) {
         log('PostDetailScreen: deleteComment error: $e');
         if (mounted) showErrorSnackbar(context, e);

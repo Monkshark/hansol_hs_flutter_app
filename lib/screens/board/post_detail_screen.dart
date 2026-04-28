@@ -18,6 +18,7 @@ import 'package:hansol_high_school/screens/board/widgets/post_action_sheet.dart'
 import 'package:hansol_high_school/screens/board/widgets/post_detail_actions_mixin.dart';
 import 'package:hansol_high_school/screens/board/widgets/post_detail_app_bar.dart';
 import 'package:hansol_high_school/screens/board/widgets/post_detail_body.dart';
+import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/data/board_categories.dart';
 import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:intl/intl.dart';
@@ -140,6 +141,13 @@ class _PostDetailScreenState extends State<PostDetailScreen> with PostDetailActi
                 }
 
                 final post = postSnapshot.data!.data()!;
+                if (post['isHidden'] == true) {
+                  return Center(child: Padding(
+                    padding: const EdgeInsets.all(32),
+                    child: Text(AppLocalizations.of(context)!.soft_deleted_label,
+                      style: TextStyle(color: AppColors.theme.mealTypeTextColor)),
+                  ));
+                }
                 _currentPostAuthorUid = post['authorUid'] as String?;
                 _anonymousMapping = Map<String, dynamic>.from(post['anonymousMapping'] ?? {});
 

@@ -222,6 +222,38 @@ final _darkTheme = ThemeData(
   ),
 );
 
+final _highContrastLight = ThemeData(
+  brightness: Brightness.light,
+  primaryColor: const Color(0xFF003B73),
+  scaffoldBackgroundColor: Colors.white,
+  cardColor: Colors.white,
+  dividerColor: Colors.black,
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Color(0xFF003B73),
+    foregroundColor: Colors.white,
+    elevation: 0,
+    surfaceTintColor: Colors.transparent,
+  ),
+  textTheme: const TextTheme().apply(bodyColor: Colors.black, displayColor: Colors.black),
+  colorScheme: const ColorScheme.highContrastLight(),
+);
+
+final _highContrastDark = ThemeData(
+  brightness: Brightness.dark,
+  primaryColor: const Color(0xFFFFD600),
+  scaffoldBackgroundColor: Colors.black,
+  cardColor: Colors.black,
+  dividerColor: Colors.white,
+  appBarTheme: const AppBarTheme(
+    backgroundColor: Colors.black,
+    foregroundColor: Colors.white,
+    elevation: 0,
+    surfaceTintColor: Colors.transparent,
+  ),
+  textTheme: const TextTheme().apply(bodyColor: Colors.white, displayColor: Colors.white),
+  colorScheme: const ColorScheme.highContrastDark(),
+);
+
 class HansolHighSchool extends ConsumerStatefulWidget {
   const HansolHighSchool({super.key});
 
@@ -277,11 +309,45 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> with Widget
     return mode == ThemeMode.dark;
   }
 
+  ColorFilter _colorBlindFilter(String mode) {
+    switch (mode) {
+      case 'protanopia':
+        return const ColorFilter.matrix([
+          0.567, 0.433, 0.000, 0, 0,
+          0.558, 0.442, 0.000, 0, 0,
+          0.000, 0.242, 0.758, 0, 0,
+          0.000, 0.000, 0.000, 1, 0,
+        ]);
+      case 'deuteranopia':
+        return const ColorFilter.matrix([
+          0.625, 0.375, 0.000, 0, 0,
+          0.700, 0.300, 0.000, 0, 0,
+          0.000, 0.300, 0.700, 0, 0,
+          0.000, 0.000, 0.000, 1, 0,
+        ]);
+      case 'tritanopia':
+        return const ColorFilter.matrix([
+          0.950, 0.050, 0.000, 0, 0,
+          0.000, 0.433, 0.567, 0, 0,
+          0.000, 0.475, 0.525, 0, 0,
+          0.000, 0.000, 0.000, 1, 0,
+        ]);
+      default:
+        return const ColorFilter.matrix([
+          1, 0, 0, 0, 0,
+          0, 1, 0, 0, 0,
+          0, 0, 1, 0, 0,
+          0, 0, 0, 1, 0,
+        ]);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final mode = ref.watch(themeProvider);
     final locale = ref.watch(localeProvider);
     final refreshKey = ref.watch(appRefreshProvider);
+    final a11y = ref.watch(a11ySettingsProvider);
 
     final isDark = _resolveIsDark(mode);
     AnimatedAppColors.instance.setDark(isDark, animate: false);
@@ -291,8 +357,8 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> with Widget
       navigatorKey: rootNavigatorKey,
       navigatorObservers: [AnalyticsService.observer],
       debugShowCheckedModeBanner: false,
-      theme: _lightTheme,
-      darkTheme: _darkTheme,
+      theme: a11y.highContrast ? _highContrastLight : _lightTheme,
+      darkTheme: a11y.highContrast ? _highContrastDark : _darkTheme,
       themeMode: mode,
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
@@ -307,11 +373,24 @@ class _HansolHighSchoolState extends ConsumerState<HansolHighSchool> with Widget
         final maxWidth = size.width > size.height
             ? size.height * (9 / 16)
             : size.width;
-        return Center(
+        final mq = MediaQuery.of(context);
+        final systemScale = mq.textScaler.scale(1.0);
+        final clampedScale = (systemScale * a11y.fontScale).clamp(1.0, 2.0);
+        Widget content = Center(
           child: ConstrainedBox(
             constraints: BoxConstraints(maxWidth: maxWidth),
             child: child,
           ),
+        );
+        if (a11y.colorBlindMode != 'none') {
+          content = ColorFiltered(
+            colorFilter: _colorBlindFilter(a11y.colorBlindMode),
+            child: content,
+          );
+        }
+        return MediaQuery(
+          data: mq.copyWith(textScaler: TextScaler.linear(clampedScale)),
+          child: content,
         );
       },
       home: MainScreen(key: ValueKey(refreshKey)),
@@ -373,6 +452,79 @@ class _MainScreenState extends State<MainScreen> {
       if (profile == null) return;
       if (!profile.needsProfileUpdate) return;
       if (!mounted) return;
+
+      final l = AppLocalizations.of(context)!;
+      bool? graduateChoice;
+      if (profile.needsGraduateCheck) {
+        graduateChoice = await showDialog<bool>(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text(l.promotion_graduateTitle),
+            content: Text(l.promotion_graduateBody),
+            actions: [
+              TextButton(onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l.promotion_graduateNo)),
+              FilledButton(onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l.promotion_graduateYes)),
+            ],
+          ),
+        );
+        if (!mounted) return;
+      }
+
+      if (graduateChoice == true) {
+        await AuthService.saveUserProfile(UserProfile(
+          uid: profile.uid, name: profile.name, studentId: '',
+          grade: 0, classNum: 0, email: profile.email,
+          approved: profile.approved, role: profile.role,
+          userType: 'graduate',
+          lastProfileUpdate: DateTime.now().year.toString(),
+          graduationYear: DateTime.now().year,
+          blockedUsers: profile.blockedUsers,
+          loginProvider: profile.loginProvider,
+          profilePhotoUrl: profile.profilePhotoUrl,
+          verificationStatus: profile.verificationStatus,
+        ));
+        if (!mounted) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(l.promotion_updated)));
+        AuthService.clearProfileCache();
+        providerContainer.read(appRefreshProvider.notifier).refresh();
+        return;
+      }
+
+      final stillSame = await showDialog<bool>(
+        context: context,
+        builder: (ctx) => AlertDialog(
+          title: Text(l.promotion_classCheckTitle),
+          content: Text(l.promotion_classCheckBody(profile.grade, profile.classNum)),
+          actions: [
+            TextButton(onPressed: () => Navigator.pop(ctx, false),
+              child: Text(l.promotion_classCheckNo)),
+            FilledButton(onPressed: () => Navigator.pop(ctx, true),
+              child: Text(l.promotion_classCheckYes)),
+          ],
+        ),
+      );
+      if (!mounted) return;
+
+      if (stillSame == true) {
+        await AuthService.saveUserProfile(UserProfile(
+          uid: profile.uid, name: profile.name, studentId: profile.studentId,
+          grade: profile.grade, classNum: profile.classNum, email: profile.email,
+          approved: profile.approved, role: profile.role, userType: profile.userType,
+          lastProfileUpdate: DateTime.now().year.toString(),
+          graduationYear: profile.graduationYear,
+          teacherSubject: profile.teacherSubject,
+          blockedUsers: profile.blockedUsers,
+          loginProvider: profile.loginProvider,
+          profilePhotoUrl: profile.profilePhotoUrl,
+          verificationStatus: profile.verificationStatus,
+        ));
+        AuthService.clearProfileCache();
+        providerContainer.read(appRefreshProvider.notifier).refresh();
+        return;
+      }
 
       if (profile.isStudent) {
         final prefs = await SharedPreferences.getInstance();

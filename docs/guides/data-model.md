@@ -81,7 +81,7 @@ erDiagram
 | `name` | string | 실명 |
 | `studentId` | string | 학번 (재학생/졸업생) |
 | `userType` | string | `student` / `alumni` / `teacher` / `parent` |
-| `role` | string | `user` / `manager` / `admin` |
+| `role` | string | `user` / `moderator` / `auditor` / `manager` / `admin` |
 | `approved` | boolean | 관리자 승인 여부 |
 | `suspendedUntil` | timestamp \| null | 정지 만료 시각. 스케줄러가 매시간 청소 |
 | `profilePhotoUrl` | string | Cloud Storage 또는 OAuth 프로필 |

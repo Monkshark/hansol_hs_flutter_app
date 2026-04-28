@@ -106,6 +106,7 @@ class WritePostValidator {
     postData['imageUrls'] = <String>[];
     postData['anonymousCount'] = 0;
     postData['anonymousMapping'] = <String, dynamic>{};
+    postData['isHidden'] = false;
   }
 
   static Future<bool> checkRateLimit() async {

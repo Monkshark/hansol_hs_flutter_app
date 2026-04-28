@@ -228,20 +228,24 @@ class PostRepository {
   }
 
 
-  Future<void> deleteComment(String postId, String commentId) async {
+  Future<void> deleteComment(String postId, String commentId, {String? actorUid}) async {
     final batch = FirebaseFirestore.instance.batch();
-    batch.delete(commentsRef(postId).doc(commentId));
+    batch.update(commentsRef(postId).doc(commentId), {
+      'isHidden': true,
+      'deletedAt': FieldValue.serverTimestamp(),
+      if (actorUid != null) 'deletedBy': actorUid,
+    });
     batch.update(postRef(postId), {'commentCount': FieldValue.increment(-1)});
     await batch.commit();
   }
 
-  Future<void> deletePost(String postId) async {
-    final comments = await commentsRef(postId).get();
-    for (var doc in comments.docs) {
-      await doc.reference.delete();
-    }
-    await postRef(postId).delete();
-  }
+  /// 소프트 딜리트: 글을 숨김 처리만 하고 보관 기간 후 Functions가 파기.
+  Future<void> deletePost(String postId, {String? actorUid}) =>
+      postRef(postId).update({
+        'isHidden': true,
+        'deletedAt': FieldValue.serverTimestamp(),
+        if (actorUid != null) 'deletedBy': actorUid,
+      });
 
 
   Future<void> sendNotification({

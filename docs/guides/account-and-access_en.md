@@ -49,11 +49,20 @@ Default `role = user` regardless of identity. Admin approval follows.
 
 ## Roles
 
-| `role` | Scope |
-|---|---|
-| `user` | General features (after approval) |
-| `manager` | User management + content moderation (limited suspension) |
-| `admin` | Everything (including granting roles) |
+| `role` | Headcount | Who | Scope |
+|---|---|---|---|
+| `admin` | 1-2 | Supervising teacher | Full access, role assignment |
+| `manager` | 2-3 | Student council president/VP | User management, content deletion, report handling, settings |
+| `moderator` | 5-7 | General student council officers | Post/comment deletion, report review/handling |
+| `auditor` | 1 | Graduate developer / supervising teacher | Read-only auditor — view logs, stats, reports, suggestions |
+| `user` | — | General users | General features (after approval) |
+
+`admin`, `manager`, `moderator`, and `auditor` are collectively referred to as **staff**.
+
+**Flutter model** (`UserProfile`):
+- New getters: `isModerator`, `isAuditor`, `isStaff`
+- `isApproved()` — staff (`isStaff`) bypass approval (previously checked `isManager`)
+- Home screen admin shield button — shown based on `isStaff` (previously `isManager`)
 
 **Promotion/demotion**: admin-only. Each change is logged in `admin_logs` (before → after).
 
@@ -110,18 +119,21 @@ Students/teachers see a popup in March to update year/class/number. Identity is 
 
 ## Role-feature Matrix
 
-| Feature | user | manager | admin |
-|---|:---:|:---:|:---:|
-| Create post/comment | ✅ | ✅ | ✅ |
-| Delete others' post/comment | ❌ | ✅ | ✅ |
-| Approve users | ❌ | ✅ | ✅ |
-| Suspend users | ❌ | ✅ | ✅ |
-| Change roles | ❌ | ❌ | ✅ |
-| Pin announcements | ❌ | ✅ | ✅ |
-| Manage urgent popup | ❌ | ✅ | ✅ |
-| Admin Web access | ❌ | ✅ | ✅ |
-| Handle reports | ❌ | ✅ | ✅ |
-| Read/write audit logs | ❌ | ✅ | ✅ |
+| Feature | user | moderator | auditor | manager | admin |
+|---|:---:|:---:|:---:|:---:|:---:|
+| Create post/comment | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Delete others' post/comment | ❌ | ✅ | ❌ | ✅ | ✅ |
+| View/handle reports | ❌ | ✅ | View only | ✅ | ✅ |
+| Approve users | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Suspend users | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Change roles | ❌ | ❌ | ❌ | ❌ | ✅ |
+| Pin announcements | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Manage urgent popup | ❌ | ❌ | ❌ | ✅ | ✅ |
+| Manage settings | ❌ | ❌ | ❌ | ✅ | ✅ |
+| View logs/stats | ❌ | ❌ | ✅ | ✅ | ✅ |
+| View suggestions | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Admin screen access | ❌ | ✅ | ✅ | ✅ | ✅ |
+| View audit logs | ❌ | ❌ | ✅ | ✅ | ✅ |
 
 Full rules detail: [security_en.md](./security_en.md).
 
