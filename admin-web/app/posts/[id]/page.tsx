@@ -4,7 +4,6 @@ import { doc, getDoc, deleteDoc, collection, getDocs, updateDoc, Timestamp } fro
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Badge from '@/components/Badge';
 import { Post, Comment } from '@/lib/types';
 import { displayName } from '@/lib/utils';
@@ -102,15 +101,13 @@ export default function PostDetailPage() {
     loadPost();
   }
 
-  if (loading || !profile || !post) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main></div>;
+  if (loading || !profile || !post) return <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main>;
 
   const likes = typeof post.likes === 'number' ? post.likes : (post.likes ? Object.keys(post.likes).length : 0);
   const dislikes = typeof post.dislikes === 'number' ? post.dislikes : (post.dislikes ? Object.keys(post.dislikes).length : 0);
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
+    <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
         <button onClick={() => router.back()} className="text-sm text-gray-400 mb-4 hover:text-gray-600">← 뒤로</button>
 
         <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm mb-4">
@@ -213,7 +210,6 @@ export default function PostDetailPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   );
 }
