@@ -187,7 +187,50 @@ graph LR
 
 Deploy rules and Functions **before** the app so old clients don't break under new rules.
 
-## 9. Rollback
+## 9. Four-Tier Role + Admin Logs Migration (one-time)
+
+This release introduces several backend changes:
+
+- Role tiers: 3-tier (user / manager / admin) → 5-tier (user / moderator / auditor / manager / admin)
+- `admin_logs`: 7 new action types (`change_role`, `delete_comment`, etc.) plus a new Admin Web `/admin-logs` viewer
+- New collections: `appeals`, `data_requests`, `community_rules`
+
+### 9.1 Deploy order
+
+1. `firestore.rules` — adds 4-tier helpers (`isModerator` / `isAuditor` / `isStaff`) and rules for the new collections
+2. `firestore.indexes.json` — indexes for `admin_logs` / `appeals` / `data_requests`
+3. Cloud Functions (if changed)
+4. Flutter app: TestFlight / Internal → promote to Production
+5. Admin Web (Vercel auto-deploy)
+
+Deploy in this order — old clients can break under new rules if you skip ahead.
+
+### 9.2 Existing user handling
+
+- Users without a `role` field are treated as `'user'` by Firestore Rules — no backfill required
+- Granting new roles to student council officers / auditors:
+  - As `admin`, open Admin Web `/users` → use the dropdown on each user row to assign `moderator` / `auditor`
+  - The change is auto-logged in `admin_logs` as `change_role` (with `previousRole` / `newRole`)
+
+### 9.3 Blaze plan + TTL policy
+
+`admin_logs`, `appeals`, `data_requests` documents all carry an `expiresAt` field set to creation + 30 days. On the Blaze plan you can have Firestore auto-delete them via TTL:
+
+- Firebase Console → Firestore → Indexes → TTL tab
+- Specify the `expiresAt` field per collection
+
+TTL does not run on the Spark plan — fall back to periodic manual cleanup or a Cloud Functions scheduler.
+
+### 9.4 Verification scenarios
+
+After deploy, confirm:
+
+- **moderator account**: can delete posts/comments, `/users` menu hidden, action recorded in `admin_logs`
+- **auditor account**: can read `/admin-logs`, `/dashboard`, `/crashes`; all writes blocked
+- **admin role change**: change a regular user → moderator → `admin_logs` shows `change_role` with `previousRole='user'` / `newRole='moderator'`
+- **Admin Web `/admin-logs`**: action group filter (all / role / delete / account / other) works; search filters by admin/target name
+
+## 10. Rollback
 
 - **Rules**: `git revert` + `firebase deploy --only firestore:rules`
 - **Functions**: checkout previous commit → `firebase deploy --only functions:<name>`

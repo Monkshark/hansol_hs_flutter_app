@@ -184,6 +184,45 @@ Details → [cicd-setup_en.md](./cicd-setup_en.md).
 - Integration (`integration_test/`): 4 tests, device/emulator required
 - Rules: **~4s**, 34 tests, via `firebase emulators:exec`
 
+## PIPA + Four-Tier Role Integration Scenarios (manual)
+
+Not part of the automated test suite — this is a **pre-deploy manual checklist**. Prepare four test accounts (admin / manager / moderator / auditor / regular).
+
+### Signup / consent flow
+- [ ] New signup with terms + privacy + age-14 all checked → signup proceeds
+- [ ] Terms / privacy unchecked → signup button disabled
+- [ ] Under-14 checked → signup blocked with message
+
+### Suspension + appeal (`appeals`)
+- [ ] Manager suspends a regular user for 24h → user can't post or comment
+- [ ] Suspended user opens `/appeal_screen` → submits reason → new `appeals` doc (`status: pending`)
+- [ ] Manager reviews on Admin Web `/appeals` → approve → user's `suspendedUntil` cleared + `appeals.status = approved`
+- [ ] Auditor opens `/appeals` → list visible, action buttons hidden
+
+### Data rights (`data_requests`)
+- [ ] User submits data request (access / portability / deletion) in-app → new `data_requests` doc
+- [ ] Manager processes on Admin Web `/data-requests` → Function returns ZIP + signed URL → `status: completed`
+- [ ] User can download via the link; verify expiry after 7 days
+
+### Four-tier role permission matrix
+- [ ] **moderator**: can delete posts/comments; `/users`, `/dashboard`, `/feedbacks` menus hidden
+- [ ] **auditor**: can read `/admin-logs`, `/dashboard`, `/crashes`, `/feedbacks`, `/function-logs`; all writes blocked
+- [ ] **manager**: can change roles (except granting admin), suspend / approve / delete users
+- [ ] **admin**: can grant admin to others; sees a "Remove Admin" button on own row
+
+### `admin_logs` records
+- [ ] After each action confirm an entry on Admin Web `/admin-logs`:
+  - `change_role` (with `previousRole`/`newRole`), `approve_user`, `reject_user`, `suspend_user` (with `hours`), `unsuspend_user`, `delete_user`, `delete_post`, `delete_comment`, `delete_feedback`
+- [ ] `expiresAt` is exactly `createdAt + 30 days`
+- [ ] (Blaze only) Entries past 30 days are auto-deleted by the TTL policy
+
+### Community rules (`community_rules`)
+- [ ] Manager publishes a new version on Admin Web `/community-rules` → new `community_rules` doc + version bump
+- [ ] App detects the new version → re-consent dialog appears → user agrees → continues
+- [ ] Without agreeing, the main UI is gated
+
+Permission matrix details: [security_en.md](./security_en.md). Action log schema: [admin-features_en.md](../features/admin-features_en.md#audit-log-admin_logs).
+
 ## When Adding Tests
 - New Riverpod provider → provider test mandatory
 - New Firestore field/rule → rules test mandatory (regression guard)
