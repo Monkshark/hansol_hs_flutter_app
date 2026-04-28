@@ -189,7 +189,50 @@ graph LR
 
 규칙/Functions를 앱보다 **먼저** 배포해야 구 버전 앱이 새 규칙 하에서 깨지지 않습니다.
 
-## 9. 롤백
+## 9. 4단계 역할 + 관리자 로그 마이그레이션 (1회성)
+
+이번 릴리즈에서 도입된 백엔드 변경:
+
+- 역할 체계: 3단계(user / manager / admin) → 5단계(user / moderator / auditor / manager / admin)
+- `admin_logs`: `change_role`, `delete_comment` 등 7종 신규 액션 + Admin Web `/admin-logs` 뷰어
+- 신규 컬렉션: `appeals`, `data_requests`, `community_rules`
+
+### 9.1 배포 순서
+
+1. `firestore.rules` 배포 — 4단계 헬퍼(`isModerator` / `isAuditor` / `isStaff`) + 신규 컬렉션 규칙
+2. `firestore.indexes.json` 배포 — `admin_logs` / `appeals` / `data_requests` 인덱스
+3. Cloud Functions 배포 (변경이 있는 경우)
+4. Flutter 앱 빌드 → TestFlight / Internal → Production 승격
+5. Admin Web 배포 (Vercel 자동)
+
+순서를 지키지 않으면 구버전 앱이 신규 규칙 하에서 깨질 수 있습니다.
+
+### 9.2 기존 사용자 처리
+
+- `role` 누락 사용자는 Firestore Rules에서 자동으로 `'user'`로 처리되므로 백필 불필요
+- 학생회 임원/감사자에게 신규 역할 부여:
+  - admin 계정으로 Admin Web `/users` 접속 → 사용자 행의 드롭다운에서 `moderator` / `auditor` 지정
+  - 변경 시 `admin_logs`에 `change_role` 액션이 자동으로 기록됨 (`previousRole` / `newRole` 포함)
+
+### 9.3 Blaze 요금제 + TTL 정책
+
+`admin_logs`, `appeals`, `data_requests` 문서는 모두 `expiresAt` 필드(생성 + 30일)를 포함합니다. Blaze 요금제에서는 Firestore TTL 정책으로 자동 삭제 가능:
+
+- Firebase Console → Firestore → 인덱스 → TTL 탭
+- 컬렉션별 `expiresAt` 필드 지정
+
+Spark 요금제에서는 TTL이 작동하지 않으므로 주기적 수동 정리 또는 Cloud Functions 스케줄러 필요.
+
+### 9.4 검증 시나리오
+
+배포 후 다음을 확인:
+
+- **moderator 계정**: 게시글/댓글 삭제 가능, `/users` 메뉴 비표시, `admin_logs`에 액션 기록 확인
+- **auditor 계정**: `/admin-logs`, `/dashboard`, `/crashes` 읽기 가능, 모든 쓰기 동작 차단 확인
+- **admin 역할 변경**: 일반 사용자 → moderator로 변경 → `admin_logs`에 `change_role` + `previousRole='user'` / `newRole='moderator'` 기록 확인
+- **Admin Web `/admin-logs`**: 액션 그룹 필터(전체 / 역할 변경 / 삭제 / 계정 / 기타) 정상 동작, 검색으로 관리자/대상자 이름 필터링
+
+## 10. 롤백
 
 - **Rules**: `git revert` + `firebase deploy --only firestore:rules` 재배포
 - **Functions**: 이전 커밋 checkout 후 `firebase deploy --only functions:<name>`
