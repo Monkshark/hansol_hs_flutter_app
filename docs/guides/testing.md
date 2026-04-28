@@ -184,6 +184,45 @@ flutter test integration_test/
 - Integration (`integration_test/`): 4개, 디바이스/에뮬레이터 필요
 - Rules (`firebase emulators:exec ... npm test`): 34개, Java 21 + Node 20
 
+## PIPA + 4단계 역할 통합 시나리오 (수동)
+
+자동화 테스트 대상이 아니라 **배포 전 수동 점검용** 체크리스트입니다. 실제 계정 4종(admin / manager / moderator / auditor / 일반)을 준비해 진행합니다.
+
+### 가입 / 동의 플로우
+- [ ] 신규 가입 — 약관 + 개인정보 + 14세 이상 모두 체크 → 가입 진행
+- [ ] 약관 / 개인정보 미동의 → 가입 버튼 비활성
+- [ ] 14세 미만 체크 → 가입 차단 메시지
+
+### 정지 + 이의제기 (`appeals`)
+- [ ] manager가 일반 사용자를 24시간 정지 → 정지 사용자가 글/댓글 작성 시도 → 차단
+- [ ] 정지 사용자가 앱 `/appeal_screen` → 사유 입력 후 제출 → `appeals` 컬렉션 신규 문서 (`status: pending`)
+- [ ] manager가 Admin Web `/appeals`에서 검토 → 승인 → 사용자 `suspendedUntil` 해제 + `appeals.status = approved`
+- [ ] auditor 계정으로 `/appeals` 진입 → 목록 읽기 가능, 액션 버튼 비표시
+
+### 데이터 권리 (`data_requests`)
+- [ ] 사용자가 앱에서 데이터 요청 제출 (열람 / 이전 / 삭제) → `data_requests` 신규 문서
+- [ ] manager가 Admin Web `/data-requests`에서 처리 → Functions가 ZIP 생성 + 서명 URL 반환 → `status: completed`
+- [ ] 사용자 측에서 다운로드 링크 동작 확인, 7일 만료 후 링크 무효 확인
+
+### 4단계 역할 권한 매트릭스
+- [ ] **moderator**: `/posts` 삭제 가능, `/comments` 삭제 가능, `/users`/`/dashboard`/`/feedbacks` 메뉴 비표시
+- [ ] **auditor**: `/admin-logs`, `/dashboard`, `/crashes`, `/feedbacks`, `/function-logs` 모두 읽기 가능 / 쓰기 시도 시 권한 오류
+- [ ] **manager**: `/users` 역할 변경 가능 (admin 임명 제외), 정지/승인/삭제 가능
+- [ ] **admin**: 다른 사용자에게 admin 임명 가능, 자신의 admin 해제 버튼 노출 확인
+
+### `admin_logs` 기록
+- [ ] 각 액션 후 Admin Web `/admin-logs`에서 해당 항목 확인:
+  - `change_role` (with `previousRole`/`newRole`), `approve_user`, `reject_user`, `suspend_user` (with `hours`), `unsuspend_user`, `delete_user`, `delete_post`, `delete_comment`, `delete_feedback`
+- [ ] `expiresAt` 필드가 `createdAt + 30일`로 정확히 설정
+- [ ] (Blaze 한정) 30일 경과 항목이 TTL로 자동 삭제되는지 확인
+
+### 커뮤니티 규정 (`community_rules`)
+- [ ] manager가 Admin Web `/community-rules`에서 신규 버전 발행 → `community_rules` 신규 문서 + 버전 증가
+- [ ] 사용자 앱이 새 버전 감지 → 재동의 다이얼로그 노출 → 동의 시 다음 사용 허용
+- [ ] 미동의 시 메인 기능 차단 동작
+
+상세 권한 매트릭스: [security.md](./security.md), 액션 로그 스키마: [admin-features.md](../features/admin-features.md#감사-로그-admin_logs).
+
 ## 새 테스트 추가 시
 - 새 Riverpod Provider → Provider test 필수
 - 새 Firestore 필드/규칙 변경 → Rules test 필수 (회귀 방지)
