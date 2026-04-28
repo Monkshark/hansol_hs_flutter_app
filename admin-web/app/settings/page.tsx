@@ -4,7 +4,6 @@ import { doc, getDoc, setDoc, collection, getDocs, updateDoc, Timestamp } from '
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 
 export default function SettingsPage() {
   const { profile, loading } = useAuth();
@@ -86,9 +85,7 @@ export default function SettingsPage() {
   if (loading || !profile) return null;
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-3xl">
+    <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-3xl">
         <h1 className="text-2xl font-bold mb-5">설정</h1>
 
         <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm mb-4">
@@ -207,7 +204,6 @@ export default function SettingsPage() {
             {popupSaved && <span className="text-green-500 text-sm">저장 완료!</span>}
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   );
 }
