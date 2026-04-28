@@ -14,6 +14,7 @@ import 'package:hansol_high_school/screens/sub/grade_screen.dart';
 import 'package:hansol_high_school/widgets/home/current_subject_card.dart';
 import 'package:hansol_high_school/widgets/home/home_header_widgets.dart';
 import 'package:hansol_high_school/widgets/home/link_card.dart';
+import 'package:hansol_high_school/providers/verification_guard.dart';
 import 'package:hansol_high_school/widgets/home/recent_posts.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
@@ -103,7 +104,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
                           future: AuthService.getCachedProfile(),
                           builder: (context, snap) {
                             if (snap.hasError) return const SizedBox.shrink();
-                            if (snap.data?.isManager == true) {
+                            if (snap.data?.isStaff == true) {
                               return IconButton(
                                 onPressed: () => Navigator.of(context).push(
                                   MaterialPageRoute(builder: (_) => const AdminScreen()),
@@ -206,6 +207,7 @@ class HomeScreenState extends ConsumerState<HomeScreen> with WidgetsBindingObser
               child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
+                  const SuspensionBanner(),
                   if (AuthService.cachedProfile?.isGraduate != true) ...[
                     const CurrentSubjectCard(),
                     const SizedBox(height: 16),

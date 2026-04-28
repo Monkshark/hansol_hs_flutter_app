@@ -120,6 +120,7 @@ class _BoardScreenState extends State<BoardScreen> {
       final lowerQuery = query.toLowerCase();
       final filtered = snap.docs.where((doc) {
         final d = doc.data();
+        if (d['isHidden'] == true) return false;
         final title = (d['title'] ?? '').toString().toLowerCase();
         final content = (d['content'] ?? '').toString().toLowerCase();
         return title.contains(lowerQuery) || content.contains(lowerQuery);
@@ -371,7 +372,8 @@ class _BoardScreenState extends State<BoardScreen> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs);
+    var docs = List<QueryDocumentSnapshot<Map<String, dynamic>>>.from(_allDocs)
+        .where((d) => d.data()['isHidden'] != true).toList();
 
     final pinned = docs.where((doc) => doc.data()['isPinned'] == true).toList();
     final nonPinned = docs.where((doc) => doc.data()['isPinned'] != true).toList();

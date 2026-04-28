@@ -146,11 +146,167 @@ abstract class AppLocalizations {
   /// **'GitHub로 계속하기'**
   String get login_githubContinue;
 
+  /// No description provided for @login_microsoftContinue.
+  ///
+  /// In ko, this message translates to:
+  /// **'Microsoft로 계속하기'**
+  String get login_microsoftContinue;
+
   /// No description provided for @login_skipButton.
   ///
   /// In ko, this message translates to:
   /// **'나중에 하기'**
   String get login_skipButton;
+
+  /// No description provided for @login_consentTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'서비스 이용을 위해 다음 항목에 동의해주세요'**
+  String get login_consentTitle;
+
+  /// No description provided for @login_consentAll.
+  ///
+  /// In ko, this message translates to:
+  /// **'모두 동의합니다'**
+  String get login_consentAll;
+
+  /// No description provided for @login_consentAge.
+  ///
+  /// In ko, this message translates to:
+  /// **'[필수] 만 14세 이상입니다'**
+  String get login_consentAge;
+
+  /// No description provided for @login_consentTerms.
+  ///
+  /// In ko, this message translates to:
+  /// **'[필수] 이용약관에 동의합니다'**
+  String get login_consentTerms;
+
+  /// No description provided for @login_consentTermsView.
+  ///
+  /// In ko, this message translates to:
+  /// **'보기'**
+  String get login_consentTermsView;
+
+  /// No description provided for @login_consentPrivacy.
+  ///
+  /// In ko, this message translates to:
+  /// **'[필수] 개인정보 처리방침에 동의합니다'**
+  String get login_consentPrivacy;
+
+  /// No description provided for @login_consentPrivacyView.
+  ///
+  /// In ko, this message translates to:
+  /// **'보기'**
+  String get login_consentPrivacyView;
+
+  /// No description provided for @login_consentRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'필수 항목에 모두 동의해야 가입할 수 있습니다'**
+  String get login_consentRequired;
+
+  /// No description provided for @verify_required_title.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증이 필요해요'**
+  String get verify_required_title;
+
+  /// No description provided for @verify_required_body.
+  ///
+  /// In ko, this message translates to:
+  /// **'학교 이메일 인증을 마쳐야 글쓰기·댓글·신고 등 기능을 사용할 수 있어요.'**
+  String get verify_required_body;
+
+  /// No description provided for @verify_required_action.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증하기'**
+  String get verify_required_action;
+
+  /// No description provided for @verify_login_required.
+  ///
+  /// In ko, this message translates to:
+  /// **'로그인이 필요한 기능입니다'**
+  String get verify_login_required;
+
+  /// No description provided for @verify_badge_unverified.
+  ///
+  /// In ko, this message translates to:
+  /// **'미인증'**
+  String get verify_badge_unverified;
+
+  /// No description provided for @suspend_banner_title.
+  ///
+  /// In ko, this message translates to:
+  /// **'현재 계정이 정지되어 있어요'**
+  String get suspend_banner_title;
+
+  /// No description provided for @suspend_banner_remaining.
+  ///
+  /// In ko, this message translates to:
+  /// **'남은 기간: {days}일'**
+  String suspend_banner_remaining(Object days);
+
+  /// No description provided for @suspend_banner_permanent.
+  ///
+  /// In ko, this message translates to:
+  /// **'영구 정지'**
+  String get suspend_banner_permanent;
+
+  /// No description provided for @suspend_banner_reason.
+  ///
+  /// In ko, this message translates to:
+  /// **'사유: {reason}'**
+  String suspend_banner_reason(Object reason);
+
+  /// No description provided for @suspend_banner_appeal.
+  ///
+  /// In ko, this message translates to:
+  /// **'이의제기'**
+  String get suspend_banner_appeal;
+
+  /// No description provided for @suspend_blocked_action.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지 중에는 사용할 수 없는 기능이에요'**
+  String get suspend_blocked_action;
+
+  /// No description provided for @soft_deleted_label.
+  ///
+  /// In ko, this message translates to:
+  /// **'숨김 처리된 글입니다'**
+  String get soft_deleted_label;
+
+  /// No description provided for @soft_deleted_comment.
+  ///
+  /// In ko, this message translates to:
+  /// **'숨김 처리된 댓글입니다'**
+  String get soft_deleted_comment;
+
+  /// No description provided for @community_rules_title.
+  ///
+  /// In ko, this message translates to:
+  /// **'커뮤니티 규정'**
+  String get community_rules_title;
+
+  /// No description provided for @community_rules_empty.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 등록된 규정이 없습니다'**
+  String get community_rules_empty;
+
+  /// No description provided for @community_rules_version.
+  ///
+  /// In ko, this message translates to:
+  /// **'버전 {version}'**
+  String community_rules_version(Object version);
+
+  /// No description provided for @community_rules_effectiveDate.
+  ///
+  /// In ko, this message translates to:
+  /// **'시행일: {date}'**
+  String community_rules_effectiveDate(Object date);
 
   /// No description provided for @profileSetup_nameRequired.
   ///
@@ -1070,11 +1226,41 @@ abstract class AppLocalizations {
   /// **'개인정보 노출'**
   String get post_reportReasonPrivacy;
 
+  /// No description provided for @post_reportReasonDefamation.
+  ///
+  /// In ko, this message translates to:
+  /// **'명예훼손'**
+  String get post_reportReasonDefamation;
+
+  /// No description provided for @post_reportReasonFlooding.
+  ///
+  /// In ko, this message translates to:
+  /// **'도배'**
+  String get post_reportReasonFlooding;
+
+  /// No description provided for @post_reportReasonMisinfo.
+  ///
+  /// In ko, this message translates to:
+  /// **'거짓정보'**
+  String get post_reportReasonMisinfo;
+
   /// No description provided for @post_reportReasonOther.
   ///
   /// In ko, this message translates to:
   /// **'기타'**
   String get post_reportReasonOther;
+
+  /// No description provided for @post_reportOtherHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'사유를 10자 이상 입력하세요'**
+  String get post_reportOtherHint;
+
+  /// No description provided for @post_reportOtherTooShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'기타 사유는 10자 이상 입력해야 합니다'**
+  String get post_reportOtherTooShort;
 
   /// No description provided for @post_reportButton.
   ///
@@ -1093,6 +1279,144 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'신고가 접수되었습니다'**
   String get post_reportSuccess;
+
+  /// No description provided for @appeal_title.
+  ///
+  /// In ko, this message translates to:
+  /// **'이의제기'**
+  String get appeal_title;
+
+  /// No description provided for @appeal_intro.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지 처분에 대해 이의제기를 작성해주세요. 1회만 가능합니다.'**
+  String get appeal_intro;
+
+  /// No description provided for @appeal_hint.
+  ///
+  /// In ko, this message translates to:
+  /// **'이의제기 사유를 작성해주세요 (최대 500자)'**
+  String get appeal_hint;
+
+  /// No description provided for @appeal_submit.
+  ///
+  /// In ko, this message translates to:
+  /// **'제출'**
+  String get appeal_submit;
+
+  /// No description provided for @appeal_alreadySubmitted.
+  ///
+  /// In ko, this message translates to:
+  /// **'이미 이의제기를 제출했습니다'**
+  String get appeal_alreadySubmitted;
+
+  /// No description provided for @appeal_submitted.
+  ///
+  /// In ko, this message translates to:
+  /// **'이의제기가 접수되었습니다'**
+  String get appeal_submitted;
+
+  /// No description provided for @appeal_tooShort.
+  ///
+  /// In ko, this message translates to:
+  /// **'10자 이상 입력해주세요'**
+  String get appeal_tooShort;
+
+  /// No description provided for @appeal_charCount.
+  ///
+  /// In ko, this message translates to:
+  /// **'{current}/500'**
+  String appeal_charCount(Object current);
+
+  /// No description provided for @withdraw_graceTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'회원 탈퇴 안내'**
+  String get withdraw_graceTitle;
+
+  /// No description provided for @withdraw_graceBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴 후 30일간은 동일 계정으로 다시 로그인하면 복구할 수 있어요. 30일이 지나면 계정과 모든 활동 데이터가 영구 삭제됩니다.'**
+  String get withdraw_graceBody;
+
+  /// No description provided for @withdraw_anonymizeNotice.
+  ///
+  /// In ko, this message translates to:
+  /// **'작성한 게시글/댓글은 즉시 익명 처리되며 다른 사용자에게는 그대로 보입니다.'**
+  String get withdraw_anonymizeNotice;
+
+  /// No description provided for @withdraw_blockedSuspended.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지 중에는 탈퇴할 수 없습니다. 정지가 해제된 후 시도해주세요.'**
+  String get withdraw_blockedSuspended;
+
+  /// No description provided for @withdraw_scheduled.
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴가 신청되었습니다. 30일 후 영구 삭제됩니다.'**
+  String get withdraw_scheduled;
+
+  /// No description provided for @withdraw_confirmAction.
+  ///
+  /// In ko, this message translates to:
+  /// **'탈퇴 신청'**
+  String get withdraw_confirmAction;
+
+  /// No description provided for @promotion_classCheckTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'새 학년 정보 확인'**
+  String get promotion_classCheckTitle;
+
+  /// No description provided for @promotion_classCheckBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'여전히 {grade}학년 {classNum}반 맞으신가요?'**
+  String promotion_classCheckBody(Object grade, Object classNum);
+
+  /// No description provided for @promotion_classCheckYes.
+  ///
+  /// In ko, this message translates to:
+  /// **'네, 맞아요'**
+  String get promotion_classCheckYes;
+
+  /// No description provided for @promotion_classCheckNo.
+  ///
+  /// In ko, this message translates to:
+  /// **'아니요, 변경할게요'**
+  String get promotion_classCheckNo;
+
+  /// No description provided for @promotion_graduateTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'졸업 확인'**
+  String get promotion_graduateTitle;
+
+  /// No description provided for @promotion_graduateBody.
+  ///
+  /// In ko, this message translates to:
+  /// **'올해 졸업하셨나요? 졸업생으로 변경하면 학년/반 정보가 사라지고 졸업생 전용 기능을 이용할 수 있어요.'**
+  String get promotion_graduateBody;
+
+  /// No description provided for @promotion_graduateYes.
+  ///
+  /// In ko, this message translates to:
+  /// **'졸업했어요'**
+  String get promotion_graduateYes;
+
+  /// No description provided for @promotion_graduateNo.
+  ///
+  /// In ko, this message translates to:
+  /// **'아직 재학중'**
+  String get promotion_graduateNo;
+
+  /// No description provided for @promotion_updated.
+  ///
+  /// In ko, this message translates to:
+  /// **'정보가 갱신되었습니다'**
+  String get promotion_updated;
 
   /// No description provided for @post_found.
   ///
@@ -1657,6 +1981,36 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'매니저 해제'**
   String get admin_usersRemoveManager;
+
+  /// No description provided for @admin_usersMakeModerator.
+  ///
+  /// In ko, this message translates to:
+  /// **'모더레이터'**
+  String get admin_usersMakeModerator;
+
+  /// No description provided for @admin_usersRemoveModerator.
+  ///
+  /// In ko, this message translates to:
+  /// **'모더레이터 해제'**
+  String get admin_usersRemoveModerator;
+
+  /// No description provided for @admin_usersMakeAuditor.
+  ///
+  /// In ko, this message translates to:
+  /// **'감사자'**
+  String get admin_usersMakeAuditor;
+
+  /// No description provided for @admin_usersRemoveAuditor.
+  ///
+  /// In ko, this message translates to:
+  /// **'감사자 해제'**
+  String get admin_usersRemoveAuditor;
+
+  /// No description provided for @admin_usersRoleUser.
+  ///
+  /// In ko, this message translates to:
+  /// **'일반'**
+  String get admin_usersRoleUser;
 
   /// No description provided for @admin_usersMakeAdmin.
   ///
@@ -3248,6 +3602,72 @@ abstract class AppLocalizations {
   /// **'알림 설정'**
   String get settings_notification;
 
+  /// No description provided for @settings_a11ySection.
+  ///
+  /// In ko, this message translates to:
+  /// **'접근성'**
+  String get settings_a11ySection;
+
+  /// No description provided for @settings_fontScale.
+  ///
+  /// In ko, this message translates to:
+  /// **'글씨 크기'**
+  String get settings_fontScale;
+
+  /// No description provided for @settings_fontScaleNormal.
+  ///
+  /// In ko, this message translates to:
+  /// **'보통'**
+  String get settings_fontScaleNormal;
+
+  /// No description provided for @settings_fontScaleLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'큼'**
+  String get settings_fontScaleLarge;
+
+  /// No description provided for @settings_fontScaleXLarge.
+  ///
+  /// In ko, this message translates to:
+  /// **'매우 큼'**
+  String get settings_fontScaleXLarge;
+
+  /// No description provided for @settings_highContrast.
+  ///
+  /// In ko, this message translates to:
+  /// **'고대비 모드'**
+  String get settings_highContrast;
+
+  /// No description provided for @settings_colorBlindMode.
+  ///
+  /// In ko, this message translates to:
+  /// **'색맹 보정'**
+  String get settings_colorBlindMode;
+
+  /// No description provided for @settings_colorBlindNone.
+  ///
+  /// In ko, this message translates to:
+  /// **'사용 안 함'**
+  String get settings_colorBlindNone;
+
+  /// No description provided for @settings_colorBlindProtanopia.
+  ///
+  /// In ko, this message translates to:
+  /// **'적색맹'**
+  String get settings_colorBlindProtanopia;
+
+  /// No description provided for @settings_colorBlindDeuteranopia.
+  ///
+  /// In ko, this message translates to:
+  /// **'녹색맹'**
+  String get settings_colorBlindDeuteranopia;
+
+  /// No description provided for @settings_colorBlindTritanopia.
+  ///
+  /// In ko, this message translates to:
+  /// **'청색맹'**
+  String get settings_colorBlindTritanopia;
+
   /// No description provided for @settings_feedbackSection.
   ///
   /// In ko, this message translates to:
@@ -3368,6 +3788,12 @@ abstract class AppLocalizations {
   /// **'Google 로그인'**
   String get settings_loginGoogle;
 
+  /// No description provided for @settings_loginMicrosoft.
+  ///
+  /// In ko, this message translates to:
+  /// **'Microsoft 로그인'**
+  String get settings_loginMicrosoft;
+
   /// No description provided for @settings_privacyTitle.
   ///
   /// In ko, this message translates to:
@@ -3377,7 +3803,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacyEffectiveDate.
   ///
   /// In ko, this message translates to:
-  /// **'시행일자: 2026년 4월 10일'**
+  /// **'시행일자: 2026년 5월 1일'**
   String get settings_privacyEffectiveDate;
 
   /// No description provided for @settings_privacyIntro.
@@ -3401,7 +3827,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection1Content.
   ///
   /// In ko, this message translates to:
-  /// **'1. 회원 가입 및 인증: 소셜 로그인(Google, Apple, Kakao, GitHub)을 통한 본인 확인 및 회원 식별\n2. 프로필 관리: 학교 구성원(학생, 졸업생, 교사, 학부모) 식별 및 학년·반 정보 관리\n3. 게시판 서비스: 게시글·댓글·좋아요·북마크·투표·익명글 기능 제공\n4. 1:1 채팅 서비스: 사용자 간 메시지 송수신\n5. 알림 서비스: 급식 알림, 댓글·멘션·인기글·새글·채팅·계정 상태 변경 푸시 알림\n6. 학사 정보 조회: 급식 메뉴, 시간표 정보 제공 및 로컬 알림\n7. 성적 관리: 시험 성적·목표 성적 저장 (기기 내 암호화 저장, 서버 미전송)\n8. 앱 개선: 이용 통계 분석 및 오류·충돌 수집을 통한 서비스 안정성 향상\n9. 부정 이용 방지: 신고·차단·계정 정지 처리 및 서비스 건전성 유지'**
+  /// **'1. 회원 가입 및 본인 확인: 소셜 로그인(Google, Microsoft, Apple, Kakao) 및 학교 이메일 도메인 검증을 통한 회원 식별\n2. 프로필 관리: 학교 구성원(학생, 졸업생, 교사) 식별 및 학년·반·번호·학번 중복 방지\n3. 게시판 서비스: 게시글·댓글·좋아요·북마크·투표·익명글·신고·이의제기 기능 제공\n4. 1:1 채팅 서비스: 사용자 간 메시지 송수신\n5. 알림 서비스: 급식·시간표·게시판·계정 상태 변경 푸시 알림 및 로컬 알림\n6. 학사 정보 조회: 급식 메뉴, 시간표 정보 제공\n7. 개인 학습 관리: 시험 성적·목표 성적 저장 (기기 내 암호화 저장, 서버 미전송)\n8. 앱 개선: 이용 통계 분석 및 오류·충돌 수집을 통한 서비스 안정성 향상\n9. 부정 이용 방지 및 분쟁 해결: 신고·차단·정지·이의제기 처리, 다계정 어뷰징 방지, 분쟁 해결'**
   String get settings_privacySection1Content;
 
   /// No description provided for @settings_privacySection2Title.
@@ -3419,7 +3845,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection2RequiredContent.
   ///
   /// In ko, this message translates to:
-  /// **'• 이름: 소셜 로그인 프로필 또는 직접 입력\n• 이메일: 소셜 로그인 제공자로부터 자동 수집\n• 고유 사용자 식별자(UID): Firebase 인증 시 자동 생성\n• 로그인 제공자 정보: Google/Apple/Kakao/GitHub 로그인 시 자동 수집\n• 사용자 유형: 학생/졸업생/교사/학부모 중 직접 선택\n• 학년·반: 직접 입력'**
+  /// **'• 이름: 소셜 로그인 프로필 또는 직접 입력\n• 이메일: 소셜 로그인 제공자로부터 자동 수집\n• 고유 사용자 식별자(UID): Firebase 인증 시 자동 생성\n• 로그인 제공자 정보: Google/Microsoft/Apple/Kakao 로그인 시 자동 수집\n• 사용자 유형: 학생/졸업생/교사 중 직접 선택\n• 학번: 학교 이메일 도메인에서 자동 추출 또는 OTP 인증 시 등록\n• 학년·반·번호: 직접 입력 (매 학년 갱신)\n• 학교 이메일: 학번 인증용 (@edu.sje.go.kr 또는 @sjhansol.sjeduhs.kr)'**
   String get settings_privacySection2RequiredContent;
 
   /// No description provided for @settings_privacySection2Optional.
@@ -3431,7 +3857,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection2OptionalContent.
   ///
   /// In ko, this message translates to:
-  /// **'• 프로필 사진: 소셜 로그인 프로필 또는 직접 업로드\n• 졸업연도: 졸업생인 경우 직접 입력\n• 담당 과목: 교사인 경우 직접 입력'**
+  /// **'• 프로필 사진: 소셜 로그인 프로필 또는 직접 업로드\n• 졸업연도: 졸업생인 경우 직접 입력\n• 담당 과목: 교사인 경우 직접 선택'**
   String get settings_privacySection2OptionalContent;
 
   /// No description provided for @settings_privacySection2Auto.
@@ -3443,7 +3869,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection2AutoContent.
   ///
   /// In ko, this message translates to:
-  /// **'• 게시글·댓글·채팅 내용 (사용자가 작성한 텍스트 및 이미지)\n• 상호작용 기록 (좋아요·싫어요·북마크·투표 참여)\n• 신고·차단 기록\n• 검색 기록: 최근 검색어 최대 10개 (기기 내에만 저장)\n• 알림 설정값 (푸시·급식 알림 on/off 및 알림 시간)\n• D-day 목록: 제목·날짜·고정 여부 (계정 연동, Firestore 저장)'**
+  /// **'• 게시글·댓글·채팅 내용 (사용자가 작성한 텍스트 및 이미지)\n• 상호작용 기록 (좋아요·싫어요·북마크·투표 참여)\n• 신고·차단·정지·이의제기 기록\n• 학번 인증 이력 (인증 일시, 인증 방식)\n• 동의 기록 (만 14세, 이용약관, 개인정보 처리방침, 커뮤니티 규정 동의 시각)\n• 검색 기록: 최근 검색어 최대 10개 (기기 내에만 저장)\n• 알림 설정값 (푸시·급식 알림 on/off 및 알림 시간)\n• D-day 목록: 제목·날짜·고정 여부 (계정 연동, Firestore 저장)'**
   String get settings_privacySection2AutoContent;
 
   /// No description provided for @settings_privacySection2AutoCollect.
@@ -3455,7 +3881,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection2AutoCollectContent.
   ///
   /// In ko, this message translates to:
-  /// **'• FCM 디바이스 토큰: 푸시 알림 발송을 위한 기기 식별 토큰\n• 앱 이용 로그: 화면 조회, 로그인/로그아웃, 게시글 작성·조회 등 (Firebase Analytics)\n• 오류·충돌 정보: 스택트레이스, 기기 OS 버전, 앱 버전 등 (Firebase Crashlytics)\n• 기기 정보: OS 종류·버전, 화면 크기, 앱 버전 (Firebase SDK 자동 수집)'**
+  /// **'• FCM 디바이스 토큰: 푸시 알림 발송을 위한 기기 식별 토큰\n• 디바이스 식별자(installationId): 부정 이용 방지(중복 신고 방지, 정지 우회 차단) 목적\n• 앱 이용 로그: 화면 조회, 로그인/로그아웃, 게시글 작성·조회 등 (Firebase Analytics)\n• 오류·충돌 정보: 스택트레이스, 기기 OS 버전, 앱 버전 등 (Firebase Crashlytics)\n• 기기 정보: OS 종류·버전, 화면 크기, 앱 버전 (Firebase SDK 자동 수집)'**
   String get settings_privacySection2AutoCollectContent;
 
   /// No description provided for @settings_privacySection2LocalOnly.
@@ -3479,7 +3905,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection3Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.\n\n• 회원 정보 (프로필·인증): 회원 탈퇴 시까지\n• 게시글·댓글·첨부 이미지: 작성일로부터 4년 (고정 공지 제외)\n• 채팅 메시지: 회원 탈퇴 시까지\n• D-day 목록: 회원 탈퇴 시까지\n• 앱 이용 로그 (Analytics): 수집일로부터 14개월\n• 오류·충돌 보고 (Crashlytics): 수집일로부터 90일'**
+  /// **'앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.\n\n• 회원 정보 (프로필·인증): 회원 탈퇴 시까지\n• 활성 게시글·댓글·첨부 이미지: 작성일로부터 3년 (고정 공지 제외)\n• 작성자 자가 삭제 게시글 (신고 없음): 30일 후 영구 파기\n• 작성자 자가 삭제 게시글 (신고 처리 중): 처리 완료 후 90일 후 영구 파기\n• 운영자 삭제 게시글: 작성일로부터 3년까지 보존 후 영구 파기\n• 채팅 메시지: 회원 탈퇴 시까지\n• D-day 목록: 회원 탈퇴 시까지\n• 관리자 행위 기록(admin_logs): 3년\n• 탈퇴 유예 데이터 (UID, 탈퇴일, 정지 이력 해시): 탈퇴일로부터 30일\n• 앱 이용 로그 (Analytics): 수집일로부터 14개월\n• 오류·충돌 보고 (Crashlytics): 수집일로부터 90일\n\n3년 보관의 근거: 「개인정보 보호법」 제3조 제1항(최소처리 원칙)과 고등학교 학사 과정(3년)에 비례.\n탈퇴 30일 유예의 근거: 부정 이용 방지 및 분쟁 해결 (제36조 제2항, 전자상거래법 시행령 제6조).'**
   String get settings_privacySection3Content;
 
   /// No description provided for @settings_privacySection4Title.
@@ -3503,7 +3929,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection5Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.\n\n• Google LLC (Firebase): 인증, 데이터 저장, 푸시 알림, 이용 통계, 오류 수집, 호스팅 — 소재국: 미국\n• Google LLC: Google 계정 로그인 인증 — 소재국: 미국\n• Apple Inc.: Apple 계정 로그인 인증 — 소재국: 미국\n• Kakao Corp.: 카카오 계정 로그인 인증 — 소재국: 한국\n• GitHub Inc. (Microsoft): GitHub 계정 로그인 인증 — 소재국: 미국'**
+  /// **'앱은 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.\n\n• Google LLC (Firebase): 인증, 데이터 저장, 푸시 알림, 이용 통계, 오류 수집, 호스팅 — 소재국: 미국\n• Google LLC: Google 계정 로그인 인증, Gmail SMTP를 통한 학번 인증 OTP 발송 — 소재국: 미국\n• Microsoft Corporation: Microsoft 계정 로그인 인증 (학교 Outlook 도메인 포함) — 소재국: 미국\n• Apple Inc.: Apple 계정 로그인 인증 — 소재국: 미국\n• Kakao Corp.: 카카오 계정 로그인 인증 — 소재국: 한국'**
   String get settings_privacySection5Content;
 
   /// No description provided for @settings_privacySection6Title.
@@ -3515,7 +3941,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection6Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 「개인정보 보호법」 제28조의8에 따라 다음과 같이 개인정보를 국외로 이전하고 있습니다.\n\n• 이전받는 자: Google LLC\n• 이전되는 국가: 미국\n• 이전 항목: 회원 정보, 게시글·댓글·채팅 내용, 첨부 이미지, 이용 로그, 오류 정보, FCM 토큰\n• 이전 목적: 클라우드 서버를 통한 서비스 제공 및 앱 안정성 개선\n• 보유·이용 기간: 제3조에 명시된 기간과 동일\n• 보호 조치: Google Cloud 보안 인증(SOC 2, ISO 27001), 전송 구간 TLS 암호화, 저장 데이터 AES-256 암호화'**
+  /// **'앱은 「개인정보 보호법」 제28조의8에 따라 다음과 같이 개인정보를 국외로 이전하고 있습니다.\n\n• 이전받는 자: Google LLC, Microsoft Corporation, Apple Inc.\n• 이전되는 국가: 미국\n• 이전 항목: 회원 정보, 게시글·댓글·채팅 내용, 첨부 이미지, 이용 로그, 오류 정보, FCM 토큰, 디바이스 식별자\n• 이전 목적: 클라우드 서버를 통한 서비스 제공, 소셜 로그인 인증, 앱 안정성 개선\n• 보유·이용 기간: 제3조에 명시된 기간과 동일\n• 보호 조치: 보안 인증(SOC 2, ISO 27001), 전송 구간 TLS 암호화, 저장 데이터 AES-256 암호화\n• 거부 시: 해당 소셜 로그인 또는 클라우드 기반 서비스 이용이 제한됩니다.'**
   String get settings_privacySection6Content;
 
   /// No description provided for @settings_privacySection7Title.
@@ -3527,7 +3953,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection7Content.
   ///
   /// In ko, this message translates to:
-  /// **'이용자(정보주체)는 언제든지 다음의 권리를 행사할 수 있습니다.\n\n1. 개인정보 열람 요구: 본인의 개인정보 처리 현황을 열람할 수 있습니다.\n2. 개인정보 정정·삭제 요구: 앱 내 프로필 수정 기능을 통해 이름·사진·학년·반 등을 직접 정정할 수 있으며, 게시글·댓글은 직접 삭제할 수 있습니다.\n3. 개인정보 처리정지 요구: 개인정보 처리의 정지를 요구할 수 있습니다.\n4. 동의 철회(회원 탈퇴): 앱 내 설정 → 계정 삭제 기능을 통해 언제든지 회원 탈퇴 및 동의 철회가 가능합니다. 탈퇴 시 서버에 저장된 회원 정보, 하위 데이터가 즉시 삭제됩니다.\n\n위 권리 행사는 앱 내 기능 또는 아래 개인정보 보호책임자에게 이메일로 요청하실 수 있으며, 지체 없이 조치하겠습니다.\n\n※ 만 14세 미만 아동의 경우 법정대리인이 해당 아동의 개인정보에 대한 열람, 정정·삭제, 처리정지를 요구할 수 있습니다.'**
+  /// **'이용자(정보주체)는 언제든지 다음의 권리를 행사할 수 있습니다.\n\n1. 개인정보 열람 요구: 본인의 개인정보 처리 현황을 열람할 수 있습니다.\n2. 개인정보 정정·삭제 요구: 앱 내 프로필 수정 기능을 통해 이름·사진·학년·반 등을 직접 정정할 수 있으며, 게시글·댓글은 직접 삭제(숨김)할 수 있습니다.\n3. 개인정보 처리정지 요구: 개인정보 처리의 정지를 요구할 수 있으며, 회원 탈퇴는 처리정지 요구로 해석됩니다.\n4. 동의 철회(회원 탈퇴): 앱 내 설정 → 계정 삭제 기능을 통해 언제든지 회원 탈퇴 및 동의 철회가 가능합니다. 탈퇴 즉시 앱 이용이 중단되며, 부정 이용 방지·분쟁 해결 목적으로 30일간 최소 정보(UID, 탈퇴일, 정지 이력)만 보관 후 완전 파기합니다. 게시글·댓글은 작성자만 \"탈퇴한 사용자\"로 익명화하여 유지됩니다.\n5. 개인정보 이전 요구: 앱 내 \"내 데이터 다운로드\" 기능을 통해 본인의 개인정보 사본(ZIP 형식: PDF·JSON·이미지)을 받을 수 있습니다 (30일 1회 제한, 이메일로 다운로드 링크 발송, 7일 후 만료).\n6. 자동화된 결정에 대한 설명·이의제기: 자동 정지·자동 파기·신고 자동 집계 등에 대해 사유 설명을 요구하거나 이의를 제기할 수 있습니다.\n\n위 권리 행사는 앱 내 기능 또는 아래 개인정보 보호책임자에게 이메일로 요청하실 수 있으며, 지체 없이 조치하겠습니다.\n\n※ 만 14세 미만 아동의 경우 법정대리인이 해당 아동의 개인정보에 대한 열람, 정정·삭제, 처리정지를 요구할 수 있습니다.'**
   String get settings_privacySection7Content;
 
   /// No description provided for @settings_privacySection8Title.
@@ -3539,7 +3965,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection8Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 개인정보의 보유 기간이 경과하거나 처리 목적이 달성된 때에는 지체 없이 해당 개인정보를 파기합니다.\n\n[파기 절차]\n• 회원 탈퇴 시: Firebase 인증 정보 삭제, Firestore 프로필 문서 및 하위 컬렉션(알림 등) 일괄 삭제\n• 게시글 자동 파기: 작성일로부터 4년이 경과한 비고정 게시글과 해당 첨부 이미지·댓글을 자동으로 일괄 삭제\n• 기기 내 데이터: 앱 삭제 시 SharedPreferences 및 SecureStorage 데이터 자동 삭제\n\n[파기 방법]\n• 전자적 파일: 복구 불가능한 방법으로 영구 삭제\n• 서버 저장 데이터: Firebase Firestore·Storage에서 문서 및 파일 영구 삭제'**
+  /// **'앱은 개인정보의 보유 기간이 경과하거나 처리 목적이 달성된 때에는 지체 없이 해당 개인정보를 파기합니다.\n\n[파기 절차]\n• 회원 탈퇴 시: 즉시 앱 이용 중단(처리정지), 30일 후 Firebase 인증·Firestore 프로필·하위 컬렉션·studentIds 점유 해제·작성 콘텐츠 작성자 익명화 일괄 처리\n• 게시글 자동 파기: 활성 게시글은 작성일로부터 3년 경과 시 댓글·첨부 이미지 포함 일괄 삭제. 숨김 처리된 게시글은 사유에 따라 30일·90일·3년 차등 보관 후 영구 삭제\n• 데이터 이전 다운로드 파일: 생성 후 7일 경과 시 Storage에서 자동 삭제\n• OTP 인증 코드: 만료 후 30분 경과 시 자동 삭제\n• 기기 내 데이터: 앱 삭제 시 SharedPreferences 및 SecureStorage 데이터 자동 삭제\n\n[파기 방법]\n• 전자적 파일: 복구 불가능한 방법으로 영구 삭제\n• 서버 저장 데이터: Firebase Firestore·Storage에서 문서 및 파일 영구 삭제'**
   String get settings_privacySection8Content;
 
   /// No description provided for @settings_privacySection9Title.
@@ -3551,7 +3977,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection9Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 「개인정보 보호법」 제29조에 따라 다음과 같은 안전성 확보 조치를 취하고 있습니다.\n\n1. 전송 구간 암호화: 모든 서버 통신은 HTTPS/TLS로 암호화됩니다.\n2. 접근 통제: Firestore Security Rules를 통해 본인 데이터만 수정 가능하도록 제한하고, 관리자 권한을 분리하고 있습니다.\n3. 민감 정보 암호화 저장: 시험 성적 등 민감 데이터는 Android Keystore / iOS Keychain을 이용하여 기기 내 암호화 저장합니다.\n4. 앱 무결성 검증: Firebase App Check(Android Play Integrity)를 적용하여 무단 접근을 방지합니다.\n5. 비밀번호 미보관: 소셜 로그인만 사용하며, 앱에서 비밀번호를 직접 저장하거나 관리하지 않습니다.\n6. 부정 이용 방지: 신고 기능에 5분당 3건 제한(rate limiting)을 적용하고 있습니다.'**
+  /// **'앱은 「개인정보 보호법」 제29조에 따라 다음과 같은 안전성 확보 조치를 취하고 있습니다.\n\n1. 전송 구간 암호화: 모든 서버 통신은 HTTPS/TLS로 암호화됩니다.\n2. 접근 통제: Firestore Security Rules를 통해 본인 데이터만 수정 가능하도록 제한하고, 관리자 권한을 5단계(admin / manager / moderator / auditor / user)로 분리하여 최소 권한 원칙을 적용합니다. moderator·auditor는 개인정보(이름·이메일·학번 등)에 직접 접근할 수 없습니다.\n3. 민감 정보 암호화 저장: 시험 성적 등 민감 데이터는 Android Keystore / iOS Keychain을 이용하여 기기 내 암호화 저장합니다.\n4. OTP 인증 코드 보호: 학번 인증 OTP 코드는 평문이 아닌 SHA-256 해시로만 저장됩니다.\n5. 앱 무결성 검증: Firebase App Check(Android Play Integrity)를 적용하여 무단 접근을 방지합니다.\n6. 비밀번호 미보관: 소셜 로그인만 사용하며, 앱에서 비밀번호를 직접 저장하거나 관리하지 않습니다.\n7. 부정 이용 방지: 신고 빈도 제한, 동일 기기 다중 신고 1표 처리, 정지 이력 기기 추적(banned_devices), OTP 발송 횟수 제한을 적용합니다.\n8. 관리자 행위 기록: 운영자의 모든 처리 행위를 admin_logs에 기록하고 정기 검토합니다.'**
   String get settings_privacySection9Content;
 
   /// No description provided for @settings_privacySection10Title.
@@ -3587,7 +4013,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection11Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 게시판에서 익명 게시 기능을 제공합니다. 익명으로 작성된 게시글·댓글의 작성자 정보(이름 등)는 다른 이용자에게 표시되지 않습니다. 다만, 서비스 운영 및 신고 처리 목적으로 작성자 식별 정보(UID)는 서버에 보관됩니다.'**
+  /// **'앱은 게시판에서 익명 게시 기능을 제공합니다. 익명으로 작성된 게시글·댓글의 작성자 정보(이름 등)는 다른 이용자에게 표시되지 않습니다. 다만, 서비스 운영 및 신고 처리 목적으로 작성자 식별 정보(UID)는 서버에 보관됩니다. 회원 탈퇴 시에는 작성자가 \"탈퇴한 사용자\"로 즉시 익명화되며, 이 시점부터는 운영자도 작성자를 식별할 수 없습니다.'**
   String get settings_privacySection11Content;
 
   /// No description provided for @settings_privacySection12Title.
@@ -3599,13 +4025,25 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection12Content.
   ///
   /// In ko, this message translates to:
-  /// **'앱은 고등학생 및 학교 관계자를 주 이용 대상으로 하며, 만 14세 미만 아동의 개인정보를 수집하지 않습니다. 만 14세 미만임이 확인된 경우 회원 가입이 제한될 수 있으며, 수집된 정보는 지체 없이 파기합니다.'**
+  /// **'앱은 고등학생 및 학교 관계자를 주 이용 대상으로 하며, 만 14세 미만 아동의 개인정보를 수집하지 않습니다. 만 14세 미만임이 확인된 경우 회원 가입이 제한되며, 수집된 정보는 지체 없이 파기합니다.'**
   String get settings_privacySection12Content;
+
+  /// No description provided for @settings_privacySectionAutomatedTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'제13조 (자동화된 결정)'**
+  String get settings_privacySectionAutomatedTitle;
+
+  /// No description provided for @settings_privacySectionAutomatedContent.
+  ///
+  /// In ko, this message translates to:
+  /// **'앱은 다음과 같은 자동화된 결정을 수행합니다.\n\n1. 신고 자동 집계: 5명 이상의 서로 다른 사용자가 동일 게시물을 신고한 경우 관리자 큐에 자동 등록되며, 동일 기기·동일 IP의 신고는 1표로만 처리됩니다.\n2. 누진 정지: 정지 회차에 따라 자동으로 7일·14일·21일·30일·영구가 적용되며, 자동 정지와 수동 정지가 합산됩니다.\n3. 정지 자동 해제: 정지 기간 만료 시 자동으로 해제되며, FCM을 통해 통지됩니다.\n4. 게시물 자동 파기: 보유 기간이 경과한 게시글·댓글·이미지가 자동으로 영구 삭제됩니다.\n5. 탈퇴 30일 후 자동 파기: 탈퇴일로부터 30일 경과 시 모든 회원 정보가 자동으로 영구 삭제됩니다.\n6. 데이터 다운로드 링크 자동 만료: 데이터 이전 다운로드 링크는 생성 후 7일 경과 시 자동 삭제됩니다.\n\n이용자는 위 자동화된 결정에 대해 사유 설명을 요구하거나, 앱 내 \"이의제기\" 폼을 통해 1회 이의를 제기할 수 있습니다. 이의제기는 3일 이내 처리되며, 인용 시 정지가 해제되고 회차가 차감됩니다. 기각 시 이메일을 통해 답변드리며, 이메일을 통해서만 재심을 요청할 수 있습니다.\n\n[근거] 「개인정보 보호법」 제4조 제5호, 제37조의2 (2024년 시행)'**
+  String get settings_privacySectionAutomatedContent;
 
   /// No description provided for @settings_privacySection13Title.
   ///
   /// In ko, this message translates to:
-  /// **'제13조 (개인정보 보호책임자)'**
+  /// **'제14조 (개인정보 보호책임자)'**
   String get settings_privacySection13Title;
 
   /// No description provided for @settings_privacySection13Content.
@@ -3617,7 +4055,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection14Title.
   ///
   /// In ko, this message translates to:
-  /// **'제14조 (권익 침해 구제 방법)'**
+  /// **'제15조 (권익 침해 구제 방법)'**
   String get settings_privacySection14Title;
 
   /// No description provided for @settings_privacySection14Content.
@@ -3701,13 +4139,13 @@ abstract class AppLocalizations {
   /// No description provided for @settings_privacySection15Title.
   ///
   /// In ko, this message translates to:
-  /// **'제15조 (개인정보 처리방침의 변경)'**
+  /// **'제16조 (개인정보 처리방침의 변경)'**
   String get settings_privacySection15Title;
 
   /// No description provided for @settings_privacySection15Content.
   ///
   /// In ko, this message translates to:
-  /// **'이 개인정보 처리방침은 시행일로부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 수정될 수 있습니다. 변경 사항이 있을 경우 시행일 7일 전부터 앱 내 공지사항 또는 푸시 알림을 통해 고지하겠습니다.\n\n• 공고일자: 2026년 4월 10일\n• 시행일자: 2026년 4월 10일'**
+  /// **'이 개인정보 처리방침은 시행일로부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 수정될 수 있습니다. 변경 사항이 있을 경우 시행일 7일 전부터 앱 내 공지사항 또는 푸시 알림을 통해 고지하며, 중대한 변경의 경우 재동의를 받습니다.\n\n• 공고일자: 2026년 4월 24일\n• 시행일자: 2026년 5월 1일'**
   String get settings_privacySection15Content;
 
   /// No description provided for @chat_title.

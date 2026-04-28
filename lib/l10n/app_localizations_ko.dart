@@ -33,7 +33,94 @@ class AppLocalizationsKo extends AppLocalizations {
   String get login_githubContinue => 'GitHub로 계속하기';
 
   @override
+  String get login_microsoftContinue => 'Microsoft로 계속하기';
+
+  @override
   String get login_skipButton => '나중에 하기';
+
+  @override
+  String get login_consentTitle => '서비스 이용을 위해 다음 항목에 동의해주세요';
+
+  @override
+  String get login_consentAll => '모두 동의합니다';
+
+  @override
+  String get login_consentAge => '[필수] 만 14세 이상입니다';
+
+  @override
+  String get login_consentTerms => '[필수] 이용약관에 동의합니다';
+
+  @override
+  String get login_consentTermsView => '보기';
+
+  @override
+  String get login_consentPrivacy => '[필수] 개인정보 처리방침에 동의합니다';
+
+  @override
+  String get login_consentPrivacyView => '보기';
+
+  @override
+  String get login_consentRequired => '필수 항목에 모두 동의해야 가입할 수 있습니다';
+
+  @override
+  String get verify_required_title => '인증이 필요해요';
+
+  @override
+  String get verify_required_body =>
+      '학교 이메일 인증을 마쳐야 글쓰기·댓글·신고 등 기능을 사용할 수 있어요.';
+
+  @override
+  String get verify_required_action => '인증하기';
+
+  @override
+  String get verify_login_required => '로그인이 필요한 기능입니다';
+
+  @override
+  String get verify_badge_unverified => '미인증';
+
+  @override
+  String get suspend_banner_title => '현재 계정이 정지되어 있어요';
+
+  @override
+  String suspend_banner_remaining(Object days) {
+    return '남은 기간: $days일';
+  }
+
+  @override
+  String get suspend_banner_permanent => '영구 정지';
+
+  @override
+  String suspend_banner_reason(Object reason) {
+    return '사유: $reason';
+  }
+
+  @override
+  String get suspend_banner_appeal => '이의제기';
+
+  @override
+  String get suspend_blocked_action => '정지 중에는 사용할 수 없는 기능이에요';
+
+  @override
+  String get soft_deleted_label => '숨김 처리된 글입니다';
+
+  @override
+  String get soft_deleted_comment => '숨김 처리된 댓글입니다';
+
+  @override
+  String get community_rules_title => '커뮤니티 규정';
+
+  @override
+  String get community_rules_empty => '아직 등록된 규정이 없습니다';
+
+  @override
+  String community_rules_version(Object version) {
+    return '버전 $version';
+  }
+
+  @override
+  String community_rules_effectiveDate(Object date) {
+    return '시행일: $date';
+  }
 
   @override
   String get profileSetup_nameRequired => '이름을 입력해주세요';
@@ -520,7 +607,22 @@ class AppLocalizationsKo extends AppLocalizations {
   String get post_reportReasonPrivacy => '개인정보 노출';
 
   @override
+  String get post_reportReasonDefamation => '명예훼손';
+
+  @override
+  String get post_reportReasonFlooding => '도배';
+
+  @override
+  String get post_reportReasonMisinfo => '거짓정보';
+
+  @override
   String get post_reportReasonOther => '기타';
+
+  @override
+  String get post_reportOtherHint => '사유를 10자 이상 입력하세요';
+
+  @override
+  String get post_reportOtherTooShort => '기타 사유는 10자 이상 입력해야 합니다';
 
   @override
   String get post_reportButton => '신고';
@@ -530,6 +632,83 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get post_reportSuccess => '신고가 접수되었습니다';
+
+  @override
+  String get appeal_title => '이의제기';
+
+  @override
+  String get appeal_intro => '정지 처분에 대해 이의제기를 작성해주세요. 1회만 가능합니다.';
+
+  @override
+  String get appeal_hint => '이의제기 사유를 작성해주세요 (최대 500자)';
+
+  @override
+  String get appeal_submit => '제출';
+
+  @override
+  String get appeal_alreadySubmitted => '이미 이의제기를 제출했습니다';
+
+  @override
+  String get appeal_submitted => '이의제기가 접수되었습니다';
+
+  @override
+  String get appeal_tooShort => '10자 이상 입력해주세요';
+
+  @override
+  String appeal_charCount(Object current) {
+    return '$current/500';
+  }
+
+  @override
+  String get withdraw_graceTitle => '회원 탈퇴 안내';
+
+  @override
+  String get withdraw_graceBody =>
+      '탈퇴 후 30일간은 동일 계정으로 다시 로그인하면 복구할 수 있어요. 30일이 지나면 계정과 모든 활동 데이터가 영구 삭제됩니다.';
+
+  @override
+  String get withdraw_anonymizeNotice =>
+      '작성한 게시글/댓글은 즉시 익명 처리되며 다른 사용자에게는 그대로 보입니다.';
+
+  @override
+  String get withdraw_blockedSuspended =>
+      '정지 중에는 탈퇴할 수 없습니다. 정지가 해제된 후 시도해주세요.';
+
+  @override
+  String get withdraw_scheduled => '탈퇴가 신청되었습니다. 30일 후 영구 삭제됩니다.';
+
+  @override
+  String get withdraw_confirmAction => '탈퇴 신청';
+
+  @override
+  String get promotion_classCheckTitle => '새 학년 정보 확인';
+
+  @override
+  String promotion_classCheckBody(Object grade, Object classNum) {
+    return '여전히 $grade학년 $classNum반 맞으신가요?';
+  }
+
+  @override
+  String get promotion_classCheckYes => '네, 맞아요';
+
+  @override
+  String get promotion_classCheckNo => '아니요, 변경할게요';
+
+  @override
+  String get promotion_graduateTitle => '졸업 확인';
+
+  @override
+  String get promotion_graduateBody =>
+      '올해 졸업하셨나요? 졸업생으로 변경하면 학년/반 정보가 사라지고 졸업생 전용 기능을 이용할 수 있어요.';
+
+  @override
+  String get promotion_graduateYes => '졸업했어요';
+
+  @override
+  String get promotion_graduateNo => '아직 재학중';
+
+  @override
+  String get promotion_updated => '정보가 갱신되었습니다';
 
   @override
   String get post_found => '찾았어요';
@@ -828,6 +1007,21 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get admin_usersRemoveManager => '매니저 해제';
+
+  @override
+  String get admin_usersMakeModerator => '모더레이터';
+
+  @override
+  String get admin_usersRemoveModerator => '모더레이터 해제';
+
+  @override
+  String get admin_usersMakeAuditor => '감사자';
+
+  @override
+  String get admin_usersRemoveAuditor => '감사자 해제';
+
+  @override
+  String get admin_usersRoleUser => '일반';
 
   @override
   String get admin_usersMakeAdmin => 'Admin';
@@ -1697,6 +1891,39 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_notification => '알림 설정';
 
   @override
+  String get settings_a11ySection => '접근성';
+
+  @override
+  String get settings_fontScale => '글씨 크기';
+
+  @override
+  String get settings_fontScaleNormal => '보통';
+
+  @override
+  String get settings_fontScaleLarge => '큼';
+
+  @override
+  String get settings_fontScaleXLarge => '매우 큼';
+
+  @override
+  String get settings_highContrast => '고대비 모드';
+
+  @override
+  String get settings_colorBlindMode => '색맹 보정';
+
+  @override
+  String get settings_colorBlindNone => '사용 안 함';
+
+  @override
+  String get settings_colorBlindProtanopia => '적색맹';
+
+  @override
+  String get settings_colorBlindDeuteranopia => '녹색맹';
+
+  @override
+  String get settings_colorBlindTritanopia => '청색맹';
+
+  @override
   String get settings_feedbackSection => '건의사항';
 
   @override
@@ -1759,10 +1986,13 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_loginGoogle => 'Google 로그인';
 
   @override
+  String get settings_loginMicrosoft => 'Microsoft 로그인';
+
+  @override
   String get settings_privacyTitle => '개인정보 처리방침';
 
   @override
-  String get settings_privacyEffectiveDate => '시행일자: 2026년 4월 10일';
+  String get settings_privacyEffectiveDate => '시행일자: 2026년 5월 1일';
 
   @override
   String get settings_privacyIntro =>
@@ -1777,7 +2007,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_privacySection1Content =>
-      '1. 회원 가입 및 인증: 소셜 로그인(Google, Apple, Kakao, GitHub)을 통한 본인 확인 및 회원 식별\n2. 프로필 관리: 학교 구성원(학생, 졸업생, 교사, 학부모) 식별 및 학년·반 정보 관리\n3. 게시판 서비스: 게시글·댓글·좋아요·북마크·투표·익명글 기능 제공\n4. 1:1 채팅 서비스: 사용자 간 메시지 송수신\n5. 알림 서비스: 급식 알림, 댓글·멘션·인기글·새글·채팅·계정 상태 변경 푸시 알림\n6. 학사 정보 조회: 급식 메뉴, 시간표 정보 제공 및 로컬 알림\n7. 성적 관리: 시험 성적·목표 성적 저장 (기기 내 암호화 저장, 서버 미전송)\n8. 앱 개선: 이용 통계 분석 및 오류·충돌 수집을 통한 서비스 안정성 향상\n9. 부정 이용 방지: 신고·차단·계정 정지 처리 및 서비스 건전성 유지';
+      '1. 회원 가입 및 본인 확인: 소셜 로그인(Google, Microsoft, Apple, Kakao) 및 학교 이메일 도메인 검증을 통한 회원 식별\n2. 프로필 관리: 학교 구성원(학생, 졸업생, 교사) 식별 및 학년·반·번호·학번 중복 방지\n3. 게시판 서비스: 게시글·댓글·좋아요·북마크·투표·익명글·신고·이의제기 기능 제공\n4. 1:1 채팅 서비스: 사용자 간 메시지 송수신\n5. 알림 서비스: 급식·시간표·게시판·계정 상태 변경 푸시 알림 및 로컬 알림\n6. 학사 정보 조회: 급식 메뉴, 시간표 정보 제공\n7. 개인 학습 관리: 시험 성적·목표 성적 저장 (기기 내 암호화 저장, 서버 미전송)\n8. 앱 개선: 이용 통계 분석 및 오류·충돌 수집을 통한 서비스 안정성 향상\n9. 부정 이용 방지 및 분쟁 해결: 신고·차단·정지·이의제기 처리, 다계정 어뷰징 방지, 분쟁 해결';
 
   @override
   String get settings_privacySection2Title => '제2조 (수집하는 개인정보의 항목 및 수집 방법)';
@@ -1787,28 +2017,28 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_privacySection2RequiredContent =>
-      '• 이름: 소셜 로그인 프로필 또는 직접 입력\n• 이메일: 소셜 로그인 제공자로부터 자동 수집\n• 고유 사용자 식별자(UID): Firebase 인증 시 자동 생성\n• 로그인 제공자 정보: Google/Apple/Kakao/GitHub 로그인 시 자동 수집\n• 사용자 유형: 학생/졸업생/교사/학부모 중 직접 선택\n• 학년·반: 직접 입력';
+      '• 이름: 소셜 로그인 프로필 또는 직접 입력\n• 이메일: 소셜 로그인 제공자로부터 자동 수집\n• 고유 사용자 식별자(UID): Firebase 인증 시 자동 생성\n• 로그인 제공자 정보: Google/Microsoft/Apple/Kakao 로그인 시 자동 수집\n• 사용자 유형: 학생/졸업생/교사 중 직접 선택\n• 학번: 학교 이메일 도메인에서 자동 추출 또는 OTP 인증 시 등록\n• 학년·반·번호: 직접 입력 (매 학년 갱신)\n• 학교 이메일: 학번 인증용 (@edu.sje.go.kr 또는 @sjhansol.sjeduhs.kr)';
 
   @override
   String get settings_privacySection2Optional => '선택 수집 항목';
 
   @override
   String get settings_privacySection2OptionalContent =>
-      '• 프로필 사진: 소셜 로그인 프로필 또는 직접 업로드\n• 졸업연도: 졸업생인 경우 직접 입력\n• 담당 과목: 교사인 경우 직접 입력';
+      '• 프로필 사진: 소셜 로그인 프로필 또는 직접 업로드\n• 졸업연도: 졸업생인 경우 직접 입력\n• 담당 과목: 교사인 경우 직접 선택';
 
   @override
   String get settings_privacySection2Auto => '서비스 이용 중 자동 생성되는 정보';
 
   @override
   String get settings_privacySection2AutoContent =>
-      '• 게시글·댓글·채팅 내용 (사용자가 작성한 텍스트 및 이미지)\n• 상호작용 기록 (좋아요·싫어요·북마크·투표 참여)\n• 신고·차단 기록\n• 검색 기록: 최근 검색어 최대 10개 (기기 내에만 저장)\n• 알림 설정값 (푸시·급식 알림 on/off 및 알림 시간)\n• D-day 목록: 제목·날짜·고정 여부 (계정 연동, Firestore 저장)';
+      '• 게시글·댓글·채팅 내용 (사용자가 작성한 텍스트 및 이미지)\n• 상호작용 기록 (좋아요·싫어요·북마크·투표 참여)\n• 신고·차단·정지·이의제기 기록\n• 학번 인증 이력 (인증 일시, 인증 방식)\n• 동의 기록 (만 14세, 이용약관, 개인정보 처리방침, 커뮤니티 규정 동의 시각)\n• 검색 기록: 최근 검색어 최대 10개 (기기 내에만 저장)\n• 알림 설정값 (푸시·급식 알림 on/off 및 알림 시간)\n• D-day 목록: 제목·날짜·고정 여부 (계정 연동, Firestore 저장)';
 
   @override
   String get settings_privacySection2AutoCollect => '자동 수집 항목';
 
   @override
   String get settings_privacySection2AutoCollectContent =>
-      '• FCM 디바이스 토큰: 푸시 알림 발송을 위한 기기 식별 토큰\n• 앱 이용 로그: 화면 조회, 로그인/로그아웃, 게시글 작성·조회 등 (Firebase Analytics)\n• 오류·충돌 정보: 스택트레이스, 기기 OS 버전, 앱 버전 등 (Firebase Crashlytics)\n• 기기 정보: OS 종류·버전, 화면 크기, 앱 버전 (Firebase SDK 자동 수집)';
+      '• FCM 디바이스 토큰: 푸시 알림 발송을 위한 기기 식별 토큰\n• 디바이스 식별자(installationId): 부정 이용 방지(중복 신고 방지, 정지 우회 차단) 목적\n• 앱 이용 로그: 화면 조회, 로그인/로그아웃, 게시글 작성·조회 등 (Firebase Analytics)\n• 오류·충돌 정보: 스택트레이스, 기기 OS 버전, 앱 버전 등 (Firebase Crashlytics)\n• 기기 정보: OS 종류·버전, 화면 크기, 앱 버전 (Firebase SDK 자동 수집)';
 
   @override
   String get settings_privacySection2LocalOnly => '기기 내에만 저장되는 정보 (서버 미전송)';
@@ -1822,7 +2052,7 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_privacySection3Content =>
-      '앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.\n\n• 회원 정보 (프로필·인증): 회원 탈퇴 시까지\n• 게시글·댓글·첨부 이미지: 작성일로부터 4년 (고정 공지 제외)\n• 채팅 메시지: 회원 탈퇴 시까지\n• D-day 목록: 회원 탈퇴 시까지\n• 앱 이용 로그 (Analytics): 수집일로부터 14개월\n• 오류·충돌 보고 (Crashlytics): 수집일로부터 90일';
+      '앱은 개인정보 수집·이용 목적이 달성된 후에는 해당 정보를 지체 없이 파기합니다.\n\n• 회원 정보 (프로필·인증): 회원 탈퇴 시까지\n• 활성 게시글·댓글·첨부 이미지: 작성일로부터 3년 (고정 공지 제외)\n• 작성자 자가 삭제 게시글 (신고 없음): 30일 후 영구 파기\n• 작성자 자가 삭제 게시글 (신고 처리 중): 처리 완료 후 90일 후 영구 파기\n• 운영자 삭제 게시글: 작성일로부터 3년까지 보존 후 영구 파기\n• 채팅 메시지: 회원 탈퇴 시까지\n• D-day 목록: 회원 탈퇴 시까지\n• 관리자 행위 기록(admin_logs): 3년\n• 탈퇴 유예 데이터 (UID, 탈퇴일, 정지 이력 해시): 탈퇴일로부터 30일\n• 앱 이용 로그 (Analytics): 수집일로부터 14개월\n• 오류·충돌 보고 (Crashlytics): 수집일로부터 90일\n\n3년 보관의 근거: 「개인정보 보호법」 제3조 제1항(최소처리 원칙)과 고등학교 학사 과정(3년)에 비례.\n탈퇴 30일 유예의 근거: 부정 이용 방지 및 분쟁 해결 (제36조 제2항, 전자상거래법 시행령 제6조).';
 
   @override
   String get settings_privacySection4Title => '제4조 (개인정보의 제3자 제공)';
@@ -1836,35 +2066,35 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_privacySection5Content =>
-      '앱은 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.\n\n• Google LLC (Firebase): 인증, 데이터 저장, 푸시 알림, 이용 통계, 오류 수집, 호스팅 — 소재국: 미국\n• Google LLC: Google 계정 로그인 인증 — 소재국: 미국\n• Apple Inc.: Apple 계정 로그인 인증 — 소재국: 미국\n• Kakao Corp.: 카카오 계정 로그인 인증 — 소재국: 한국\n• GitHub Inc. (Microsoft): GitHub 계정 로그인 인증 — 소재국: 미국';
+      '앱은 원활한 서비스 제공을 위하여 다음과 같이 개인정보 처리 업무를 위탁하고 있습니다.\n\n• Google LLC (Firebase): 인증, 데이터 저장, 푸시 알림, 이용 통계, 오류 수집, 호스팅 — 소재국: 미국\n• Google LLC: Google 계정 로그인 인증, Gmail SMTP를 통한 학번 인증 OTP 발송 — 소재국: 미국\n• Microsoft Corporation: Microsoft 계정 로그인 인증 (학교 Outlook 도메인 포함) — 소재국: 미국\n• Apple Inc.: Apple 계정 로그인 인증 — 소재국: 미국\n• Kakao Corp.: 카카오 계정 로그인 인증 — 소재국: 한국';
 
   @override
   String get settings_privacySection6Title => '제6조 (개인정보의 국외 이전)';
 
   @override
   String get settings_privacySection6Content =>
-      '앱은 「개인정보 보호법」 제28조의8에 따라 다음과 같이 개인정보를 국외로 이전하고 있습니다.\n\n• 이전받는 자: Google LLC\n• 이전되는 국가: 미국\n• 이전 항목: 회원 정보, 게시글·댓글·채팅 내용, 첨부 이미지, 이용 로그, 오류 정보, FCM 토큰\n• 이전 목적: 클라우드 서버를 통한 서비스 제공 및 앱 안정성 개선\n• 보유·이용 기간: 제3조에 명시된 기간과 동일\n• 보호 조치: Google Cloud 보안 인증(SOC 2, ISO 27001), 전송 구간 TLS 암호화, 저장 데이터 AES-256 암호화';
+      '앱은 「개인정보 보호법」 제28조의8에 따라 다음과 같이 개인정보를 국외로 이전하고 있습니다.\n\n• 이전받는 자: Google LLC, Microsoft Corporation, Apple Inc.\n• 이전되는 국가: 미국\n• 이전 항목: 회원 정보, 게시글·댓글·채팅 내용, 첨부 이미지, 이용 로그, 오류 정보, FCM 토큰, 디바이스 식별자\n• 이전 목적: 클라우드 서버를 통한 서비스 제공, 소셜 로그인 인증, 앱 안정성 개선\n• 보유·이용 기간: 제3조에 명시된 기간과 동일\n• 보호 조치: 보안 인증(SOC 2, ISO 27001), 전송 구간 TLS 암호화, 저장 데이터 AES-256 암호화\n• 거부 시: 해당 소셜 로그인 또는 클라우드 기반 서비스 이용이 제한됩니다.';
 
   @override
   String get settings_privacySection7Title => '제7조 (정보주체의 권리·의무 및 행사 방법)';
 
   @override
   String get settings_privacySection7Content =>
-      '이용자(정보주체)는 언제든지 다음의 권리를 행사할 수 있습니다.\n\n1. 개인정보 열람 요구: 본인의 개인정보 처리 현황을 열람할 수 있습니다.\n2. 개인정보 정정·삭제 요구: 앱 내 프로필 수정 기능을 통해 이름·사진·학년·반 등을 직접 정정할 수 있으며, 게시글·댓글은 직접 삭제할 수 있습니다.\n3. 개인정보 처리정지 요구: 개인정보 처리의 정지를 요구할 수 있습니다.\n4. 동의 철회(회원 탈퇴): 앱 내 설정 → 계정 삭제 기능을 통해 언제든지 회원 탈퇴 및 동의 철회가 가능합니다. 탈퇴 시 서버에 저장된 회원 정보, 하위 데이터가 즉시 삭제됩니다.\n\n위 권리 행사는 앱 내 기능 또는 아래 개인정보 보호책임자에게 이메일로 요청하실 수 있으며, 지체 없이 조치하겠습니다.\n\n※ 만 14세 미만 아동의 경우 법정대리인이 해당 아동의 개인정보에 대한 열람, 정정·삭제, 처리정지를 요구할 수 있습니다.';
+      '이용자(정보주체)는 언제든지 다음의 권리를 행사할 수 있습니다.\n\n1. 개인정보 열람 요구: 본인의 개인정보 처리 현황을 열람할 수 있습니다.\n2. 개인정보 정정·삭제 요구: 앱 내 프로필 수정 기능을 통해 이름·사진·학년·반 등을 직접 정정할 수 있으며, 게시글·댓글은 직접 삭제(숨김)할 수 있습니다.\n3. 개인정보 처리정지 요구: 개인정보 처리의 정지를 요구할 수 있으며, 회원 탈퇴는 처리정지 요구로 해석됩니다.\n4. 동의 철회(회원 탈퇴): 앱 내 설정 → 계정 삭제 기능을 통해 언제든지 회원 탈퇴 및 동의 철회가 가능합니다. 탈퇴 즉시 앱 이용이 중단되며, 부정 이용 방지·분쟁 해결 목적으로 30일간 최소 정보(UID, 탈퇴일, 정지 이력)만 보관 후 완전 파기합니다. 게시글·댓글은 작성자만 \"탈퇴한 사용자\"로 익명화하여 유지됩니다.\n5. 개인정보 이전 요구: 앱 내 \"내 데이터 다운로드\" 기능을 통해 본인의 개인정보 사본(ZIP 형식: PDF·JSON·이미지)을 받을 수 있습니다 (30일 1회 제한, 이메일로 다운로드 링크 발송, 7일 후 만료).\n6. 자동화된 결정에 대한 설명·이의제기: 자동 정지·자동 파기·신고 자동 집계 등에 대해 사유 설명을 요구하거나 이의를 제기할 수 있습니다.\n\n위 권리 행사는 앱 내 기능 또는 아래 개인정보 보호책임자에게 이메일로 요청하실 수 있으며, 지체 없이 조치하겠습니다.\n\n※ 만 14세 미만 아동의 경우 법정대리인이 해당 아동의 개인정보에 대한 열람, 정정·삭제, 처리정지를 요구할 수 있습니다.';
 
   @override
   String get settings_privacySection8Title => '제8조 (개인정보의 파기 절차 및 방법)';
 
   @override
   String get settings_privacySection8Content =>
-      '앱은 개인정보의 보유 기간이 경과하거나 처리 목적이 달성된 때에는 지체 없이 해당 개인정보를 파기합니다.\n\n[파기 절차]\n• 회원 탈퇴 시: Firebase 인증 정보 삭제, Firestore 프로필 문서 및 하위 컬렉션(알림 등) 일괄 삭제\n• 게시글 자동 파기: 작성일로부터 4년이 경과한 비고정 게시글과 해당 첨부 이미지·댓글을 자동으로 일괄 삭제\n• 기기 내 데이터: 앱 삭제 시 SharedPreferences 및 SecureStorage 데이터 자동 삭제\n\n[파기 방법]\n• 전자적 파일: 복구 불가능한 방법으로 영구 삭제\n• 서버 저장 데이터: Firebase Firestore·Storage에서 문서 및 파일 영구 삭제';
+      '앱은 개인정보의 보유 기간이 경과하거나 처리 목적이 달성된 때에는 지체 없이 해당 개인정보를 파기합니다.\n\n[파기 절차]\n• 회원 탈퇴 시: 즉시 앱 이용 중단(처리정지), 30일 후 Firebase 인증·Firestore 프로필·하위 컬렉션·studentIds 점유 해제·작성 콘텐츠 작성자 익명화 일괄 처리\n• 게시글 자동 파기: 활성 게시글은 작성일로부터 3년 경과 시 댓글·첨부 이미지 포함 일괄 삭제. 숨김 처리된 게시글은 사유에 따라 30일·90일·3년 차등 보관 후 영구 삭제\n• 데이터 이전 다운로드 파일: 생성 후 7일 경과 시 Storage에서 자동 삭제\n• OTP 인증 코드: 만료 후 30분 경과 시 자동 삭제\n• 기기 내 데이터: 앱 삭제 시 SharedPreferences 및 SecureStorage 데이터 자동 삭제\n\n[파기 방법]\n• 전자적 파일: 복구 불가능한 방법으로 영구 삭제\n• 서버 저장 데이터: Firebase Firestore·Storage에서 문서 및 파일 영구 삭제';
 
   @override
   String get settings_privacySection9Title => '제9조 (개인정보의 안전성 확보 조치)';
 
   @override
   String get settings_privacySection9Content =>
-      '앱은 「개인정보 보호법」 제29조에 따라 다음과 같은 안전성 확보 조치를 취하고 있습니다.\n\n1. 전송 구간 암호화: 모든 서버 통신은 HTTPS/TLS로 암호화됩니다.\n2. 접근 통제: Firestore Security Rules를 통해 본인 데이터만 수정 가능하도록 제한하고, 관리자 권한을 분리하고 있습니다.\n3. 민감 정보 암호화 저장: 시험 성적 등 민감 데이터는 Android Keystore / iOS Keychain을 이용하여 기기 내 암호화 저장합니다.\n4. 앱 무결성 검증: Firebase App Check(Android Play Integrity)를 적용하여 무단 접근을 방지합니다.\n5. 비밀번호 미보관: 소셜 로그인만 사용하며, 앱에서 비밀번호를 직접 저장하거나 관리하지 않습니다.\n6. 부정 이용 방지: 신고 기능에 5분당 3건 제한(rate limiting)을 적용하고 있습니다.';
+      '앱은 「개인정보 보호법」 제29조에 따라 다음과 같은 안전성 확보 조치를 취하고 있습니다.\n\n1. 전송 구간 암호화: 모든 서버 통신은 HTTPS/TLS로 암호화됩니다.\n2. 접근 통제: Firestore Security Rules를 통해 본인 데이터만 수정 가능하도록 제한하고, 관리자 권한을 5단계(admin / manager / moderator / auditor / user)로 분리하여 최소 권한 원칙을 적용합니다. moderator·auditor는 개인정보(이름·이메일·학번 등)에 직접 접근할 수 없습니다.\n3. 민감 정보 암호화 저장: 시험 성적 등 민감 데이터는 Android Keystore / iOS Keychain을 이용하여 기기 내 암호화 저장합니다.\n4. OTP 인증 코드 보호: 학번 인증 OTP 코드는 평문이 아닌 SHA-256 해시로만 저장됩니다.\n5. 앱 무결성 검증: Firebase App Check(Android Play Integrity)를 적용하여 무단 접근을 방지합니다.\n6. 비밀번호 미보관: 소셜 로그인만 사용하며, 앱에서 비밀번호를 직접 저장하거나 관리하지 않습니다.\n7. 부정 이용 방지: 신고 빈도 제한, 동일 기기 다중 신고 1표 처리, 정지 이력 기기 추적(banned_devices), OTP 발송 횟수 제한을 적용합니다.\n8. 관리자 행위 기록: 운영자의 모든 처리 행위를 admin_logs에 기록하고 정기 검토합니다.';
 
   @override
   String get settings_privacySection10Title => '제10조 (자동 수집 장치의 설치·운영 및 거부)';
@@ -1884,24 +2114,31 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settings_privacySection11Content =>
-      '앱은 게시판에서 익명 게시 기능을 제공합니다. 익명으로 작성된 게시글·댓글의 작성자 정보(이름 등)는 다른 이용자에게 표시되지 않습니다. 다만, 서비스 운영 및 신고 처리 목적으로 작성자 식별 정보(UID)는 서버에 보관됩니다.';
+      '앱은 게시판에서 익명 게시 기능을 제공합니다. 익명으로 작성된 게시글·댓글의 작성자 정보(이름 등)는 다른 이용자에게 표시되지 않습니다. 다만, 서비스 운영 및 신고 처리 목적으로 작성자 식별 정보(UID)는 서버에 보관됩니다. 회원 탈퇴 시에는 작성자가 \"탈퇴한 사용자\"로 즉시 익명화되며, 이 시점부터는 운영자도 작성자를 식별할 수 없습니다.';
 
   @override
   String get settings_privacySection12Title => '제12조 (만 14세 미만 아동의 개인정보)';
 
   @override
   String get settings_privacySection12Content =>
-      '앱은 고등학생 및 학교 관계자를 주 이용 대상으로 하며, 만 14세 미만 아동의 개인정보를 수집하지 않습니다. 만 14세 미만임이 확인된 경우 회원 가입이 제한될 수 있으며, 수집된 정보는 지체 없이 파기합니다.';
+      '앱은 고등학생 및 학교 관계자를 주 이용 대상으로 하며, 만 14세 미만 아동의 개인정보를 수집하지 않습니다. 만 14세 미만임이 확인된 경우 회원 가입이 제한되며, 수집된 정보는 지체 없이 파기합니다.';
 
   @override
-  String get settings_privacySection13Title => '제13조 (개인정보 보호책임자)';
+  String get settings_privacySectionAutomatedTitle => '제13조 (자동화된 결정)';
+
+  @override
+  String get settings_privacySectionAutomatedContent =>
+      '앱은 다음과 같은 자동화된 결정을 수행합니다.\n\n1. 신고 자동 집계: 5명 이상의 서로 다른 사용자가 동일 게시물을 신고한 경우 관리자 큐에 자동 등록되며, 동일 기기·동일 IP의 신고는 1표로만 처리됩니다.\n2. 누진 정지: 정지 회차에 따라 자동으로 7일·14일·21일·30일·영구가 적용되며, 자동 정지와 수동 정지가 합산됩니다.\n3. 정지 자동 해제: 정지 기간 만료 시 자동으로 해제되며, FCM을 통해 통지됩니다.\n4. 게시물 자동 파기: 보유 기간이 경과한 게시글·댓글·이미지가 자동으로 영구 삭제됩니다.\n5. 탈퇴 30일 후 자동 파기: 탈퇴일로부터 30일 경과 시 모든 회원 정보가 자동으로 영구 삭제됩니다.\n6. 데이터 다운로드 링크 자동 만료: 데이터 이전 다운로드 링크는 생성 후 7일 경과 시 자동 삭제됩니다.\n\n이용자는 위 자동화된 결정에 대해 사유 설명을 요구하거나, 앱 내 \"이의제기\" 폼을 통해 1회 이의를 제기할 수 있습니다. 이의제기는 3일 이내 처리되며, 인용 시 정지가 해제되고 회차가 차감됩니다. 기각 시 이메일을 통해 답변드리며, 이메일을 통해서만 재심을 요청할 수 있습니다.\n\n[근거] 「개인정보 보호법」 제4조 제5호, 제37조의2 (2024년 시행)';
+
+  @override
+  String get settings_privacySection13Title => '제14조 (개인정보 보호책임자)';
 
   @override
   String get settings_privacySection13Content =>
       '앱은 개인정보 처리에 관한 업무를 총괄하고, 이용자의 불만 처리 및 피해 구제를 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.\n\n• 성명: 추희도\n• 직위: 앱 개발자\n• 연락처: justinchoo0814@gmail.com\n\n개인정보 관련 문의, 불만, 피해 구제 등은 위 연락처로 문의해 주시기 바랍니다.';
 
   @override
-  String get settings_privacySection14Title => '제14조 (권익 침해 구제 방법)';
+  String get settings_privacySection14Title => '제15조 (권익 침해 구제 방법)';
 
   @override
   String get settings_privacySection14Content =>
@@ -1944,11 +2181,11 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_privacySection14Url4 => 'https://ecrm.police.go.kr';
 
   @override
-  String get settings_privacySection15Title => '제15조 (개인정보 처리방침의 변경)';
+  String get settings_privacySection15Title => '제16조 (개인정보 처리방침의 변경)';
 
   @override
   String get settings_privacySection15Content =>
-      '이 개인정보 처리방침은 시행일로부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 수정될 수 있습니다. 변경 사항이 있을 경우 시행일 7일 전부터 앱 내 공지사항 또는 푸시 알림을 통해 고지하겠습니다.\n\n• 공고일자: 2026년 4월 10일\n• 시행일자: 2026년 4월 10일';
+      '이 개인정보 처리방침은 시행일로부터 적용되며, 법령·정책 또는 서비스 변경에 따라 내용이 수정될 수 있습니다. 변경 사항이 있을 경우 시행일 7일 전부터 앱 내 공지사항 또는 푸시 알림을 통해 고지하며, 중대한 변경의 경우 재동의를 받습니다.\n\n• 공고일자: 2026년 4월 24일\n• 시행일자: 2026년 5월 1일';
 
   @override
   String get chat_title => '채팅';

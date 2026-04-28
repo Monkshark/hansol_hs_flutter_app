@@ -15,7 +15,7 @@ export default function LoginPage() {
     const snap = await getDoc(doc(db, 'users', uid));
     if (!snap.exists()) return false;
     const role = snap.data().role;
-    return role === 'admin' || role === 'manager';
+    return ['admin', 'manager', 'moderator', 'auditor'].includes(role);
   }
 
   async function setSessionCookie(uid: string) {
@@ -32,7 +32,7 @@ export default function LoginPage() {
         await setSessionCookie(result.user.uid);
         router.push('/dashboard');
       } else {
-        setError('관리자 또는 매니저 권한이 필요합니다');
+        setError('관리 권한이 필요합니다');
         await auth.signOut();
       }
     } catch { setError('로그인 실패: 이메일 또는 비밀번호를 확인하세요'); }
@@ -45,7 +45,7 @@ export default function LoginPage() {
         await setSessionCookie(result.user.uid);
         router.push('/dashboard');
       } else {
-        setError('관리자 또는 매니저 권한이 필요합니다');
+        setError('관리 권한이 필요합니다');
         await auth.signOut();
       }
     } catch { setError('Google 로그인 실패'); }
@@ -71,7 +71,7 @@ export default function LoginPage() {
 
         <button onClick={handleGoogle}
           className="w-full p-3 bg-white dark:bg-dark-card border border-gray-200 dark:border-gray-700 rounded-xl font-semibold hover:bg-gray-50 dark:hover:bg-dark-input transition text-sm">
-          Google 로그인 (매니저)
+          Google 로그인
         </button>
 
         {error && <p className="text-red-500 text-xs mt-3">{error}</p>}

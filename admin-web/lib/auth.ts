@@ -17,7 +17,7 @@ export function useAuth() {
         const snap = await getDoc(doc(db, 'users', u.uid));
         if (snap.exists()) {
           const data = snap.data() as UserProfile;
-          if (data.role === 'admin' || data.role === 'manager') {
+          if (['admin', 'manager', 'moderator', 'auditor'].includes(data.role)) {
             setProfile({ ...data, uid: snap.id });
           } else {
             setProfile(null);

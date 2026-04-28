@@ -92,7 +92,8 @@ class _MyPostsList extends StatelessWidget {
           return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
         }
 
-        final docs = snapshot.data?.docs ?? [];
+        final docs = (snapshot.data?.docs ?? [])
+            .where((d) => d.data()['isHidden'] != true).toList();
         if (docs.isEmpty) {
           return Center(
             child: Text(AppLocalizations.of(context)!.myActivity_noPosts, style: TextStyle(color: AppColors.theme.darkGreyColor)),
@@ -137,7 +138,8 @@ class _MyCommentsList extends StatelessWidget {
           return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
         }
 
-        final docs = snapshot.data?.docs ?? [];
+        final docs = (snapshot.data?.docs ?? [])
+            .where((d) => d.data()['isHidden'] != true).toList();
         if (docs.isEmpty) {
           return Center(
             child: Text(AppLocalizations.of(context)!.myActivity_noComments, style: TextStyle(color: AppColors.theme.darkGreyColor)),
@@ -218,7 +220,8 @@ class _BookmarkedPostsList extends StatelessWidget {
         if (snapshot.hasError) {
           return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
         }
-        final docs = snapshot.data?.docs ?? [];
+        final docs = (snapshot.data?.docs ?? [])
+            .where((d) => d.data()['isHidden'] != true).toList();
         if (docs.isEmpty) {
           return Center(child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(Icons.bookmark_border, size: 40, color: AppColors.theme.darkGreyColor),

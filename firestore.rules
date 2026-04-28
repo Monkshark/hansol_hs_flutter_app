@@ -17,6 +17,48 @@ service cloud.firestore {
       );
     }
 
+    function isModerator() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager', 'moderator']
+      );
+    }
+
+    function isAuditor() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager', 'auditor']
+      );
+    }
+
+    function isStaff() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role in ['admin', 'manager', 'moderator', 'auditor']
+      );
+    }
+
+    function isTeacher() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('userType', '') == 'teacher';
+    }
+
+    // verificationStatus 필드가 없으면 grandfathered 처리 (기존 사용자 호환)
+    function isVerified() {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/users/$(request.auth.uid))
+          .data.get('verificationStatus', 'verified') == 'verified';
+    }
+
+    function isNotSuspended() {
+      return isSignedIn() && (
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('suspendedUntil', null) == null ||
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.suspendedUntil < request.time
+      );
+    }
+
+    // 인증 + 비정지 (글/댓글/신고/투표/북마크 작성 가드)
+    function canWrite() {
+      return isVerified() && isNotSuspended();
+    }
+
     function noScript(value) {
       return !value.matches('.*<[sS][cC][rR][iI][pP][tT].*');
     }
@@ -73,7 +115,7 @@ service cloud.firestore {
     match /posts/{postId} {
       allow read: if true;
 
-      allow create: if isSignedIn() &&
+      allow create: if canWrite() &&
         request.resource.data.authorUid == request.auth.uid &&
         request.resource.data.title is string &&
         request.resource.data.title.size() > 0 &&
@@ -97,45 +139,55 @@ service cloud.firestore {
         (
           isAdminOrManager() &&
           changedKeys().hasOnly(['isPinned', 'pinnedAt'])
+        ) ||
+        (
+          isModerator() &&
+          changedKeys().hasOnly(['isHidden', 'deletedAt', 'deletedBy']) &&
+          request.resource.data.isHidden == true
         )
       );
 
       allow delete: if isSignedIn() && (
-        request.auth.uid == resource.data.authorUid || isAdminOrManager()
+        request.auth.uid == resource.data.authorUid || isModerator()
       );
 
       match /comments/{commentId} {
         allow read: if true;
-        allow create: if isSignedIn() &&
+        allow create: if canWrite() &&
           request.resource.data.authorUid == request.auth.uid &&
           request.resource.data.content is string &&
           request.resource.data.content.size() > 0 &&
           request.resource.data.content.size() <= 1000 &&
           noScript(request.resource.data.content) &&
-          // mentions 필드는 string 배열 (uid 목록)
           (
             !('mentions' in request.resource.data) ||
             (request.resource.data.mentions is list &&
              request.resource.data.mentions.size() <= 20)
           );
         allow delete: if isSignedIn() && (
-          request.auth.uid == resource.data.authorUid || isAdminOrManager()
+          request.auth.uid == resource.data.authorUid || isModerator()
         );
-        // 댓글 update는 admin/manager만 (편집 기능 없음, soft-delete 대비)
-        allow update: if isAdminOrManager();
+        // 모더는 자유 수정 / 작성자는 본인 댓글 소프트 삭제만
+        allow update: if isModerator() || (
+          isSignedIn() &&
+          request.auth.uid == resource.data.authorUid &&
+          changedKeys().hasOnly(['isHidden', 'deletedAt', 'deletedBy']) &&
+          request.resource.data.isHidden == true
+        );
       }
     }
 
     // ── reports ────────────────────────────────────────────────────────
     match /reports/{reportId} {
-      // 누구나 신고 생성 가능하지만 본인 uid + reason 필수
-      allow create: if isSignedIn() &&
+      // 인증 + 비정지 사용자만 신고 가능 (어뷰징 방지)
+      allow create: if canWrite() &&
         request.resource.data.reporterUid == request.auth.uid &&
         request.resource.data.reason is string &&
         request.resource.data.reason.size() > 0 &&
         request.resource.data.reason.size() <= 200 &&
         noScript(request.resource.data.reason);
-      allow read, delete: if isAdminOrManager();
+      allow read: if isStaff();
+      allow delete: if isAdminOrManager();
       allow update: if false;
     }
 
@@ -145,10 +197,16 @@ service cloud.firestore {
       allow write: if isAdminOrManager();
     }
 
+    // ── app_stats (집계 카운터 — Cloud Functions가 쓰기, 관리자만 읽기) ──
+    match /app_stats/{doc} {
+      allow read: if isAuditor();
+      allow write: if false;
+    }
+
     // ── admin_logs ─────────────────────────────────────────────────────
     match /admin_logs/{logId} {
-      allow create: if isAdminOrManager();
-      allow read: if isAdminOrManager();
+      allow create: if isModerator();
+      allow read: if isStaff();
       allow update, delete: if false;
     }
 
@@ -164,7 +222,7 @@ service cloud.firestore {
         allow read: if isSignedIn() &&
           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants;
 
-        allow create: if isSignedIn() &&
+        allow create: if canWrite() &&
           request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participants &&
           // 일반 메시지: senderUid 본인 일치 / 시스템 메시지: type=='system'
           (
@@ -197,14 +255,14 @@ service cloud.firestore {
 
     // ── function_logs ──────────────────────────────────────────────────
     match /function_logs/{logId} {
-      allow read: if isAdminOrManager();
+      allow read: if isAuditor();
       allow write: if false;
     }
 
     // ── crash_logs ─────────────────────────────────────────────────────
     match /crash_logs/{logId} {
       allow create: if isSignedIn();
-      allow read: if isAdminOrManager();
+      allow read: if isAuditor();
       allow update, delete: if isAdminOrManager();
     }
 
@@ -216,7 +274,8 @@ service cloud.firestore {
         request.resource.data.content.size() > 0 &&
         request.resource.data.content.size() <= 3000 &&
         noScript(request.resource.data.content);
-      allow read, update, delete: if isAdminOrManager();
+      allow read: if isAuditor();
+      allow update, delete: if isAdminOrManager();
     }
     match /council_feedbacks/{feedbackId} {
       allow create: if isSignedIn() &&
@@ -225,7 +284,82 @@ service cloud.firestore {
         request.resource.data.content.size() > 0 &&
         request.resource.data.content.size() <= 3000 &&
         noScript(request.resource.data.content);
-      allow read, update, delete: if isAdminOrManager();
+      allow read: if isAuditor();
+      allow update, delete: if isAdminOrManager();
+    }
+
+    // ── studentIds (학번 점유 역색인) ──────────────────────────────────
+    // Cloud Functions가 가입/탈퇴 트랜잭션으로 관리. 클라이언트는 unique 검사용 read만.
+    match /studentIds/{studentId} {
+      allow read: if isSignedIn();
+      allow write: if false;
+    }
+
+    // ── otp_codes (OTP 해시 + TTL 30분) ────────────────────────────────
+    // Cloud Functions만 발송/검증. 클라이언트 직접 접근 차단.
+    match /otp_codes/{uid} {
+      allow read, write: if false;
+    }
+
+    // ── banned_devices (정지 이력 기기 추적) ────────────────────────────
+    // Cloud Functions만 관리. 사용자는 본인 기기 차단 여부를 알 수 없음.
+    match /banned_devices/{installationId} {
+      allow read, write: if false;
+    }
+
+    // ── reports_queue (신고 5명 임계 시 자동 등록) ──────────────────────
+    // Cloud Functions가 aggregate로 작성. moderator 이상이 큐 조회.
+    // 신고자 식별 정보(reporters)는 admin만 접근 (앱 단에서 마스킹).
+    match /reports_queue/{postId} {
+      allow read: if isStaff();
+      allow write: if false;
+    }
+
+    // ── appeals (이의제기) ─────────────────────────────────────────────
+    // 정지된 사용자가 본인 uid로 작성 가능 (canWrite 우회). admin/manager가 처리.
+    match /appeals/{appealId} {
+      allow create: if isSignedIn() &&
+        request.resource.data.uid == request.auth.uid &&
+        request.resource.data.reason is string &&
+        request.resource.data.reason.size() > 0 &&
+        request.resource.data.reason.size() <= 500 &&
+        noScript(request.resource.data.reason);
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.uid || isStaff()
+      );
+      allow update: if isAdminOrManager() &&
+        changedKeys().hasOnly(['status', 'reviewedBy', 'reviewedAt', 'reviewerNote']);
+      allow delete: if false;
+    }
+
+    // ── data_requests (개인정보 이전 요구) ──────────────────────────────
+    // 본인 uid로 신청, Cloud Functions가 처리 후 상태 업데이트.
+    match /data_requests/{requestId} {
+      allow create: if canWrite() &&
+        request.resource.data.uid == request.auth.uid;
+      allow read: if isSignedIn() && (
+        request.auth.uid == resource.data.uid || isAdminOrManager()
+      );
+      allow update, delete: if false;
+    }
+
+    // ── teacher_invites (교사 초대링크) ─────────────────────────────────
+    // admin/manager 발급, 사용자가 redeem 시 토큰 검증용으로 read.
+    // 사용 횟수 차감/만료 처리는 Cloud Functions만.
+    match /teacher_invites/{inviteId} {
+      allow create: if isAdminOrManager() &&
+        request.resource.data.maxUses is int &&
+        request.resource.data.maxUses > 0 &&
+        request.resource.data.expiresAt is timestamp;
+      allow read: if isSignedIn();
+      allow update: if false;
+      allow delete: if isAdminOrManager();
+    }
+
+    // ── community_rules (커뮤니티 규정 버전 관리) ───────────────────────
+    match /community_rules/{version} {
+      allow read: if true;
+      allow write: if isAdminOrManager();
     }
 
     // ── 댓글 collection group 읽기 ─────────────────────────────────────
