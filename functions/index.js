@@ -14,6 +14,45 @@ const KakaoAuthSchema = z.object({
   token: z.string().min(10).max(2000),
 });
 
+// ── Stats helpers ──────────────────────────────────────────────────
+function todayKey() {
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+async function incrementStat(field, delta = 1) {
+  const db = getFirestore();
+  const totalsRef = db.doc("app_stats/totals");
+  const dailyRef = db.doc(`app_stats/daily_${todayKey()}`);
+  const inc = FieldValue.increment(delta);
+  await Promise.all([
+    totalsRef.set({ [field]: inc }, { merge: true }),
+    dailyRef.set({ [field]: inc, date: todayKey() }, { merge: true }),
+  ]);
+}
+
+async function incrementCategoryStat(category) {
+  if (!category) return;
+  const db = getFirestore();
+  const dailyRef = db.doc(`app_stats/daily_${todayKey()}`);
+  await dailyRef.set({
+    [`cat_${category}`]: FieldValue.increment(1),
+    date: todayKey(),
+  }, { merge: true });
+}
+
+async function incrementHourStat(hour) {
+  const db = getFirestore();
+  const dailyRef = db.doc(`app_stats/daily_${todayKey()}`);
+  await dailyRef.set({
+    [`hour_${hour}`]: FieldValue.increment(1),
+    date: todayKey(),
+  }, { merge: true });
+}
+
 async function logError(functionName, error, extra = {}) {
   try {
     await getFirestore().collection("function_logs").add({
@@ -192,6 +231,16 @@ exports.onPostCreated = onDocumentCreated("posts/{postId}", async (event) => {
   const post = event.data.data();
   const postId = event.params.postId;
 
+  // 통계 카운터 갱신
+  try {
+    const hour = post.createdAt ? new Date(post.createdAt.seconds * 1000).getHours() : new Date().getHours();
+    await Promise.all([
+      incrementStat("posts"),
+      incrementCategoryStat(post.category),
+      incrementHourStat(hour),
+    ]);
+  } catch (e) { await logError("onPostCreated.stats", e, { postId }); }
+
   if (!post.authorUid || !post.title) return;
 
   const authorDoc = await getFirestore().doc(`users/${post.authorUid}`).get();
@@ -248,6 +297,9 @@ exports.onPostLikeUpdated = onDocumentUpdated("posts/{postId}", async (event) =>
 });
 
 exports.onUserCreated = onDocumentCreated("users/{userId}", async (event) => {
+  try {
+    await incrementStat("users");
+  } catch (e) { await logError("onUserCreated.stats", e, { userId: event.params.userId }); }
   try {
     const user = event.data.data();
     const name = user.name || "새 사용자";
@@ -317,6 +369,8 @@ exports.onUserUpdated = onDocumentUpdated("users/{userId}", async (event) => {
 });
 
 exports.onUserDeleted = onDocumentDeleted("users/{userId}", async (event) => {
+  try { await incrementStat("users", -1); } catch (_) {}
+
   const user = event.data.data();
   const token = user.fcmToken;
   const userId = event.params.userId;
@@ -407,6 +461,7 @@ exports.backfillCustomClaims = onRequest(async (req, res) => {
 
 // 신고 rate limit: 5분 내 3건 초과 시 새 신고 자동 삭제 + 로그
 exports.onReportCreated = onDocumentCreated("reports/{reportId}", async (event) => {
+  try { await incrementStat("reports"); } catch (_) {}
   try {
     const report = event.data.data();
     const reporterUid = report.reporterUid;
@@ -501,6 +556,83 @@ exports.postOgRenderer = onRequest(async (req, res) => {
   }
 });
 
+// 통계 backfill: 기존 데이터로 app_stats를 초기 구축 (1회성)
+exports.backfillStats = onRequest(async (req, res) => {
+  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
+  if (req.get("x-admin-secret") !== process.env.BACKFILL_SECRET) {
+    res.status(403).json({ error: "Forbidden" }); return;
+  }
+  try {
+    const db = getFirestore();
+    const [usersSnap, postsSnap, reportsSnap] = await Promise.all([
+      db.collection("users").get(),
+      db.collection("posts").get(),
+      db.collection("reports").get(),
+    ]);
+
+    // totals
+    await db.doc("app_stats/totals").set({
+      users: usersSnap.size,
+      posts: postsSnap.size,
+      reports: reportsSnap.size,
+    });
+
+    // daily (30 days)
+    const dailyMap = {};
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    for (const doc of postsSnap.docs) {
+      const data = doc.data();
+      const ts = data.createdAt;
+      if (!ts) continue;
+      const dt = ts.toDate ? ts.toDate() : new Date(ts);
+      if (dt < thirtyDaysAgo) continue;
+      const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+      if (!dailyMap[key]) dailyMap[key] = { posts: 0, date: key };
+      dailyMap[key].posts++;
+      if (data.category) {
+        dailyMap[key][`cat_${data.category}`] = (dailyMap[key][`cat_${data.category}`] || 0) + 1;
+      }
+      const hour = dt.getHours();
+      dailyMap[key][`hour_${hour}`] = (dailyMap[key][`hour_${hour}`] || 0) + 1;
+    }
+
+    for (const doc of usersSnap.docs) {
+      const data = doc.data();
+      const ts = data.createdAt;
+      if (!ts) continue;
+      const dt = ts.toDate ? ts.toDate() : new Date(ts);
+      if (dt < thirtyDaysAgo) continue;
+      const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+      if (!dailyMap[key]) dailyMap[key] = { date: key };
+      dailyMap[key].users = (dailyMap[key].users || 0) + 1;
+    }
+
+    for (const doc of reportsSnap.docs) {
+      const data = doc.data();
+      const ts = data.createdAt;
+      if (!ts) continue;
+      const dt = ts.toDate ? ts.toDate() : new Date(ts);
+      if (dt < thirtyDaysAgo) continue;
+      const key = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}-${String(dt.getDate()).padStart(2, "0")}`;
+      if (!dailyMap[key]) dailyMap[key] = { date: key };
+      dailyMap[key].reports = (dailyMap[key].reports || 0) + 1;
+    }
+
+    const batch = db.batch();
+    for (const [key, data] of Object.entries(dailyMap)) {
+      batch.set(db.doc(`app_stats/daily_${key}`), data);
+    }
+    await batch.commit();
+
+    res.json({ totals: { users: usersSnap.size, posts: postsSnap.size, reports: reportsSnap.size }, dailyDocs: Object.keys(dailyMap).length });
+  } catch (error) {
+    await logError("backfillStats", error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 exports.cleanupOldPosts = onSchedule("every day 18:00", async () => {
   const db = getFirestore();
   const { getStorage } = require("firebase-admin/storage");
@@ -535,6 +667,12 @@ exports.cleanupOldPosts = onSchedule("every day 18:00", async () => {
   }
 
   if (deleted > 0) {
+    try {
+      await getFirestore().doc("app_stats/totals").set(
+        { posts: FieldValue.increment(-deleted) },
+        { merge: true }
+      );
+    } catch (_) {}
     await getFirestore().collection("function_logs").add({
       function: "cleanupOldPosts",
       deleted,
