@@ -4,11 +4,11 @@ import { collection, doc, getDoc, getDocs, query, orderBy, limit, where, Timesta
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import StatsCard from '@/components/StatsCard';
 import Badge from '@/components/Badge';
 import { formatTime } from '@/lib/utils';
 import { Post, Report } from '@/lib/types';
+import { useCached } from '@/lib/cache';
 import {
   ResponsiveContainer, LineChart, Line, BarChart, Bar,
   PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -26,24 +26,126 @@ interface CatCount { name: string; value: number; }
 interface HourCount { hour: string; count: number; }
 interface TopPost { title: string; comments: number; }
 
+function fmtDateKey(d: Date) {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function fmtDateLabel(key: string) {
+  const parts = key.split('-');
+  return `${parseInt(parts[1])}/${parseInt(parts[2])}`;
+}
+
+interface DashboardData {
+  stats: { users: number; posts: number; reports: number; todayPosts: number };
+  recentPosts: Post[];
+  recentReports: Report[];
+  postTrend: DailyCount[];
+  signupTrend: DailyCount[];
+  catDist: CatCount[];
+  hourDist: HourCount[];
+  reportTrend: DailyCount[];
+  topCommented: TopPost[];
+}
+
 export default function DashboardPage() {
   const { profile, loading } = useAuth();
   const router = useRouter();
-  const [stats, setStats] = useState({ users: 0, posts: 0, reports: 0, todayPosts: 0 });
-  const [recentPosts, setRecentPosts] = useState<Post[]>([]);
-  const [recentReports, setRecentReports] = useState<Report[]>([]);
-
-  const [postTrend, setPostTrend] = useState<DailyCount[]>([]);
-  const [signupTrend, setSignupTrend] = useState<DailyCount[]>([]);
-  const [catDist, setCatDist] = useState<CatCount[]>([]);
-  const [hourDist, setHourDist] = useState<HourCount[]>([]);
-  const [reportTrend, setReportTrend] = useState<DailyCount[]>([]);
-  const [topCommented, setTopCommented] = useState<TopPost[]>([]);
 
   useEffect(() => {
     if (!loading && !profile) router.push('/');
   }, [loading, profile, router]);
 
+  const { data: dash } = useCached<DashboardData>(
+    profile ? 'dashboard:all' : null,
+    async () => {
+      const totalsDoc = await getDoc(doc(db, 'app_stats', 'totals'));
+      const totals = totalsDoc.exists() ? totalsDoc.data() : {};
+
+      const todayKey = fmtDateKey(new Date());
+      const todayDoc = await getDoc(doc(db, 'app_stats', `daily_${todayKey}`));
+      const todayData = todayDoc.exists() ? todayDoc.data() : {};
+
+      const stats = {
+        users: totals.users || 0,
+        posts: totals.posts || 0,
+        reports: totals.reports || 0,
+        todayPosts: todayData.posts || 0,
+      };
+
+      const [postsData, reportsData] = await Promise.all([
+        getDocs(query(collection(db, 'posts'), orderBy('createdAt', 'desc'), limit(10))),
+        getDocs(query(collection(db, 'reports'), orderBy('createdAt', 'desc'), limit(5))),
+      ]);
+
+      const recentPosts = postsData.docs.map(d => ({ id: d.id, ...d.data() } as Post));
+      const recentReports = reportsData.docs.map(d => ({ id: d.id, ...d.data() } as Report));
+
+      const days: string[] = [];
+      for (let i = 29; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        days.push(fmtDateKey(d));
+      }
+
+      const dailyDocs = await Promise.all(
+        days.map(key => getDoc(doc(db, 'app_stats', `daily_${key}`)))
+      );
+
+      const postTrend: DailyCount[] = [];
+      const signupTrend: DailyCount[] = [];
+      const reportTrend: DailyCount[] = [];
+      const catAccum: Record<string, number> = {};
+      const hourAccum: Record<number, number> = {};
+
+      days.forEach((key, i) => {
+        const data = dailyDocs[i].exists() ? dailyDocs[i].data()! : {};
+        const label = fmtDateLabel(key);
+
+        postTrend.push({ date: label, count: data.posts || 0 });
+        signupTrend.push({ date: label, count: data.users || 0 });
+        reportTrend.push({ date: label, count: data.reports || 0 });
+
+        for (const cat of CATEGORIES) {
+          const val = data[`cat_${cat}`] || 0;
+          if (val > 0) catAccum[cat] = (catAccum[cat] || 0) + val;
+        }
+
+        for (let h = 0; h < 24; h++) {
+          const val = data[`hour_${h}`] || 0;
+          if (val > 0) hourAccum[h] = (hourAccum[h] || 0) + val;
+        }
+      });
+
+      const catDist: CatCount[] = Object.entries(catAccum)
+        .map(([name, value]) => ({ name, value }))
+        .sort((a, b) => b.value - a.value);
+      const hourDist: HourCount[] = Array.from({ length: 24 }, (_, i) => ({ hour: `${i}시`, count: hourAccum[i] || 0 }));
+
+      const topPostsSnap = await getDocs(
+        query(collection(db, 'posts'), orderBy('commentCount', 'desc'), limit(5))
+      );
+      const topCommented: TopPost[] = topPostsSnap.docs.map(d => ({
+        title: d.data().title as string,
+        comments: (d.data().commentCount as number) || 0,
+      }));
+
+      return { stats, recentPosts, recentReports, postTrend, signupTrend, catDist, hourDist, reportTrend, topCommented };
+    },
+    { ttlMs: 120_000 }
+  );
+
+  const stats = dash?.stats ?? { users: 0, posts: 0, reports: 0, todayPosts: 0 };
+  const recentPosts = dash?.recentPosts ?? [];
+  const recentReports = dash?.recentReports ?? [];
+  const postTrend = dash?.postTrend ?? [];
+  const signupTrend = dash?.signupTrend ?? [];
+  const catDist = dash?.catDist ?? [];
+  const hourDist = dash?.hourDist ?? [];
+  const reportTrend = dash?.reportTrend ?? [];
+  const topCommented = dash?.topCommented ?? [];
   useEffect(() => {
     if (!profile) return;
     loadData();
@@ -153,9 +255,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 overflow-y-auto">
+    <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 overflow-y-auto">
         <h1 className="text-2xl font-bold mb-5">대시보드</h1>
 
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
@@ -296,8 +396,7 @@ export default function DashboardPage() {
             </table>
           </div>
         </div>
-      </main>
-    </div>
+    </main>
   );
 }
 

@@ -4,7 +4,6 @@ import { doc, getDoc, collection, getDocs, query, where, orderBy, limit } from '
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth';
 import { useRouter, useParams } from 'next/navigation';
-import Sidebar from '@/components/Sidebar';
 import Badge from '@/components/Badge';
 import { formatTime, roleBadge, isSuspended, suspendRemaining } from '@/lib/utils';
 import { UserProfile, Post } from '@/lib/types';
@@ -31,16 +30,14 @@ export default function UserDetailPage() {
     } catch { setPosts([]); }
   }
 
-  if (loading || !profile || !user) return <div className="flex min-h-screen"><Sidebar /><main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main></div>;
+  if (loading || !profile || !user) return <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6">로딩중...</main>;
 
   const badge = roleBadge(user.role);
   const suspended = isSuspended(user.suspendedUntil);
   const typeLabels: Record<string, string> = { student: '재학생', graduate: '졸업생', teacher: '교사', parent: '학부모' };
 
   return (
-    <div className="flex min-h-screen">
-      <Sidebar />
-      <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
+    <main className="flex-1 p-4 md:p-6 pt-14 md:pt-6 max-w-4xl">
         <button onClick={() => router.back()} className="text-sm text-gray-400 mb-4 hover:text-gray-600">← 뒤로</button>
 
         <div className="bg-white dark:bg-dark-card rounded-xl p-6 shadow-sm mb-4">
@@ -90,7 +87,6 @@ export default function UserDetailPage() {
             </div>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   );
 }
