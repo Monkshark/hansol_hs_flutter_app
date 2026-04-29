@@ -232,8 +232,15 @@ var FILES = [
   }catch(e){ console.warn('Highlight init skipped:', e); }
   marked.use({breaks:false,gfm:true});
   // Generate slug for heading id attributes (GitHub-style).
+  // GitHub keeps each space as a single hyphen (does NOT collapse runs), so e.g.
+  // "Auth \u2192 Firestore" \u2192 "auth--firestore" (two hyphens, since the arrow is stripped
+  // but the surrounding spaces remain).
   function slugify(text){
-    return text.toLowerCase().replace(/<[^>]*>/g,'').replace(/[^\w\u3130-\u318F\uAC00-\uD7AF\u4E00-\u9FFF -]/g,'').replace(/\s+/g,'-').replace(/-+$/,'');
+    return text.toLowerCase()
+      .replace(/<[^>]*>/g,'')
+      .replace(/[^\w\u3130-\u318F\uAC00-\uD7AF\u4E00-\u9FFF -]/g,'')
+      .replace(/ /g,'-')
+      .replace(/-+$/,'');
   }
   // Render ```mermaid blocks as <pre class="mermaid"> so mermaid.run() can process them.
   // Handle both marked v4 signature (code, lang) and v12 token-object signature.
@@ -542,6 +549,18 @@ var FILES = [
     var scrollTarget = opts.scrollTo || null;
     if(scrollTarget){
       var el = inner.querySelector('#' + CSS.escape(scrollTarget));
+      // Fallback: many existing links use a truncated prefix of the actual slug
+      // (e.g. heading "10. X (Auth → Firestore)" → real id ends with "...권한-소실",
+      //  but the link only writes "#10-계정-삭제-순서-문제"). Try prefix match.
+      if(!el){
+        var headings = inner.querySelectorAll('.md h1, .md h2, .md h3, .md h4, .md h5, .md h6');
+        for(var i = 0; i < headings.length; i++){
+          if(headings[i].id && headings[i].id.indexOf(scrollTarget) === 0){
+            el = headings[i];
+            break;
+          }
+        }
+      }
       if(el){
         el.scrollIntoView({behavior:'auto', block:'start'});
       } else {
