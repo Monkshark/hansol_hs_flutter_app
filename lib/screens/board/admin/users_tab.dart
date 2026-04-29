@@ -139,6 +139,7 @@ class UsersTabState extends State<UsersTab> {
               return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
             }
             final isAdmin = myProfileSnap.data?.isAdmin ?? false;
+            final isManager = myProfileSnap.data?.isManager ?? false;
 
             return ListView.separated(
               shrinkWrap: true,
@@ -238,7 +239,7 @@ class UsersTabState extends State<UsersTab> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          if (widget.filter == 'pending') ...[
+                          if (widget.filter == 'pending' && isManager) ...[
                             _actionBtn(l.admin_usersApprove, AppColors.theme.primaryColor, () async {
                               try {
                                 await docs[index].reference.update({'approved': true});
@@ -250,18 +251,20 @@ class UsersTabState extends State<UsersTab> {
                                 if (context.mounted) showErrorSnackbar(context, e);
                               }
                             }),
-                            const SizedBox(width: 6),
-                            _actionBtn(l.admin_usersReject, Colors.red, () async {
-                              try {
-                                await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
-                                await docs[index].reference.delete();
-                                await _logAdminAction('거절', uid, name);
-                                if (mounted) _refreshAll();
-                              } catch (e) {
-                                log('UsersTab: reject error: $e');
-                                if (context.mounted) showErrorSnackbar(context, e);
-                              }
-                            }),
+                            if (isAdmin) ...[
+                              const SizedBox(width: 6),
+                              _actionBtn(l.admin_usersReject, Colors.red, () async {
+                                try {
+                                  await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
+                                  await docs[index].reference.delete();
+                                  await _logAdminAction('거절', uid, name);
+                                  if (mounted) _refreshAll();
+                                } catch (e) {
+                                  log('UsersTab: reject error: $e');
+                                  if (context.mounted) showErrorSnackbar(context, e);
+                                }
+                              }),
+                            ],
                           ],
                           if (widget.filter == 'approved') ...[
                             if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
@@ -278,7 +281,7 @@ class UsersTabState extends State<UsersTab> {
                             if (isAdmin && role != 'admin') ...[
                               _roleDropdown(context, role, docs[index].reference, uid, name),
                             ],
-                            if (uid != AuthService.currentUser?.uid && !const ['admin', 'manager', 'moderator', 'auditor'].contains(role)) ...[
+                            if (isManager && uid != AuthService.currentUser?.uid && !const ['admin', 'manager', 'moderator', 'auditor'].contains(role)) ...[
                               const SizedBox(width: 6),
                               _actionBtn(l.admin_usersSuspend, Colors.orange, () async {
                                 final hours = await _showSuspendDialog(context, name);
@@ -296,27 +299,29 @@ class UsersTabState extends State<UsersTab> {
                                   }
                                 }
                               }),
-                              const SizedBox(width: 6),
-                              _actionBtn(l.admin_usersDelete, Colors.red, () async {
-                                final first = await _confirmDialog(context, l.admin_usersDeleteConfirm, l.admin_usersDeleteConfirmMessage(name));
-                                if (first != true || !context.mounted) return;
-                                final second = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
-                                if (!context.mounted) return;
-                                if (second == true) {
-                                  try {
-                                    await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
-                                    await docs[index].reference.delete();
-                                    await _logAdminAction('삭제', uid, name);
-                                    if (mounted) _refreshAll();
-                                  } catch (e) {
-                                    log('UsersTab: delete error: $e');
-                                    if (context.mounted) showErrorSnackbar(context, e);
+                              if (isAdmin) ...[
+                                const SizedBox(width: 6),
+                                _actionBtn(l.admin_usersDelete, Colors.red, () async {
+                                  final first = await _confirmDialog(context, l.admin_usersDeleteConfirm, l.admin_usersDeleteConfirmMessage(name));
+                                  if (first != true || !context.mounted) return;
+                                  final second = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
+                                  if (!context.mounted) return;
+                                  if (second == true) {
+                                    try {
+                                      await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
+                                      await docs[index].reference.delete();
+                                      await _logAdminAction('삭제', uid, name);
+                                      if (mounted) _refreshAll();
+                                    } catch (e) {
+                                      log('UsersTab: delete error: $e');
+                                      if (context.mounted) showErrorSnackbar(context, e);
+                                    }
                                   }
-                                }
-                              }),
+                                }),
+                              ],
                             ],
                           ],
-                          if (widget.filter == 'suspended') ...[
+                          if (widget.filter == 'suspended' && isManager) ...[
                             _actionBtn(l.admin_usersUnsuspend, AppColors.theme.primaryColor, () async {
                               try {
                                 await docs[index].reference.update({'suspendedUntil': null});
