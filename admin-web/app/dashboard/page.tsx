@@ -1,6 +1,6 @@
 'use client';
 import { useEffect } from 'react';
-import { collection, doc, getDoc, getDocs, query, orderBy, limit } from 'firebase/firestore';
+import { collection, doc, getDoc, getDocs, getCountFromServer, query, orderBy, limit } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import { useAuth } from '@/lib/auth';
 import { useRouter } from 'next/navigation';
@@ -68,11 +68,14 @@ export default function DashboardPage() {
       const todayDoc = await getDoc(doc(db, 'app_stats', `daily_${todayKey}`));
       const todayData = todayDoc.exists() ? todayDoc.data() : {};
 
+      const usersCountSnap = await getCountFromServer(collection(db, 'users'));
+      const usersCount = usersCountSnap.data().count;
+
       const stats = {
-        users: totals.users || 0,
-        posts: totals.posts || 0,
-        reports: totals.reports || 0,
-        todayPosts: todayData.posts || 0,
+        users: usersCount,
+        posts: Math.max(0, totals.posts || 0),
+        reports: Math.max(0, totals.reports || 0),
+        todayPosts: Math.max(0, todayData.posts || 0),
       };
 
       const [postsData, reportsData] = await Promise.all([
