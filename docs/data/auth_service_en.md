@@ -19,8 +19,8 @@ class UserProfile {
   final int classNum;
   final String email;
   final bool approved;
-  final String role;           // 'user' | 'manager' | 'admin'
-  final String userType;       // 'student' | 'graduate' | 'teacher' | 'parent'
+  final String role;                // 'user' | 'moderator' | 'auditor' | 'manager' | 'admin'
+  final String userType;            // 'student' | 'graduate' | 'teacher' | 'parent'
   final String lastProfileUpdate;
   final int? graduationYear;
   final String? teacherSubject;
@@ -28,6 +28,8 @@ class UserProfile {
   final List<String> blockedUsers;
   final String loginProvider;
   final String? profilePhotoUrl;
+  final String verificationStatus;  // 'pending' | 'verified'
+  final String? suspendReason;
 }
 ```
 
@@ -35,11 +37,19 @@ class UserProfile {
 
 | Property | Logic |
 |----------|------|
-| `isManager` | `role == 'manager' \|\| role == 'admin'` |
 | `isAdmin` | `role == 'admin'` |
+| `isManager` | `role == 'manager' \|\| isAdmin` |
+| `isModerator` | `role == 'moderator' \|\| isManager` |
+| `isAuditor` | `role == 'auditor' \|\| isManager` |
+| `isStaff` | `isModerator \|\| isAuditor` (= admin/manager/moderator/auditor) |
 | `isSuspended` | `suspendedUntil != null && DateTime.now().isBefore(suspendedUntil!)` |
+| `isVerified` | `verificationStatus == 'verified'` |
+| `canWrite` | `isVerified && !isSuspended` |
+| `isStudent` / `isGraduate` / `isTeacher` / `isParent` | `userType == '...'` |
 | `displayName` | Branches by userType: prefix for graduate/teacher/parent, student uses `studentId + name` |
-| `needsProfileUpdate` | Only for students/teachers; true if after March and `lastProfileUpdate` is not in the current year |
+| `localizedDisplayName(l)` | Localized variant of `displayName` (uses `l10n`) |
+| `needsProfileUpdate` | Students/teachers only; true if `lastProfileUpdate != current year` during March 1–14 |
+| `needsGraduateCheck` | Whether a 3rd-year student needs the graduation confirmation popup at the new term (March 1–14 with stale `lastProfileUpdate`) |
 
 ---
 
@@ -215,10 +225,10 @@ static Future<bool> isApproved()
 
 ```dart
 if (profile.isSuspended) return false;
-return profile.approved || profile.isManager;
+return profile.approved || profile.isStaff;
 ```
 
-Returns `false` if suspended; managers/admins do not require approval.
+Returns `false` if suspended; staff (admin/manager/moderator/auditor) bypass approval.
 
 ---
 

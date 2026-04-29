@@ -41,8 +41,8 @@ sequenceDiagram
 
 Chosen at signup:
 - `student` — current student (student ID required)
-- `alumni` — graduate
-- `teacher` — teacher
+- `graduate` — graduate (graduation year required)
+- `teacher` — teacher (subject required)
 - `parent` — parent/guardian
 
 Default `role = user` regardless of identity. Admin approval follows.

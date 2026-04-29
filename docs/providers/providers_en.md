@@ -63,9 +63,12 @@ Future<void> save(UserProfile profile) async {
 | Provider | Type | Description |
 |----------|------|-------------|
 | `isLoggedInProvider` | `Provider<bool>` | `authStateProvider.user != null` |
-| `isManagerProvider` | `Provider<bool>` | `profile?.isManager ?? false` |
+| `isManagerProvider` | `Provider<bool>` | `profile?.isManager ?? false` (manager + admin) |
 | `isAdminProvider` | `Provider<bool>` | `profile?.isAdmin ?? false` |
+| `isStaffProvider` | `Provider<bool>` | `profile?.isStaff ?? false` (admin + manager + moderator + auditor) |
 | `isSuspendedProvider` | `Provider<bool>` | `profile?.isSuspended ?? false` |
+| `isVerifiedProvider` | `Provider<bool>` | `profile?.isVerified ?? false` |
+| `canWriteProvider` | `Provider<bool>` | `profile?.canWrite ?? false` (verified && !suspended) |
 
 ---
 
