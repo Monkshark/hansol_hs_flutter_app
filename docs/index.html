@@ -438,10 +438,10 @@ var FILES = [
         });
         return;
       }
-      // Strip any query/hash for resolution but keep for re-attach (rare).
-      var hashPart = '';
+      // Strip any hash for resolution but remember it so we can scroll after load.
+      var hashTarget = '';
       var hashIdx = href.indexOf('#');
-      if(hashIdx !== -1){ hashPart = href.substring(hashIdx); href = href.substring(0, hashIdx); }
+      if(hashIdx !== -1){ hashTarget = decodeURIComponent(href.substring(hashIdx + 1)); href = href.substring(0, hashIdx); }
       if(!href.endsWith('.md')) return;
 
       // Normalize ./ prefix before joining
@@ -459,7 +459,7 @@ var FILES = [
         resolved = dir ? dir + '/' + href : href;
       }
       if(MD_DATA[resolved]){
-        a.onclick = function(e){ e.preventDefault(); loadFile(resolved); };
+        a.onclick = function(e){ e.preventDefault(); loadFile(resolved, hashTarget ? {scrollTo: hashTarget} : undefined); };
       } else {
         // Intercept anyway to avoid the browser navigating to a 404 relative URL
         a.onclick = function(e){ e.preventDefault(); console.warn('Doc not found in viewer:', resolved); };
@@ -539,10 +539,21 @@ var FILES = [
       pre.appendChild(btn);
     });
 
-    document.getElementById('content').scrollTop = 0;
+    var scrollTarget = opts.scrollTo || null;
+    if(scrollTarget){
+      var el = inner.querySelector('#' + CSS.escape(scrollTarget));
+      if(el){
+        el.scrollIntoView({behavior:'auto', block:'start'});
+      } else {
+        document.getElementById('content').scrollTop = 0;
+      }
+    } else {
+      document.getElementById('content').scrollTop = 0;
+    }
     closeSidebar();
     if(!opts.fromPopState){
-      window.history.pushState({path:p}, '', '#' + p);
+      var hashPart = '#' + p + (scrollTarget ? '#' + scrollTarget : '');
+      window.history.pushState({path:p, scrollTo: scrollTarget}, '', hashPart);
     }
   }
 
@@ -564,14 +575,36 @@ var FILES = [
   };
   window._loadFile = function(p){ loadFile(p); };
 
+  function parseHash(raw){
+    if(!raw) return {path:null, scrollTo:null};
+    var s = raw.charAt(0) === '#' ? raw.slice(1) : raw;
+    if(!s) return {path:null, scrollTo:null};
+    var mdIdx = s.indexOf('.md');
+    if(mdIdx !== -1){
+      var path = s.substring(0, mdIdx + 3);
+      var rest = s.substring(mdIdx + 3);
+      var scrollTo = (rest.charAt(0) === '#') ? decodeURIComponent(rest.substring(1)) : null;
+      return {path: path, scrollTo: scrollTo};
+    }
+    return {path: s, scrollTo: null};
+  }
+
   window.addEventListener('popstate', function(e){
     if(navigating) return;
-    var p = (e.state && e.state.path) || location.hash.slice(1) || initialDefaultPath();
+    var stateP = e.state && e.state.path;
+    var stateScroll = e.state && e.state.scrollTo;
+    var p, scrollTo;
+    if(stateP){ p = stateP; scrollTo = stateScroll || null; }
+    else {
+      var parsed = parseHash(location.hash);
+      p = parsed.path || initialDefaultPath();
+      scrollTo = parsed.scrollTo;
+    }
     if(MD_DATA[p]){
       navigating = true;
       var idx = history.lastIndexOf(p);
       if(idx !== -1) historyIndex = idx;
-      loadFile(p, {fromPopState:true});
+      loadFile(p, {fromPopState:true, scrollTo: scrollTo});
       navigating = false;
     }
   });
@@ -632,10 +665,10 @@ var FILES = [
   var initialLang = getLang();
   applyLang(initialLang, {skipContentSwap:true});
 
-  var hash = location.hash.slice(1);
-  if(hash && MD_DATA[hash]){
+  var parsedInit = parseHash(location.hash);
+  if(parsedInit.path && MD_DATA[parsedInit.path]){
     // If URL hash points to a language different from the preference, honor the URL.
-    var info = PATH_INDEX[hash];
+    var info = PATH_INDEX[parsedInit.path];
     if(info && info.lang !== initialLang){
       // Adjust lang to match URL without re-navigating.
       setLang(info.lang);
@@ -645,7 +678,7 @@ var FILES = [
       document.getElementById('sidebarTitle').textContent = (info.lang === 'en') ? 'Hansol HS App Docs' : '한솔고 앱 Docs';
       renderNav(info.lang);
     }
-    loadFile(hash);
+    loadFile(parsedInit.path, parsedInit.scrollTo ? {scrollTo: parsedInit.scrollTo} : undefined);
   } else {
     loadFile(initialDefaultPath());
   }
