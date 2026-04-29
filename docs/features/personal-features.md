@@ -73,6 +73,31 @@
   3. Cloud Storage 프로필 사진 삭제
   4. `user.delete()`로 Auth 계정 삭제
 - 이름/프로필 사진/성적은 로컬 포함 완전 파기
+- **즉시 vs 유예 탈퇴** — `requestAccountDeletion` 호출 시 30일 유예 후 `purgeDeactivatedAccounts`가 영구 파기 (PIPA 권리)
+
+## PIPA 사용자 권리
+
+한국 개인정보 보호법(PIPA)에 따라 사용자가 직접 행사할 수 있는 권리를 앱 화면으로 제공합니다.
+
+### 이의신청 (`appeals`)
+- 신고 처리, 정지, 게시글 숨김 등 모더레이션 결정에 대해 사유를 적어 90일 이내 제출
+- manager가 검토 → 결과 푸시 알림
+- 90일 후 `expiresAt` TTL로 자동 삭제
+
+**관련 파일**: `lib/screens/appeal/`
+
+### 데이터 요청 (`data_requests`)
+- 본인의 게시글/댓글/신고 이력/채팅 메시지를 JSON으로 일괄 익스포트
+- `createDataExport` Cloud Function이 Storage에 업로드 → 다운로드 링크 이메일 발송
+- 익스포트 파일은 30일 후 자동 만료 (`purgeExpiredExports`)
+
+**관련 파일**: `lib/screens/data_request/`, `functions/index.js` (`createDataExport` / `purgeExpiredExports`)
+
+### 커뮤니티 규칙 (`community_rules`)
+- 운영 정책을 명시적으로 노출하는 화면
+- admin만 수정 가능, 모든 사용자가 읽기 가능
+
+**관련 파일**: `lib/screens/community_rules/`
 
 ## 관련 문서
 - [공개 기능](./public-features.md)

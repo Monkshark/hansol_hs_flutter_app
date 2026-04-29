@@ -12,7 +12,6 @@ export default function SettingsPage() {
   const [min, setMin] = useState('');
   const [updateUrlAndroid, setUpdateUrlAndroid] = useState('');
   const [updateUrlIOS, setUpdateUrlIOS] = useState('');
-  // 팝업
   const [popupActive, setPopupActive] = useState(false);
   const [popupType, setPopupType] = useState('notice');
   const [popupTitle, setPopupTitle] = useState('');
