@@ -111,7 +111,7 @@ graph LR
 ```
 
 ### 파생 관계 설명
-- `authStateProvider`를 root로 하는 **인증 상태 트리**: 프로필 → 권한(manager/admin/suspended) 파생
+- `authStateProvider`를 root로 하는 **인증 상태 트리**: 프로필 → 권한(moderator/auditor/manager/admin/suspended) 파생 — 권한은 Firebase Auth custom claims에서 직접 읽음
 - `examsProvider` 기반으로 `examsByTypeProvider` (수시/정시 분류) 파생
 - 화면(`Consumer`)은 필요한 leaf provider만 `watch` → 불필요한 rebuild 방지
 - `autoDispose` 적극 사용으로 화면 이탈 시 자동 해제
@@ -174,28 +174,38 @@ graph LR
 | **UI 프레임워크** | Flutter Material | Next.js 14 + Tailwind CSS |
 | **상태 관리** | Riverpod 2.5 | React hooks + SWR |
 | **인증** | Firebase Auth SDK (모바일) | Firebase Auth (웹) + 역할 검증 |
-| **주요 대상** | 학생/교사/학부모/졸업생 | admin/manager 역할만 |
+| **주요 대상** | 학생/교사/학부모/졸업생 | moderator/auditor/manager/admin 역할만 (4단계) |
 | **공유** | Firestore 컬렉션 동일 사용 (`users`, `posts`, ...) | 동일 |
 
-**쓰기 규칙 충돌 방지**: admin-web의 UPDATE 권한은 `firestore.rules`의 `isAdminOrManager()` 헬퍼로 통일 검증. 클라이언트 분리와 무관하게 규칙이 단일 진실 소스(Single Source of Truth).
+**쓰기 규칙 충돌 방지**: admin-web의 UPDATE 권한은 `firestore.rules`의 `isManager()`/`isAdmin()`/`isAuditor()` 헬퍼로 통일 검증. 모든 역할 검사는 `request.auth.token.role` (Firebase Auth custom claims) 기반이라 Firestore 추가 읽기 0회. 클라이언트 분리와 무관하게 규칙이 단일 진실 소스(Single Source of Truth).
 
 ## Cloud Functions 트리거 맵
 
 | Function | 트리거 | 역할 |
 |---|---|---|
 | `kakaoCustomAuth` | HTTPS onRequest | Kakao access token → Firebase custom token 교환 |
-| `backfillCustomClaims` | HTTPS onRequest | 기존 유저의 커스텀 클레임 일괄 재부여 (관리자 도구) |
+| `sendSchoolEmailOTP` / `verifySchoolEmailOTP` | onCall | 학교 이메일 OTP 발송/검증 (교사 인증) |
+| `redeemTeacherInvite` | onCall | 교사 초대 코드 사용 (`teacher` userType + 자동 승인) |
 | `postOgRenderer` | HTTPS onRequest | 딥링크용 OG 태그 포함 HTML 렌더링 |
-| `onCommentCreated` | `posts/{pid}/comments/{cid}` onCreate | 글 작성자에게 댓글 푸시 |
-| `onPostCreated` | `posts/{pid}` onCreate | 관리자에게 새 글 푸시 (카테고리별 on/off 고려) |
+| `onCommentCreated` | `posts/{pid}/comments/{cid}` onCreate | 글 작성자에게 댓글 푸시 + 통계 증분 |
+| `onPostCreated` | `posts/{pid}` onCreate | 관리자에게 새 글 푸시 + `app_stats/totals.posts` 증분 |
 | `onPostLikeUpdated` | `posts/{pid}` onUpdate | 좋아요 수 변화 감지, 인기글 카운터 보정 |
-| `onReportCreated` | `reports/{rid}` onCreate | 신고 접수 시 관리자 푸시 + 로그 기록 |
-| `onUserCreated` | `users/{uid}` onCreate | 신규 유저 초기화, 커스텀 클레임 부여 |
+| `onReportCreated` | `reports/{rid}` onCreate | 신고 접수 시 관리자 푸시 + 로그 기록 + 통계 증분 |
+| `aggregateReports` | `reports/{rid}` onCreate | 5분 내 동일 대상 신고 누적 → manager 알림 가속 |
+| `onUserCreated` | `users/{uid}` onCreate | 신규 유저 초기화, 커스텀 클레임 부여 (`role: "user"`, `approved: false`) |
 | `onUserUpdated` | `users/{uid}` onUpdate | 승인/역할/정지 변경 시 푸시 + 클레임 갱신 |
 | `onUserDeleted` | `users/{uid}` onDelete | Auth 계정 + Storage 파일 연쇄 삭제 |
 | `onChatMessageCreated` | `chats/{cid}/messages/{mid}` onCreate | 수신자에게 채팅 푸시 |
 | `checkSuspensionExpiry` | onSchedule (매시간) | `suspendedUntil <= now`인 유저 필드 삭제 → `onUserUpdated` 연쇄 |
+| `applyProgressiveSuspension` | onCall | 누진 정지 (1차 1일 → 2차 7일 → 3차 30일) — manager 전용 |
+| `requestAccountDeletion` | onCall | 사용자 본인 탈퇴 신청 (deferred 30일 후 자동 파기) |
+| `purgeDeactivatedAccounts` | onSchedule (매일 04:00) | 30일 지난 탈퇴 신청 계정 완전 파기 |
+| `createDataExport` | onCall | 본인 데이터 (게시글/댓글/신고/채팅) JSON 익스포트 → Storage 업로드 |
+| `purgeExpiredExports` | onSchedule (매일 05:00) | 만료된 `data_requests` 익스포트 파일 청소 |
 | `cleanupOldPosts` | onSchedule (매일 18:00) | TTL 만료된 신고/로그 정리 |
+| `promoteGradesAnnually` | onSchedule (매년 3/2 0시) | 재학생 학년 자동 진급 + 졸업 처리 |
+| `backfillStats` | HTTPS onRequest | 카운터 누락 시 컬렉션 전수 재계산 (수동 도구) |
+| `backfillCustomClaims` | HTTPS onRequest | 기존 유저 커스텀 클레임 일괄 재부여 (관리자 도구) |
 
 전체 코드는 `functions/index.js` 참조.
 

@@ -24,7 +24,6 @@ export default function PostDetailPage() {
     if (!snap.exists()) return;
     const postData = { id: snap.id, ...snap.data() } as Post;
 
-    // 익명 실명 조회
     if (postData.isAnonymous) {
       try {
         const userDoc = await getDoc(doc(db, 'users', postData.authorUid));
@@ -36,19 +35,15 @@ export default function PostDetailPage() {
     const commentList = cSnap.docs.map(d => ({ id: d.id, postId, ...d.data() } as Comment));
     postData.commentCount = commentList.length;
 
-    // 유저 실명 맵
     const usersSnap = await getDocs(collection(db, 'users'));
     const nameMap: Record<string, string> = {};
     usersSnap.forEach(d => { nameMap[d.id] = displayName(d.data() as any); });
 
-    // anonymousMap에서 익명 번호 추출
     const anonMap: Record<string, number> = (postData as any).anonymousMap || {};
 
     for (const c of commentList) {
-      // 실명 매핑
       if (nameMap[c.authorUid]) (c as any).authorRealName = nameMap[c.authorUid];
 
-      // 익명 번호 + 글쓴이 구분
       if (c.isAnonymous) {
         const isPostAuthor = c.authorUid === postData.authorUid;
         const anonNum = anonMap[c.authorUid];
@@ -61,11 +56,9 @@ export default function PostDetailPage() {
         }
       }
 
-      // 글쓴이 여부
       (c as any).isPostAuthor = c.authorUid === postData.authorUid;
     }
 
-    // 게시글 작성자 익명 라벨
     if (postData.isAnonymous) {
       (postData as any).anonLabel = '익명(글쓴이)';
     }

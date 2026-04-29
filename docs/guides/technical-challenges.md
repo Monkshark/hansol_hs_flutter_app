@@ -2,7 +2,7 @@
 
 > English: [technical-challenges_en.md](./technical-challenges_en.md)
 
-개발 중 부딪힌 14건의 기술 과제와 해결 방법을 정리합니다. 각 사례는 *문제 → 해결 → 결과*의 흐름을 유지하고, 관련 파일 경로를 함께 남깁니다.
+개발 중 부딪힌 16건의 기술 과제와 해결 방법을 정리합니다. 각 사례는 *문제 → 해결 → 결과*의 흐름을 유지하고, 관련 파일 경로를 함께 남깁니다.
 
 ## 목차
 
@@ -20,6 +20,8 @@
 12. [위젯 테스트의 비결정적 Timer Leak](#12-위젯-테스트의-비결정적-timer-leak)
 13. [StatefulWidget 1,400+ 라인 리팩토링](#13-statefulwidget-1400-라인--stateless-composition-refactoring)
 14. [Repository 패턴 + GetIt 점진적 마이그레이션](#14-repository-패턴--getit-점진적-마이그레이션)
+15. [권한 검사 Firestore 읽기 0회 — Custom Claims 마이그레이션](#15-권한-검사-firestore-읽기-0회--custom-claims-마이그레이션)
+16. [PIPA TTL 데이터 라이프사이클 자동화](#16-pipa-ttl-데이터-라이프사이클-자동화)
 
 ---
 
@@ -155,7 +157,7 @@
 1. **Private class → Public StatelessWidget 추출** — `post_detail_screen` 의 `_PollCard` / `_VoteButton` / `_CommentItem` / `_EventAttachCard`, `admin_screen` 의 5개 탭 클래스, `timetable_view` 의 다이얼로그/Painter 등을 별도 파일로 이동 + `_` prefix 제거
 2. **State 의존 builder method → Callback parameter 위젯** — `write_post_screen` 의 `_buildEventForm` / `_buildPollForm` / `_buildImageSection` 은 state를 직접 참조하므로, state 값과 setState wrapper를 명시적 callback (`onPickDate`, `onAddOption`, `onReorder`...)으로 받는 StatelessWidget으로 변환
 
-**결과:** 4개 화면 합계 **4,575 → 1,919줄 (-58%)** — `post_detail` 545, `write_post` 700, `timetable_view` 588, `admin_screen` 86(+admin/ 5파일 1,123). 16개 위젯 모듈로 분리(`widgets/` 9 + `write_widgets/` 7), 524개 Flutter 테스트 모두 통과 (회귀 0)
+**결과:** 4개 화면 합계 **4,575 → 1,919줄 (-58%)** — `post_detail` 545, `write_post` 700, `timetable_view` 588, `admin_screen` 86(+admin/ 5파일 1,123). 16개 위젯 모듈로 분리(`widgets/` 9 + `write_widgets/` 7), 563개 Flutter 테스트 모두 통과 (회귀 0)
 
 **관련 파일:** `lib/screens/board/widgets/`, `lib/screens/board/write_widgets/`, `lib/screens/board/admin/`, `lib/screens/sub/timetable_widgets/`
 
@@ -168,6 +170,39 @@
 **해결:** Abstract `AuthRepository` / `GradeRepository` 인터페이스를 새로 정의하고 `FirebaseAuthRepository` / `LocalGradeRepository` 가 기존 static 메서드를 위임 호출. 신규 코드는 `GetIt.I<AuthRepository>()`로 가져가고 기존 호출 사이트는 그대로 둠. 테스트에서는 `setupServiceLocator()` / `resetServiceLocator()` + Mock 구현체로 주입 가능 → 점진적 마이그레이션과 백워드 호환을 동시에 확보
 
 **관련 파일:** `test/auth_repository_test.dart`, `test/auth_service_test.dart`, `test/grade_manager_test.dart`
+
+---
+
+## 15. 권한 검사 Firestore 읽기 0회 — Custom Claims 마이그레이션
+
+**문제:** 보안 규칙이 매 요청마다 `get(/databases/.../users/$uid).data.role`로 사용자 문서를 추가 조회 → 게시글 1건 읽을 때마다 추가 1회 읽기. 권한 모델을 4단계(`moderator`/`auditor`/`manager`/`admin`)로 확장하면서 트래픽이 비례 증가할 우려
+
+**해결:**
+1. 사용자의 `role`/`approved`를 Firebase Auth **custom claims**로 ID 토큰에 박음 → 보안 규칙은 `request.auth.token.role`로 직접 검사
+2. `onUserUpdated` Cloud Function 트리거에서 `role` 필드 변경 감지 시 `setCustomUserClaims` 호출 → 권한 변경이 즉시 토큰에 반영
+3. 클라이언트는 권한 변경 직후 `getIdTokenResult(true)` 강제 갱신
+4. 기존 28명에 대해서는 `scripts/backfill-claims.js` (로컬 admin SDK)로 1회 백필. 단순한 루프지만 잘못 돌면 권한이 다 깨지므로 dry-run 후 적용
+
+**결과:** 게시글/댓글 조회 시 권한 검사 추가 읽기 0회. Firestore 비용이 사용자 수가 아니라 트래픽에 비례하지 않게 됨. Rules 테스트 51건 추가 (4단계 매트릭스 검증)
+
+**관련 파일:** `firestore.rules`, `functions/index.js` (`onUserUpdated`), `scripts/backfill-claims.js`, `tests/firestore-rules/test/rules.test.js`
+
+---
+
+## 16. PIPA TTL 데이터 라이프사이클 자동화
+
+**문제:** PIPA(개인정보 보호법)는 보관 의무가 끝난 데이터를 자동 파기하라고 요구. 단순히 "삭제 버튼"을 만드는 건 일이 아닌데, 진짜 어려운 건 **사람 개입 없이 만료된 데이터가 사라지게** 하는 것. 매주 청소하는 시스템은 결국 안 청소됨
+
+**해결:**
+1. 새로 추가한 컬렉션(`appeals`, `data_requests`, `admin_logs`)에 `expiresAt: Timestamp` 필드를 강제
+2. Firestore TTL 정책을 `expiresAt`에 바인딩 → 시각이 지나면 Firestore가 알아서 문서 삭제 (1회/일 정도, 비결정적이지만 PIPA 요건엔 충분)
+3. 보관 기간은 정책 기반으로 차등: `appeals` 90일 / `data_requests` 30일 / `admin_logs` 1년
+4. 데이터 익스포트는 Cloud Function `createDataExport`가 비동기 처리 — 사용자 데이터를 JSON으로 묶어 Storage 업로드, 다운로드 링크 이메일 발송. `purgeExpiredExports`가 일일 청소
+5. 보안 규칙에서 `expiresAt` 필드의 존재/타입 검증을 강제 → TTL 누락 데이터 진입 차단
+
+**결과:** 사람의 개입 없이 데이터가 정책대로 사라짐. 75개 파일 / 약 7,000줄 변경(인증 가드, 로그인 플로우, i18n 240키, 어드민 4페이지, Rules 테스트 등) — 법 조항 몇 줄을 만족시키려고 모든 레이어에 손이 감
+
+**관련 파일:** `firestore.rules`, `firestore.indexes.json`, `functions/index.js` (`createDataExport`/`purgeExpiredExports`), `lib/screens/{appeal,data_request,community_rules}/`, `lib/services/verification_guard.dart`
 
 ---
 

@@ -77,7 +77,22 @@ Under `admin-web/app/`:
 - **Anonymous → real-name reveal** (admin-only, audit-logged)
 - **Audit logging**: every admin action recorded in `admin_logs`
 
-**Files**: `admin-web/app/`, `admin-web/components/`, `admin-web/lib/`
+### AdminShell layout
+
+`AdminShell` (`admin-web/components/AdminShell.tsx`) wraps the sidebar + content area uniformly. Auth routes (`/`, `/login`) are auto-bypassed so the sidebar stays hidden on auth screens. All admin pages are wrapped once via `app/layout.tsx` — individual pages don't import the sidebar.
+
+### Cache layer (`lib/cache.ts`)
+
+To avoid re-running identical Firestore queries across page transitions, an in-memory cache + in-flight request dedup hook is provided.
+
+- `useCached(key, fetcher, { ttlMs })` — TTL (default 60s) cache hit; refetch on expiry
+- **In-flight dedup** — concurrent calls with the same key collapse into a single fetch and share the result (e.g., sidebar user count + dashboard card sharing one key reads only once)
+- `invalidateCache(prefix)` — invalidate only a prefix after an action (e.g., clear `users` cache after a suspension)
+- `setData(updater)` — optimistic updates that also patch the cache
+
+**Effect**: roughly half the Firestore reads when sidebar + dashboard load together. Revisits within 5 minutes incur near-zero extra reads.
+
+**Files**: `admin-web/app/`, `admin-web/components/AdminShell.tsx`, `admin-web/components/Sidebar.tsx`, `admin-web/lib/cache.ts`
 
 ## Audit Log (`admin_logs`)
 

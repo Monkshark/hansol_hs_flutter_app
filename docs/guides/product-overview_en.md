@@ -20,7 +20,7 @@ School announcements, meals, timetables, and academic calendars are scattered ac
 | **Teachers** | Teacher-view timetable, announcements, approvals/moderation |
 | **Alumni** | Login + community access (grade/timetable limited) |
 | **Parents** | Academic calendar / announcements / urgent popup subscription |
-| **Admins (manager/admin)** | Flutter Admin screen + Next.js Admin Web |
+| **Admins (moderator/auditor/manager/admin)** | Flutter Admin screen + Next.js Admin Web (4-tier role separation) |
 
 ## Core Value Props
 
@@ -41,12 +41,14 @@ School announcements, meals, timetables, and academic calendars are scattered ac
 
 | Item | Value |
 |---|---|
-| Total LOC | ~40,000 (Dart 33,389 + TS 2,098 + Java/XML 1,181 + Swift 330 + JS 543) |
-| Source files | 122 (Flutter) + 22 (Admin Web TS/TSX) + Android/iOS widgets |
-| Cloud Functions | 13 |
+| Total LOC | ~43,000 (Dart 36,031 + TS/TSX + Java/XML + Swift + JS) |
+| Source files | 139 (Flutter) + 30 (Admin Web TS/TSX) + Android/iOS widgets |
+| Cloud Functions | 24 |
 | OAuth providers | 4 (Google / Apple / Kakao / GitHub) |
 | Push types | 4 FCM (`account` / `comment` / `new_post` / `chat`) + 3 local (breakfast/lunch/dinner) |
-| Tests | 513 Flutter + 34 Rules = 547 |
+| Role model | 4 tiers (`moderator` / `auditor` / `manager` / `admin`) + Firebase Auth custom claims |
+| PIPA compliance | `appeals` (90-day TTL) / `data_requests` (30-day TTL) / `community_rules` |
+| Tests | 563 Flutter + 85 Rules = 648 |
 
 ## Tech Stack Summary
 

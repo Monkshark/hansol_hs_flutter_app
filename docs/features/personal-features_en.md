@@ -73,6 +73,32 @@ Double-confirmation dialog → full wipe:
 
 Order matters — Auth first causes PERMISSION_DENIED ([Technical Challenge #10](../guides/technical-challenges_en.md#10-account-deletion-ordering-auth--firestore-permission-loss)).
 
+**Immediate vs deferred deletion** — `requestAccountDeletion` schedules a 30-day grace period; `purgeDeactivatedAccounts` performs the permanent wipe (PIPA right).
+
+## PIPA User Rights
+
+Korea's Personal Information Protection Act (PIPA) requires user-facing screens for these rights:
+
+### Appeals (`appeals`)
+- Submit a reason within 90 days to contest moderation decisions (reports / suspensions / hides)
+- Manager reviews → push notification with the result
+- Auto-deleted after 90 days via `expiresAt` TTL
+
+**Files**: `lib/screens/appeal/`
+
+### Data Requests (`data_requests`)
+- Bundle the user's own posts / comments / report history / chat messages into a JSON export
+- `createDataExport` Cloud Function uploads the file to Storage and emails the download link
+- Export files auto-expire after 30 days (`purgeExpiredExports`)
+
+**Files**: `lib/screens/data_request/`, `functions/index.js` (`createDataExport` / `purgeExpiredExports`)
+
+### Community Rules (`community_rules`)
+- Public-facing screen exposing the operational policy
+- Admin-only writes; all users can read
+
+**Files**: `lib/screens/community_rules/`
+
 ## See Also
 - [Public Features](./public-features_en.md)
 - [Community Features](./community-features_en.md)
