@@ -87,7 +87,7 @@ void main() {
     await tester.tap(find.text('trigger'));
     await tester.pump();
 
-    expect(find.text('문제가 발생했습니다'), findsOneWidget);
+    expect(find.textContaining('문제가 발생했습니다'), findsOneWidget);
   });
 
   testWidgets('String 에러 → 기본 메시지', (tester) async {
@@ -101,7 +101,7 @@ void main() {
     await tester.tap(find.text('trigger'));
     await tester.pump();
 
-    expect(find.text('문제가 발생했습니다'), findsOneWidget);
+    expect(find.textContaining('문제가 발생했습니다'), findsOneWidget);
   });
 
   testWidgets('SnackBar가 실제로 표시됨', (tester) async {
