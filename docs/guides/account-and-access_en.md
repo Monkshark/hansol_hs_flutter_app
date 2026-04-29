@@ -151,7 +151,7 @@ function canWrite() { return isVerified() && isNotSuspended(); }
 
 ### Functions secrets
 
-`GMAIL_SENDER_EMAIL` and `GMAIL_APP_PASSWORD` are stored as Functions secrets and used to send via Gmail SMTP (app password). After enabling Blaze, register via `firebase functions:secrets:set`.
+`GMAIL_SENDER_EMAIL` and `GMAIL_APP_PASSWORD` are stored as Functions secrets and used to send via Gmail SMTP (app password). Register via `firebase functions:secrets:set GMAIL_SENDER_EMAIL` and `... GMAIL_APP_PASSWORD`.
 
 **Files**: `functions/index.js` (`sendSchoolEmailOTP`, `verifySchoolEmailOTP`), `lib/screens/auth/email_verification_screen.dart`, `lib/providers/verification_guard.dart`
 

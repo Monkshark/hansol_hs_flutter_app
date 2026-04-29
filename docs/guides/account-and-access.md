@@ -151,7 +151,7 @@ function canWrite() { return isVerified() && isNotSuspended(); }
 
 ### Functions Secrets
 
-`GMAIL_SENDER_EMAIL`, `GMAIL_APP_PASSWORD`를 Functions secrets로 관리. Gmail 앱 비밀번호로 SMTP 발송. Blaze 활성화 후 `firebase functions:secrets:set`로 등록 필요.
+`GMAIL_SENDER_EMAIL`, `GMAIL_APP_PASSWORD`를 Functions secrets로 관리. Gmail 앱 비밀번호로 SMTP 발송. `firebase functions:secrets:set GMAIL_SENDER_EMAIL` / `... GMAIL_APP_PASSWORD`로 등록.
 
 **관련 파일**: `functions/index.js` (`sendSchoolEmailOTP`, `verifySchoolEmailOTP`), `lib/screens/auth/email_verification_screen.dart`, `lib/providers/verification_guard.dart`
 
