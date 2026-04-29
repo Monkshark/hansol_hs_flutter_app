@@ -84,6 +84,77 @@ graph LR
 - Un-approved users are blocked from most features (rules + client guards)
 - Admin approval via Admin screen → `onUserUpdated` trigger → approval push
 
+## School Email Verification (OTP)
+
+PIPA youth-data requirements plus the need to keep outsiders out: identity is confirmed via a school-issued email domain.
+
+**Allowed domains**: `edu.sje.go.kr`, `sjhansol.sjeduhs.kr` (Functions constant `SCHOOL_EMAIL_DOMAINS`)
+
+### Flow
+
+```mermaid
+sequenceDiagram
+    participant App as Flutter App
+    participant CF as Cloud Functions
+    participant FS as Firestore
+    participant Mail as Gmail SMTP
+
+    App->>CF: sendSchoolEmailOTP({email})
+    CF->>FS: write otp_codes/{uid}<br/>(codeHash, expiresAt, dailyCount)
+    CF->>Mail: send 6-digit code
+    App->>CF: verifySchoolEmailOTP({code})
+    CF->>FS: read otp_codes/{uid} + hash compare
+    CF->>FS: update users/{uid}<br/>(verificationStatus: "verified")
+    CF->>FS: delete otp_codes/{uid}
+```
+
+### State fields (`users/{uid}`)
+
+| Field | Value |
+|---|---|
+| `verificationStatus` | `pending` (right after signup) / `verified` (on success) |
+| `schoolEmail` | the verified address |
+| `verifiedAt` | server timestamp |
+| `verifiedVia` | `otp` |
+
+On signup, `ProfileSetupScreen` writes `verificationStatus: 'pending'` and immediately pushes the verification screen (`dismissible: false`).
+
+### Security / rate limits
+
+| Item | Value | Location |
+|---|---|---|
+| Code length | 6 digits | `crypto.randomInt(0, 1000000)` |
+| Storage | sha256 hash | plaintext never persisted |
+| Expiry | 30 minutes | `expiresAt` |
+| Resend interval | 120 seconds | compared against `lastSentAt` |
+| Daily send cap | 5 | `dailyKey` + `dailyCount` |
+| Attempt cap | 5 | `attempts` counter → OTP deleted on excess |
+| Success / expiry | OTP deleted immediately | non-reusable |
+
+The `otp_codes/{uid}` collection denies all client read/write (Cloud Functions only). See [security_en.md#new-collections-pipa](./security_en.md#new-collections-pipa).
+
+### `isVerified()` guard
+
+```js
+function canWrite() { return isVerified() && isNotSuspended(); }
+```
+
+`posts` / `comments` / `reports` / `chats/messages` creates require `canWrite()`. Unverified users cannot post, comment, report, or chat.
+
+**Grandfathering**: pre-existing users without a `verificationStatus` field are treated as `'verified'` (`data.get('verificationStatus', 'verified')`). Only new signups go through verification.
+
+### Client guard
+
+`VerificationGuard.check()` (`lib/providers/verification_guard.dart`) is invoked at write/comment/report entry points:
+- Suspended → suspension dialog + appeal entry
+- Unverified → verification prompt → "Verify" pushes `EmailVerificationScreen` → on success, invalidates `userProfileProvider`
+
+### Functions secrets
+
+`GMAIL_SENDER_EMAIL` and `GMAIL_APP_PASSWORD` are stored as Functions secrets and used to send via Gmail SMTP (app password). After enabling Blaze, register via `firebase functions:secrets:set`.
+
+**Files**: `functions/index.js` (`sendSchoolEmailOTP`, `verifySchoolEmailOTP`), `lib/screens/auth/email_verification_screen.dart`, `lib/providers/verification_guard.dart`
+
 ## Suspension & Unsuspension
 
 - **Durations**: 1h / 6h / 1d / 3d / 7d / 30d / permanent
