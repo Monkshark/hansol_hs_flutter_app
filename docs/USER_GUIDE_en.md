@@ -98,9 +98,15 @@ Five independent toggles:
 
 ## For Admins
 
-Managers / admins get extra:
+Privileged roles get extra functionality:
+- **moderator** — handle reports, hide posts/comments (no suspension)
+- **auditor** — read-only access to all reports / logs / stats (teacher audit role)
+- **manager** — suspend, pin notices, approve users
+- **admin** — everything + change other users' roles
+
+Tools:
 - **Flutter Admin screen**: Settings → Admin
-- **Admin Web**: separate web dashboard (URL provided by ops)
+- **Admin Web**: separate web dashboard (URL provided by ops) — sidebar items auto-filter by role
 
 Details → [docs/features/admin-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md).
 
@@ -113,7 +119,8 @@ Details → [docs/features/admin-features_en.md](https://monkshark.github.io/han
 
 ### Role Changes
 - Request from an admin if you need student-council / broadcasting privileges
-- Admin changes `role` to `manager` or `admin`
+- Admin changes `role` to `moderator` / `auditor` / `manager` / `admin`
+- The app refreshes the ID token automatically right after the change, so the new role takes effect immediately
 
 ### New School Year Update
 - Students/teachers see a popup in March to update year/class/number
@@ -143,7 +150,13 @@ A. Previously fetched data is cached and visible offline. A red offline banner s
 A. Open the app once. Automatic refresh runs at midnight + hourly (iOS) / via AlarmManager (Android).
 
 **Q. Can I pin my own post as an announcement?**
-A. Only managers/admins can pin.
+A. Only managers/admins can pin. Moderators can handle reports / hide content; auditors are read-only.
+
+**Q. Can I appeal a moderation decision (e.g., a suspension)?**
+A. Settings → Appeals. You have 90 days to submit a reason (PIPA right). You'll get a push notification once an admin reviews it.
+
+**Q. Can I download a copy of all my data?**
+A. Settings → Data Request. Your posts / comments / report history / chats are bundled into a JSON file with a download link sent to your email. The link expires after 30 days.
 
 **Q. Can anyone see who wrote an anonymous post?**
 A. Regular users see only the anonymous number. Admins can reveal identity for moderation — every lookup is logged in `admin_logs`.

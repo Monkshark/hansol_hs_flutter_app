@@ -111,7 +111,7 @@ graph LR
 ```
 
 ### Derivation Rules
-- `authStateProvider` is the root of the **auth state tree**: profile → roles (manager/admin/suspended) derived downstream
+- `authStateProvider` is the root of the **auth state tree**: profile → roles (moderator/auditor/manager/admin/suspended) derived downstream — roles read directly from Firebase Auth custom claims
 - `examsByTypeProvider` (susi/jeongsi split) derives from `examsProvider`
 - Consumers `watch` only the leaf providers they need → avoid unnecessary rebuilds
 - `autoDispose` is used aggressively so providers clean up when screens unmount
@@ -174,28 +174,38 @@ Each store has one clear responsibility → "where does this data live?" is neve
 | **UI framework** | Flutter Material | Next.js 14 + Tailwind CSS |
 | **State** | Riverpod 2.5 | React hooks + SWR |
 | **Auth** | Firebase Auth SDK (mobile) | Firebase Auth (web) + role check |
-| **Audience** | students / teachers / parents / alumni | admin/manager roles only |
+| **Audience** | students / teachers / parents / alumni | moderator/auditor/manager/admin roles only (4 tiers) |
 | **Shared** | same Firestore collections (`users`, `posts`, ...) | same |
 
-**Conflict prevention**: Admin Web UPDATE permissions enforce `isAdminOrManager()` from `firestore.rules` — rules remain the single source of truth regardless of client.
+**Conflict prevention**: Admin Web UPDATE permissions enforce `isManager()` / `isAdmin()` / `isAuditor()` helpers from `firestore.rules`. All role checks read from `request.auth.token.role` (Firebase Auth custom claims) → zero extra Firestore reads. Rules remain the single source of truth regardless of client.
 
 ## Cloud Functions Trigger Map
 
 | Function | Trigger | Role |
 |---|---|---|
 | `kakaoCustomAuth` | HTTPS onRequest | Kakao access token → Firebase custom token |
-| `backfillCustomClaims` | HTTPS onRequest | Re-grant custom claims to existing users (admin tool) |
+| `sendSchoolEmailOTP` / `verifySchoolEmailOTP` | onCall | School email OTP issue / verify (teacher onboarding) |
+| `redeemTeacherInvite` | onCall | Redeem teacher invite code (`teacher` userType + auto-approve) |
 | `postOgRenderer` | HTTPS onRequest | Render OG-tagged HTML for deep links |
-| `onCommentCreated` | `posts/{pid}/comments/{cid}` onCreate | push to post author |
-| `onPostCreated` | `posts/{pid}` onCreate | push to admins (per-category opt-in) |
+| `onCommentCreated` | `posts/{pid}/comments/{cid}` onCreate | push to post author + stat increment |
+| `onPostCreated` | `posts/{pid}` onCreate | push to admins (per-category opt-in) + `app_stats/totals.posts++` |
 | `onPostLikeUpdated` | `posts/{pid}` onUpdate | detect like count changes, correct popular-post counter |
-| `onReportCreated` | `reports/{rid}` onCreate | push to admins on report + write log |
-| `onUserCreated` | `users/{uid}` onCreate | initialize user, grant custom claims |
+| `onReportCreated` | `reports/{rid}` onCreate | push to admins on report + write log + stat increment |
+| `aggregateReports` | `reports/{rid}` onCreate | Burst detection (multiple reports on same target within 5min) → manager alert |
+| `onUserCreated` | `users/{uid}` onCreate | initialize user, grant custom claims (`role: "user"`, `approved: false`) |
 | `onUserUpdated` | `users/{uid}` onUpdate | push on approval / role / suspension change + claim refresh |
 | `onUserDeleted` | `users/{uid}` onDelete | cascade delete Auth account + Storage files |
 | `onChatMessageCreated` | `chats/{cid}/messages/{mid}` onCreate | push to recipient |
 | `checkSuspensionExpiry` | onSchedule (hourly) | delete `suspendedUntil` when expired → cascades `onUserUpdated` |
+| `applyProgressiveSuspension` | onCall | Progressive suspension (1st: 1d → 2nd: 7d → 3rd: 30d) — manager only |
+| `requestAccountDeletion` | onCall | User-initiated account deletion (deferred 30-day purge) |
+| `purgeDeactivatedAccounts` | onSchedule (daily 04:00) | Permanently destroy accounts past 30-day deletion window |
+| `createDataExport` | onCall | Export user's own data (posts/comments/reports/chats) as JSON → Storage |
+| `purgeExpiredExports` | onSchedule (daily 05:00) | Sweep expired `data_requests` export files |
 | `cleanupOldPosts` | onSchedule (daily 18:00) | TTL cleanup for stale reports/logs |
+| `promoteGradesAnnually` | onSchedule (yearly Mar-2 00:00) | Auto-promote grades + graduate handoff |
+| `backfillStats` | HTTPS onRequest | Recompute counters from full collection scan (manual tool) |
+| `backfillCustomClaims` | HTTPS onRequest | Re-grant custom claims to existing users (admin tool) |
 
 Full code in `functions/index.js`.
 

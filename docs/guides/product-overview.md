@@ -20,7 +20,7 @@
 | **교사** | 교사 전용 시간표, 공지 작성, 승인/모더레이션 |
 | **졸업생** | 로그인 + 커뮤니티 접근 (성적/시간표 제한) |
 | **학부모** | 학사일정 / 공지 / 긴급 팝업 구독 |
-| **관리자 (manager/admin)** | Flutter Admin 화면 + Next.js Admin Web |
+| **관리자 (moderator/auditor/manager/admin)** | Flutter Admin 화면 + Next.js Admin Web (4단계 권한 분리) |
 
 ## 핵심 가치
 
@@ -41,12 +41,14 @@
 
 | 항목 | 수치 |
 |---|---|
-| 총 코드 라인 | 약 40,000 (Dart 33,389 + TS 2,098 + Java/XML 1,181 + Swift 330 + JS 543) |
-| 소스 파일 | 122 (Flutter) + 22 (Admin Web TS/TSX) + Android/iOS 위젯 |
-| Cloud Functions | 13개 |
+| 총 코드 라인 | 약 43,000 (Dart 36,031 + TS/TSX + Java/XML + Swift + JS) |
+| 소스 파일 | 139 (Flutter) + 30 (Admin Web TS/TSX) + Android/iOS 위젯 |
+| Cloud Functions | 24개 |
 | OAuth 로그인 | 4종 (Google / Apple / Kakao / GitHub) |
 | 푸시 알림 | FCM 4종 (`account` / `comment` / `new_post` / `chat`) + 로컬 3종 (조식/중식/석식) |
-| 테스트 | 513 Flutter + 34 Rules = 547개 |
+| 권한 모델 | 4단계 (`moderator` / `auditor` / `manager` / `admin`) + Firebase Auth custom claims |
+| PIPA 컴플라이언스 | `appeals` (90일 TTL) / `data_requests` (30일 TTL) / `community_rules` |
+| 테스트 | 563 Flutter + 85 Rules = 648개 |
 
 ## 기술 스택 요약
 

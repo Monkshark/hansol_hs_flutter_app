@@ -6,7 +6,7 @@
 [![Firestore Rules Tests](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml/badge.svg)](https://github.com/Monkshark/hansol_hs_flutter_app/actions/workflows/firestore-rules.yml)
 ![Flutter](https://img.shields.io/badge/Flutter-3.x-02569B?logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-3.x-0175C2?logo=dart&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-524%20Flutter%20%2B%2034%20rules-success)
+![Tests](https://img.shields.io/badge/tests-563%20Flutter%20%2B%2085%20rules-success)
 [![codecov](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app/branch/master/graph/badge.svg)](https://codecov.io/gh/Monkshark/hansol_hs_flutter_app)
 ![Riverpod](https://img.shields.io/badge/state-Riverpod%202.5-00b894)
 ![Firebase](https://img.shields.io/badge/backend-Firebase-FFCA28?logo=firebase&logoColor=black)
@@ -39,8 +39,10 @@ Documentation is split by topic. Jump in based on your purpose.
 
 ### Further Reading
 - [Data Model](https://monkshark.github.io/hansol_hs_flutter_app/#guides/data-model_en.md)
-- [Testing Strategy](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md) — 524 Flutter + 34 Rules tests
+- [Testing Strategy](https://monkshark.github.io/hansol_hs_flutter_app/#guides/testing_en.md) — 563 Flutter + 85 Rules tests
 - [Technical Challenges (14 cases)](https://monkshark.github.io/hansol_hs_flutter_app/#guides/technical-challenges_en.md)
+- [PIPA Migration Guide](https://monkshark.github.io/hansol_hs_flutter_app/#guides/pipa-migration_en.md) — custom claims backfill + TTL collection design
+- [PIPA Integration Test Scenarios](https://monkshark.github.io/hansol_hs_flutter_app/#guides/pipa-integration-tests_en.md)
 - [Screenshots Gallery](https://monkshark.github.io/hansol_hs_flutter_app/#guides/screenshots-gallery_en.md)
 
 ### Per-File Technical Reference
@@ -71,13 +73,15 @@ Full gallery → [Screenshots Gallery](https://monkshark.github.io/hansol_hs_flu
 
 | Metric | Value | Notes |
 |---|---|---|
-| **Total LOC** | **~40,000** | Dart 33,389 + TypeScript/TSX + Java/XML + Swift + JS |
-| **Source files** | **122** (Flutter) + **22** (Admin Web TS/TSX) + Android/iOS widgets | screens, extracted widgets, models/utils/services |
-| **Cloud Functions** | **13** | Kakao OAuth · post/comment/like triggers · user C/U/D · chat · report · suspension scheduler · OG renderer · old-post cleanup |
+| **Total LOC** | **~43,000** | Dart 36,031 + TypeScript/TSX + Java/XML + Swift + JS |
+| **Source files** | **139** (Flutter) + **30** (Admin Web TS/TSX) + Android/iOS widgets | screens, extracted widgets, models/utils/services |
+| **Role model** | **4 tiers** | `user` / `moderator` / `auditor` / `manager` / `admin` — checked via Firebase Auth custom claims (zero Firestore `get()` in rules) |
+| **PIPA compliance** | **3 collections** | `appeals` (90-day TTL) · `data_requests` (30-day TTL) · `community_rules` |
+| **Cloud Functions** | **24** | Kakao/School OTP · triggers (post/comment/like/user CRUD/chat/report) · suspension scheduler · OG renderer · old-post cleanup · data export · progressive suspension · annual grade promotion · teacher invite |
 | **OAuth providers** | **4** | Google, Apple, Kakao, GitHub |
 | **Push notifications** | **4 FCM types** | `account` / `comment` / `new_post` / `chat` (+ local breakfast/lunch/dinner). Per-category on/off |
-| **Tests** | **524 / 34** | Flutter 520 (test 440 + testWidgets 80) + Integration 4 + Firestore Rules emulator 34 |
-| **Docs** | **75 MDs (≈9,544 lines)** | Root 8 + `docs/guides/` 20 + `docs/features/` 8 + per-file details `docs/{api,data,...}` 39 |
+| **Tests** | **563 / 85** | Flutter 559 (test 470 + testWidgets 89) + Integration 4 + Firestore Rules emulator 85 |
+| **Docs** | **106 MDs** | Root 9 + `docs/guides/` 22 + `docs/features/` 8 + per-file details `docs/{api,data,...}` 67 |
 | **State management** | **Riverpod 2.5** | AsyncNotifier/Notifier + GetIt + repository DI |
 | **Image compression** | **~70% reduction** | Posts: 1080px w/ EXIF/GPS stripped, profiles: 256px |
 | **Search** | **Firestore n-gram index** | Title+body 2-gram `array-contains-any`, 350ms debounce |
@@ -91,10 +95,10 @@ Full gallery → [Screenshots Gallery](https://monkshark.github.io/hansol_hs_flu
 | Item | Value | Method |
 |---|---|---|
 | **Release APK** | **27 MB** | `build/app/outputs/flutter-apk/app-release.apk` (universal) |
-| **Dart LOC** | **33,389** | `find lib -name '*.dart' \| xargs cat \| wc -l` |
-| **Dart files** | **122** | `find lib -name '*.dart' \| wc -l` |
-| **Flutter test count** | **524** | test() 440 + testWidgets() 80 + Integration 4 |
-| **Rules test count** | **34** | `firebase emulators:exec ... npm test` |
+| **Dart LOC** | **36,031** | `find lib -name '*.dart' \| xargs cat \| wc -l` |
+| **Dart files** | **139** | `find lib -name '*.dart' \| wc -l` |
+| **Flutter test count** | **563** | test() 470 + testWidgets() 89 + Integration 4 |
+| **Rules test count** | **85** | `firebase emulators:exec ... npm test` (covers 4-tier roles + PIPA collections) |
 | **Compressed image size** | **~30% of original** | 1080px wide, JPEG q80, EXIF stripped |
 | **Search fetch limit** | **50 / 350ms debounce** | `array-contains-any` + client-side substring filter |
 | **Board page size** | **20 / cursor pagination** | `startAfterDocument` + `limit(20)` |
@@ -157,6 +161,9 @@ D3.js-based zoom/drag graph. Source HTML at `docs/riverpod_graph.html`.
 | 06 | Storage allocation = SQLite/Firestore/SecureStorage/Cloud Storage | [link](./docs/guides/architecture-decisions_en.md#adr-06-storage-allocation) |
 | 07 | DI = GetIt + abstract repository | [link](./docs/guides/architecture-decisions_en.md#adr-07-di-getit--abstract-repository) |
 | 08 | Test strategy = 4 layers (Unit/Provider/Widget/Rules) | [link](./docs/guides/architecture-decisions_en.md#adr-08-test-strategy-unit--provider--widget--rules) |
+| 09 | Roles = 4 tiers (user/moderator/auditor/manager/admin) + Firebase Auth custom claims | — |
+| 10 | PIPA = `appeals`/`data_requests`/`community_rules` + `expiresAt` TTL for lifecycle automation | — |
+| 11 | Dashboard counters = denormalized `app_stats/totals` (`FieldValue.increment`) | — |
 
 Full details → [architecture-decisions_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md).
 
@@ -174,7 +181,7 @@ Full details → [architecture-decisions_en.md](https://monkshark.github.io/hans
 | **Local** | sqflite (schedule DB), SharedPreferences (settings/cache) |
 | **Auth** | Google / Apple / Kakao / GitHub OAuth |
 | **CI** | GitHub Actions — analyze + test + Codecov + Android APK |
-| **Test** | `flutter_test` — Unit + Widget + Provider + Golden + Integration (524) + Firestore rules (34) |
+| **Test** | `flutter_test` — Unit + Widget + Provider + Golden + Integration (563) + Firestore rules (85) |
 
 ## Features (Summary)
 
@@ -182,22 +189,24 @@ Full details → [architecture-decisions_en.md](https://monkshark.github.io/hans
 |---|---|---|
 | **Public** | Meals, timetable, academic calendar, urgent popup, home widgets (Android/iOS), offline | [public-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/public-features_en.md) |
 | **Community** | Board (6 categories + popular + n-gram search), 1:1 chat, notifications, feedback | [community-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/community-features_en.md) |
-| **Personal** | Grades (susi/jeongsi, local-only), schedules, D-day, profile | [personal-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features_en.md) |
-| **Admin** | Flutter admin + Next.js Admin Web, approval/suspension/report/feedback/audit logs | [admin-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md) |
+| **Personal** | Grades (susi/jeongsi, local-only), schedules, D-day, profile, appeals, data export requests | [personal-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/personal-features_en.md) |
+| **Admin** | Flutter admin + Next.js Admin Web (AdminShell + dark mode + 30s TTL cache), 4-tier role separation (moderator: report-only / auditor: read-only / manager: suspension / admin: role changes), appeal review, data-request handling, community-rules editor, admin_logs (1-year TTL) | [admin-features_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#features/admin-features_en.md) |
 
 ## Security & Privacy
 
+- **4-tier roles + custom claims**: `user` / `moderator` / `auditor` / `manager` / `admin` are baked into the Firebase Auth ID token, so security rules check them with zero `get()` calls.
 - **Firestore rules**: role-based access control + per-field update validation + `validCounterDelta(±1)`
+- **PIPA compliance**: `appeals` / `data_requests` / `community_rules` collections with `expiresAt` TTL auto-deletion (admin_logs 1y / appeals 90d / data_requests 30d).
 - **Grades stay local**: `flutter_secure_storage` → Android Keystore / iOS Keychain. Never uploaded.
-- **Rate limiting**: 30s post cooldown, 10s comment cooldown, duplicate-report index.
-- **On deletion**: Firestore → Storage → Auth order for complete erasure.
+- **Rate limiting**: 30s post cooldown, 10s comment cooldown, duplicate-report index, progressive suspension (`applyProgressiveSuspension`).
+- **On deletion**: Firestore → Storage → Auth order for complete erasure, daily `purgeDeactivatedAccounts` sweep.
 - **OAuth only**: no passwords stored.
 
 Details → [security_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/security_en.md).
 
 ## Testing & CI/CD
 
-- **524 Flutter tests + 34 Rules tests** (Unit / Widget / Provider / Golden / Repository / Integration / Firestore Rules)
+- **563 Flutter tests + 85 Rules tests** (Unit / Widget / Provider / Golden / Repository / Integration / Firestore Rules — covering 4-tier roles + PIPA collections)
 - `flutter test` locally / `firebase emulators:exec ... npm test` for rules
 - Two GitHub Actions workflows: [flutter.yml](./.github/workflows/flutter.yml), [firestore-rules.yml](./.github/workflows/firestore-rules.yml)
 - Codecov upload, debug APK artifact on master push

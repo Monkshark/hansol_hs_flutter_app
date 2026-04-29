@@ -87,10 +87,53 @@
 
 ## ADR-08. 테스트 전략: Unit + Provider + Widget + Rules 4계층
 
-- **`test()` 단위 (440)**: 모델/유틸/파서/Provider/Repository/Golden 포함. `ProviderContainer`로 위젯 없이 AsyncNotifier 검증, Mock 주입으로 외부 의존 0
-- **`testWidgets()` 위젯 (80)**: `ProviderScope.overrides`로 Mock notifier 주입, 로딩/에러/빈 분기 검증
+- **`test()` 단위 (470)**: 모델/유틸/파서/Provider/Repository/Golden 포함. `ProviderContainer`로 위젯 없이 AsyncNotifier 검증, Mock 주입으로 외부 의존 0
+- **`testWidgets()` 위젯 (89)**: `ProviderScope.overrides`로 Mock notifier 주입, 로딩/에러/빈 분기 검증
 - **Golden (`matchesGoldenFile`)**: PostCard 스냅샷 비교 (`fake_cloud_firestore` + tolerance comparator) — `test()` 내부 포함
 - **Integration (4)**: `integration_test/`에서 앱 네비게이션 E2E
-- **Firestore Rules (34)**: `@firebase/rules-unit-testing` + 에뮬레이터로 보안 규칙 자체를 검증. 코드 변경 없이 rules 회귀 방지
+- **Firestore Rules (85)**: `@firebase/rules-unit-testing` + 에뮬레이터로 보안 규칙 자체를 검증. 4단계 역할(`user`/`moderator`/`auditor`/`manager`/`admin`) + PIPA 컬렉션(`appeals`/`data_requests`/`community_rules`) 권한 매트릭스 포함
 - **버린 옵션**: 통합 테스트 전체 의존 (Firebase Auth 실로그인) — CI 비용 ↑, 플레이크 ↑
-- **합계**: 524 (Flutter) + 34 (Rules) = **558개**. 상세 분류는 [testing.md](./testing.md) 참조.
+- **합계**: 563 (Flutter) + 85 (Rules) = **648개**. 상세 분류는 [testing.md](./testing.md) 참조.
+
+---
+
+## ADR-09. 권한 모델: 4단계 역할 + Firebase Auth custom claims (vs Firestore role 필드 단일 검사)
+
+- **배경**: 초기 모델은 `role: "user" | "manager"` 2단계. manager는 신고 처리부터 정지까지 전부 가능 → 학생 운영자가 "정지" 같은 무거운 행동을 떠안게 됨. 동시에 Firestore 보안 규칙은 매 요청마다 `get(/databases/.../users/$uid).data.role`로 사용자 문서를 추가 조회 → 게시글 1건 읽을 때마다 읽기 1회 추가
+- **선택**: 역할을 `user` / `moderator` / `auditor` / `manager` / `admin` 5단계로 분리 (실질 4단계 권한 + 일반 사용자). 권한은 Firebase Auth **custom claims**로 ID 토큰에 박아 `request.auth.token.role`로 검사 → 보안 규칙 `get()` 0회
+- **권한 매트릭스**:
+  - `moderator` — 신고 처리, 게시글/댓글 숨김. 정지 불가
+  - `auditor` — 모든 신고/로그/통계 읽기 전용. 쓰기 없음 (교사 감사 권한 시나리오)
+  - `manager` — 정지, 공지 고정, 사용자 승인
+  - `admin` — 모든 권한 + 다른 사용자 권한 변경
+- **마이그레이션**: 기존 28명 사용자에 대해 `users` 컬렉션을 순회하며 `setCustomUserClaims({role, approved})` 1회 백필 (`scripts/backfill-claims.js` 로컬 admin SDK)
+- **트레이드오프**: 권한 변경 직후 클라이언트는 `getIdTokenResult(true)` 강제 갱신 필요 / 권한 검사 로직이 토큰 발급 시점과 동기화돼야 함
+- **버린 옵션**: Firestore role 필드 단일 검사 — 매 요청 추가 읽기, 권한 검사가 데이터 읽기에 비례
+- **관련 파일**: `firestore.rules`, `functions/index.js` (`onUserUpdated`/`backfillCustomClaims`), `tests/firestore-rules/test/rules.test.js`
+
+---
+
+## ADR-10. PIPA 컴플라이언스: TTL 컬렉션 + 자동 라이프사이클 (vs 수동 청소 / soft delete 플래그)
+
+- **배경**: 한국 개인정보 보호법(PIPA)은 (1) 처리 결과 이의신청권 (2) 데이터 다운로드권 (3) 명시된 커뮤니티 규칙 — 세 가지를 보장하라고 요구. "삭제 버튼"이 아니라 **보관 기한이 끝난 데이터를 개입 없이 사라지게 만드는 것**이 진짜 핵심
+- **선택**: 새 컬렉션 3개 (`appeals`, `data_requests`, `community_rules`) 추가 + 거의 모든 새 컬렉션에 `expiresAt` 필드 + Firestore TTL 정책. 만료 시각이 지나면 Firestore가 알아서 문서 삭제
+- **TTL 정책**:
+  - `appeals.expiresAt` — 90일
+  - `data_requests.expiresAt` — 30일
+  - `admin_logs.expiresAt` — 1년 (감사 로그)
+- **데이터 익스포트**: `createDataExport` Cloud Function이 사용자 게시글/댓글/신고/채팅을 JSON으로 묶어 Storage 업로드, 다운로드 링크 이메일 발송, 만료 후 `purgeExpiredExports` 일일 청소
+- **트레이드오프**: TTL은 1회/일 정도로 비결정적 시점에 삭제 → 정확한 만료 시각 보장 안 됨 (PIPA 요건 충족엔 충분)
+- **버린 옵션**:
+  - *수동 청소* — 사람이 매주 청소하는 시스템은 결국 안 청소됨
+  - *soft delete 플래그* — 데이터가 사라지지 않으니 PIPA의 "보관 의무 종료 후 파기" 요건 미충족
+- **관련 파일**: `firestore.rules`, `firestore.indexes.json`, `functions/index.js` (`createDataExport`/`purgeExpiredExports`), `lib/screens/appeal/`, `lib/screens/data_request/`, `lib/screens/community_rules/`
+
+---
+
+## ADR-11. 대시보드 카운터: `app_stats/totals` 비정규화 (vs 클라이언트 collection.count())
+
+- **배경**: 관리자 대시보드는 `posts`, `users`, `reports` 컬렉션의 총 개수와 일별 추세를 보여줘야 함. 클라이언트가 매번 컬렉션 전체를 fetch하면 1k 사용자 기준 매 페이지 진입마다 수천 회 읽기
+- **선택**: Cloud Functions 트리거(`onPostCreated`/`onUserCreated`/`onReportCreated`)에서 `app_stats/totals` 단일 문서에 `FieldValue.increment(1)`. 일별 추세는 `app_stats/daily_<YYYY-MM-DD>` 문서에 동일하게 누적. 대시보드는 카운터 문서 1개만 읽음
+- **트레이드오프**: 트리거가 누락되면 카운터가 어긋남 → `backfillStats` HTTP 함수로 1회 재계산 가능
+- **버린 옵션**: `collection.count()` aggregation — 매 호출마다 컬렉션 스캔, 비용 절감 효과 거의 없음
+- **관련 파일**: `functions/index.js` (`incrementStat`/`backfillStats`), `admin-web/app/page.tsx`

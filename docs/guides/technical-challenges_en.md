@@ -2,7 +2,7 @@
 
 > 한국어: [technical-challenges.md](./technical-challenges.md)
 
-14 engineering challenges hit during development, each with a *problem → solution → outcome* summary and related file paths.
+16 engineering challenges hit during development, each with a *problem → solution → outcome* summary and related file paths.
 
 ## Contents
 
@@ -20,6 +20,8 @@
 12. [Non-deterministic widget test timer leak](#12-non-deterministic-widget-test-timer-leak)
 13. [StatefulWidget 1,400+ lines → Stateless composition (refactoring)](#13-statefulwidget-1400-lines--stateless-composition-refactoring)
 14. [Repository + GetIt gradual migration](#14-repository--getit-gradual-migration)
+15. [Zero-read permission checks — custom claims migration](#15-zero-read-permission-checks--custom-claims-migration)
+16. [PIPA TTL data lifecycle automation](#16-pipa-ttl-data-lifecycle-automation)
 
 ---
 
@@ -155,7 +157,7 @@
 1. **Private class → public StatelessWidget** — extracted `_PollCard` / `_VoteButton` / `_CommentItem` / `_EventAttachCard` from `post_detail_screen`, 5 tab classes from `admin_screen`, dialogs / Painters from `timetable_view`, etc. Moved to separate files, dropped `_` prefix.
 2. **State-dependent builder methods → callback-parameter widgets** — `write_post_screen`'s `_buildEventForm` / `_buildPollForm` / `_buildImageSection` accessed state directly; converted to Stateless widgets that accept explicit callbacks (`onPickDate`, `onAddOption`, `onReorder`, …).
 
-**Outcome:** 4 screens **4,575 → 1,919 lines (-58%)** — `post_detail` 545, `write_post` 700, `timetable_view` 588, `admin_screen` 86 (+ `admin/` 5 files, 1,123 total). Split into 16 widget modules (`widgets/` 9 + `write_widgets/` 7); all 524 Flutter tests still passing (zero regression).
+**Outcome:** 4 screens **4,575 → 1,919 lines (-58%)** — `post_detail` 545, `write_post` 700, `timetable_view` 588, `admin_screen` 86 (+ `admin/` 5 files, 1,123 total). Split into 16 widget modules (`widgets/` 9 + `write_widgets/` 7); all 563 Flutter tests still passing (zero regression).
 
 **Related:** `lib/screens/board/widgets/`, `lib/screens/board/write_widgets/`, `lib/screens/board/admin/`, `lib/screens/sub/timetable_widgets/`
 
@@ -168,6 +170,39 @@
 **Fix:** Introduced abstract `AuthRepository` / `GradeRepository` interfaces with `FirebaseAuthRepository` / `LocalGradeRepository` delegating to the old static methods. New code pulls via `GetIt.I<AuthRepository>()`; old call sites left untouched. Tests inject mocks through `setupServiceLocator()` / `resetServiceLocator()` → incremental migration + backward compatibility simultaneously.
 
 **Related:** `test/auth_repository_test.dart`, `test/auth_service_test.dart`, `test/grade_manager_test.dart`
+
+---
+
+## 15. Zero-read permission checks — custom claims migration
+
+**Problem:** Security rules called `get(/databases/.../users/$uid).data.role` on every request — every post read incurred one extra read for permission checking. Expanding the role model to 4 tiers (`moderator`/`auditor`/`manager`/`admin`) would scale that overhead with traffic.
+
+**Fix:**
+1. Bake `role` / `approved` into the Firebase Auth ID token via **custom claims** → security rules read `request.auth.token.role` directly.
+2. `onUserUpdated` Cloud Function trigger detects `role` field changes and calls `setCustomUserClaims` → permission updates propagate into the next token immediately.
+3. Client calls `getIdTokenResult(true)` right after a role change to force-refresh.
+4. For the existing 28 users, a one-shot `scripts/backfill-claims.js` (local admin SDK) iterates the `users` collection. Simple loop, but a wrong run wipes everyone's permissions — so dry-run first.
+
+**Outcome:** Zero extra Firestore reads for permission checks on post / comment fetches. Costs scale with traffic, not user count. Added 51 rules tests covering the 4-tier matrix.
+
+**Related:** `firestore.rules`, `functions/index.js` (`onUserUpdated`), `scripts/backfill-claims.js`, `tests/firestore-rules/test/rules.test.js`
+
+---
+
+## 16. PIPA TTL data lifecycle automation
+
+**Problem:** Korea's Personal Information Protection Act (PIPA) requires expired data to be destroyed automatically. The "Delete" button is the easy part — the hard part is making **expired data disappear without intervention**. A system that needs weekly hand-cleanup eventually doesn't get cleaned.
+
+**Fix:**
+1. Every new collection (`appeals`, `data_requests`, `admin_logs`) carries a mandatory `expiresAt: Timestamp` field.
+2. Bound a Firestore TTL policy to `expiresAt` → Firestore deletes the document on its own once the timestamp passes (~once a day, non-deterministic but sufficient for PIPA).
+3. Retention is policy-driven and tiered: `appeals` 90d / `data_requests` 30d / `admin_logs` 1y.
+4. Data export runs async via the `createDataExport` Cloud Function — bundles the user's data into JSON, uploads to Storage, emails the download link. `purgeExpiredExports` runs the daily sweep.
+5. Security rules enforce `expiresAt` field presence/type → blocks writes that would slip past TTL.
+
+**Outcome:** Data disappears on policy without anyone touching it. Took ~75 files / ~7,000 lines (auth guard, login flow, 240 i18n keys, 4 admin pages, rules tests, etc.) — satisfying a few statutory clauses cascaded through every layer of the stack.
+
+**Related:** `firestore.rules`, `firestore.indexes.json`, `functions/index.js` (`createDataExport` / `purgeExpiredExports`), `lib/screens/{appeal,data_request,community_rules}/`, `lib/services/verification_guard.dart`
 
 ---
 
