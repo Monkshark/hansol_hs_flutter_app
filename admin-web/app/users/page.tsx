@@ -112,6 +112,7 @@ export default function UsersPage() {
   if (loading || !profile) return null;
 
   const isAdmin = profile.role === 'admin';
+  const isSuperAdmin = isAdmin && profile.email === 'admin@admin.com';
 
   const tabs: { key: Tab; label: string; color: string }[] = [
     { key: 'pending', label: '승인 대기', color: 'bg-orange-500' },
@@ -183,7 +184,7 @@ export default function UsersPage() {
                         <button onClick={() => reject(u.uid)} className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-semibold">거절</button>
                       </>}
                       {tab === 'approved' && <>
-                        {profile?.role === 'admin' && u.role !== 'admin' && (
+                        {isAdmin && (u.role !== 'admin' || (isSuperAdmin && u.uid !== profile.uid)) && (
                           <select value={u.role} onChange={e => setRole(u.uid, e.target.value)}
                             className="px-2 py-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-input text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold">
                             <option value="user">일반</option>
@@ -193,7 +194,7 @@ export default function UsersPage() {
                             <option value="admin">Admin</option>
                           </select>
                         )}
-                        {profile?.role === 'admin' && u.role === 'admin' && u.uid === profile.uid && (
+                        {isAdmin && u.role === 'admin' && u.uid === profile.uid && (
                           <button onClick={() => setRole(u.uid, 'user')} className="px-3 py-1 bg-gray-400 text-white rounded-lg text-xs font-semibold">Admin 해제</button>
                         )}
                         {u.role === 'user' && u.uid !== profile?.uid && <>
