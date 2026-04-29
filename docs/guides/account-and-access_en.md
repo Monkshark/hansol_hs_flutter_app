@@ -74,15 +74,16 @@ graph LR
     B -->|no| C[profile setup<br/>identity / student ID / name]
     B -->|yes| D{approved?}
     C --> E[save with approved: false]
-    E --> F[waiting screen]
-    D -->|yes| G[enter home]
+    E --> F[school email OTP verification]
+    F -->|verified| G[approved: true auto-set]
+    G --> H[enter home]
+    D -->|yes| H
     D -->|no| F
-    F -.->|admin approves| D
-    F -.->|admin rejects| H[disabled account]
 ```
 
-- Un-approved users are blocked from most features (rules + client guards)
-- Admin approval via Admin screen → `onUserUpdated` trigger → approval push
+- Passing school-email OTP verification = automatic approval (`verifySchoolEmailOTP` sets `approved: true` alongside `verificationStatus`)
+- There is no separate manual admin approval step. To deactivate a user, admins use suspend or reject instead
+- Staff (`admin`/`manager`/`moderator`/`auditor`) bypass approval/verification — `isApproved()` short-circuits via `isStaff`
 
 ## School Email Verification (OTP)
 
@@ -104,7 +105,7 @@ sequenceDiagram
     CF->>Mail: send 6-digit code
     App->>CF: verifySchoolEmailOTP({code})
     CF->>FS: read otp_codes/{uid} + hash compare
-    CF->>FS: update users/{uid}<br/>(verificationStatus: "verified")
+    CF->>FS: update users/{uid}<br/>(verificationStatus: "verified",<br/>approved: true)
     CF->>FS: delete otp_codes/{uid}
 ```
 
@@ -116,6 +117,9 @@ sequenceDiagram
 | `schoolEmail` | the verified address |
 | `verifiedAt` | server timestamp |
 | `verifiedVia` | `otp` |
+| `approved` | auto-set to `true` on OTP success |
+| `approvedAt` | server timestamp at OTP success |
+| `approvedVia` | `otp` (auto via OTP) / `admin` (manual grant) |
 
 On signup, `ProfileSetupScreen` writes `verificationStatus: 'pending'` and immediately pushes the verification screen (`dismissible: false`).
 

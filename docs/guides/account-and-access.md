@@ -74,15 +74,16 @@ graph LR
     B -->|no| C[프로필 셋업<br/>신분/학번/이름]
     B -->|yes| D{approved?}
     C --> E[approved: false로 저장]
-    E --> F[승인 대기 화면]
-    D -->|yes| G[홈 진입]
+    E --> F[학교 이메일 OTP 인증]
+    F -->|verified| G[approved: true 자동 부여]
+    G --> H[홈 진입]
+    D -->|yes| H
     D -->|no| F
-    F -.->|관리자 승인| D
-    F -.->|관리자 거절| H[계정 비활성]
 ```
 
-- 승인 대기 중에는 일반 기능 차단 (규칙 + 클라이언트 가드)
-- 관리자가 Admin 화면에서 승인 → `onUserUpdated` 트리거 → 승인 푸시
+- 학교 이메일 OTP 인증 통과 = 자동 승인 (`verifySchoolEmailOTP`가 `approved: true`도 함께 set)
+- 별도의 관리자 승인 단계는 없음. Admin이 직접 사용자를 비활성화하려면 정지(`suspend`) 또는 거절(`reject`) 기능을 사용
+- staff(`admin`/`manager`/`moderator`/`auditor`)는 승인/인증 없이도 통과 (`isApproved()`가 `isStaff` 우회)
 
 ## 학교 이메일 인증 (OTP)
 
@@ -104,7 +105,7 @@ sequenceDiagram
     CF->>Mail: 6자리 코드 발송
     App->>CF: verifySchoolEmailOTP({code})
     CF->>FS: otp_codes/{uid} 읽기 + 해시 비교
-    CF->>FS: users/{uid} 갱신<br/>(verificationStatus: "verified")
+    CF->>FS: users/{uid} 갱신<br/>(verificationStatus: "verified",<br/>approved: true)
     CF->>FS: otp_codes/{uid} 삭제
 ```
 
@@ -116,6 +117,9 @@ sequenceDiagram
 | `schoolEmail` | 인증된 이메일 주소 |
 | `verifiedAt` | 서버 타임스탬프 |
 | `verifiedVia` | `otp` |
+| `approved` | OTP 통과 시 `true`로 자동 set |
+| `approvedAt` | OTP 통과 시점 서버 타임스탬프 |
+| `approvedVia` | `otp` (OTP 자동승인) / `admin` (수동 부여) |
 
 신규 가입 시 `ProfileSetupScreen`이 `verificationStatus: 'pending'`으로 저장하고 인증 화면을 강제 푸시 (`dismissible: false`).
 
