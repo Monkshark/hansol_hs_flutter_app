@@ -111,6 +111,8 @@ export default function UsersPage() {
 
   if (loading || !profile) return null;
 
+  const isAdmin = profile.role === 'admin';
+
   const tabs: { key: Tab; label: string; color: string }[] = [
     { key: 'pending', label: '승인 대기', color: 'bg-orange-500' },
     { key: 'approved', label: '사용자', color: 'bg-primary' },
@@ -137,12 +139,13 @@ export default function UsersPage() {
         {filtered.length === 0 ? (
           <p className="p-6 text-gray-400 text-sm">사용자가 없습니다</p>
         ) : (
-          <table className="w-full text-sm min-w-[600px]">
+          <table className={`w-full text-sm ${isAdmin ? 'min-w-[760px]' : 'min-w-[600px]'}`}>
             <thead><tr className="bg-gray-50 dark:bg-dark-input text-gray-400 dark:text-gray-500 text-xs">
               <th className="text-left p-3">이름</th>
               <th className="text-left p-3">학번</th>
               <th className="text-left p-3">학년/반</th>
               <th className="text-left p-3">로그인</th>
+              {isAdmin && <th className="text-left p-3">가입 이메일</th>}
               {tab === 'suspended' && <th className="text-left p-3">남은 기간</th>}
               <th className="text-left p-3">액션</th>
             </tr></thead>
@@ -168,6 +171,9 @@ export default function UsersPage() {
                          (u as any).loginProvider === 'apple' ? 'Apple' : 'Google'}
                       </span>
                     </td>
+                    {isAdmin && (
+                      <td className="p-3 text-gray-500 dark:text-gray-400 text-xs break-all">{u.email || '-'}</td>
+                    )}
                     {tab === 'suspended' && (
                       <td className="p-3 text-red-500 dark:text-red-400 font-semibold text-xs">{suspendRemaining(u.suspendedUntil)}</td>
                     )}
