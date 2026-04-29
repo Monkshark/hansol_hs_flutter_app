@@ -118,6 +118,7 @@
   "profileEdit_photoChangeFailed": "Failed to change photo",
   "profileEdit_photoDeletedSuccess": "Profile photo has been deleted",
   "profileEdit_photoDeleteFailed": "Deletion failed",
+  "profileEdit_savingPhotoBlockExit": "Saving photo. Please wait a moment.",
   "profileEdit_deleteAccountTitle": "Delete Account",
   "profileEdit_deleteAccountConfirm": "Are you sure you want to delete your account?\nAll data will be deleted and cannot be recovered.",
   "profileEdit_confirm": "Confirm",

@@ -354,6 +354,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileEdit_photoDeleteFailed => 'Deletion failed';
 
   @override
+  String get profileEdit_savingPhotoBlockExit =>
+      'Saving photo. Please wait a moment.';
+
+  @override
   String get profileEdit_deleteAccountTitle => 'Delete Account';
 
   @override

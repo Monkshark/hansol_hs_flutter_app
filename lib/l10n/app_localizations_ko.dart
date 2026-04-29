@@ -338,6 +338,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get profileEdit_photoDeleteFailed => '삭제에 실패했습니다';
 
   @override
+  String get profileEdit_savingPhotoBlockExit => '사진을 저장하는 중입니다. 잠시만 기다려주세요.';
+
+  @override
   String get profileEdit_deleteAccountTitle => '회원 탈퇴';
 
   @override

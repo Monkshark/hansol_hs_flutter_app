@@ -120,6 +120,7 @@
   "profileEdit_photoChangeFailed": "사진 변경에 실패했습니다",
   "profileEdit_photoDeletedSuccess": "프로필 사진이 삭제되었습니다",
   "profileEdit_photoDeleteFailed": "삭제에 실패했습니다",
+  "profileEdit_savingPhotoBlockExit": "사진을 저장하는 중입니다. 잠시만 기다려주세요.",
   "profileEdit_deleteAccountTitle": "회원 탈퇴",
   "profileEdit_deleteAccountConfirm": "정말 탈퇴하시겠습니까?\n모든 데이터가 삭제되며 복구할 수 없습니다.",
   "profileEdit_confirm": "확인",

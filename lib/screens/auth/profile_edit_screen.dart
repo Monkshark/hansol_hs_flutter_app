@@ -338,7 +338,18 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
       );
     }
 
-    return Scaffold(
+    return PopScope(
+      canPop: !_isSaving,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop || !_isSaving) return;
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.profileEdit_savingPhotoBlockExit),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+      child: Scaffold(
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
       appBar: AppBar(
         backgroundColor: Theme.of(context).scaffoldBackgroundColor,
@@ -438,7 +449,7 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
           ],
         ),
       ),
-    );
+    ));
   }
 
   Widget _infoRow(String label, String value) {

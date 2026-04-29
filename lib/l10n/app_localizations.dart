@@ -716,6 +716,12 @@ abstract class AppLocalizations {
   /// **'삭제에 실패했습니다'**
   String get profileEdit_photoDeleteFailed;
 
+  /// No description provided for @profileEdit_savingPhotoBlockExit.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 저장하는 중입니다. 잠시만 기다려주세요.'**
+  String get profileEdit_savingPhotoBlockExit;
+
   /// No description provided for @profileEdit_deleteAccountTitle.
   ///
   /// In ko, this message translates to:
