@@ -79,6 +79,86 @@ class AppLocalizationsKo extends AppLocalizations {
   String get verify_badge_unverified => '미인증';
 
   @override
+  String get emailVerify_title => '학교 이메일 인증';
+
+  @override
+  String get emailVerify_subtitle => '학교 이메일로 본인 확인';
+
+  @override
+  String get emailVerify_hint =>
+      '학교에서 발급받은 이메일 주소만 사용할 수 있어요. 입력한 주소로 인증번호를 보내드립니다.';
+
+  @override
+  String get emailVerify_emailLabel => '학교 이메일';
+
+  @override
+  String get emailVerify_localPartHint => '아이디';
+
+  @override
+  String get emailVerify_localPartRequired => '이메일 아이디를 입력해주세요';
+
+  @override
+  String get emailVerify_localPartInvalid => '공백이나 @는 사용할 수 없어요';
+
+  @override
+  String get emailVerify_pickDomainTitle => '도메인 선택';
+
+  @override
+  String get emailVerify_sendCode => '인증번호 받기';
+
+  @override
+  String get emailVerify_codeLabel => '인증번호 (6자리)';
+
+  @override
+  String emailVerify_codeSentTo(Object email) {
+    return '$email로 인증번호를 보냈어요';
+  }
+
+  @override
+  String get emailVerify_verify => '인증하기';
+
+  @override
+  String get emailVerify_changeEmail => '이메일 변경';
+
+  @override
+  String get emailVerify_resend => '재전송';
+
+  @override
+  String emailVerify_resendIn(int seconds) {
+    return '재전송 ($seconds초)';
+  }
+
+  @override
+  String get emailVerify_success => '이메일 인증을 완료했어요';
+
+  @override
+  String get emailVerify_failed => '인증에 실패했어요. 다시 시도해주세요.';
+
+  @override
+  String get emailVerify_sendFailed => '인증번호 전송에 실패했어요. 잠시 후 다시 시도해주세요.';
+
+  @override
+  String get emailVerify_otpFormatError => '6자리 숫자를 입력해주세요';
+
+  @override
+  String get emailVerify_codeExpired => '인증번호가 만료됐어요. 다시 받아주세요.';
+
+  @override
+  String get emailVerify_attemptsExceeded => '인증 시도 횟수를 초과했어요. 인증번호를 다시 받아주세요.';
+
+  @override
+  String get emailVerify_codeNotFound => '발급된 인증번호가 없어요. 먼저 인증번호를 받아주세요.';
+
+  @override
+  String get emailVerify_codeMismatch => '인증번호가 일치하지 않아요';
+
+  @override
+  String get emailVerify_domainNotAllowed => '허용된 학교 도메인이 아니에요';
+
+  @override
+  String get emailVerify_rateLimited => '잠시 후 다시 시도해주세요';
+
+  @override
   String get suspend_banner_title => '현재 계정이 정지되어 있어요';
 
   @override

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/providers/auth_provider.dart';
+import 'package:hansol_high_school/screens/auth/email_verification_screen.dart';
 import 'package:hansol_high_school/screens/sub/appeal_screen.dart';
 
 class VerificationGuard {
@@ -24,31 +25,46 @@ class VerificationGuard {
     }
 
     if (!profile.isVerified) {
-      await _showUnverifiedDialog(context, l);
+      await _showUnverifiedDialog(context, ref, l);
       return false;
     }
 
     return true;
   }
 
-  static Future<void> _showUnverifiedDialog(BuildContext context, AppLocalizations l) async {
-    return showDialog(
+  static Future<void> _showUnverifiedDialog(
+    BuildContext context,
+    WidgetRef ref,
+    AppLocalizations l,
+  ) async {
+    final shouldVerify = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(l.verify_required_title),
         content: Text(l.verify_required_body),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
           ),
           FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(),
+            onPressed: () => Navigator.of(ctx).pop(true),
             child: Text(l.verify_required_action),
           ),
         ],
       ),
     );
+
+    if (shouldVerify == true && context.mounted) {
+      final verified = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => const EmailVerificationScreen(),
+        ),
+      );
+      if (verified == true) {
+        ref.invalidate(userProfileProvider);
+      }
+    }
   }
 
   static Future<void> _showSuspendedDialog(BuildContext context, UserProfile profile) async {

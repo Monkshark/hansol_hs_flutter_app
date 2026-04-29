@@ -236,6 +236,156 @@ abstract class AppLocalizations {
   /// **'미인증'**
   String get verify_badge_unverified;
 
+  /// No description provided for @emailVerify_title.
+  ///
+  /// In ko, this message translates to:
+  /// **'학교 이메일 인증'**
+  String get emailVerify_title;
+
+  /// No description provided for @emailVerify_subtitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'학교 이메일로 본인 확인'**
+  String get emailVerify_subtitle;
+
+  /// No description provided for @emailVerify_hint.
+  ///
+  /// In ko, this message translates to:
+  /// **'학교에서 발급받은 이메일 주소만 사용할 수 있어요. 입력한 주소로 인증번호를 보내드립니다.'**
+  String get emailVerify_hint;
+
+  /// No description provided for @emailVerify_emailLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'학교 이메일'**
+  String get emailVerify_emailLabel;
+
+  /// No description provided for @emailVerify_localPartHint.
+  ///
+  /// In ko, this message translates to:
+  /// **'아이디'**
+  String get emailVerify_localPartHint;
+
+  /// No description provided for @emailVerify_localPartRequired.
+  ///
+  /// In ko, this message translates to:
+  /// **'이메일 아이디를 입력해주세요'**
+  String get emailVerify_localPartRequired;
+
+  /// No description provided for @emailVerify_localPartInvalid.
+  ///
+  /// In ko, this message translates to:
+  /// **'공백이나 @는 사용할 수 없어요'**
+  String get emailVerify_localPartInvalid;
+
+  /// No description provided for @emailVerify_pickDomainTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'도메인 선택'**
+  String get emailVerify_pickDomainTitle;
+
+  /// No description provided for @emailVerify_sendCode.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증번호 받기'**
+  String get emailVerify_sendCode;
+
+  /// No description provided for @emailVerify_codeLabel.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증번호 (6자리)'**
+  String get emailVerify_codeLabel;
+
+  /// No description provided for @emailVerify_codeSentTo.
+  ///
+  /// In ko, this message translates to:
+  /// **'{email}로 인증번호를 보냈어요'**
+  String emailVerify_codeSentTo(Object email);
+
+  /// No description provided for @emailVerify_verify.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증하기'**
+  String get emailVerify_verify;
+
+  /// No description provided for @emailVerify_changeEmail.
+  ///
+  /// In ko, this message translates to:
+  /// **'이메일 변경'**
+  String get emailVerify_changeEmail;
+
+  /// No description provided for @emailVerify_resend.
+  ///
+  /// In ko, this message translates to:
+  /// **'재전송'**
+  String get emailVerify_resend;
+
+  /// No description provided for @emailVerify_resendIn.
+  ///
+  /// In ko, this message translates to:
+  /// **'재전송 ({seconds}초)'**
+  String emailVerify_resendIn(int seconds);
+
+  /// No description provided for @emailVerify_success.
+  ///
+  /// In ko, this message translates to:
+  /// **'이메일 인증을 완료했어요'**
+  String get emailVerify_success;
+
+  /// No description provided for @emailVerify_failed.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증에 실패했어요. 다시 시도해주세요.'**
+  String get emailVerify_failed;
+
+  /// No description provided for @emailVerify_sendFailed.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증번호 전송에 실패했어요. 잠시 후 다시 시도해주세요.'**
+  String get emailVerify_sendFailed;
+
+  /// No description provided for @emailVerify_otpFormatError.
+  ///
+  /// In ko, this message translates to:
+  /// **'6자리 숫자를 입력해주세요'**
+  String get emailVerify_otpFormatError;
+
+  /// No description provided for @emailVerify_codeExpired.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증번호가 만료됐어요. 다시 받아주세요.'**
+  String get emailVerify_codeExpired;
+
+  /// No description provided for @emailVerify_attemptsExceeded.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증 시도 횟수를 초과했어요. 인증번호를 다시 받아주세요.'**
+  String get emailVerify_attemptsExceeded;
+
+  /// No description provided for @emailVerify_codeNotFound.
+  ///
+  /// In ko, this message translates to:
+  /// **'발급된 인증번호가 없어요. 먼저 인증번호를 받아주세요.'**
+  String get emailVerify_codeNotFound;
+
+  /// No description provided for @emailVerify_codeMismatch.
+  ///
+  /// In ko, this message translates to:
+  /// **'인증번호가 일치하지 않아요'**
+  String get emailVerify_codeMismatch;
+
+  /// No description provided for @emailVerify_domainNotAllowed.
+  ///
+  /// In ko, this message translates to:
+  /// **'허용된 학교 도메인이 아니에요'**
+  String get emailVerify_domainNotAllowed;
+
+  /// No description provided for @emailVerify_rateLimited.
+  ///
+  /// In ko, this message translates to:
+  /// **'잠시 후 다시 시도해주세요'**
+  String get emailVerify_rateLimited;
+
   /// No description provided for @suspend_banner_title.
   ///
   /// In ko, this message translates to:
