@@ -41,8 +41,8 @@ sequenceDiagram
 
 가입 시 선택:
 - `student` — 재학생 (학번 입력 필수)
-- `alumni` — 졸업생
-- `teacher` — 교사
+- `graduate` — 졸업생 (졸업 연도 입력)
+- `teacher` — 교사 (담당 과목 입력)
 - `parent` — 학부모
 
 신분에 따라 기본 역할 = `user`. 이후 관리자 승인 절차.
