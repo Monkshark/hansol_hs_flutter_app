@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
+import 'package:hansol_high_school/screens/auth/email_verification_screen.dart';
 import 'package:hansol_high_school/screens/sub/setting_screen.dart' show PrivacyPolicyScreen;
 import 'package:hansol_high_school/styles/app_colors.dart';
 import 'package:hansol_high_school/widgets/error_snackbar.dart';
@@ -24,6 +25,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
   final _gradYearController = TextEditingController();
   final _teacherSubjectController = TextEditingController();
   String _userType = 'student';
+  String _existingVerificationStatus = 'pending';
   bool _isSaving = false;
   bool _privacyAgreed = false;
   bool _ageConfirmed = false;
@@ -41,6 +43,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         _nameController.text = profile.name;
         _userType = profile.userType;
         _studentIdController.text = profile.studentId;
+        _existingVerificationStatus = profile.verificationStatus;
         if (profile.graduationYear != null) {
           _gradYearController.text = profile.graduationYear.toString();
         }
@@ -120,6 +123,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         graduationYear: _userType == 'graduate' ? int.tryParse(_gradYearController.text.trim()) : null,
         teacherSubject: _userType == 'teacher' ? _teacherSubjectController.text.trim() : null,
         loginProvider: provider,
+        verificationStatus: widget.isUpdate ? _existingVerificationStatus : 'pending',
       );
 
       await AuthService.saveUserProfile(profile);
@@ -130,6 +134,12 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         final signupTitle = AppLocalizations.of(context)!.profileSetup_signupRequest;
         final signupContent = AppLocalizations.of(context)!.profileSetup_signupNotification(name);
         _notifyAdminsNewSignup(name, signupTitle, signupContent);
+
+        await Navigator.of(context).push(
+          MaterialPageRoute(
+            builder: (_) => const EmailVerificationScreen(dismissible: false),
+          ),
+        );
       }
 
       if (mounted) Navigator.of(context).pop(true);

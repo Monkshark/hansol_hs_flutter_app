@@ -84,6 +84,77 @@ graph LR
 - 승인 대기 중에는 일반 기능 차단 (규칙 + 클라이언트 가드)
 - 관리자가 Admin 화면에서 승인 → `onUserUpdated` 트리거 → 승인 푸시
 
+## 학교 이메일 인증 (OTP)
+
+PIPA 청소년 조항 + 외부인 차단을 위해 학교에서 발급한 이메일 도메인으로 본인 확인.
+
+**허용 도메인**: `edu.sje.go.kr`, `sjhansol.sjeduhs.kr` (Functions `SCHOOL_EMAIL_DOMAINS` 상수)
+
+### 플로우
+
+```mermaid
+sequenceDiagram
+    participant App as Flutter App
+    participant CF as Cloud Functions
+    participant FS as Firestore
+    participant Mail as Gmail SMTP
+
+    App->>CF: sendSchoolEmailOTP({email})
+    CF->>FS: otp_codes/{uid} 저장<br/>(codeHash, expiresAt, dailyCount)
+    CF->>Mail: 6자리 코드 발송
+    App->>CF: verifySchoolEmailOTP({code})
+    CF->>FS: otp_codes/{uid} 읽기 + 해시 비교
+    CF->>FS: users/{uid} 갱신<br/>(verificationStatus: "verified")
+    CF->>FS: otp_codes/{uid} 삭제
+```
+
+### 상태 필드 (`users/{uid}`)
+
+| 필드 | 값 |
+|---|---|
+| `verificationStatus` | `pending` (가입 직후) / `verified` (성공) |
+| `schoolEmail` | 인증된 이메일 주소 |
+| `verifiedAt` | 서버 타임스탬프 |
+| `verifiedVia` | `otp` |
+
+신규 가입 시 `ProfileSetupScreen`이 `verificationStatus: 'pending'`으로 저장하고 인증 화면을 강제 푸시 (`dismissible: false`).
+
+### 보안 / 레이트 리밋
+
+| 항목 | 값 | 위치 |
+|---|---|---|
+| 코드 길이 | 6자리 숫자 | `crypto.randomInt(0, 1000000)` |
+| 저장 방식 | sha256 해시 | 평문 미보관 |
+| 만료 | 30분 | `expiresAt` |
+| 재전송 간격 | 120초 | `lastSentAt` 비교 |
+| 일일 발송 한도 | 5회 | `dailyKey` + `dailyCount` |
+| 시도 한도 | 5회 | `attempts` 카운트 → 초과 시 OTP 삭제 |
+| 인증 성공/만료 | OTP 즉시 삭제 | 재사용 불가 |
+
+`otp_codes/{uid}` 컬렉션은 클라이언트 read/write 전부 거부 (Cloud Functions 전용). [security.md#신규-컬렉션-pipa-대응](./security.md#신규-컬렉션-pipa-대응) 참조.
+
+### `isVerified()` 가드
+
+```js
+function canWrite() { return isVerified() && isNotSuspended(); }
+```
+
+`posts` / `comments` / `reports` / `chats/messages` create는 `canWrite()` 통과 필수. 미인증 사용자는 글/댓글/신고/채팅이 막힙니다.
+
+**Grandfathering**: `verificationStatus` 필드가 없는 기존 사용자는 `'verified'`로 처리되어 통과 (`data.get('verificationStatus', 'verified')`). 신규 가입자만 인증 단계를 거칩니다.
+
+### 클라이언트 가드
+
+`VerificationGuard.check()` (`lib/providers/verification_guard.dart`)가 글쓰기/댓글/신고 진입점에서 호출:
+- 정지 → 정지 다이얼로그 + 이의제기 진입
+- 미인증 → 인증 안내 다이얼로그 → "인증하기" 시 `EmailVerificationScreen` 푸시 → 성공 시 `userProfileProvider` invalidate
+
+### Functions Secrets
+
+`GMAIL_SENDER_EMAIL`, `GMAIL_APP_PASSWORD`를 Functions secrets로 관리. Gmail 앱 비밀번호로 SMTP 발송. Blaze 활성화 후 `firebase functions:secrets:set`로 등록 필요.
+
+**관련 파일**: `functions/index.js` (`sendSchoolEmailOTP`, `verifySchoolEmailOTP`), `lib/screens/auth/email_verification_screen.dart`, `lib/providers/verification_guard.dart`
+
 ## 정지 & 해제
 
 - **정지 기간**: 1시간 / 6시간 / 1일 / 3일 / 7일 / 30일 / 영구

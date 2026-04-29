@@ -82,6 +82,91 @@ class AppLocalizationsEn extends AppLocalizations {
   String get verify_badge_unverified => 'Unverified';
 
   @override
+  String get emailVerify_title => 'School email verification';
+
+  @override
+  String get emailVerify_subtitle => 'Verify with your school email';
+
+  @override
+  String get emailVerify_hint =>
+      'Only school-issued email addresses are accepted. We\'ll send a verification code to the address you enter.';
+
+  @override
+  String get emailVerify_emailLabel => 'School email';
+
+  @override
+  String get emailVerify_localPartHint => 'ID';
+
+  @override
+  String get emailVerify_localPartRequired => 'Please enter the email ID';
+
+  @override
+  String get emailVerify_localPartInvalid => 'Spaces or @ are not allowed';
+
+  @override
+  String get emailVerify_pickDomainTitle => 'Select domain';
+
+  @override
+  String get emailVerify_sendCode => 'Send verification code';
+
+  @override
+  String get emailVerify_codeLabel => 'Verification code (6 digits)';
+
+  @override
+  String emailVerify_codeSentTo(Object email) {
+    return 'We sent a code to $email';
+  }
+
+  @override
+  String get emailVerify_verify => 'Verify';
+
+  @override
+  String get emailVerify_changeEmail => 'Change email';
+
+  @override
+  String get emailVerify_resend => 'Resend';
+
+  @override
+  String emailVerify_resendIn(int seconds) {
+    return 'Resend (${seconds}s)';
+  }
+
+  @override
+  String get emailVerify_success => 'Email verification complete';
+
+  @override
+  String get emailVerify_failed => 'Verification failed. Please try again.';
+
+  @override
+  String get emailVerify_sendFailed =>
+      'Failed to send the code. Please try again later.';
+
+  @override
+  String get emailVerify_otpFormatError => 'Please enter 6 digits';
+
+  @override
+  String get emailVerify_codeExpired =>
+      'The code has expired. Please request a new one.';
+
+  @override
+  String get emailVerify_attemptsExceeded =>
+      'Too many attempts. Please request a new code.';
+
+  @override
+  String get emailVerify_codeNotFound =>
+      'No active code. Please request one first.';
+
+  @override
+  String get emailVerify_codeMismatch => 'The code does not match';
+
+  @override
+  String get emailVerify_domainNotAllowed =>
+      'That school domain is not allowed';
+
+  @override
+  String get emailVerify_rateLimited => 'Please try again in a moment';
+
+  @override
   String get suspend_banner_title => 'Your account is currently suspended';
 
   @override
