@@ -77,7 +77,22 @@
 - **익명 → 실명 확인** (admin만, 감사 로그 남김)
 - **감사 로그 기록**: 모든 관리 행위 (`admin_logs`)
 
-**관련 파일**: `admin-web/app/`, `admin-web/components/`, `admin-web/lib/`
+### AdminShell 레이아웃
+
+`AdminShell` (`admin-web/components/AdminShell.tsx`)이 사이드바 + 콘텐츠 영역을 통합 래핑합니다. 로그인/홈 경로(`/`, `/login`)는 자동으로 우회되어 인증 화면에서는 사이드바가 숨겨집니다. 모든 관리 페이지는 `app/layout.tsx`에서 한 번만 래핑되므로 페이지별로 사이드바 import가 필요 없습니다.
+
+### 캐시 레이어 (`lib/cache.ts`)
+
+페이지 전환 시 동일 Firestore 쿼리를 재실행하지 않도록 인메모리 캐시 + 진행 중 요청 dedup을 제공합니다.
+
+- `useCached(key, fetcher, { ttlMs })` — TTL(기본 60초) 내에는 캐시 히트, 만료 시 재요청
+- **In-flight dedup** — 같은 키로 동시에 여러 호출이 발생해도 단일 fetch만 실행되고 결과를 공유 (예: 사이드바 사용자 카운트와 대시보드 카드가 동일 키 사용 시 1회만 읽음)
+- `invalidateCache(prefix)` — 액션 후 특정 prefix만 무효화 (예: 정지 후 `users` 캐시만 비우기)
+- `setData(updater)` — 낙관적 업데이트 시 캐시까지 함께 갱신
+
+**효과**: 사이드바/대시보드 동시 접근 시 Firestore 읽기 약 절반 절감. 5분 이내 재방문은 거의 0회 추가 읽기.
+
+**관련 파일**: `admin-web/app/`, `admin-web/components/AdminShell.tsx`, `admin-web/components/Sidebar.tsx`, `admin-web/lib/cache.ts`
 
 ## 감사 로그 (`admin_logs`)
 
