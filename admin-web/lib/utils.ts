@@ -46,6 +46,28 @@ export function roleBadge(role: string) {
   switch (role) {
     case 'admin': return { label: 'Admin', color: 'bg-red-100 text-red-600' };
     case 'manager': return { label: '매니저', color: 'bg-blue-100 text-blue-600' };
+    case 'moderator': return { label: '모더레이터', color: 'bg-teal-100 text-teal-600' };
+    case 'auditor': return { label: '감사자', color: 'bg-purple-100 text-purple-600' };
     default: return null;
   }
+}
+
+const sectionPermissions: Record<string, string[]> = {
+  dashboard: ['admin', 'manager', 'auditor'],
+  posts: ['admin', 'manager', 'moderator', 'auditor'],
+  comments: ['admin', 'manager', 'moderator', 'auditor'],
+  reports: ['admin', 'manager', 'moderator', 'auditor'],
+  users: ['admin', 'manager'],
+  feedbacks: ['admin', 'manager', 'auditor'],
+  appeals: ['admin', 'manager', 'auditor'],
+  'data-requests': ['admin', 'manager'],
+  'community-rules': ['admin', 'manager'],
+  'admin-logs': ['admin', 'manager', 'moderator', 'auditor'],
+  crashes: ['admin', 'manager', 'auditor'],
+  'function-logs': ['admin', 'manager', 'auditor'],
+  settings: ['admin', 'manager'],
+};
+
+export function canAccess(role: string, section: string): boolean {
+  return (sectionPermissions[section] ?? []).includes(role);
 }

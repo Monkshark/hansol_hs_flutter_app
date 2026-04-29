@@ -8,6 +8,7 @@ import 'package:hansol_high_school/data/setting_data.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/auth/login_screen.dart';
 import 'package:hansol_high_school/screens/auth/profile_edit_screen.dart';
+import 'package:hansol_high_school/screens/sub/community_rules_screen.dart';
 import 'package:hansol_high_school/screens/sub/feedback_screen.dart';
 import 'package:hansol_high_school/screens/sub/notification_setting_screen.dart';
 import 'package:hansol_high_school/widgets/setting/grade_and_class_picker.dart';
@@ -273,6 +274,15 @@ class _SettingScreenState extends State<SettingScreen> {
                   ),
                 ),
               ]),
+              const SizedBox(height: 24),
+              _buildSectionTitle(AppLocalizations.of(context)!.settings_a11ySection),
+              _buildGroupedCard([
+                _buildA11yFontScaleRow(),
+                _buildDivider(),
+                _buildA11yHighContrastRow(),
+                _buildDivider(),
+                _buildA11yColorBlindRow(),
+              ]),
               if (AuthService.isLoggedIn) ...[
                 const SizedBox(height: 24),
                 _buildSectionTitle(AppLocalizations.of(context)!.settings_feedbackSection),
@@ -307,6 +317,16 @@ class _SettingScreenState extends State<SettingScreen> {
                     MaterialPageRoute(builder: (_) => const PrivacyPolicyScreen())),
                   child: _buildSettingRow(
                     AppLocalizations.of(context)!.settings_privacy,
+                    trailing: Icon(Icons.chevron_right, size: Responsive.r(context, 18), color: AppColors.theme.darkGreyColor),
+                  ),
+                ),
+                _buildDivider(),
+                GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => Navigator.push(context,
+                    MaterialPageRoute(builder: (_) => const CommunityRulesScreen())),
+                  child: _buildSettingRow(
+                    AppLocalizations.of(context)!.community_rules_title,
                     trailing: Icon(Icons.chevron_right, size: Responsive.r(context, 18), color: AppColors.theme.darkGreyColor),
                   ),
                 ),
@@ -534,6 +554,104 @@ class _SettingScreenState extends State<SettingScreen> {
     );
   }
 
+  Widget _buildA11yFontScaleRow() {
+    final l = AppLocalizations.of(context)!;
+    final current = SettingData().fontScale;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(l.settings_fontScale,
+              style: TextStyle(fontSize: Responsive.sp(context, 16), fontWeight: FontWeight.w500)),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              _buildA11yFontButton(1.0, l.settings_fontScaleNormal, current),
+              const SizedBox(width: 8),
+              _buildA11yFontButton(1.3, l.settings_fontScaleLarge, current),
+              const SizedBox(width: 8),
+              _buildA11yFontButton(1.6, l.settings_fontScaleXLarge, current),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildA11yFontButton(double value, String label, double current) {
+    final isSelected = (current - value).abs() < 0.05;
+    return Expanded(
+      child: GestureDetector(
+        onTap: () {
+          providerContainer.read(a11ySettingsProvider.notifier).setFontScale(value);
+          setState(() {});
+        },
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 10),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.theme.primaryColor : AppColors.theme.lightGreyColor,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Center(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: Responsive.sp(context, 13),
+                fontWeight: FontWeight.w500,
+                color: isSelected ? Colors.white : AppColors.theme.darkGreyColor,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildA11yHighContrastRow() {
+    final l = AppLocalizations.of(context)!;
+    final current = SettingData().highContrast;
+    return _buildSettingRow(
+      l.settings_highContrast,
+      trailing: Switch.adaptive(
+        value: current,
+        activeTrackColor: AppColors.theme.primaryColor,
+        onChanged: (v) {
+          providerContainer.read(a11ySettingsProvider.notifier).setHighContrast(v);
+          setState(() {});
+        },
+      ),
+    );
+  }
+
+  Widget _buildA11yColorBlindRow() {
+    final l = AppLocalizations.of(context)!;
+    final current = SettingData().colorBlindMode;
+    String labelOf(String mode) {
+      switch (mode) {
+        case 'protanopia': return l.settings_colorBlindProtanopia;
+        case 'deuteranopia': return l.settings_colorBlindDeuteranopia;
+        case 'tritanopia': return l.settings_colorBlindTritanopia;
+        default: return l.settings_colorBlindNone;
+      }
+    }
+    return _buildSettingRow(
+      l.settings_colorBlindMode,
+      trailing: DropdownButton<String>(
+        value: current,
+        underline: const SizedBox.shrink(),
+        items: const ['none', 'protanopia', 'deuteranopia', 'tritanopia']
+            .map((m) => DropdownMenuItem(value: m, child: Text(labelOf(m))))
+            .toList(),
+        onChanged: (v) {
+          if (v == null) return;
+          providerContainer.read(a11ySettingsProvider.notifier).setColorBlindMode(v);
+          setState(() {});
+        },
+      ),
+    );
+  }
+
   Widget _buildThemeButton(int index, String label, IconData icon) {
     final isSelected = themeModeIndex == index;
     return Expanded(
@@ -681,6 +799,9 @@ class PrivacyPolicyScreen extends StatelessWidget {
 
           _t(l.settings_privacySection12Title, textColor, ctx: context),
           _b(l.settings_privacySection12Content, subColor, ctx: context),
+
+          _t(l.settings_privacySectionAutomatedTitle, textColor, ctx: context),
+          _b(l.settings_privacySectionAutomatedContent, subColor, ctx: context),
 
           _t(l.settings_privacySection13Title, textColor, ctx: context),
           _b(l.settings_privacySection13Content, subColor, ctx: context),

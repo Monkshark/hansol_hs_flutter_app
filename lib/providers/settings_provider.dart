@@ -154,3 +154,54 @@ class AppRefreshNotifier extends Notifier<int> {
 
 final appRefreshProvider =
     NotifierProvider<AppRefreshNotifier, int>(AppRefreshNotifier.new);
+
+
+/// 접근성 설정 (큰 글씨 / 고대비 / 색맹 보정)
+class A11ySettings {
+  final double fontScale;
+  final bool highContrast;
+  final String colorBlindMode;
+
+  const A11ySettings({
+    required this.fontScale,
+    required this.highContrast,
+    required this.colorBlindMode,
+  });
+
+  A11ySettings copyWith({double? fontScale, bool? highContrast, String? colorBlindMode}) =>
+      A11ySettings(
+        fontScale: fontScale ?? this.fontScale,
+        highContrast: highContrast ?? this.highContrast,
+        colorBlindMode: colorBlindMode ?? this.colorBlindMode,
+      );
+}
+
+class A11ySettingsNotifier extends Notifier<A11ySettings> {
+  @override
+  A11ySettings build() {
+    final s = SettingData();
+    return A11ySettings(
+      fontScale: s.fontScale,
+      highContrast: s.highContrast,
+      colorBlindMode: s.colorBlindMode,
+    );
+  }
+
+  void setFontScale(double value) {
+    SettingData().fontScale = value;
+    state = state.copyWith(fontScale: value);
+  }
+
+  void setHighContrast(bool value) {
+    SettingData().highContrast = value;
+    state = state.copyWith(highContrast: value);
+  }
+
+  void setColorBlindMode(String value) {
+    SettingData().colorBlindMode = value;
+    state = state.copyWith(colorBlindMode: value);
+  }
+}
+
+final a11ySettingsProvider =
+    NotifierProvider<A11ySettingsNotifier, A11ySettings>(A11ySettingsNotifier.new);

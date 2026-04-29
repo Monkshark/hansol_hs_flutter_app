@@ -27,6 +27,39 @@ function isAdminOrManager() {
   );
 }
 
+function isModerator() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.role in ['admin', 'manager', 'moderator']
+  );
+}
+
+function isAuditor() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.role in ['admin', 'manager', 'auditor']
+  );
+}
+
+function isStaff() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.role in ['admin', 'manager', 'moderator', 'auditor']
+  );
+}
+
+function isVerified() {
+  return isSignedIn() &&
+    get(/databases/$(db)/documents/users/$(auth.uid))
+      .data.get('verificationStatus', 'verified') == 'verified';
+}
+
+function isNotSuspended() {
+  return isSignedIn() && (
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.get('suspendedUntil', null) == null ||
+    get(/databases/$(db)/documents/users/$(auth.uid)).data.suspendedUntil < request.time
+  );
+}
+
+function canWrite() { return isVerified() && isNotSuspended(); }
+
 function changedKeys() {
   return request.resource.data.diff(resource.data).affectedKeys();
 }
@@ -62,18 +95,47 @@ function validCounterDelta(field) {
 - **read**: 공개
 - **create**: `authorUid == auth.uid` + 제목 1~200자 + 본문 ≤5000자
 - **update**: 작성자 자유 OR 비작성자는 `isInteractionUpdate()` 필드 + `validCounterDelta(±1)`
-- **delete**: 작성자 또는 manager/admin
+- **delete**: 작성자 또는 moderator 이상 (`isModerator()`)
+
+### `posts/{postId}/comments/{commentId}`
+- **delete**: 작성자 또는 moderator 이상 (`isModerator()`)
 
 ### `chats/{chatId}` + 메시지
 - 참여자(`participants` 배열)만 read/write
 - 메시지 update는 삭제 필드(`deleted`, `deletedFor`)만 허용 — 내용 위변조 차단
 
-### `reports`, `admin_logs`, `function_logs`
-- `reports.create` 인증 사용자, 읽기/삭제 관리자 전용
-- `admin_logs` / `function_logs` 관리자 전용
+### `reports`
+- **create**: 인증 사용자
+- **read**: staff 이상 (`isStaff()` — admin, manager, moderator, auditor)
+- **delete**: manager/admin (`isAdminOrManager()`)
+
+### `admin_logs`
+- **create**: moderator 이상 (`isModerator()`)
+- **read**: staff 이상 (`isStaff()`)
+
+### `app_stats`, `function_logs`, `crash_logs`
+- **read**: auditor 이상 (`isAuditor()` — admin, manager, auditor)
+
+### `app_feedbacks`, `council_feedbacks`
+- **read**: auditor 이상 (`isAuditor()`)
+- **update/delete**: manager/admin (`isAdminOrManager()`)
 
 ### `app_config/{key}`
 - 읽기 공개 (버전 체크 / 팝업 공지), 쓰기 관리자 전용
+
+### 인증/정지 가드 적용 컬렉션
+- `posts` create, `comments` create, `reports` create, `chats/messages` create는 `canWrite()` 통과 필수 — 정지/미인증 사용자 차단
+- 기존 사용자(`verificationStatus`/`suspendedUntil` 필드 없음)는 grandfathered 처리되어 통과
+
+### 신규 컬렉션 (PIPA 대응)
+- `studentIds/{studentId}` — 학번 점유 인덱스. read 인증 사용자, write Cloud Functions 전용
+- `otp_codes/{uid}` — 학교 이메일 인증 OTP. 클라이언트 read/write 전부 거부
+- `banned_devices/{installationId}` — 정지 회피 차단. 클라이언트 거부
+- `reports_queue/{postId}` — 자동 누적 신고 큐. read staff 이상, write Functions
+- `appeals/{appealId}` — 이의제기. 정지 사용자도 본인 uid로 작성 가능 (canWrite 우회), 500자 제한, 상태 변경은 admin/manager
+- `data_requests/{requestId}` — 데이터 이전권/열람권. create canWrite + 본인 uid, read 본인 또는 manager+
+- `teacher_invites/{inviteId}` — 교사 초대링크. 발급 admin/manager, 차감은 Functions
+- `community_rules/{version}` — 공개 read, 발행 admin/manager
 
 ## Rate Limiting
 
@@ -129,7 +191,7 @@ function validCounterDelta(field) {
 
 ## 테스트
 
-- `tests/firestore-rules/`: `@firebase/rules-unit-testing` + 에뮬레이터 34개 테스트
+- `tests/firestore-rules/`: `@firebase/rules-unit-testing` + 에뮬레이터 80개 테스트
 - 권한 우회 / 카운터 위조 / 필드 위조 시나리오를 CI 단계에서 검증
 - 실행법: [testing.md](./testing.md) + [cicd-setup.md](./cicd-setup.md)
 

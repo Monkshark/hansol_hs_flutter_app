@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/data/post_repository.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
 import 'package:hansol_high_school/screens/board/post_detail_screen.dart';
@@ -109,7 +110,7 @@ class ReportsTabState extends State<ReportsTab> {
                       GestureDetector(
                         onTap: () async {
                           try {
-                            await PostRepository.instance.deletePost(postId);
+                            await PostRepository.instance.deletePost(postId, actorUid: AuthService.currentUser?.uid);
                             await docs[index].reference.delete();
                             _refresh();
                           } catch (e) {

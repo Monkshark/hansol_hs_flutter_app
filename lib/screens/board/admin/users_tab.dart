@@ -169,6 +169,8 @@ class UsersTabState extends State<UsersTab> {
                             radius: 18,
                             backgroundColor: role == 'admin' ? Colors.red
                                 : role == 'manager' ? AppColors.theme.secondaryColor
+                                : role == 'moderator' ? Colors.teal
+                                : role == 'auditor' ? Colors.purple
                                 : AppColors.theme.primaryColor,
                             child: Text(name.isNotEmpty ? name[0] : '?',
                               style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w700)),
@@ -198,6 +200,24 @@ class UsersTabState extends State<UsersTab> {
                                         decoration: BoxDecoration(
                                           color: AppColors.theme.secondaryColor.withAlpha(20), borderRadius: BorderRadius.circular(4)),
                                         child: Text(l.admin_usersMakeManager, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: AppColors.theme.secondaryColor)),
+                                      ),
+                                    ],
+                                    if (role == 'moderator') ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                        decoration: BoxDecoration(
+                                          color: Colors.teal.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+                                        child: Text(l.admin_usersMakeModerator, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.teal)),
+                                      ),
+                                    ],
+                                    if (role == 'auditor') ...[
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 1),
+                                        decoration: BoxDecoration(
+                                          color: Colors.purple.withAlpha(20), borderRadius: BorderRadius.circular(4)),
+                                        child: Text(l.admin_usersMakeAuditor, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600, color: Colors.purple)),
                                       ),
                                     ],
                                   ],
@@ -256,34 +276,9 @@ class UsersTabState extends State<UsersTab> {
                                 }
                               }),
                             if (isAdmin && role != 'admin') ...[
-                              _actionBtn(
-                                role == 'manager' ? l.admin_usersRemoveManager : l.admin_usersMakeManager,
-                                role == 'manager' ? AppColors.theme.darkGreyColor : AppColors.theme.secondaryColor,
-                                () async {
-                                  try {
-                                    final newRole = role == 'manager' ? 'user' : 'manager';
-                                    await docs[index].reference.update({'role': newRole});
-                                    await _logAdminAction('역할 변경: $newRole', uid, name);
-                                    if (mounted) _refreshAll();
-                                  } catch (e) {
-                                    log('UsersTab: roleChange error: $e');
-                                    if (context.mounted) showErrorSnackbar(context, e);
-                                  }
-                                },
-                              ),
-                              const SizedBox(width: 6),
-                              _actionBtn('Admin', Colors.red, () async {
-                                try {
-                                  await docs[index].reference.update({'role': 'admin'});
-                                  await _logAdminAction('역할 변경: admin', uid, name);
-                                  if (mounted) _refreshAll();
-                                } catch (e) {
-                                  log('UsersTab: makeAdmin error: $e');
-                                  if (context.mounted) showErrorSnackbar(context, e);
-                                }
-                              }),
+                              _roleDropdown(context, role, docs[index].reference, uid, name),
                             ],
-                            if (uid != AuthService.currentUser?.uid && role == 'user') ...[
+                            if (uid != AuthService.currentUser?.uid && !const ['admin', 'manager', 'moderator', 'auditor'].contains(role)) ...[
                               const SizedBox(width: 6),
                               _actionBtn(l.admin_usersSuspend, Colors.orange, () async {
                                 final hours = await _showSuspendDialog(context, name);
@@ -344,6 +339,61 @@ class UsersTabState extends State<UsersTab> {
           },
         );
       },
+    );
+  }
+
+  Widget _roleDropdown(BuildContext context, String currentRole, DocumentReference ref, String uid, String name) {
+    final roleOptions = {
+      'user': AppLocalizations.of(context)!.admin_usersRoleUser,
+      'moderator': AppLocalizations.of(context)!.admin_usersMakeModerator,
+      'auditor': AppLocalizations.of(context)!.admin_usersMakeAuditor,
+      'manager': AppLocalizations.of(context)!.admin_usersMakeManager,
+      'admin': AppLocalizations.of(context)!.admin_usersMakeAdmin,
+    };
+    final roleColors = {
+      'user': AppColors.theme.darkGreyColor,
+      'moderator': Colors.teal,
+      'auditor': Colors.purple,
+      'manager': AppColors.theme.secondaryColor,
+      'admin': Colors.red,
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        border: Border.all(color: roleColors[currentRole] ?? AppColors.theme.darkGreyColor, width: 1.5),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: DropdownButton<String>(
+        value: currentRole,
+        underline: const SizedBox.shrink(),
+        isDense: true,
+        style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: roleColors[currentRole]),
+        items: roleOptions.entries.map((e) => DropdownMenuItem(
+          value: e.key,
+          child: Text(e.value, style: TextStyle(fontSize: 12, color: roleColors[e.key])),
+        )).toList(),
+        onChanged: (newRole) async {
+          if (newRole == null || newRole == currentRole) return;
+          try {
+            await ref.update({'role': newRole});
+            await FirebaseFirestore.instance.collection('admin_logs').add({
+              'action': 'change_role',
+              'targetUid': uid,
+              'targetName': name,
+              'previousRole': currentRole,
+              'newRole': newRole,
+              'adminUid': AuthService.currentUser?.uid ?? '',
+              'adminName': AuthService.cachedProfile?.displayName ?? '',
+              'createdAt': FieldValue.serverTimestamp(),
+              'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+            });
+            if (mounted) _refreshAll();
+          } catch (e) {
+            log('UsersTab: roleChange error: $e');
+            if (context.mounted) showErrorSnackbar(context, e);
+          }
+        },
+      ),
     );
   }
 

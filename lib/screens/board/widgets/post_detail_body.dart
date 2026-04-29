@@ -226,11 +226,15 @@ class PostDetailBody extends StatelessWidget {
                 return ErrorView(message: l.error_loadFailed);
               }
               final comments = commentSnapshot.data?.docs ?? [];
+              final visibleCount = comments.where((d) {
+                final m = d.data() as Map<String, dynamic>;
+                return m['isHidden'] != true;
+              }).length;
 
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(l.post_comments(comments.length),
+                  Text(l.post_comments(visibleCount),
                     style: TextStyle(fontSize: Responsive.sp(context, 15), fontWeight: FontWeight.w700, color: textColor)),
                   const SizedBox(height: 12),
                   if (comments.isEmpty)
@@ -308,10 +312,19 @@ class PostDetailBody extends StatelessWidget {
   Widget _buildCommentWidget(BuildContext context, QueryDocumentSnapshot doc, {required bool indent}) {
     final String docId = doc.id;
     final c = Map<String, dynamic>.from(doc.data() as Map<String, dynamic>);
+    final l = AppLocalizations.of(context)!;
+    if (c['isHidden'] == true) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(indent ? 32 : 0, 8, 0, 8),
+        child: Text(l.soft_deleted_comment,
+          style: TextStyle(fontSize: Responsive.sp(context, 13),
+            color: AppColors.theme.darkGreyColor,
+            fontStyle: FontStyle.italic)),
+      );
+    }
     final isCommentAuthor = AuthService.currentUser?.uid == c['authorUid'];
     final canDelete = isCommentAuthor || (AuthService.cachedProfile?.isManager ?? false);
     final isPostAuthor = c['authorUid'] == currentPostAuthorUid;
-    final l = AppLocalizations.of(context)!;
 
     if (c['isAnonymous'] == true && c['authorUid'] != null) {
       final uid = c['authorUid'] as String;

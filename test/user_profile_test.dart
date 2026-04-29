@@ -107,10 +107,10 @@ void main() {
       expect(p.needsProfileUpdate, false);
     });
 
-    test('student with old year needs update if March or later', () {
+    test('student with old year needs update during March 1-14 window', () {
       final now = DateTime.now();
       final p = _profile(userType: 'student', lastProfileUpdate: '2025');
-      if (now.month >= 3) {
+      if (now.month == 3 && now.day <= 14) {
         expect(p.needsProfileUpdate, true);
       } else {
         expect(p.needsProfileUpdate, false);

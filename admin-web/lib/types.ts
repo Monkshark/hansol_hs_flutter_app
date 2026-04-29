@@ -8,7 +8,7 @@ export interface UserProfile {
   classNum: number;
   email: string;
   approved: boolean;
-  role: 'user' | 'manager' | 'admin';
+  role: 'user' | 'moderator' | 'auditor' | 'manager' | 'admin';
   userType: 'student' | 'graduate' | 'teacher' | 'parent';
   fcmToken?: string;
   suspendedUntil?: Timestamp;
@@ -61,4 +61,33 @@ export interface Report {
   reporterUid: string;
   reason: string;
   createdAt: Timestamp;
+}
+
+export interface AdminLog {
+  id: string;
+  action: string;
+  adminUid?: string;
+  adminName?: string;
+  targetUid?: string;
+  targetName?: string;
+  previousRole?: string;
+  newRole?: string;
+  postId?: string;
+  postTitle?: string;
+  postAuthorUid?: string;
+  postAuthorName?: string;
+  commentId?: string;
+  commentContent?: string;
+  commentAuthorUid?: string;
+  commentAuthorName?: string;
+  feedbackType?: string;
+  feedbackContent?: string;
+  feedbackAuthorName?: string;
+  reason?: string;
+  suspensionCount?: number;
+  days?: number;
+  actorUid?: string;
+  hours?: number;
+  createdAt?: Timestamp;
+  expiresAt?: Timestamp;
 }

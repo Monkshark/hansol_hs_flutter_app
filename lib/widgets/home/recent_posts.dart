@@ -18,8 +18,8 @@ class RecentPosts extends StatelessWidget {
         if (snapshot.hasError) return const SizedBox.shrink();
         if (!snapshot.hasData) return const SizedBox.shrink();
 
-        final pinnedDocs = snapshot.data![0].docs;
-        final recentDocs = snapshot.data![1].docs;
+        final pinnedDocs = snapshot.data![0].docs.where((d) => d.data()['isHidden'] != true).toList();
+        final recentDocs = snapshot.data![1].docs.where((d) => d.data()['isHidden'] != true).toList();
 
         QueryDocumentSnapshot<Map<String, dynamic>>? pinnedPost;
         if (pinnedDocs.isNotEmpty) {
