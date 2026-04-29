@@ -66,7 +66,7 @@ sequenceDiagram
 
 **승급/강등**: `admin`만 가능. 감사 로그(`admin_logs`)에 이전→이후 기록.
 
-## 가입 & 승인 플로우
+## 가입 & 인증 플로우
 
 ```mermaid
 graph LR
@@ -74,15 +74,21 @@ graph LR
     B -->|no| C[프로필 셋업<br/>신분/학번/이름]
     B -->|yes| D{approved?}
     C --> E[approved: false로 저장]
-    E --> F[승인 대기 화면]
-    D -->|yes| G[홈 진입]
-    D -->|no| F
-    F -.->|관리자 승인| D
-    F -.->|관리자 거절| H[계정 비활성]
+    E --> F[학교 이메일 OTP 인증 화면<br/>dismissible: true]
+    F -->|인증하기 → verified| G[approved: true 자동 부여<br/>전체 기능 사용]
+    F -->|나중에 하기| V[홈 진입 가능<br/>읽기/탐색만]
+    V -.->|글쓰기 시도| W[스낵바: 학교 이메일 인증 필요]
+    W -.-> F
+    D -->|yes| G
+    D -->|no| V
 ```
 
-- 승인 대기 중에는 일반 기능 차단 (규칙 + 클라이언트 가드)
-- 관리자가 Admin 화면에서 승인 → `onUserUpdated` 트리거 → 승인 푸시
+- 가입 직후 인증 화면이 자동으로 뜨지만 **"나중에 하기"** 로 스킵 가능 (홈 진입은 막지 않음)
+- 학교 이메일 OTP 인증 통과 = 자동 승인 (`verifySchoolEmailOTP`가 `approved: true`도 함께 set)
+- 별도의 관리자 승인 단계는 없음. Admin이 사용자를 비활성화하려면 정지(`suspend`)/거절(`reject`)
+- 미인증 상태는 글쓰기/댓글/신고/채팅이 차단됨 (`isApproved()` 가드 + Firestore rules `canWrite()`)
+- staff(`admin`/`manager`/`moderator`/`auditor`)는 인증 없이도 통과 (`isApproved()`가 `isStaff` 우회)
+- 학생 도메인이 없는 케이스(학부모/일부 교사/grandfathered)는 admin이 pending 탭에서 manual approve
 
 ## 학교 이메일 인증 (OTP)
 
@@ -104,7 +110,7 @@ sequenceDiagram
     CF->>Mail: 6자리 코드 발송
     App->>CF: verifySchoolEmailOTP({code})
     CF->>FS: otp_codes/{uid} 읽기 + 해시 비교
-    CF->>FS: users/{uid} 갱신<br/>(verificationStatus: "verified")
+    CF->>FS: users/{uid} 갱신<br/>(verificationStatus: "verified",<br/>approved: true)
     CF->>FS: otp_codes/{uid} 삭제
 ```
 
@@ -116,8 +122,11 @@ sequenceDiagram
 | `schoolEmail` | 인증된 이메일 주소 |
 | `verifiedAt` | 서버 타임스탬프 |
 | `verifiedVia` | `otp` |
+| `approved` | OTP 통과 시 `true`로 자동 set |
+| `approvedAt` | OTP 통과 시점 서버 타임스탬프 |
+| `approvedVia` | `otp` (OTP 자동승인) / `admin` (수동 부여) |
 
-신규 가입 시 `ProfileSetupScreen`이 `verificationStatus: 'pending'`으로 저장하고 인증 화면을 강제 푸시 (`dismissible: false`).
+신규 가입 시 `ProfileSetupScreen`이 `verificationStatus: 'pending'`으로 저장하고 인증 화면을 푸시. 사용자는 인증을 완료하거나 "나중에 하기"로 스킵 가능 — 스킵 시 홈 진입은 가능하나 글쓰기 등은 차단된다.
 
 ### 보안 / 레이트 리밋
 

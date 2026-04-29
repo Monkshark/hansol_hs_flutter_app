@@ -22,9 +22,11 @@ class _AdminScreenState extends State<AdminScreen> {
   final _approvedKey = GlobalKey<UsersTabState>();
 
   void _refreshAllTabs() {
-    _pendingKey.currentState?.refresh();
-    _suspendedKey.currentState?.refresh();
-    _approvedKey.currentState?.refresh();
+    for (final key in [_pendingKey, _suspendedKey, _approvedKey]) {
+      try {
+        key.currentState?.refresh();
+      } catch (_) {}
+    }
   }
 
   @override

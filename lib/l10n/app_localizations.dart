@@ -386,6 +386,12 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get emailVerify_rateLimited;
 
+  /// No description provided for @emailVerify_skip.
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 하기'**
+  String get emailVerify_skip;
+
   /// No description provided for @suspend_banner_title.
   ///
   /// In ko, this message translates to:
@@ -709,6 +715,12 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'삭제에 실패했습니다'**
   String get profileEdit_photoDeleteFailed;
+
+  /// No description provided for @profileEdit_savingPhotoBlockExit.
+  ///
+  /// In ko, this message translates to:
+  /// **'사진을 저장하는 중입니다. 잠시만 기다려주세요.'**
+  String get profileEdit_savingPhotoBlockExit;
 
   /// No description provided for @profileEdit_deleteAccountTitle.
   ///
@@ -1133,7 +1145,7 @@ abstract class AppLocalizations {
   /// No description provided for @board_awaitingAdminApproval.
   ///
   /// In ko, this message translates to:
-  /// **'관리자 승인 대기 중입니다'**
+  /// **'학교 이메일 인증을 먼저 완료해주세요'**
   String get board_awaitingAdminApproval;
 
   /// No description provided for @board_categoryAll.
@@ -2027,7 +2039,7 @@ abstract class AppLocalizations {
   /// No description provided for @admin_usersPending.
   ///
   /// In ko, this message translates to:
-  /// **'승인 대기'**
+  /// **'이메일 미인증'**
   String get admin_usersPending;
 
   /// No description provided for @admin_usersSuspended.
@@ -2275,6 +2287,42 @@ abstract class AppLocalizations {
   /// In ko, this message translates to:
   /// **'{name} 계정을 정말 삭제합니까?\n되돌릴 수 없습니다.'**
   String admin_usersDeleteFinalMessage(Object name);
+
+  /// No description provided for @admin_usersDeleteEmailPrompt.
+  ///
+  /// In ko, this message translates to:
+  /// **'확인을 위해 사용자 이메일을 입력하세요'**
+  String get admin_usersDeleteEmailPrompt;
+
+  /// No description provided for @admin_usersDeleteEmailMismatch.
+  ///
+  /// In ko, this message translates to:
+  /// **'이메일이 일치하지 않습니다'**
+  String get admin_usersDeleteEmailMismatch;
+
+  /// No description provided for @admin_usersSuspendConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지하시겠습니까?'**
+  String get admin_usersSuspendConfirmTitle;
+
+  /// No description provided for @admin_usersSuspendConfirmMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}을(를) {duration} 동안 정지합니다.'**
+  String admin_usersSuspendConfirmMessage(Object name, Object duration);
+
+  /// No description provided for @admin_usersUnsuspendConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지를 해제하시겠습니까?'**
+  String get admin_usersUnsuspendConfirmTitle;
+
+  /// No description provided for @admin_usersUnsuspendConfirmMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 정지를 해제합니다.'**
+  String admin_usersUnsuspendConfirmMessage(Object name);
 
   /// No description provided for @admin_usersSuspendedRemaining.
   ///
@@ -3893,7 +3941,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_pendingApproval.
   ///
   /// In ko, this message translates to:
-  /// **'승인 대기중'**
+  /// **'이메일 미인증'**
   String get settings_pendingApproval;
 
   /// No description provided for @settings_logout.

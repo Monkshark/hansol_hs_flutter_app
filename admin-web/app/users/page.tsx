@@ -80,6 +80,8 @@ export default function UsersPage() {
 
   async function suspend(uid: string, hours: number) {
     const target = findUser(uid);
+    const label = suspendOptions.find(o => o.hours === hours)?.label ?? `${hours}시간`;
+    if (!confirm(`${target?.name ?? '사용자'}을(를) ${label} 동안 정지하시겠습니까?`)) return;
     const until = new Date(Date.now() + hours * 3600000);
     await updateDoc(doc(db, 'users', uid), { suspendedUntil: Timestamp.fromDate(until) });
     invalidateCache('users:');
@@ -89,6 +91,7 @@ export default function UsersPage() {
 
   async function unsuspend(uid: string) {
     const target = findUser(uid);
+    if (!confirm(`${target?.name ?? '사용자'}의 정지를 해제하시겠습니까?`)) return;
     await updateDoc(doc(db, 'users', uid), { suspendedUntil: null });
     invalidateCache('users:');
     refreshUsers();
@@ -96,9 +99,19 @@ export default function UsersPage() {
   }
 
   async function deleteUser(uid: string) {
-    if (!confirm('계정을 삭제하시겠습니까?')) return;
-    if (!confirm('정말 삭제합니까? 되돌릴 수 없습니다.')) return;
     const target = findUser(uid);
+    if (!confirm(`${target?.name ?? '사용자'} 계정을 삭제하시겠습니까?`)) return;
+    const email = target?.email ?? '';
+    if (email) {
+      const input = prompt(`정말 삭제합니까? 되돌릴 수 없습니다.\n확인을 위해 사용자 이메일을 입력하세요:\n${email}`);
+      if (input === null) return;
+      if (input.trim() !== email) {
+        alert('이메일이 일치하지 않습니다.');
+        return;
+      }
+    } else {
+      if (!confirm('정말 삭제합니까? 되돌릴 수 없습니다.')) return;
+    }
     await deleteDoc(doc(db, 'users', uid));
     setUsers(prev => (prev || []).filter(u => u.uid !== uid));
     await writeAdminLog(profile, 'delete_user', { targetUid: uid, targetName: target?.name ?? '' });
@@ -110,6 +123,9 @@ export default function UsersPage() {
   ];
 
   if (loading || !profile) return null;
+
+  const isAdmin = profile.role === 'admin';
+  const isSuperAdmin = isAdmin && profile.email === 'admin@admin.com';
 
   const tabs: { key: Tab; label: string; color: string }[] = [
     { key: 'pending', label: '승인 대기', color: 'bg-orange-500' },
@@ -137,12 +153,13 @@ export default function UsersPage() {
         {filtered.length === 0 ? (
           <p className="p-6 text-gray-400 text-sm">사용자가 없습니다</p>
         ) : (
-          <table className="w-full text-sm min-w-[600px]">
+          <table className={`w-full text-sm ${isAdmin ? 'min-w-[760px]' : 'min-w-[600px]'}`}>
             <thead><tr className="bg-gray-50 dark:bg-dark-input text-gray-400 dark:text-gray-500 text-xs">
               <th className="text-left p-3">이름</th>
               <th className="text-left p-3">학번</th>
               <th className="text-left p-3">학년/반</th>
               <th className="text-left p-3">로그인</th>
+              {isAdmin && <th className="text-left p-3">가입 이메일</th>}
               {tab === 'suspended' && <th className="text-left p-3">남은 기간</th>}
               <th className="text-left p-3">액션</th>
             </tr></thead>
@@ -168,6 +185,9 @@ export default function UsersPage() {
                          (u as any).loginProvider === 'apple' ? 'Apple' : 'Google'}
                       </span>
                     </td>
+                    {isAdmin && (
+                      <td className="p-3 text-gray-500 dark:text-gray-400 text-xs break-all">{u.email || '-'}</td>
+                    )}
                     {tab === 'suspended' && (
                       <td className="p-3 text-red-500 dark:text-red-400 font-semibold text-xs">{suspendRemaining(u.suspendedUntil)}</td>
                     )}
@@ -177,7 +197,7 @@ export default function UsersPage() {
                         <button onClick={() => reject(u.uid)} className="px-3 py-1 bg-red-500 text-white rounded-lg text-xs font-semibold">거절</button>
                       </>}
                       {tab === 'approved' && <>
-                        {profile?.role === 'admin' && u.role !== 'admin' && (
+                        {isAdmin && (u.role !== 'admin' || (isSuperAdmin && u.uid !== profile.uid)) && (
                           <select value={u.role} onChange={e => setRole(u.uid, e.target.value)}
                             className="px-2 py-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-dark-input text-gray-900 dark:text-gray-100 rounded-lg text-xs font-semibold">
                             <option value="user">일반</option>
@@ -187,7 +207,7 @@ export default function UsersPage() {
                             <option value="admin">Admin</option>
                           </select>
                         )}
-                        {profile?.role === 'admin' && u.role === 'admin' && u.uid === profile.uid && (
+                        {isAdmin && u.role === 'admin' && u.uid === profile.uid && (
                           <button onClick={() => setRole(u.uid, 'user')} className="px-3 py-1 bg-gray-400 text-white rounded-lg text-xs font-semibold">Admin 해제</button>
                         )}
                         {u.role === 'user' && u.uid !== profile?.uid && <>

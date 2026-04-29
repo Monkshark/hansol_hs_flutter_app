@@ -82,7 +82,9 @@ erDiagram
 | `studentId` | string | 학번 (재학생) |
 | `userType` | string | `student` / `graduate` / `teacher` / `parent` |
 | `role` | string | `user` / `moderator` / `auditor` / `manager` / `admin` |
-| `approved` | boolean | 관리자 승인 여부 |
+| `approved` | boolean | 활성 사용자 여부. OTP 인증 통과 시 자동으로 `true` (`verifySchoolEmailOTP`가 함께 set) |
+| `approvedAt` | timestamp | 승인 시점 |
+| `approvedVia` | string | `otp` (자동) / `admin` (수동 부여) |
 | `verificationStatus` | string | `pending` / `verified` (학교 이메일 OTP 인증 결과). 필드 없으면 `verified`로 grandfathered |
 | `schoolEmail` | string | 인증된 학교 이메일 (성공 시 기록) |
 | `verifiedAt` | timestamp | 인증 완료 시각 |

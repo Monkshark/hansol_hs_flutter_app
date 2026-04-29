@@ -167,6 +167,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get emailVerify_rateLimited => 'Please try again in a moment';
 
   @override
+  String get emailVerify_skip => 'Skip for now';
+
+  @override
   String get suspend_banner_title => 'Your account is currently suspended';
 
   @override
@@ -349,6 +352,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileEdit_photoDeleteFailed => 'Deletion failed';
+
+  @override
+  String get profileEdit_savingPhotoBlockExit =>
+      'Saving photo. Please wait a moment.';
 
   @override
   String get profileEdit_deleteAccountTitle => 'Delete Account';
@@ -577,7 +584,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get board_awaitingAdminApproval => 'Awaiting admin approval';
+  String get board_awaitingAdminApproval =>
+      'Please verify your school email first';
 
   @override
   String get board_categoryAll => 'All';
@@ -1067,7 +1075,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get admin_userManagement => 'User Management';
 
   @override
-  String get admin_usersPending => 'Pending Approval';
+  String get admin_usersPending => 'Email Unverified';
 
   @override
   String get admin_usersSuspended => 'Suspended Users';
@@ -1200,6 +1208,29 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String admin_usersDeleteFinalMessage(Object name) {
     return 'Really delete $name\'s account?\nThis cannot be undone.';
+  }
+
+  @override
+  String get admin_usersDeleteEmailPrompt =>
+      'Type the user\'s email to confirm';
+
+  @override
+  String get admin_usersDeleteEmailMismatch => 'Email does not match';
+
+  @override
+  String get admin_usersSuspendConfirmTitle => 'Suspend this user?';
+
+  @override
+  String admin_usersSuspendConfirmMessage(Object name, Object duration) {
+    return 'Suspend $name for $duration.';
+  }
+
+  @override
+  String get admin_usersUnsuspendConfirmTitle => 'Lift suspension?';
+
+  @override
+  String admin_usersUnsuspendConfirmMessage(Object name) {
+    return 'Lift suspension for $name.';
   }
 
   @override
@@ -2089,7 +2120,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_approved => 'Approved';
 
   @override
-  String get settings_pendingApproval => 'Pending Approval';
+  String get settings_pendingApproval => 'Email Unverified';
 
   @override
   String get settings_logout => 'Logout';

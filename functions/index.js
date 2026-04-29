@@ -800,6 +800,9 @@ exports.verifySchoolEmailOTP = onCall(async (request) => {
     verificationStatus: "verified",
     verifiedAt: FieldValue.serverTimestamp(),
     verifiedVia: "otp",
+    approved: true,
+    approvedAt: FieldValue.serverTimestamp(),
+    approvedVia: "otp",
   }, { merge: true });
   await otpRef.delete();
 

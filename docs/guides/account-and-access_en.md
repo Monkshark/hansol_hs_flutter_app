@@ -66,7 +66,7 @@ Default `role = user` regardless of identity. Admin approval follows.
 
 **Promotion/demotion**: admin-only. Each change is logged in `admin_logs` (before → after).
 
-## Signup & Approval Flow
+## Signup & Verification Flow
 
 ```mermaid
 graph LR
@@ -74,15 +74,21 @@ graph LR
     B -->|no| C[profile setup<br/>identity / student ID / name]
     B -->|yes| D{approved?}
     C --> E[save with approved: false]
-    E --> F[waiting screen]
-    D -->|yes| G[enter home]
-    D -->|no| F
-    F -.->|admin approves| D
-    F -.->|admin rejects| H[disabled account]
+    E --> F[school email OTP screen<br/>dismissible: true]
+    F -->|Verify → verified| G[approved: true auto-set<br/>full access]
+    F -->|Skip for now| V[enter home<br/>read/browse only]
+    V -.->|write attempt| W[snackbar: please verify school email]
+    W -.-> F
+    D -->|yes| G
+    D -->|no| V
 ```
 
-- Un-approved users are blocked from most features (rules + client guards)
-- Admin approval via Admin screen → `onUserUpdated` trigger → approval push
+- The OTP screen pops automatically right after signup but is **dismissible** — users can press "Skip for now" to enter the home screen
+- Passing school-email OTP verification = automatic approval (`verifySchoolEmailOTP` sets `approved: true` alongside `verificationStatus`)
+- No separate manual admin approval step. To deactivate a user, admins use suspend or reject
+- Unverified users are blocked from posting/commenting/reporting/chatting (`isApproved()` guard + Firestore `canWrite()`)
+- Staff (`admin`/`manager`/`moderator`/`auditor`) bypass verification — `isApproved()` short-circuits via `isStaff`
+- Users without a student-issued email (parents, some teachers, grandfathered) are activated by admin via the pending tab manual approval
 
 ## School Email Verification (OTP)
 
@@ -104,7 +110,7 @@ sequenceDiagram
     CF->>Mail: send 6-digit code
     App->>CF: verifySchoolEmailOTP({code})
     CF->>FS: read otp_codes/{uid} + hash compare
-    CF->>FS: update users/{uid}<br/>(verificationStatus: "verified")
+    CF->>FS: update users/{uid}<br/>(verificationStatus: "verified",<br/>approved: true)
     CF->>FS: delete otp_codes/{uid}
 ```
 
@@ -116,8 +122,11 @@ sequenceDiagram
 | `schoolEmail` | the verified address |
 | `verifiedAt` | server timestamp |
 | `verifiedVia` | `otp` |
+| `approved` | auto-set to `true` on OTP success |
+| `approvedAt` | server timestamp at OTP success |
+| `approvedVia` | `otp` (auto via OTP) / `admin` (manual grant) |
 
-On signup, `ProfileSetupScreen` writes `verificationStatus: 'pending'` and immediately pushes the verification screen (`dismissible: false`).
+On signup, `ProfileSetupScreen` writes `verificationStatus: 'pending'` and pushes the verification screen. The user can verify or tap "Skip for now" — skipping enters the home screen but write actions remain blocked until verification.
 
 ### Security / rate limits
 

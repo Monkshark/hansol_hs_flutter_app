@@ -159,6 +159,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get emailVerify_rateLimited => '잠시 후 다시 시도해주세요';
 
   @override
+  String get emailVerify_skip => '나중에 하기';
+
+  @override
   String get suspend_banner_title => '현재 계정이 정지되어 있어요';
 
   @override
@@ -333,6 +336,9 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get profileEdit_photoDeleteFailed => '삭제에 실패했습니다';
+
+  @override
+  String get profileEdit_savingPhotoBlockExit => '사진을 저장하는 중입니다. 잠시만 기다려주세요.';
 
   @override
   String get profileEdit_deleteAccountTitle => '회원 탈퇴';
@@ -558,7 +564,7 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get board_awaitingAdminApproval => '관리자 승인 대기 중입니다';
+  String get board_awaitingAdminApproval => '학교 이메일 인증을 먼저 완료해주세요';
 
   @override
   String get board_categoryAll => '전체';
@@ -1035,7 +1041,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get admin_userManagement => '사용자 관리';
 
   @override
-  String get admin_usersPending => '승인 대기';
+  String get admin_usersPending => '이메일 미인증';
 
   @override
   String get admin_usersSuspended => '정지된 사용자';
@@ -1168,6 +1174,28 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String admin_usersDeleteFinalMessage(Object name) {
     return '$name 계정을 정말 삭제합니까?\n되돌릴 수 없습니다.';
+  }
+
+  @override
+  String get admin_usersDeleteEmailPrompt => '확인을 위해 사용자 이메일을 입력하세요';
+
+  @override
+  String get admin_usersDeleteEmailMismatch => '이메일이 일치하지 않습니다';
+
+  @override
+  String get admin_usersSuspendConfirmTitle => '정지하시겠습니까?';
+
+  @override
+  String admin_usersSuspendConfirmMessage(Object name, Object duration) {
+    return '$name을(를) $duration 동안 정지합니다.';
+  }
+
+  @override
+  String get admin_usersUnsuspendConfirmTitle => '정지를 해제하시겠습니까?';
+
+  @override
+  String admin_usersUnsuspendConfirmMessage(Object name) {
+    return '$name의 정지를 해제합니다.';
   }
 
   @override
@@ -2042,7 +2070,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get settings_approved => '승인됨';
 
   @override
-  String get settings_pendingApproval => '승인 대기중';
+  String get settings_pendingApproval => '이메일 미인증';
 
   @override
   String get settings_logout => '로그아웃';

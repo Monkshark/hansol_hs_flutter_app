@@ -82,7 +82,9 @@ erDiagram
 | `studentId` | string | student number (current students) |
 | `userType` | string | `student` / `graduate` / `teacher` / `parent` |
 | `role` | string | `user` / `moderator` / `auditor` / `manager` / `admin` |
-| `approved` | boolean | admin-approved flag |
+| `approved` | boolean | active-user flag. Auto-set to `true` when OTP is verified (`verifySchoolEmailOTP` writes it alongside `verificationStatus`) |
+| `approvedAt` | timestamp | approval timestamp |
+| `approvedVia` | string | `otp` (auto) / `admin` (manual grant) |
 | `verificationStatus` | string | `pending` / `verified` (school email OTP). Missing field is grandfathered to `verified` |
 | `schoolEmail` | string | verified school email (set on success) |
 | `verifiedAt` | timestamp | verification completion time |

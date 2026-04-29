@@ -4,6 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hansol_high_school/data/auth_service.dart';
 import 'package:hansol_high_school/l10n/app_localizations.dart';
+import 'package:hansol_high_school/main.dart' show providerContainer;
+import 'package:hansol_high_school/providers/auth_provider.dart';
+import 'package:hansol_high_school/providers/settings_provider.dart';
 import 'package:hansol_high_school/styles/app_colors.dart';
 
 const List<String> _schoolDomains = [
@@ -181,6 +184,8 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           .httpsCallable('verifySchoolEmailOTP')
           .call({'code': code});
       AuthService.clearProfileCache();
+      await providerContainer.read(userProfileProvider.notifier).refresh();
+      providerContainer.read(appRefreshProvider.notifier).refresh();
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l.emailVerify_success)),
@@ -407,6 +412,19 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                         ),
                       ),
                     ],
+                  ),
+                ],
+
+                if (widget.dismissible) ...[
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(
+                        l.emailVerify_skip,
+                        style: TextStyle(color: AppColors.theme.darkGreyColor),
+                      ),
+                    ),
                   ),
                 ],
 

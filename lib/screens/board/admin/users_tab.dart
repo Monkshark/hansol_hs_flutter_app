@@ -29,11 +29,18 @@ class UsersTabState extends State<UsersTab> {
   Future<QuerySnapshot<Map<String, dynamic>>> _fetch() =>
       FirebaseFirestore.instance.collection('users').get();
 
-  void refresh() => setState(() => _future = _fetch());
+  void refresh() {
+    if (!mounted) return;
+    setState(() => _future = _fetch());
+  }
 
   void _refreshAll() {
     refresh();
-    widget.onChanged?.call();
+    try {
+      widget.onChanged?.call();
+    } catch (e) {
+      log('UsersTab: onChanged error: $e');
+    }
   }
 
   Future<void> _logAdminAction(String action, String targetUid, String targetName) async {
@@ -139,6 +146,7 @@ class UsersTabState extends State<UsersTab> {
               return ErrorView(message: AppLocalizations.of(context)!.error_loadFailed);
             }
             final isAdmin = myProfileSnap.data?.isAdmin ?? false;
+            final isManager = myProfileSnap.data?.isManager ?? false;
 
             return ListView.separated(
               shrinkWrap: true,
@@ -238,7 +246,7 @@ class UsersTabState extends State<UsersTab> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          if (widget.filter == 'pending') ...[
+                          if (widget.filter == 'pending' && isManager) ...[
                             _actionBtn(l.admin_usersApprove, AppColors.theme.primaryColor, () async {
                               try {
                                 await docs[index].reference.update({'approved': true});
@@ -250,18 +258,20 @@ class UsersTabState extends State<UsersTab> {
                                 if (context.mounted) showErrorSnackbar(context, e);
                               }
                             }),
-                            const SizedBox(width: 6),
-                            _actionBtn(l.admin_usersReject, Colors.red, () async {
-                              try {
-                                await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
-                                await docs[index].reference.delete();
-                                await _logAdminAction('거절', uid, name);
-                                if (mounted) _refreshAll();
-                              } catch (e) {
-                                log('UsersTab: reject error: $e');
-                                if (context.mounted) showErrorSnackbar(context, e);
-                              }
-                            }),
+                            if (isAdmin) ...[
+                              const SizedBox(width: 6),
+                              _actionBtn(l.admin_usersReject, Colors.red, () async {
+                                try {
+                                  await _sendAccountNotification(uid, l.admin_usersAccountRejected, l.admin_usersRejectedMessage);
+                                  await docs[index].reference.delete();
+                                  await _logAdminAction('거절', uid, name);
+                                  if (mounted) _refreshAll();
+                                } catch (e) {
+                                  log('UsersTab: reject error: $e');
+                                  if (context.mounted) showErrorSnackbar(context, e);
+                                }
+                              }),
+                            ],
                           ],
                           if (widget.filter == 'approved') ...[
                             if (isAdmin && role == 'admin' && uid == AuthService.currentUser?.uid)
@@ -278,31 +288,44 @@ class UsersTabState extends State<UsersTab> {
                             if (isAdmin && role != 'admin') ...[
                               _roleDropdown(context, role, docs[index].reference, uid, name),
                             ],
-                            if (uid != AuthService.currentUser?.uid && !const ['admin', 'manager', 'moderator', 'auditor'].contains(role)) ...[
+                            if (isManager && uid != AuthService.currentUser?.uid && !const ['admin', 'manager', 'moderator', 'auditor'].contains(role)) ...[
                               const SizedBox(width: 6),
                               _actionBtn(l.admin_usersSuspend, Colors.orange, () async {
                                 final hours = await _showSuspendDialog(context, name);
-                                if (hours != null) {
-                                  try {
-                                    final until = DateTime.now().add(Duration(hours: hours));
-                                    await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
-                                    if (!context.mounted) return;
-                                    await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
-                                    await _logAdminAction('정지', uid, name);
-                                    if (mounted) _refreshAll();
-                                  } catch (e) {
-                                    log('UsersTab: suspend error: $e');
-                                    if (context.mounted) showErrorSnackbar(context, e);
-                                  }
+                                if (hours == null || !context.mounted) return;
+                                final confirmed = await _confirmDialog(
+                                  context,
+                                  l.admin_usersSuspendConfirmTitle,
+                                  l.admin_usersSuspendConfirmMessage(name, _formatDuration(context, hours)),
+                                  confirmLabel: l.admin_usersSuspend,
+                                  confirmColor: Colors.orange,
+                                );
+                                if (confirmed != true || !context.mounted) return;
+                                try {
+                                  final until = DateTime.now().add(Duration(hours: hours));
+                                  await docs[index].reference.update({'suspendedUntil': Timestamp.fromDate(until)});
+                                  if (!context.mounted) return;
+                                  await _sendAccountNotification(uid, l.admin_usersAccountSuspended, l.admin_usersSuspendedMessage(_formatDuration(context, hours)));
+                                  await _logAdminAction('정지', uid, name);
+                                  if (mounted) _refreshAll();
+                                } catch (e) {
+                                  log('UsersTab: suspend error: $e');
+                                  if (context.mounted) showErrorSnackbar(context, e);
                                 }
                               }),
-                              const SizedBox(width: 6),
-                              _actionBtn(l.admin_usersDelete, Colors.red, () async {
-                                final first = await _confirmDialog(context, l.admin_usersDeleteConfirm, l.admin_usersDeleteConfirmMessage(name));
-                                if (first != true || !context.mounted) return;
-                                final second = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
-                                if (!context.mounted) return;
-                                if (second == true) {
+                              if (isAdmin) ...[
+                                const SizedBox(width: 6),
+                                _actionBtn(l.admin_usersDelete, Colors.red, () async {
+                                  final first = await _confirmDialog(context, l.admin_usersDeleteConfirm, l.admin_usersDeleteConfirmMessage(name));
+                                  if (first != true || !context.mounted) return;
+                                  final email = (data['email'] ?? '') as String;
+                                  final bool? confirmed;
+                                  if (email.isNotEmpty) {
+                                    confirmed = await _emailConfirmDialog(context, name, email);
+                                  } else {
+                                    confirmed = await _confirmDialog(context, l.admin_usersDeleteFinal, l.admin_usersDeleteFinalMessage(name));
+                                  }
+                                  if (confirmed != true || !context.mounted) return;
                                   try {
                                     await _sendAccountNotification(uid, l.admin_usersAccountDeleted, l.admin_usersDeletedMessage);
                                     await docs[index].reference.delete();
@@ -312,12 +335,20 @@ class UsersTabState extends State<UsersTab> {
                                     log('UsersTab: delete error: $e');
                                     if (context.mounted) showErrorSnackbar(context, e);
                                   }
-                                }
-                              }),
+                                }),
+                              ],
                             ],
                           ],
-                          if (widget.filter == 'suspended') ...[
+                          if (widget.filter == 'suspended' && isManager) ...[
                             _actionBtn(l.admin_usersUnsuspend, AppColors.theme.primaryColor, () async {
+                              final confirmed = await _confirmDialog(
+                                context,
+                                l.admin_usersUnsuspendConfirmTitle,
+                                l.admin_usersUnsuspendConfirmMessage(name),
+                                confirmLabel: l.admin_usersUnsuspend,
+                                confirmColor: AppColors.theme.primaryColor,
+                              );
+                              if (confirmed != true || !context.mounted) return;
                               try {
                                 await docs[index].reference.update({'suspendedUntil': null});
                                 await _sendAccountNotification(uid, l.admin_usersSuspendRemoved, l.admin_usersSuspendRemovedMessage);
@@ -376,17 +407,21 @@ class UsersTabState extends State<UsersTab> {
           if (newRole == null || newRole == currentRole) return;
           try {
             await ref.update({'role': newRole});
-            await FirebaseFirestore.instance.collection('admin_logs').add({
-              'action': 'change_role',
-              'targetUid': uid,
-              'targetName': name,
-              'previousRole': currentRole,
-              'newRole': newRole,
-              'adminUid': AuthService.currentUser?.uid ?? '',
-              'adminName': AuthService.cachedProfile?.displayName ?? '',
-              'createdAt': FieldValue.serverTimestamp(),
-              'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
-            });
+            try {
+              await FirebaseFirestore.instance.collection('admin_logs').add({
+                'action': 'change_role',
+                'targetUid': uid,
+                'targetName': name,
+                'previousRole': currentRole,
+                'newRole': newRole,
+                'adminUid': AuthService.currentUser?.uid ?? '',
+                'adminName': AuthService.cachedProfile?.displayName ?? '',
+                'createdAt': FieldValue.serverTimestamp(),
+                'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+              });
+            } catch (e) {
+              log('UsersTab: roleChange log error: $e');
+            }
             if (mounted) _refreshAll();
           } catch (e) {
             log('UsersTab: roleChange error: $e');
@@ -492,8 +527,15 @@ class UsersTabState extends State<UsersTab> {
     }
   }
 
-  Future<bool?> _confirmDialog(BuildContext context, String title, String content) {
+  Future<bool?> _confirmDialog(
+    BuildContext context,
+    String title,
+    String content, {
+    String? confirmLabel,
+    Color confirmColor = Colors.red,
+  }) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final label = confirmLabel ?? AppLocalizations.of(context)!.admin_usersDelete;
     return showDialog<bool>(
       context: context,
       builder: (ctx) => Dialog(
@@ -522,18 +564,90 @@ class UsersTabState extends State<UsersTab> {
                   Expanded(child: ElevatedButton(
                     onPressed: () => Navigator.pop(ctx, true),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red,
+                      backgroundColor: confirmColor,
                       foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       elevation: 0,
                     ),
-                    child: Text(AppLocalizations.of(context)!.admin_usersDelete),
+                    child: Text(label),
                   )),
                 ],
               ),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Future<bool?> _emailConfirmDialog(BuildContext context, String name, String email) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final controller = TextEditingController();
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setSt) {
+          final matched = controller.text.trim() == email;
+          return Dialog(
+            backgroundColor: isDark ? const Color(0xFF1E2028) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(AppLocalizations.of(context)!.admin_usersDeleteFinal,
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700,
+                      color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                  const SizedBox(height: 12),
+                  Text(AppLocalizations.of(context)!.admin_usersDeleteFinalMessage(name),
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 13, color: AppColors.theme.darkGreyColor, height: 1.5)),
+                  const SizedBox(height: 8),
+                  Text(AppLocalizations.of(context)!.admin_usersDeleteEmailPrompt,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 12, color: AppColors.theme.darkGreyColor)),
+                  const SizedBox(height: 4),
+                  Text(email, style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.theme.primaryColor)),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: controller,
+                    autofocus: true,
+                    style: TextStyle(color: isDark ? Colors.white : Colors.black87),
+                    decoration: InputDecoration(
+                      hintText: email,
+                      hintStyle: TextStyle(color: AppColors.theme.darkGreyColor),
+                      filled: true,
+                      fillColor: isDark ? const Color(0xFF252830) : const Color(0xFFF5F5F5),
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                    ),
+                    onChanged: (_) => setSt(() {}),
+                  ),
+                  const SizedBox(height: 20),
+                  Row(
+                    children: [
+                      Expanded(child: TextButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
+                      )),
+                      const SizedBox(width: 10),
+                      Expanded(child: ElevatedButton(
+                        onPressed: matched ? () => Navigator.pop(ctx, true) : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          elevation: 0,
+                        ),
+                        child: Text(AppLocalizations.of(context)!.admin_usersDelete),
+                      )),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       ),
     );
   }
