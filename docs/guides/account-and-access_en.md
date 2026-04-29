@@ -66,7 +66,7 @@ Default `role = user` regardless of identity. Admin approval follows.
 
 **Promotion/demotion**: admin-only. Each change is logged in `admin_logs` (before → after).
 
-## Signup & Approval Flow
+## Signup & Verification Flow
 
 ```mermaid
 graph LR
@@ -74,16 +74,21 @@ graph LR
     B -->|no| C[profile setup<br/>identity / student ID / name]
     B -->|yes| D{approved?}
     C --> E[save with approved: false]
-    E --> F[school email OTP verification]
-    F -->|verified| G[approved: true auto-set]
-    G --> H[enter home]
-    D -->|yes| H
-    D -->|no| F
+    E --> F[school email OTP screen<br/>dismissible: true]
+    F -->|Verify → verified| G[approved: true auto-set<br/>full access]
+    F -->|Skip for now| V[enter home<br/>read/browse only]
+    V -.->|write attempt| W[snackbar: please verify school email]
+    W -.-> F
+    D -->|yes| G
+    D -->|no| V
 ```
 
+- The OTP screen pops automatically right after signup but is **dismissible** — users can press "Skip for now" to enter the home screen
 - Passing school-email OTP verification = automatic approval (`verifySchoolEmailOTP` sets `approved: true` alongside `verificationStatus`)
-- There is no separate manual admin approval step. To deactivate a user, admins use suspend or reject instead
-- Staff (`admin`/`manager`/`moderator`/`auditor`) bypass approval/verification — `isApproved()` short-circuits via `isStaff`
+- No separate manual admin approval step. To deactivate a user, admins use suspend or reject
+- Unverified users are blocked from posting/commenting/reporting/chatting (`isApproved()` guard + Firestore `canWrite()`)
+- Staff (`admin`/`manager`/`moderator`/`auditor`) bypass verification — `isApproved()` short-circuits via `isStaff`
+- Users without a student-issued email (parents, some teachers, grandfathered) are activated by admin via the pending tab manual approval
 
 ## School Email Verification (OTP)
 
@@ -121,7 +126,7 @@ sequenceDiagram
 | `approvedAt` | server timestamp at OTP success |
 | `approvedVia` | `otp` (auto via OTP) / `admin` (manual grant) |
 
-On signup, `ProfileSetupScreen` writes `verificationStatus: 'pending'` and immediately pushes the verification screen (`dismissible: false`).
+On signup, `ProfileSetupScreen` writes `verificationStatus: 'pending'` and pushes the verification screen. The user can verify or tap "Skip for now" — skipping enters the home screen but write actions remain blocked until verification.
 
 ### Security / rate limits
 

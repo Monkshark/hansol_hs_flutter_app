@@ -386,6 +386,12 @@ abstract class AppLocalizations {
   /// **'잠시 후 다시 시도해주세요'**
   String get emailVerify_rateLimited;
 
+  /// No description provided for @emailVerify_skip.
+  ///
+  /// In ko, this message translates to:
+  /// **'나중에 하기'**
+  String get emailVerify_skip;
+
   /// No description provided for @suspend_banner_title.
   ///
   /// In ko, this message translates to:
@@ -1133,7 +1139,7 @@ abstract class AppLocalizations {
   /// No description provided for @board_awaitingAdminApproval.
   ///
   /// In ko, this message translates to:
-  /// **'관리자 승인 대기 중입니다'**
+  /// **'학교 이메일 인증을 먼저 완료해주세요'**
   String get board_awaitingAdminApproval;
 
   /// No description provided for @board_categoryAll.
@@ -2027,7 +2033,7 @@ abstract class AppLocalizations {
   /// No description provided for @admin_usersPending.
   ///
   /// In ko, this message translates to:
-  /// **'승인 대기'**
+  /// **'이메일 미인증'**
   String get admin_usersPending;
 
   /// No description provided for @admin_usersSuspended.
@@ -3893,7 +3899,7 @@ abstract class AppLocalizations {
   /// No description provided for @settings_pendingApproval.
   ///
   /// In ko, this message translates to:
-  /// **'승인 대기중'**
+  /// **'이메일 미인증'**
   String get settings_pendingApproval;
 
   /// No description provided for @settings_logout.

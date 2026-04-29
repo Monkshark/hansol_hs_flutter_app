@@ -410,6 +410,19 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
                   ),
                 ],
 
+                if (widget.dismissible) ...[
+                  const SizedBox(height: 12),
+                  Center(
+                    child: TextButton(
+                      onPressed: () => Navigator.of(context).pop(false),
+                      child: Text(
+                        l.emailVerify_skip,
+                        style: TextStyle(color: AppColors.theme.darkGreyColor),
+                      ),
+                    ),
+                  ),
+                ],
+
                 SizedBox(height: MediaQuery.of(context).padding.bottom + 16),
               ],
             ),

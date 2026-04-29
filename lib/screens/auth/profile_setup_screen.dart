@@ -137,7 +137,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
         await Navigator.of(context).push(
           MaterialPageRoute(
-            builder: (_) => const EmailVerificationScreen(dismissible: false),
+            builder: (_) => const EmailVerificationScreen(),
           ),
         );
       }
