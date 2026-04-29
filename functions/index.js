@@ -437,35 +437,6 @@ exports.onChatMessageCreated = onDocumentCreated(
   }
 );
 
-// 기존 사용자에게 일괄로 custom claims 적용 (1회성 마이그레이션)
-// 호출: POST /backfillCustomClaims  (admin SDK 호출이므로 인증 필요 — 임시 토큰)
-exports.backfillCustomClaims = onRequest(async (req, res) => {
-  if (req.method !== "POST") { res.status(405).send("Method Not Allowed"); return; }
-  // 매우 단순한 secret 헤더 검증 (실배포 전 환경변수로 교체)
-  if (req.get("x-admin-secret") !== process.env.BACKFILL_SECRET) {
-    res.status(403).json({ error: "Forbidden" });
-    return;
-  }
-  try {
-    const snap = await getFirestore().collection("users").get();
-    let updated = 0, failed = 0;
-    for (const doc of snap.docs) {
-      const data = doc.data();
-      try {
-        await getAuth().setCustomUserClaims(doc.id, {
-          role: data.role || "user",
-          approved: data.approved === true,
-        });
-        updated++;
-      } catch (_) { failed++; }
-    }
-    res.json({ updated, failed, total: snap.size });
-  } catch (error) {
-    await logError("backfillCustomClaims", error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
 // 신고 rate limit: 5분 내 3건 초과 시 새 신고 자동 삭제 + 로그
 exports.onReportCreated = onDocumentCreated("reports/{reportId}", async (event) => {
   try { await incrementStat("reports"); } catch (_) {}
