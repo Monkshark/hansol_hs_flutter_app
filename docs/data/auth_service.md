@@ -17,8 +17,8 @@ class UserProfile {
   final int classNum;
   final String email;
   final bool approved;
-  final String role;           // 'user' | 'manager' | 'admin'
-  final String userType;       // 'student' | 'graduate' | 'teacher' | 'parent'
+  final String role;                // 'user' | 'moderator' | 'auditor' | 'manager' | 'admin'
+  final String userType;            // 'student' | 'graduate' | 'teacher' | 'parent'
   final String lastProfileUpdate;
   final int? graduationYear;
   final String? teacherSubject;
@@ -26,6 +26,8 @@ class UserProfile {
   final List<String> blockedUsers;
   final String loginProvider;
   final String? profilePhotoUrl;
+  final String verificationStatus;  // 'pending' | 'verified'
+  final String? suspendReason;
 }
 ```
 
@@ -33,11 +35,19 @@ class UserProfile {
 
 | 프로퍼티 | 로직 |
 |----------|------|
-| `isManager` | `role == 'manager' \|\| role == 'admin'` |
 | `isAdmin` | `role == 'admin'` |
+| `isManager` | `role == 'manager' \|\| isAdmin` |
+| `isModerator` | `role == 'moderator' \|\| isManager` |
+| `isAuditor` | `role == 'auditor' \|\| isManager` |
+| `isStaff` | `isModerator \|\| isAuditor` (= admin/manager/moderator/auditor) |
 | `isSuspended` | `suspendedUntil != null && DateTime.now().isBefore(suspendedUntil!)` |
+| `isVerified` | `verificationStatus == 'verified'` |
+| `canWrite` | `isVerified && !isSuspended` |
+| `isStudent` / `isGraduate` / `isTeacher` / `isParent` | `userType == '...'` |
 | `displayName` | userType별 분기: 졸업생/교사/학부모 접두어, 학생은 `studentId + name` |
-| `needsProfileUpdate` | 학생/교사만 해당, 3월 이후 `lastProfileUpdate`가 올해가 아니면 true |
+| `localizedDisplayName(l)` | `displayName`의 다국어 버전 (`l10n` 사용) |
+| `needsProfileUpdate` | 학생/교사만 해당, 3월 1~14일 + `lastProfileUpdate != 올해`면 true |
+| `needsGraduateCheck` | 3학년 학생이 새 학기에 졸업 확인이 필요한지 (3월 1~14일 + 작년 데이터) |
 
 ---
 
@@ -213,10 +223,10 @@ static Future<bool> isApproved()
 
 ```dart
 if (profile.isSuspended) return false;
-return profile.approved || profile.isManager;
+return profile.approved || profile.isStaff;
 ```
 
-정지 상태면 `false`, 매니저/관리자는 승인 불필요
+정지 상태면 `false`, staff(admin/manager/moderator/auditor)는 승인 불필요
 
 ---
 

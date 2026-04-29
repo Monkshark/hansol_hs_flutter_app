@@ -79,11 +79,21 @@ erDiagram
 |---|---|---|
 | `uid` | string (doc id) | Firebase Auth UID, or `kakao:{id}` for Kakao users |
 | `name` | string | real name |
-| `studentId` | string | student number (students/alumni) |
-| `userType` | string | `student` / `alumni` / `teacher` / `parent` |
+| `studentId` | string | student number (current students) |
+| `userType` | string | `student` / `graduate` / `teacher` / `parent` |
 | `role` | string | `user` / `moderator` / `auditor` / `manager` / `admin` |
 | `approved` | boolean | admin-approved flag |
+| `verificationStatus` | string | `pending` / `verified` (school email OTP). Missing field is grandfathered to `verified` |
+| `schoolEmail` | string | verified school email (set on success) |
+| `verifiedAt` | timestamp | verification completion time |
+| `verifiedVia` | string | verification path (`otp`) |
 | `suspendedUntil` | timestamp \| null | expiry; scheduler clears hourly |
+| `suspendReason` | string \| null | reason for suspension (banner display) |
+| `blockedUsers` | string[] | uids the user has blocked |
+| `lastProfileUpdate` | string | `"YYYY"` — tracks new-term grade/class/number refresh |
+| `graduationYear` | int \| null | graduates only |
+| `teacherSubject` | string \| null | teachers only |
+| `loginProvider` | string | `google` / `apple` / `kakao` / `github` |
 | `profilePhotoUrl` | string | Cloud Storage or OAuth profile |
 | `fcmToken` | string | FCM push target |
 | `notiComment` / `notiReply` / `notiChat` / `notiNewPost` / `notiAccount` | boolean | per-category toggles |

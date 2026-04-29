@@ -79,11 +79,21 @@ erDiagram
 |---|---|---|
 | `uid` | string (doc id) | Firebase Auth UID 또는 `kakao:{id}` |
 | `name` | string | 실명 |
-| `studentId` | string | 학번 (재학생/졸업생) |
-| `userType` | string | `student` / `alumni` / `teacher` / `parent` |
+| `studentId` | string | 학번 (재학생) |
+| `userType` | string | `student` / `graduate` / `teacher` / `parent` |
 | `role` | string | `user` / `moderator` / `auditor` / `manager` / `admin` |
 | `approved` | boolean | 관리자 승인 여부 |
+| `verificationStatus` | string | `pending` / `verified` (학교 이메일 OTP 인증 결과). 필드 없으면 `verified`로 grandfathered |
+| `schoolEmail` | string | 인증된 학교 이메일 (성공 시 기록) |
+| `verifiedAt` | timestamp | 인증 완료 시각 |
+| `verifiedVia` | string | 인증 경로 (`otp`) |
 | `suspendedUntil` | timestamp \| null | 정지 만료 시각. 스케줄러가 매시간 청소 |
+| `suspendReason` | string \| null | 정지 사유 (배너 표시용) |
+| `blockedUsers` | string[] | 차단한 사용자 uid 목록 |
+| `lastProfileUpdate` | string | "YYYY" 형식 — 새 학기 학년/반/번호 갱신 추적 |
+| `graduationYear` | int \| null | 졸업생만 |
+| `teacherSubject` | string \| null | 교사만 (담당 과목) |
+| `loginProvider` | string | `google` / `apple` / `kakao` / `github` |
 | `profilePhotoUrl` | string | Cloud Storage 또는 OAuth 프로필 |
 | `fcmToken` | string | FCM 푸시 타겟 |
 | `notiComment` / `notiReply` / `notiChat` / `notiNewPost` / `notiAccount` | boolean | 카테고리별 알림 on/off |
