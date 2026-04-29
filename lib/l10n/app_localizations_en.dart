@@ -1207,6 +1207,29 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get admin_usersDeleteEmailPrompt =>
+      'Type the user\'s email to confirm';
+
+  @override
+  String get admin_usersDeleteEmailMismatch => 'Email does not match';
+
+  @override
+  String get admin_usersSuspendConfirmTitle => 'Suspend this user?';
+
+  @override
+  String admin_usersSuspendConfirmMessage(Object name, Object duration) {
+    return 'Suspend $name for $duration.';
+  }
+
+  @override
+  String get admin_usersUnsuspendConfirmTitle => 'Lift suspension?';
+
+  @override
+  String admin_usersUnsuspendConfirmMessage(Object name) {
+    return 'Lift suspension for $name.';
+  }
+
+  @override
   String admin_usersSuspendedRemaining(Object duration) {
     return 'Remaining: $duration';
   }

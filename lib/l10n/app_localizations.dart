@@ -2282,6 +2282,42 @@ abstract class AppLocalizations {
   /// **'{name} 계정을 정말 삭제합니까?\n되돌릴 수 없습니다.'**
   String admin_usersDeleteFinalMessage(Object name);
 
+  /// No description provided for @admin_usersDeleteEmailPrompt.
+  ///
+  /// In ko, this message translates to:
+  /// **'확인을 위해 사용자 이메일을 입력하세요'**
+  String get admin_usersDeleteEmailPrompt;
+
+  /// No description provided for @admin_usersDeleteEmailMismatch.
+  ///
+  /// In ko, this message translates to:
+  /// **'이메일이 일치하지 않습니다'**
+  String get admin_usersDeleteEmailMismatch;
+
+  /// No description provided for @admin_usersSuspendConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지하시겠습니까?'**
+  String get admin_usersSuspendConfirmTitle;
+
+  /// No description provided for @admin_usersSuspendConfirmMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}을(를) {duration} 동안 정지합니다.'**
+  String admin_usersSuspendConfirmMessage(Object name, Object duration);
+
+  /// No description provided for @admin_usersUnsuspendConfirmTitle.
+  ///
+  /// In ko, this message translates to:
+  /// **'정지를 해제하시겠습니까?'**
+  String get admin_usersUnsuspendConfirmTitle;
+
+  /// No description provided for @admin_usersUnsuspendConfirmMessage.
+  ///
+  /// In ko, this message translates to:
+  /// **'{name}의 정지를 해제합니다.'**
+  String admin_usersUnsuspendConfirmMessage(Object name);
+
   /// No description provided for @admin_usersSuspendedRemaining.
   ///
   /// In ko, this message translates to:

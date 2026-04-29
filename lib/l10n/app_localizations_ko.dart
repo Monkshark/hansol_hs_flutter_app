@@ -1174,6 +1174,28 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
+  String get admin_usersDeleteEmailPrompt => '확인을 위해 사용자 이메일을 입력하세요';
+
+  @override
+  String get admin_usersDeleteEmailMismatch => '이메일이 일치하지 않습니다';
+
+  @override
+  String get admin_usersSuspendConfirmTitle => '정지하시겠습니까?';
+
+  @override
+  String admin_usersSuspendConfirmMessage(Object name, Object duration) {
+    return '$name을(를) $duration 동안 정지합니다.';
+  }
+
+  @override
+  String get admin_usersUnsuspendConfirmTitle => '정지를 해제하시겠습니까?';
+
+  @override
+  String admin_usersUnsuspendConfirmMessage(Object name) {
+    return '$name의 정지를 해제합니다.';
+  }
+
+  @override
   String admin_usersSuspendedRemaining(Object duration) {
     return '남은 기간: $duration';
   }

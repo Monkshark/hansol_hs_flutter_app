@@ -80,6 +80,8 @@ export default function UsersPage() {
 
   async function suspend(uid: string, hours: number) {
     const target = findUser(uid);
+    const label = suspendOptions.find(o => o.hours === hours)?.label ?? `${hours}시간`;
+    if (!confirm(`${target?.name ?? '사용자'}을(를) ${label} 동안 정지하시겠습니까?`)) return;
     const until = new Date(Date.now() + hours * 3600000);
     await updateDoc(doc(db, 'users', uid), { suspendedUntil: Timestamp.fromDate(until) });
     invalidateCache('users:');
@@ -89,6 +91,7 @@ export default function UsersPage() {
 
   async function unsuspend(uid: string) {
     const target = findUser(uid);
+    if (!confirm(`${target?.name ?? '사용자'}의 정지를 해제하시겠습니까?`)) return;
     await updateDoc(doc(db, 'users', uid), { suspendedUntil: null });
     invalidateCache('users:');
     refreshUsers();
@@ -96,9 +99,19 @@ export default function UsersPage() {
   }
 
   async function deleteUser(uid: string) {
-    if (!confirm('계정을 삭제하시겠습니까?')) return;
-    if (!confirm('정말 삭제합니까? 되돌릴 수 없습니다.')) return;
     const target = findUser(uid);
+    if (!confirm(`${target?.name ?? '사용자'} 계정을 삭제하시겠습니까?`)) return;
+    const email = target?.email ?? '';
+    if (email) {
+      const input = prompt(`정말 삭제합니까? 되돌릴 수 없습니다.\n확인을 위해 사용자 이메일을 입력하세요:\n${email}`);
+      if (input === null) return;
+      if (input.trim() !== email) {
+        alert('이메일이 일치하지 않습니다.');
+        return;
+      }
+    } else {
+      if (!confirm('정말 삭제합니까? 되돌릴 수 없습니다.')) return;
+    }
     await deleteDoc(doc(db, 'users', uid));
     setUsers(prev => (prev || []).filter(u => u.uid !== uid));
     await writeAdminLog(profile, 'delete_user', { targetUid: uid, targetName: target?.name ?? '' });
