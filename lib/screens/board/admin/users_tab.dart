@@ -29,11 +29,18 @@ class UsersTabState extends State<UsersTab> {
   Future<QuerySnapshot<Map<String, dynamic>>> _fetch() =>
       FirebaseFirestore.instance.collection('users').get();
 
-  void refresh() => setState(() => _future = _fetch());
+  void refresh() {
+    if (!mounted) return;
+    setState(() => _future = _fetch());
+  }
 
   void _refreshAll() {
     refresh();
-    widget.onChanged?.call();
+    try {
+      widget.onChanged?.call();
+    } catch (e) {
+      log('UsersTab: onChanged error: $e');
+    }
   }
 
   Future<void> _logAdminAction(String action, String targetUid, String targetName) async {
@@ -400,17 +407,21 @@ class UsersTabState extends State<UsersTab> {
           if (newRole == null || newRole == currentRole) return;
           try {
             await ref.update({'role': newRole});
-            await FirebaseFirestore.instance.collection('admin_logs').add({
-              'action': 'change_role',
-              'targetUid': uid,
-              'targetName': name,
-              'previousRole': currentRole,
-              'newRole': newRole,
-              'adminUid': AuthService.currentUser?.uid ?? '',
-              'adminName': AuthService.cachedProfile?.displayName ?? '',
-              'createdAt': FieldValue.serverTimestamp(),
-              'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
-            });
+            try {
+              await FirebaseFirestore.instance.collection('admin_logs').add({
+                'action': 'change_role',
+                'targetUid': uid,
+                'targetName': name,
+                'previousRole': currentRole,
+                'newRole': newRole,
+                'adminUid': AuthService.currentUser?.uid ?? '',
+                'adminName': AuthService.cachedProfile?.displayName ?? '',
+                'createdAt': FieldValue.serverTimestamp(),
+                'expiresAt': Timestamp.fromDate(DateTime.now().add(const Duration(days: 30))),
+              });
+            } catch (e) {
+              log('UsersTab: roleChange log error: $e');
+            }
             if (mounted) _refreshAll();
           } catch (e) {
             log('UsersTab: roleChange error: $e');
