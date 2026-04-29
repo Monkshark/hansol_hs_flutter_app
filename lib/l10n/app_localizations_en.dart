@@ -34,7 +34,97 @@ class AppLocalizationsEn extends AppLocalizations {
   String get login_githubContinue => 'Continue with GitHub';
 
   @override
+  String get login_microsoftContinue => 'Continue with Microsoft';
+
+  @override
   String get login_skipButton => 'Do it later';
+
+  @override
+  String get login_consentTitle =>
+      'Please agree to the following to use the service';
+
+  @override
+  String get login_consentAll => 'Agree to all';
+
+  @override
+  String get login_consentAge => '[Required] I am 14 years of age or older';
+
+  @override
+  String get login_consentTerms => '[Required] I agree to the Terms of Service';
+
+  @override
+  String get login_consentTermsView => 'View';
+
+  @override
+  String get login_consentPrivacy => '[Required] I agree to the Privacy Policy';
+
+  @override
+  String get login_consentPrivacyView => 'View';
+
+  @override
+  String get login_consentRequired =>
+      'You must agree to all required items to sign up';
+
+  @override
+  String get verify_required_title => 'Verification required';
+
+  @override
+  String get verify_required_body =>
+      'You must complete school email verification before posting, commenting, or reporting.';
+
+  @override
+  String get verify_required_action => 'Verify';
+
+  @override
+  String get verify_login_required => 'This feature requires sign-in';
+
+  @override
+  String get verify_badge_unverified => 'Unverified';
+
+  @override
+  String get suspend_banner_title => 'Your account is currently suspended';
+
+  @override
+  String suspend_banner_remaining(Object days) {
+    return 'Remaining: $days days';
+  }
+
+  @override
+  String get suspend_banner_permanent => 'Permanent suspension';
+
+  @override
+  String suspend_banner_reason(Object reason) {
+    return 'Reason: $reason';
+  }
+
+  @override
+  String get suspend_banner_appeal => 'Appeal';
+
+  @override
+  String get suspend_blocked_action =>
+      'This action is unavailable while suspended';
+
+  @override
+  String get soft_deleted_label => 'This post has been hidden';
+
+  @override
+  String get soft_deleted_comment => 'This comment has been hidden';
+
+  @override
+  String get community_rules_title => 'Community Rules';
+
+  @override
+  String get community_rules_empty => 'No rules have been published yet';
+
+  @override
+  String community_rules_version(Object version) {
+    return 'Version $version';
+  }
+
+  @override
+  String community_rules_effectiveDate(Object date) {
+    return 'Effective: $date';
+  }
 
   @override
   String get profileSetup_nameRequired => 'Please enter your name';
@@ -531,7 +621,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get post_reportReasonPrivacy => 'Personal Info Exposure';
 
   @override
+  String get post_reportReasonDefamation => 'Defamation';
+
+  @override
+  String get post_reportReasonFlooding => 'Flooding';
+
+  @override
+  String get post_reportReasonMisinfo => 'Misinformation';
+
+  @override
   String get post_reportReasonOther => 'Other';
+
+  @override
+  String get post_reportOtherHint => 'Please enter at least 10 characters';
+
+  @override
+  String get post_reportOtherTooShort =>
+      'Other reason must be at least 10 characters';
 
   @override
   String get post_reportButton => 'Report';
@@ -541,6 +647,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get post_reportSuccess => 'Report submitted';
+
+  @override
+  String get appeal_title => 'Appeal';
+
+  @override
+  String get appeal_intro =>
+      'Please write your appeal regarding the suspension. Only one submission is allowed.';
+
+  @override
+  String get appeal_hint =>
+      'Write the reason for your appeal (max 500 characters)';
+
+  @override
+  String get appeal_submit => 'Submit';
+
+  @override
+  String get appeal_alreadySubmitted => 'You have already submitted an appeal';
+
+  @override
+  String get appeal_submitted => 'Appeal submitted';
+
+  @override
+  String get appeal_tooShort => 'Please enter at least 10 characters';
+
+  @override
+  String appeal_charCount(Object current) {
+    return '$current/500';
+  }
+
+  @override
+  String get withdraw_graceTitle => 'Account Withdrawal';
+
+  @override
+  String get withdraw_graceBody =>
+      'For 30 days after withdrawal, you can recover your account by signing in again. After 30 days, the account and all activity data are permanently deleted.';
+
+  @override
+  String get withdraw_anonymizeNotice =>
+      'Your posts and comments are immediately anonymized but remain visible to other users.';
+
+  @override
+  String get withdraw_blockedSuspended =>
+      'You cannot withdraw while suspended. Please try again after the suspension ends.';
+
+  @override
+  String get withdraw_scheduled =>
+      'Withdrawal scheduled. Your account will be permanently deleted in 30 days.';
+
+  @override
+  String get withdraw_confirmAction => 'Submit withdrawal';
+
+  @override
+  String get promotion_classCheckTitle => 'New School Year Check';
+
+  @override
+  String promotion_classCheckBody(Object grade, Object classNum) {
+    return 'Are you still grade $grade, class $classNum?';
+  }
+
+  @override
+  String get promotion_classCheckYes => 'Yes, it\'s correct';
+
+  @override
+  String get promotion_classCheckNo => 'No, I need to update';
+
+  @override
+  String get promotion_graduateTitle => 'Graduation Check';
+
+  @override
+  String get promotion_graduateBody =>
+      'Did you graduate this year? Switching to graduate removes grade/class info and unlocks graduate-only features.';
+
+  @override
+  String get promotion_graduateYes => 'I graduated';
+
+  @override
+  String get promotion_graduateNo => 'Still enrolled';
+
+  @override
+  String get promotion_updated => 'Profile updated';
 
   @override
   String get post_found => 'Found';
@@ -848,6 +1034,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get admin_usersRemoveManager => 'Remove Manager';
+
+  @override
+  String get admin_usersMakeModerator => 'Moderator';
+
+  @override
+  String get admin_usersRemoveModerator => 'Remove Moderator';
+
+  @override
+  String get admin_usersMakeAuditor => 'Auditor';
+
+  @override
+  String get admin_usersRemoveAuditor => 'Remove Auditor';
+
+  @override
+  String get admin_usersRoleUser => 'User';
 
   @override
   String get admin_usersMakeAdmin => 'Admin';
@@ -1732,6 +1933,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_notification => 'Notification Settings';
 
   @override
+  String get settings_a11ySection => 'Accessibility';
+
+  @override
+  String get settings_fontScale => 'Font Size';
+
+  @override
+  String get settings_fontScaleNormal => 'Normal';
+
+  @override
+  String get settings_fontScaleLarge => 'Large';
+
+  @override
+  String get settings_fontScaleXLarge => 'Extra Large';
+
+  @override
+  String get settings_highContrast => 'High Contrast';
+
+  @override
+  String get settings_colorBlindMode => 'Color Blind Filter';
+
+  @override
+  String get settings_colorBlindNone => 'Off';
+
+  @override
+  String get settings_colorBlindProtanopia => 'Protanopia';
+
+  @override
+  String get settings_colorBlindDeuteranopia => 'Deuteranopia';
+
+  @override
+  String get settings_colorBlindTritanopia => 'Tritanopia';
+
+  @override
   String get settings_feedbackSection => 'Feedback';
 
   @override
@@ -1794,10 +2028,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settings_loginGoogle => 'Google Login';
 
   @override
+  String get settings_loginMicrosoft => 'Microsoft Login';
+
+  @override
   String get settings_privacyTitle => 'Privacy Policy';
 
   @override
-  String get settings_privacyEffectiveDate => 'Effective Date: April 10, 2026';
+  String get settings_privacyEffectiveDate => 'Effective Date: May 1, 2026';
 
   @override
   String get settings_privacyIntro =>
@@ -1813,7 +2050,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection1Content =>
-      '1. Registration & Authentication: Identity verification via social login (Google, Apple, Kakao, GitHub)\n2. Profile Management: Identifying school members (students, alumni, teachers, parents) and grade/class info\n3. Board Service: Posts, comments, likes, bookmarks, voting, anonymous posts\n4. Chat Service: User-to-user messaging\n5. Notifications: Meal alerts, comments, mentions, popular posts, new posts, chat, account status push notifications\n6. School Info: Meal menus, timetable, and local notifications\n7. Grade Management: Exam scores stored locally with encryption (not transmitted to server)\n8. App Improvement: Usage statistics and crash collection for stability\n9. Abuse Prevention: Reports, blocks, account suspension for service integrity';
+      '1. Registration & Identity Verification: Member identification via social login (Google, Microsoft, Apple, Kakao) and school email domain verification\n2. Profile Management: Identifying school members (students, graduates, teachers) and managing grade/class/number/student ID with duplicate prevention\n3. Board Service: Posts, comments, likes, bookmarks, voting, anonymous posts, reports, appeals\n4. Chat Service: User-to-user messaging\n5. Notification Service: Meal, timetable, board, account status push and local notifications\n6. School Info: Meal menus and timetable\n7. Personal Study Management: Exam and target scores stored locally with encryption (not transmitted to server)\n8. App Improvement: Usage statistics and crash collection for stability\n9. Abuse Prevention & Dispute Resolution: Reports, blocks, suspensions, appeals, multi-account abuse prevention, dispute resolution';
 
   @override
   String get settings_privacySection2Title =>
@@ -1824,28 +2061,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection2RequiredContent =>
-      '• Name: From social login profile or direct input\n• Email: Auto-collected from social login provider\n• UID: Auto-generated during Firebase authentication\n• Login Provider: Auto-collected during social login\n• User Type: Direct selection (student/alumnus/teacher/parent)\n• Grade/Class: Direct input';
+      '• Name: From social login profile or direct input\n• Email: Auto-collected from social login provider\n• UID: Auto-generated during Firebase authentication\n• Login Provider: Auto-collected during Google/Microsoft/Apple/Kakao login\n• User Type: Direct selection (student/graduate/teacher)\n• Student ID: Auto-extracted from school email domain or registered via OTP verification\n• Grade/Class/Number: Direct input (renewed each academic year)\n• School Email: For student ID verification (@edu.sje.go.kr or @sjhansol.sjeduhs.kr)';
 
   @override
   String get settings_privacySection2Optional => 'Optional Items';
 
   @override
   String get settings_privacySection2OptionalContent =>
-      '• Profile Picture: From social login or direct upload\n• Graduation Year: Direct input if alumnus\n• Subject: Direct input if teacher';
+      '• Profile Picture: From social login or direct upload\n• Graduation Year: Direct input if graduate\n• Subject: Direct selection if teacher';
 
   @override
   String get settings_privacySection2Auto => 'Auto-Generated During Use';
 
   @override
   String get settings_privacySection2AutoContent =>
-      '• Posts, comments, chat content (text and images)\n• Interaction records (likes, dislikes, bookmarks, voting)\n• Report and block records\n• Search history: Up to 10 recent searches (stored locally only)\n• Notification settings (push/meal on/off and times)\n• D-day List: Title, date, and pin status (synced to account via Firestore)';
+      '• Posts, comments, chat content (text and images)\n• Interaction records (likes, dislikes, bookmarks, voting)\n• Report, block, suspension, and appeal records\n• Student ID verification history (timestamp, verification method)\n• Consent records (age 14+, terms of service, privacy policy, community guidelines consent timestamps)\n• Search history: Up to 10 recent searches (stored locally only)\n• Notification settings (push/meal on/off and times)\n• D-day List: Title, date, and pin status (synced to account via Firestore)';
 
   @override
   String get settings_privacySection2AutoCollect => 'Auto-Collected Items';
 
   @override
   String get settings_privacySection2AutoCollectContent =>
-      '• FCM Device Token: For push notification delivery\n• Usage Logs: Screen views, login/logout, post activity (Firebase Analytics)\n• Error/Crash Info: Stack trace, OS version, app version (Firebase Crashlytics)\n• Device Info: OS type/version, screen size, app version (Firebase SDK)';
+      '• FCM Device Token: For push notification delivery\n• Device Identifier (installationId): For abuse prevention (preventing duplicate reports, blocking suspension evasion)\n• Usage Logs: Screen views, login/logout, post activity (Firebase Analytics)\n• Error/Crash Info: Stack trace, OS version, app version (Firebase Crashlytics)\n• Device Info: OS type/version, screen size, app version (Firebase SDK)';
 
   @override
   String get settings_privacySection2LocalOnly =>
@@ -1860,7 +2097,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection3Content =>
-      'The App deletes information without delay after collection purposes are fulfilled.\n\n• Member Info (Profile/Auth): Until account withdrawal\n• Posts, Comments, Images: 4 years from creation (except pinned)\n• Chat Messages: Until account withdrawal\n• D-day List: Until account withdrawal\n• Usage Logs (Analytics): 14 months from collection\n• Crash Reports (Crashlytics): 90 days from collection';
+      'The App deletes information without delay after collection purposes are fulfilled.\n\n• Member Info (Profile/Auth): Until account withdrawal\n• Active Posts, Comments, Images: 3 years from creation (except pinned)\n• Author-deleted posts (no reports): Permanently destroyed after 30 days\n• Author-deleted posts (under report processing): Permanently destroyed 90 days after processing completion\n• Operator-removed posts: Retained until 3 years from creation, then permanently destroyed\n• Chat Messages: Until account withdrawal\n• D-day List: Until account withdrawal\n• Admin action logs (admin_logs): 3 years\n• Withdrawal grace data (UID, withdrawal date, suspension history hash): 30 days from withdrawal\n• Usage Logs (Analytics): 14 months from collection\n• Crash Reports (Crashlytics): 90 days from collection\n\nBasis for 3-year retention: Article 3(1) of the Personal Information Protection Act (minimum processing principle), proportional to the high school curriculum (3 years).\nBasis for 30-day post-withdrawal grace: Abuse prevention and dispute resolution (Article 36(2), Enforcement Decree of the Act on Consumer Protection in Electronic Commerce Article 6).';
 
   @override
   String get settings_privacySection4Title =>
@@ -1876,7 +2113,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection5Content =>
-      'The App outsources the following personal information processing tasks:\n\n• Google LLC (Firebase): Authentication, data storage, push notifications, analytics, crash reporting, hosting — Location: USA\n• Google LLC: Google account login — Location: USA\n• Apple Inc.: Apple account login — Location: USA\n• Kakao Corp.: Kakao account login — Location: South Korea\n• GitHub Inc. (Microsoft): GitHub account login — Location: USA';
+      'The App outsources the following personal information processing tasks:\n\n• Google LLC (Firebase): Authentication, data storage, push notifications, analytics, crash reporting, hosting — Location: USA\n• Google LLC: Google account login, Gmail SMTP for student ID verification OTP delivery — Location: USA\n• Microsoft Corporation: Microsoft account login (including school Outlook domain) — Location: USA\n• Apple Inc.: Apple account login — Location: USA\n• Kakao Corp.: Kakao account login — Location: South Korea';
 
   @override
   String get settings_privacySection6Title =>
@@ -1884,7 +2121,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection6Content =>
-      'The App transfers personal information overseas in accordance with Article 28-8 of the Personal Information Protection Act:\n\n• Recipient: Google LLC\n• Country: United States\n• Items: Member info, posts, comments, chat content, images, usage logs, error info, FCM tokens\n• Purpose: Service delivery via cloud servers and app stability improvement\n• Retention: Same as Article 3\n• Safeguards: Google Cloud security certifications (SOC 2, ISO 27001), TLS encryption in transit, AES-256 encryption at rest';
+      'The App transfers personal information overseas in accordance with Article 28-8 of the Personal Information Protection Act:\n\n• Recipients: Google LLC, Microsoft Corporation, Apple Inc.\n• Country: United States\n• Items: Member info, posts/comments/chat content, images, usage logs, error info, FCM tokens, device identifiers\n• Purpose: Service delivery via cloud servers, social login authentication, app stability improvement\n• Retention: Same as Article 3\n• Safeguards: Security certifications (SOC 2, ISO 27001), TLS encryption in transit, AES-256 encryption at rest\n• If refused: The corresponding social login or cloud-based service will be unavailable.';
 
   @override
   String get settings_privacySection7Title =>
@@ -1892,7 +2129,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection7Content =>
-      'Users (data subjects) may exercise the following rights at any time:\n\n1. Right to access: View your personal information processing status.\n2. Right to correction/deletion: Correct name, photo, grade, class via profile edit; delete your posts and comments directly.\n3. Right to suspend processing: Request suspension of personal information processing.\n4. Right to withdraw consent (account deletion): Withdraw consent and delete account via Settings → Delete Account. All server-stored data is immediately deleted.\n\nThese rights can be exercised through in-app features or by contacting the Privacy Officer below.\n\n※ For children under 14, a legal guardian may exercise these rights on their behalf.';
+      'Users (data subjects) may exercise the following rights at any time:\n\n1. Right to access: View your personal information processing status.\n2. Right to correction/deletion: Correct name, photo, grade, class via profile edit; delete (hide) your posts and comments directly.\n3. Right to suspend processing: Request suspension of personal information processing. Account withdrawal is interpreted as a suspension request.\n4. Right to withdraw consent (account withdrawal): Withdraw consent and delete account via Settings → Delete Account. App use stops immediately, and minimal data (UID, withdrawal date, suspension history) is retained for 30 days for abuse prevention and dispute resolution before permanent destruction. Posts and comments remain with the author anonymized to \"Withdrawn User\".\n5. Right to data portability: Receive a copy of your personal information (ZIP format: PDF, JSON, images) via the in-app \"Download My Data\" feature (limited to once per 30 days; download link sent by email; expires in 7 days).\n6. Right to explanation/objection regarding automated decisions: Request explanations or file appeals against automatic suspensions, automatic destruction, automated report aggregation, etc.\n\nThese rights can be exercised through in-app features or by contacting the Privacy Officer below.\n\n※ For children under 14, a legal guardian may exercise these rights on their behalf.';
 
   @override
   String get settings_privacySection8Title =>
@@ -1900,14 +2137,14 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection8Content =>
-      'The App destroys personal information without delay when the retention period expires or the processing purpose is achieved.\n\n[Destruction Procedures]\n• Account deletion: Firebase auth deletion, Firestore profile document and sub-collections batch deletion\n• Automatic post destruction: Non-pinned posts older than 4 years with their images and comments are automatically batch deleted\n• Device data: SharedPreferences and SecureStorage data automatically deleted upon app removal\n\n[Destruction Methods]\n• Electronic files: Permanently deleted using irrecoverable methods\n• Server data: Documents and files permanently deleted from Firebase Firestore/Storage';
+      'The App destroys personal information without delay when the retention period expires or the processing purpose is achieved.\n\n[Destruction Procedures]\n• Account withdrawal: App use stops immediately (processing suspension); after 30 days, Firebase authentication, Firestore profile, sub-collections, studentIds occupancy release, and content authorship anonymization are batch processed\n• Automatic post destruction: Active posts permanently deleted (with comments and images) after 3 years from creation. Hidden posts are retained 30 days, 90 days, or 3 years differentially based on cause before permanent destruction\n• Data export downloads: Automatically deleted from Storage 7 days after generation\n• OTP verification codes: Automatically deleted 30 minutes after expiration\n• Device data: SharedPreferences and SecureStorage data automatically deleted upon app removal\n\n[Destruction Methods]\n• Electronic files: Permanently deleted using irrecoverable methods\n• Server data: Documents and files permanently deleted from Firebase Firestore/Storage';
 
   @override
   String get settings_privacySection9Title => 'Article 9 (Security Measures)';
 
   @override
   String get settings_privacySection9Content =>
-      'The App takes the following security measures in accordance with Article 29 of the Personal Information Protection Act:\n\n1. Transport encryption: All server communications are encrypted with HTTPS/TLS.\n2. Access control: Firestore Security Rules restrict modifications to own data only, with separated admin privileges.\n3. Sensitive data encryption: Exam scores and other sensitive data are encrypted using Android Keystore / iOS Keychain.\n4. App integrity verification: Firebase App Check (Android Play Integrity) prevents unauthorized access.\n5. No password storage: Only social login is used; the app does not store or manage passwords directly.\n6. Abuse prevention: Report feature has rate limiting of 3 reports per 5 minutes.';
+      'The App takes the following security measures in accordance with Article 29 of the Personal Information Protection Act:\n\n1. Transport encryption: All server communications are encrypted with HTTPS/TLS.\n2. Access control: Firestore Security Rules restrict modifications to own data only, with administrator privileges separated into 5 levels (admin / manager / moderator / auditor / user) under the principle of least privilege. Moderators and auditors cannot directly access personal information (name, email, student ID, etc.).\n3. Sensitive data encryption: Exam scores and other sensitive data are encrypted using Android Keystore / iOS Keychain.\n4. OTP code protection: Student ID verification OTP codes are stored only as SHA-256 hashes, not in plaintext.\n5. App integrity verification: Firebase App Check (Android Play Integrity) prevents unauthorized access.\n6. No password storage: Only social login is used; the app does not store or manage passwords directly.\n7. Abuse prevention: Report frequency limiting, single-vote handling for reports from the same device, suspension-history device tracking (banned_devices), and OTP send-rate limits are applied.\n8. Administrator action logs: All operator actions are recorded in admin_logs and reviewed periodically.';
 
   @override
   String get settings_privacySection10Title =>
@@ -1929,17 +2166,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection11Content =>
-      'The App provides anonymous posting on the bulletin board. Author information (name, etc.) of anonymous posts and comments is not shown to other users. However, author identification information (UID) is retained on the server for service operation and report processing purposes.';
+      'The App provides anonymous posting on the bulletin board. Author information (name, etc.) of anonymous posts and comments is not shown to other users. However, author identification information (UID) is retained on the server for service operation and report processing purposes. Upon account withdrawal, the author is immediately anonymized to \"Withdrawn User\", after which point even operators cannot identify the author.';
 
   @override
   String get settings_privacySection12Title => 'Article 12 (Children Under 14)';
 
   @override
   String get settings_privacySection12Content =>
-      'The App primarily targets high school students and school personnel, and does not collect personal information from children under 14. If a user is confirmed to be under 14, registration may be restricted, and collected information will be destroyed without delay.';
+      'The App primarily targets high school students and school personnel, and does not collect personal information from children under 14. If a user is confirmed to be under 14, registration is restricted, and collected information will be destroyed without delay.';
 
   @override
-  String get settings_privacySection13Title => 'Article 13 (Privacy Officer)';
+  String get settings_privacySectionAutomatedTitle =>
+      'Article 13 (Automated Decisions)';
+
+  @override
+  String get settings_privacySectionAutomatedContent =>
+      'The App performs the following automated decisions.\n\n1. Automated report aggregation: When 5 or more distinct users report the same post, it is automatically registered to the administrator queue, and reports from the same device or IP are counted as a single vote.\n2. Progressive suspension: Based on the suspension count, 7 days / 14 days / 21 days / 30 days / permanent is applied automatically, combining automatic and manual suspensions.\n3. Automatic suspension lifting: Suspensions are automatically lifted upon expiration and notified via FCM.\n4. Automatic post destruction: Posts, comments, and images are automatically and permanently destroyed after the retention period.\n5. Automatic destruction 30 days after withdrawal: All member information is automatically and permanently destroyed 30 days after withdrawal.\n6. Automatic data download link expiration: Data export download links are automatically deleted 7 days after generation.\n\nUsers may request explanations of the above automated decisions or file appeals once via the in-app \"Appeal\" form. Appeals are processed within 3 days; if accepted, the suspension is lifted and the count is reduced. If rejected, a response is sent by email, and re-examination requests must be made through email only.\n\n[Basis] Personal Information Protection Act Article 4(5), Article 37-2 (effective 2024)';
+
+  @override
+  String get settings_privacySection13Title => 'Article 14 (Privacy Officer)';
 
   @override
   String get settings_privacySection13Content =>
@@ -1947,7 +2192,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection14Title =>
-      'Article 14 (Remedies for Rights Infringement)';
+      'Article 15 (Remedies for Rights Infringement)';
 
   @override
   String get settings_privacySection14Content =>
@@ -1994,11 +2239,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settings_privacySection15Title =>
-      'Article 15 (Changes to Privacy Policy)';
+      'Article 16 (Changes to Privacy Policy)';
 
   @override
   String get settings_privacySection15Content =>
-      'This Privacy Policy is effective from the enforcement date and may be amended due to changes in laws, policies, or services. Any changes will be announced via in-app notices or push notifications at least 7 days before the enforcement date.\n\n• Announcement date: April 10, 2026\n• Enforcement date: April 10, 2026';
+      'This Privacy Policy is effective from the enforcement date and may be amended due to changes in laws, policies, or services. Any changes will be announced via in-app notices or push notifications at least 7 days before the enforcement date, and material changes will require renewed consent.\n\n• Announcement date: April 24, 2026\n• Enforcement date: May 1, 2026';
 
   @override
   String get chat_title => 'Chat';

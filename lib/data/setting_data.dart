@@ -35,6 +35,18 @@ class SettingData {
   set isDarkMode(bool value) => _sharedPreferences.setBool('isDarkMode', value);
   bool get isDarkMode => _sharedPreferences.getBool('isDarkMode') ?? false;
 
+  /// 접근성: 큰 글씨 (1.0 = 보통, 1.3 = 큼, 1.6 = 매우 큼)
+  set fontScale(double value) => _sharedPreferences.setDouble('a11y_fontScale', value);
+  double get fontScale => _sharedPreferences.getDouble('a11y_fontScale') ?? 1.0;
+
+  /// 접근성: 고대비 모드
+  set highContrast(bool value) => _sharedPreferences.setBool('a11y_highContrast', value);
+  bool get highContrast => _sharedPreferences.getBool('a11y_highContrast') ?? false;
+
+  /// 접근성: 색맹 보정 ('none', 'protanopia', 'deuteranopia', 'tritanopia')
+  set colorBlindMode(String value) => _sharedPreferences.setString('a11y_colorBlindMode', value);
+  String get colorBlindMode => _sharedPreferences.getString('a11y_colorBlindMode') ?? 'none';
+
   set themeModeIndex(int value) => _sharedPreferences.setInt('themeModeIndex', value);
   int get themeModeIndex => _sharedPreferences.getInt('themeModeIndex') ?? 2;
 

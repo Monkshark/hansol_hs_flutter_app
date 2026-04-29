@@ -81,7 +81,7 @@ erDiagram
 | `name` | string | real name |
 | `studentId` | string | student number (students/alumni) |
 | `userType` | string | `student` / `alumni` / `teacher` / `parent` |
-| `role` | string | `user` / `manager` / `admin` |
+| `role` | string | `user` / `moderator` / `auditor` / `manager` / `admin` |
 | `approved` | boolean | admin-approved flag |
 | `suspendedUntil` | timestamp \| null | expiry; scheduler clears hourly |
 | `profilePhotoUrl` | string | Cloud Storage or OAuth profile |

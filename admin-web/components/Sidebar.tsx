@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
+import { canAccess } from '@/lib/utils';
 
 const nav = [
   { href: '/dashboard', label: '대시보드', icon: '📊' },
@@ -12,6 +13,10 @@ const nav = [
   { href: '/reports', label: '신고', icon: '🚨' },
   { href: '/users', label: '사용자', icon: '👥' },
   { href: '/feedbacks', label: '건의사항', icon: '📮' },
+  { href: '/appeals', label: '이의제기', icon: '⚖️' },
+  { href: '/data-requests', label: '데이터 요청', icon: '📂' },
+  { href: '/community-rules', label: '커뮤니티 규정', icon: '📜' },
+  { href: '/admin-logs', label: '관리자 로그', icon: '📋' },
   { href: '/crashes', label: '앱 크래시', icon: '🐛' },
   { href: '/function-logs', label: 'Functions 로그', icon: '⚡' },
   { href: '/settings', label: '설정', icon: '⚙️' },
@@ -21,7 +26,8 @@ export default function Sidebar() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
   const { dark, toggle } = useTheme();
-  const { logout } = useAuth();
+  const { profile, logout } = useAuth();
+  const filteredNav = nav.filter(item => canAccess(profile?.role ?? 'user', item.href.slice(1)));
 
   const sidebarContent = (
     <>
@@ -30,7 +36,7 @@ export default function Sidebar() {
         <button onClick={() => setOpen(false)} className="md:hidden text-gray-400 hover:text-white text-xl">✕</button>
       </div>
       <nav className="flex-1 py-2">
-        {nav.map((item) => (
+        {filteredNav.map((item) => (
           <Link key={item.href} href={item.href} onClick={() => setOpen(false)}
             className={`flex items-center gap-3 px-5 py-3 text-sm transition-colors ${
               pathname.startsWith(item.href) ? 'text-white bg-white/5 border-l-2 border-primary' : 'text-gray-400 hover:text-white hover:bg-white/5'
@@ -74,7 +80,7 @@ export default function Sidebar() {
       </aside>
 
       {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 bg-dark-card min-h-screen flex-col">
+      <aside className="hidden md:flex shrink-0 w-56 bg-dark-card min-h-screen flex-col">
         {sidebarContent}
       </aside>
     </>

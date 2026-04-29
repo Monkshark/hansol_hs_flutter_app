@@ -119,7 +119,8 @@ void main() {
       expect(upToDate.needsProfileUpdate, false);
 
       final outdated = UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '', lastProfileUpdate: lastYear);
-      expect(outdated.needsProfileUpdate, DateTime.now().month >= 3);
+      final now = DateTime.now();
+      expect(outdated.needsProfileUpdate, now.month == 3 && now.day <= 14);
 
       final empty = UserProfile(uid: '', name: '', studentId: '', grade: 0, classNum: 0, email: '');
       expect(empty.needsProfileUpdate, true);

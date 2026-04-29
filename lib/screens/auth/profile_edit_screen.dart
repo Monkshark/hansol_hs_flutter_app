@@ -1,8 +1,7 @@
 import 'dart:developer';
 import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
@@ -200,10 +199,20 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
   Future<void> _deleteAccount() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final l10n = AppLocalizations.of(context)!;
+
+    final profile = AuthService.cachedProfile ?? await AuthService.getUserProfile();
+    if (!mounted) return;
+    if (profile?.isSuspended == true) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.withdraw_blockedSuspended)));
+      return;
+    }
+
     final confirm1 = await showModalBottomSheet<bool>(
       context: context,
+      isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => _confirmSheet(ctx, isDark, l10n.profileEdit_deleteAccountTitle, l10n.profileEdit_deleteAccountConfirm, l10n.profileEdit_confirm),
+      builder: (ctx) => _withdrawGraceSheet(ctx, isDark),
     );
     if (confirm1 != true) return;
     if (!mounted) return;
@@ -222,52 +231,73 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     try {
       final user = AuthService.currentUser;
       if (user == null) return;
-      final uid = user.uid;
 
-      await FirebaseFirestore.instance.collection('users').doc(uid).delete();
-
-      try {
-        await user.delete();
-      } on FirebaseAuthException catch (e) {
-        if (e.code == 'requires-recent-login') {
-          try {
-            final googleUser = await GoogleSignIn().signIn();
-            if (googleUser != null) {
-              final googleAuth = await googleUser.authentication;
-              final credential = GoogleAuthProvider.credential(
-                accessToken: googleAuth.accessToken,
-                idToken: googleAuth.idToken,
-              );
-              await user.reauthenticateWithCredential(credential);
-              await user.delete();
-            } else {
-              if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.profileEdit_reauthRequired)));
-              }
-              return;
-            }
-          } catch (e) {
-            log('ProfileEditScreen: reauth error: $e');
-            if (mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(l10n.profileEdit_reauthFailed)));
-            }
-            return;
-          }
-        } else {
-          rethrow;
-        }
-      }
+      await FirebaseFunctions.instance
+          .httpsCallable('requestAccountDeletion')
+          .call();
 
       await AuthService.signOut();
       AuthService.clearProfileCache();
       providerContainer.read(appRefreshProvider.notifier).refresh();
-      if (mounted) Navigator.of(context).popUntil((r) => r.isFirst);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(l10n.withdraw_scheduled)));
+      Navigator.of(context).popUntil((r) => r.isFirst);
     } catch (e) {
-      log('ProfileEdit: account deletion error: $e');
+      log('ProfileEdit: withdrawal error: $e');
       if (mounted) showErrorSnackbar(context, e);
     }
+  }
+
+  Widget _withdrawGraceSheet(BuildContext ctx, bool isDark) {
+    final l10n = AppLocalizations.of(ctx)!;
+    final textColor = Theme.of(ctx).textTheme.bodyLarge?.color;
+    final subColor = AppColors.theme.darkGreyColor;
+    return Container(
+      margin: const EdgeInsets.all(12),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 12),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1E2028) : Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(width: 36, height: 4,
+              margin: const EdgeInsets.only(bottom: 12),
+              decoration: BoxDecoration(
+                color: isDark ? Colors.grey[600] : Colors.grey[300],
+                borderRadius: BorderRadius.circular(2))),
+            Text(l10n.withdraw_graceTitle,
+              style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: textColor)),
+            const SizedBox(height: 12),
+            Text(l10n.withdraw_graceBody,
+              style: TextStyle(fontSize: 14, height: 1.5, color: subColor)),
+            const SizedBox(height: 8),
+            Text(l10n.withdraw_anonymizeNotice,
+              style: TextStyle(fontSize: 13, height: 1.5, color: subColor)),
+            const SizedBox(height: 16),
+            Row(children: [
+              Expanded(child: OutlinedButton(
+                onPressed: () => Navigator.pop(ctx, false),
+                child: Text(l10n.common_cancel),
+              )),
+              const SizedBox(width: 8),
+              Expanded(child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red, foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                ),
+                onPressed: () => Navigator.pop(ctx, true),
+                child: Text(l10n.withdraw_confirmAction),
+              )),
+            ]),
+          ],
+        ),
+      ),
+    );
   }
 
   String _userTypeLabel(String type) {
@@ -492,40 +522,4 @@ class _ProfileEditScreenState extends State<ProfileEditScreen> {
     );
   }
 
-  Widget _confirmSheet(BuildContext ctx, bool isDark, String title, String content, String confirmLabel) {
-    return Container(
-      margin: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF1E2028) : Colors.white,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-        const SizedBox(height: 8),
-        Container(width: 36, height: 4, decoration: BoxDecoration(
-          color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-        const SizedBox(height: 16),
-        Text(title, style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700,
-          color: isDark ? Colors.white : Colors.black87)),
-        const SizedBox(height: 8),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(content, textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14, color: AppColors.theme.darkGreyColor, height: 1.5))),
-        const SizedBox(height: 20),
-        Padding(padding: const EdgeInsets.symmetric(horizontal: 16), child: Row(children: [
-          Expanded(child: TextButton(
-            onPressed: () => Navigator.pop(ctx, false),
-            child: Text(AppLocalizations.of(context)!.common_cancel, style: TextStyle(color: AppColors.theme.darkGreyColor)),
-          )),
-          const SizedBox(width: 10),
-          Expanded(child: ElevatedButton(
-            onPressed: () => Navigator.pop(ctx, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0),
-            child: Text(confirmLabel),
-          )),
-        ])),
-        const SizedBox(height: 12),
-      ])),
-    );
-  }
 }

@@ -29,6 +29,8 @@ class UserProfile {
   final List<String> blockedUsers;
   final String loginProvider;
   final String? profilePhotoUrl;
+  final String verificationStatus;
+  final String? suspendReason;
 
   UserProfile({
     required this.uid,
@@ -47,11 +49,18 @@ class UserProfile {
     this.blockedUsers = const [],
     this.loginProvider = 'google',
     this.profilePhotoUrl,
+    this.verificationStatus = 'verified',
+    this.suspendReason,
   });
 
   bool get isManager => role == 'manager' || role == 'admin';
   bool get isAdmin => role == 'admin';
+  bool get isModerator => role == 'moderator' || isManager;
+  bool get isAuditor => role == 'auditor' || isManager;
+  bool get isStaff => isModerator || isAuditor;
   bool get isSuspended => suspendedUntil != null && DateTime.now().isBefore(suspendedUntil!);
+  bool get isVerified => verificationStatus == 'verified';
+  bool get canWrite => isVerified && !isSuspended;
   bool get isStudent => userType == 'student';
   bool get isGraduate => userType == 'graduate';
   bool get isTeacher => userType == 'teacher';
@@ -88,7 +97,16 @@ class UserProfile {
     if (lastProfileUpdate.isEmpty) return true;
     final now = DateTime.now();
     final currentYear = now.year.toString();
-    return lastProfileUpdate != currentYear && now.month >= 3;
+    return lastProfileUpdate != currentYear && now.month == 3 && now.day <= 14;
+  }
+
+  /// 3학년 학생이 새 학기에 졸업 확인 팝업을 받아야 하는지
+  bool get needsGraduateCheck {
+    if (userType != 'student' || grade != 3) return false;
+    if (lastProfileUpdate.isEmpty) return false;
+    final now = DateTime.now();
+    final currentYear = now.year.toString();
+    return lastProfileUpdate != currentYear && now.month == 3 && now.day <= 14;
   }
 
   Map<String, dynamic> toMap() => {
@@ -108,6 +126,8 @@ class UserProfile {
     'blockedUsers': blockedUsers,
     'loginProvider': loginProvider,
     if (profilePhotoUrl != null) 'profilePhotoUrl': profilePhotoUrl,
+    'verificationStatus': verificationStatus,
+    if (suspendReason != null) 'suspendReason': suspendReason,
     'updatedAt': FieldValue.serverTimestamp(),
   };
 
@@ -128,6 +148,8 @@ class UserProfile {
     blockedUsers: map['blockedUsers'] != null ? List<String>.from(map['blockedUsers'] as List) : [],
     loginProvider: map['loginProvider'] ?? 'google',
     profilePhotoUrl: map['profilePhotoUrl'],
+    verificationStatus: map['verificationStatus'] ?? 'verified',
+    suspendReason: map['suspendReason'],
   );
 }
 
@@ -291,7 +313,7 @@ class AuthService {
     final profile = await getUserProfile();
     if (profile == null) return false;
     if (profile.isSuspended) return false;
-    return profile.approved || profile.isManager;
+    return profile.approved || profile.isStaff;
   }
 
   static Future<Duration?> getSuspendedDuration() async {

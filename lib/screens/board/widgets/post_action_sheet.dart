@@ -101,57 +101,92 @@ Future<void> showReportSheet({
   final isDark = Theme.of(context).brightness == Brightness.dark;
   final l = AppLocalizations.of(context)!;
   String? selected;
+  final detailController = TextEditingController();
   final reason = await showModalBottomSheet<String>(
     context: context,
+    isScrollControlled: true,
     backgroundColor: Colors.transparent,
     builder: (ctx) => StatefulBuilder(
-      builder: (ctx, setSheetState) => Container(
-        margin: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: isDark ? const Color(0xFF1E2028) : Colors.white,
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
-          const SizedBox(height: 8),
-          Container(width: 36, height: 4, decoration: BoxDecoration(
-            color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
-          const SizedBox(height: 16),
-          Text(l.post_reportSelectReason, style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700,
-            color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-          const SizedBox(height: 12),
-          RadioGroup<String>(
-            groupValue: selected,
-            onChanged: (v) => setSheetState(() => selected = v),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                l.post_reportReasonSwearing,
-                l.post_reportReasonAdult,
-                l.post_reportReasonSpam,
-                l.post_reportReasonPrivacy,
-                l.post_reportReasonOther,
-              ].map((r) =>
-                RadioListTile<String>(
-                  value: r,
-                  title: Text(r, style: TextStyle(fontSize: Responsive.sp(context, 14), color: Theme.of(ctx).textTheme.bodyLarge?.color)),
-                  activeColor: AppColors.theme.primaryColor,
-                  dense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      builder: (ctx, setSheetState) {
+        final isOther = selected == l.post_reportReasonOther;
+        final detailValid = detailController.text.trim().length >= 10;
+        final canSubmit = selected != null && (!isOther || detailValid);
+        return Padding(
+          padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+          child: Container(
+            margin: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF1E2028) : Colors.white,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: SafeArea(child: Column(mainAxisSize: MainAxisSize.min, children: [
+              const SizedBox(height: 8),
+              Container(width: 36, height: 4, decoration: BoxDecoration(
+                color: isDark ? Colors.grey[600] : Colors.grey[300], borderRadius: BorderRadius.circular(2))),
+              const SizedBox(height: 16),
+              Text(l.post_reportSelectReason, style: TextStyle(fontSize: Responsive.sp(context, 17), fontWeight: FontWeight.w700,
+                color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+              const SizedBox(height: 12),
+              RadioGroup<String>(
+                groupValue: selected,
+                onChanged: (v) => setSheetState(() => selected = v),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    l.post_reportReasonSwearing,
+                    l.post_reportReasonAdult,
+                    l.post_reportReasonSpam,
+                    l.post_reportReasonPrivacy,
+                    l.post_reportReasonDefamation,
+                    l.post_reportReasonFlooding,
+                    l.post_reportReasonMisinfo,
+                    l.post_reportReasonOther,
+                  ].map((r) =>
+                    RadioListTile<String>(
+                      value: r,
+                      title: Text(r, style: TextStyle(fontSize: Responsive.sp(context, 14), color: Theme.of(ctx).textTheme.bodyLarge?.color)),
+                      activeColor: AppColors.theme.primaryColor,
+                      dense: true, contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                  ).toList(),
                 ),
-              ).toList(),
-            ),
+              ),
+              if (isOther)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                  child: TextField(
+                    controller: detailController,
+                    onChanged: (_) => setSheetState(() {}),
+                    maxLength: 200,
+                    minLines: 2, maxLines: 4,
+                    decoration: InputDecoration(
+                      hintText: l.post_reportOtherHint,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                      isDense: true,
+                    ),
+                  ),
+                ),
+              Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 12), child: SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: canSubmit
+                      ? () {
+                          final result = isOther
+                              ? '${selected!}: ${detailController.text.trim()}'
+                              : selected!;
+                          Navigator.pop(ctx, result);
+                        }
+                      : null,
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 12)),
+                  child: Text(l.post_reportButton),
+                ),
+              )),
+            ])),
           ),
-          Padding(padding: const EdgeInsets.fromLTRB(16, 8, 16, 12), child: SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: selected != null ? () => Navigator.pop(ctx, selected) : null,
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)), elevation: 0,
-                padding: const EdgeInsets.symmetric(vertical: 12)),
-              child: Text(l.post_reportButton),
-            ),
-          )),
-        ])),
-      ),
+        );
+      },
     ),
   );
 
