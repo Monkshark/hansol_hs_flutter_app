@@ -9,10 +9,12 @@
     "archiver": "^7.0.1",
     "firebase-admin": "^13.7.0",
     "firebase-functions": "^6.3.0",
-    "nodemailer": "^6.9.16",
+    "nodemailer": "^8.0.7",
     "zod": "^3.23.8"
   },
   "overrides": {
-    "@tootallnate/once": "^3.0.1"
+    "@tootallnate/once": "^3.0.1",
+    "uuid": "^14.0.0",
+    "fast-xml-parser": "^5.7.0"
   }
 }
