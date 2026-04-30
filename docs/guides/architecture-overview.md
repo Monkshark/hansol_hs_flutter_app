@@ -76,7 +76,7 @@ lib/
 
 ## Riverpod Provider 의존성 그래프
 
-`riverpod_graph` CLI로 정적 분석 후 자동 생성. 아래는 mermaid 요약본이고, **🔗 [인터랙티브 풀버전 (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)** 에서 D3.js 기반 zoom/drag 그래프로 모든 노드 탐색 가능. 원본 HTML은 `docs/riverpod_graph.html`에 보관.
+`riverpod_graph` CLI로 정적 분석 후 자동 생성. 아래는 mermaid 요약본이고, **🔗 [인터랙티브 버전](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)** 에서 D3.js 기반 zoom/drag 그래프로 모든 노드 탐색 가능. 원본 HTML은 `docs/riverpod_graph.html`에 보관.
 
 ```mermaid
 graph LR
@@ -150,7 +150,7 @@ graph LR
 
 ### 원칙
 - **Widget → Provider**만 직접 의존, Manager/저장소는 Provider 안쪽에 캡슐화
-- 저장소는 **데이터 민감도/접근 패턴**에 따라 4가지로 분담 (→ [architecture-decisions.md#adr-06](./architecture-decisions.md))
+- 저장소는 **데이터 민감도/접근 패턴**에 따라 4가지로 분담 (→ [architecture-decisions.md#adr-06](./architecture-decisions.md#adr-06))
 - 쓰기 → Firestore 트리거 → Cloud Functions → FCM 으로 **비동기 푸시 흐름**
 - 위젯은 `ProviderScope.overrides`로 테스트에서 Mock Notifier 주입 가능
 

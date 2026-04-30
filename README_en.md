@@ -143,9 +143,9 @@ graph TD
 ```
 
 - **Riverpod provider dependency graph** and **layered data-flow model** → [architecture-overview_en.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview_en.md)
-- Storage allocation rationale (sqflite / Firestore / SecureStorage / Cloud Storage) → [ADR-06](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md)
+- Storage allocation rationale (sqflite / Firestore / SecureStorage / Cloud Storage) → [ADR-06](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions_en.md#adr-06-storage-allocation)
 
-### 🔗 [Interactive Riverpod Graph (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
+### 🔗 [Interactive Riverpod Graph](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
 D3.js-based zoom/drag graph. Source HTML at `docs/riverpod_graph.html`.
 

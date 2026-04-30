@@ -143,7 +143,7 @@ graph TD
 ```
 
 - **Riverpod Provider 의존성 그래프**, **데이터 흐름 계층 모델** → [architecture-overview.md](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-overview.md)
-- 저장소 분담(sqflite/Firestore/SecureStorage/Storage) 설계 근거 → [ADR-06](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions.md)
+- 저장소 분담(sqflite/Firestore/SecureStorage/Storage) 설계 근거 → [ADR-06](https://monkshark.github.io/hansol_hs_flutter_app/#guides/architecture-decisions.md#adr-06)
 
 ### 🔗 [인터랙티브 Riverpod 그래프](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)
 
