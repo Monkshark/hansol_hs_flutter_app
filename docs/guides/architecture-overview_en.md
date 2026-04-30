@@ -76,7 +76,7 @@ lib/
 
 ## Riverpod Provider Graph
 
-Auto-generated via `riverpod_graph` CLI. The mermaid below is a summary — full version at **🔗 [Interactive (GitHub Pages)](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)** (D3.js zoom/drag). Source HTML stored at `docs/riverpod_graph.html`.
+Auto-generated via `riverpod_graph` CLI. The mermaid below is a summary — full version at **🔗 [Interactive](https://monkshark.github.io/hansol_hs_flutter_app/riverpod_graph.html)** (D3.js zoom/drag). Source HTML stored at `docs/riverpod_graph.html`.
 
 ```mermaid
 graph LR
@@ -150,7 +150,7 @@ graph LR
 
 ### Principles
 - **Widgets only depend on Providers** — Managers/stores are encapsulated behind providers
-- Four storage backends chosen by **sensitivity / access pattern** → [ADR-06](./architecture-decisions_en.md)
+- Four storage backends chosen by **sensitivity / access pattern** → [ADR-06](./architecture-decisions_en.md#adr-06-storage-allocation)
 - Writes → Firestore triggers → Cloud Functions → FCM form the **async push pipeline**
 - Widgets can mock notifiers via `ProviderScope.overrides` in tests
 
