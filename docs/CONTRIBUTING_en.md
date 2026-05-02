@@ -61,21 +61,24 @@ flutter pub run build_runner watch --delete-conflicting-outputs
 
 ### Commit Messages
 
-Existing convention (Korean summary with leading topic):
+A single Korean summary line. Do not use prefix tags like `fix:`, `docs:`, or `<topic>:`.
 
 ```
-<topic>: <summary>
+<summary>
 
 <optional body>
 ```
 
-Real examples (from `git log --oneline`):
-- `Blaze 배포: Storage Rules + cleanupOldPosts + Functions 런타임 업그레이드`
-- `README 민감 데이터 row D-day 제거 + Firestore Rules CI Java 21 업그레이드`
-- `golden test: tolerance comparator로 platform font diff 흡수`
-- `테스트 커버리지 확대 (Golden + SearchHistory)`
+Rules:
+- Body in Korean, but keep technical terms / variable / class / file / library names in English (`Riverpod`, `Firestore`, `StreamBuilder`, `index`, `lazy load`, etc.)
+- Join multiple changes with ` + `
+- Single-line title by default; add a body only for large changes (refactors, migrations)
 
-Topics: `README`, `golden test`, `Firestore rules`, `auth`, `build`, `docs`, `CI`.
+Real examples (from `git log --oneline`):
+- `Riverpod 마이그레이션 + 대형 파일 refactoring + 테스트 강화`
+- `댓글 대댓글 위치 수정 + mention 중복 표시 수정 + refresh + Firestore index 정의`
+- `관리자 화면 StreamBuilder → FutureBuilder 전환, ExpansionTile 자식 lazy load`
+- `테스트 커버리지 확대 (Golden + SearchHistory)`
 
 ## Code Style
 

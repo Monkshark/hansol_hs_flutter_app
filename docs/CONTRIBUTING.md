@@ -61,21 +61,24 @@ flutter pub run build_runner watch --delete-conflicting-outputs
 
 ### 커밋 메시지
 
-기존 컨벤션 (한국어 요약, 핵심 주제 우선):
+한국어 요약 한 줄로 작성. `fix:`·`docs:`·`<주제>:` 같은 prefix 태그는 쓰지 않음.
 
 ```
-<주제>: <요약>
+<요약>
 
 <필요 시 본문 설명>
 ```
 
-실제 예시 (`git log --oneline` 참고):
-- `Blaze 배포: Storage Rules + cleanupOldPosts + Functions 런타임 업그레이드`
-- `README 민감 데이터 row D-day 제거 + Firestore Rules CI Java 21 업그레이드`
-- `golden test: tolerance comparator로 platform font diff 흡수`
-- `테스트 커버리지 확대 (Golden + SearchHistory)`
+규칙:
+- 본문은 한국어, 전문용어/변수명/클래스명/파일명/라이브러리명은 영어 그대로 (`Riverpod`, `Firestore`, `StreamBuilder`, `index`, `lazy load` 등)
+- 여러 변경은 ` + `로 연결
+- 제목 한 줄이 기본, 큰 변경(리팩토링/마이그레이션 등)일 때만 본문 추가
 
-주제 예시: `README`, `golden test`, `Firestore rules`, `auth`, `build`, `docs`, `CI`.
+실제 예시 (`git log --oneline` 참고):
+- `Riverpod 마이그레이션 + 대형 파일 refactoring + 테스트 강화`
+- `댓글 대댓글 위치 수정 + mention 중복 표시 수정 + refresh + Firestore index 정의`
+- `관리자 화면 StreamBuilder → FutureBuilder 전환, ExpansionTile 자식 lazy load`
+- `테스트 커버리지 확대 (Golden + SearchHistory)`
 
 ## 코드 스타일
 
