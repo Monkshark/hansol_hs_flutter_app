@@ -15,6 +15,8 @@
 
 A full-stack project with a Flutter mobile app + Next.js admin dashboard. Features NEIS public-data API integration, Firebase real-time database, role-based access control, push notifications, 1:1 chat — at a production-service level.
 
+[Dev Blog](https://monkshark.github.io/categories/%ED%95%9C%EC%86%94%EA%B3%A0-%EC%95%B1-%EA%B0%9C%EB%B0%9C%EA%B8%B0/)
+
 ## Documentation Hub
 
 Documentation is split by topic. Jump in based on your purpose.
