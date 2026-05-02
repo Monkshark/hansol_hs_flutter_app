@@ -15,6 +15,8 @@
 
 Flutter 기반 모바일 앱 + Next.js 관리자 대시보드로 구성된 풀스택 프로젝트입니다. NEIS 공공데이터 API 연동, Firebase 실시간 데이터베이스, 역할 기반 권한 시스템, 푸시 알림, 1:1 채팅 등 실서비스 수준의 기능을 구현했습니다.
 
+[개발 블로그](https://monkshark.github.io/categories/%ED%95%9C%EC%86%94%EA%B3%A0-%EC%95%B1-%EA%B0%9C%EB%B0%9C%EA%B8%B0/)
+
 ## 문서 허브
 
 주제별로 문서가 분산되어 있습니다. 목적에 맞춰 들어가세요.
